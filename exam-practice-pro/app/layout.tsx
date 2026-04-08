@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/layout/theme-provider';
+import { AuthProvider } from '@/components/layout/auth-provider';
+import { UserStorageProvider } from '@/components/layout/user-storage-provider';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
 const inter = Inter({
@@ -29,11 +31,15 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <TooltipProvider delay={300}>
-            <div className="relative flex min-h-screen flex-col bg-background">
-              {children}
-            </div>
-          </TooltipProvider>
+          <AuthProvider>
+            <UserStorageProvider>
+              <TooltipProvider delay={300}>
+                <div className="relative flex min-h-screen flex-col bg-background">
+                  {children}
+                </div>
+              </TooltipProvider>
+            </UserStorageProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

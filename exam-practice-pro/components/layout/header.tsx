@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
-import { GraduationCap, Moon, Sun, LayoutDashboard, Menu, BookmarkCheck } from 'lucide-react';
+import { useSession, signOut } from 'next-auth/react';
+import { GraduationCap, Moon, Sun, LayoutDashboard, Menu, BookmarkCheck, LogIn, LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -15,10 +16,12 @@ import {
   SheetContent,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { Separator } from '@/components/ui/separator';
 import { useState } from 'react';
 
 export function Header() {
   const { setTheme, theme } = useTheme();
+  const { data: session, status } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -93,6 +96,49 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
 
+          {/* Auth */}
+          {status !== 'loading' && (
+            <>
+              {session?.user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="hidden md:flex gap-2">
+                      {session.user.image ? (
+                        <img
+                          src={session.user.image}
+                          alt=""
+                          className="h-6 w-6 rounded-full"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <User className="h-4 w-4" />
+                      )}
+                      <span className="max-w-[100px] truncate text-sm">
+                        {session.user.name || 'User'}
+                      </span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem disabled className="text-xs text-muted-foreground">
+                      {session.user.email || 'Guest account'}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/' })}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button variant="ghost" size="sm" asChild className="hidden md:flex">
+                  <Link href="/auth/signin">
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Sign In
+                  </Link>
+                </Button>
+              )}
+            </>
+          )}
+
           {/* Mobile Menu */}
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild className="md:hidden">
@@ -124,6 +170,50 @@ export function Header() {
                 >
                   Bookmarks
                 </Link>
+                <Separator className="my-2" />
+                {session?.user ? (
+                  <>
+                    <div className="flex items-center gap-3 py-2">
+                      {session.user.image ? (
+                        <img
+                          src={session.user.image}
+                          alt=""
+                          className="h-8 w-8 rounded-full"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900">
+                          <User className="h-4 w-4" />
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="font-medium truncate">{session.user.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {session.user.email || 'Guest'}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      className="flex items-center gap-2 text-lg font-medium text-red-600 transition-colors hover:text-red-700"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        signOut({ callbackUrl: '/' });
+                      }}
+                    >
+                      <LogOut className="h-5 w-5" />
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <Link
+                    href="/auth/signin"
+                    className="flex items-center gap-2 text-lg font-medium transition-colors hover:text-indigo-600"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <LogIn className="h-5 w-5" />
+                    Sign In
+                  </Link>
+                )}
               </nav>
             </SheetContent>
           </Sheet>

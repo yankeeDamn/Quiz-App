@@ -1,6 +1,7 @@
 import { QuizSession, QuizResult, DashboardStats, Bookmark, QuestionNote, QuestionReport, Achievement, AchievementType } from '@/lib/types';
+import { getStoragePrefix } from '@/components/layout/user-storage-provider';
 
-const STORAGE_KEYS = {
+const BASE_KEYS = {
   SESSION: 'exam-practice-session',
   RESULTS: 'exam-practice-results',
   DASHBOARD_STATS: 'exam-practice-dashboard-stats',
@@ -9,6 +10,16 @@ const STORAGE_KEYS = {
   REPORTS: 'exam-practice-reports',
   ACHIEVEMENTS: 'exam-practice-achievements',
 } as const;
+
+/** Returns user-scoped storage keys */
+const STORAGE_KEYS = new Proxy(BASE_KEYS, {
+  get(target, prop: string) {
+    const base = target[prop as keyof typeof BASE_KEYS];
+    if (!base) return undefined;
+    const prefix = getStoragePrefix();
+    return `${prefix}${base}`;
+  },
+}) as typeof BASE_KEYS;
 
 // Check if we're in a browser environment
 const isBrowser = typeof window !== 'undefined';
@@ -52,11 +63,12 @@ function handleStorageError(error: unknown): void {
 function clearOldSessions(): void {
   if (!isBrowser) return;
   const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const sessionPrefix = STORAGE_KEYS.SESSION;
   const keysToRemove: string[] = [];
   
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key?.startsWith(STORAGE_KEYS.SESSION)) {
+    if (key?.startsWith(sessionPrefix)) {
       try {
         const data = localStorage.getItem(key);
         const session = safeJsonParse<{ startTime?: number } | null>(data, null);
@@ -254,11 +266,14 @@ export function clearAllData(): void {
       if (key) allKeys.push(key);
     }
     
-    // Now safely remove keys
+    // Get current user-scoped prefixes
+    const prefixes = Object.keys(BASE_KEYS).map(
+      (k) => STORAGE_KEYS[k as keyof typeof BASE_KEYS]
+    );
+    
+    // Now safely remove keys matching current user's scope
     allKeys.forEach((key) => {
-      if (
-        Object.values(STORAGE_KEYS).some((prefix) => key.startsWith(prefix))
-      ) {
+      if (prefixes.some((prefix) => key.startsWith(prefix))) {
         localStorage.removeItem(key);
       }
     });
