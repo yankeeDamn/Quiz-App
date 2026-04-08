@@ -1,0 +1,39 @@
+# ──────────────────────────────────────────────
+# Exam Practice Pro — Local Development Stack
+# ──────────────────────────────────────────────
+# Usage:
+#   docker compose up            — start the API
+#   docker compose up --build    — rebuild & start
+#   docker compose down          — stop everything
+# ──────────────────────────────────────────────
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT:-3000}:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+    restart: unless-stopped
+
+  # ── Optional: PostgreSQL for future database integration ──
+  # Uncomment when ready to add a real database.
+  #
+  # db:
+  #   image: postgres:16-alpine
+  #   environment:
+  #     POSTGRES_USER: exam_user
+  #     POSTGRES_PASSWORD: exam_password
+  #     POSTGRES_DB: exam_practice_pro
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
+  #   restart: unless-stopped
+
+# volumes:
+#   pgdata:
