@@ -21,7 +21,7 @@ function errorHandler(err, _req, res, _next) {
       message: isProduction && statusCode === 500
         ? 'Internal server error'
         : err.message,
-      ...(! isProduction && { stack: err.stack }),
+      ...(!isProduction && { stack: err.stack }),
     },
   });
 }

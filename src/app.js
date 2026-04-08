@@ -36,7 +36,7 @@ app.use(
 // ──────────────────────────────────────────────────────────
 app.use(
   cors({
-    origin: config.env === 'production' ? config.cors.origins : true,
+    origin: config.cors.origins,
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Stripe-Signature'],
     credentials: true,
