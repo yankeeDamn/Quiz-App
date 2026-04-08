@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: quiz-app
+    runtime: node
+    rootDir: exam-practice-pro
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: AUTH_SECRET
+        generateValue: true
