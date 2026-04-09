@@ -37,7 +37,7 @@ app.use(
 app.use(
   cors({
     origin: config.cors.origins,
-    methods: ['GET', 'POST'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Stripe-Signature'],
     credentials: true,
     maxAge: 86400,
