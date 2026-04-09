@@ -15,6 +15,7 @@ import {
 import { getAnyQuizById } from '@/data/quizzes';
 import { shuffleArray, calculateResults } from '@/lib/quiz-utils';
 import { saveQuizResult, loadDashboardStats, saveDashboardStats, updateStreak, checkQuizAchievements } from '@/lib/storage';
+import { submitQuizAttempt } from '@/lib/api';
 
 interface QuizState {
   // Current Quiz State
@@ -214,10 +215,10 @@ export const useQuizStore = create<QuizState>()(
         const endTime = Date.now();
         const result = calculateResults(session, currentQuiz, endTime);
 
-        // Save result to localStorage
+        // Save result to localStorage (client cache)
         saveQuizResult(result);
 
-        // Update dashboard stats
+        // Update dashboard stats (client cache)
         const stats = loadDashboardStats();
         const updatedStats = {
           ...stats,
@@ -234,6 +235,24 @@ export const useQuizStore = create<QuizState>()(
         updateStreak();
         const reloadedStats = loadDashboardStats();
         checkQuizAchievements(result, reloadedStats.streak);
+
+        // Sync to backend (fire-and-forget — localStorage is the fallback)
+        submitQuizAttempt({
+          quizId: result.quizId,
+          quizTitle: result.quizTitle,
+          score: result.correct,
+          totalQuestions: result.totalQuestions,
+          percentage: result.percentage,
+          passed: result.passed,
+          timeTaken: result.timeTaken,
+          answers: session.answers as Record<string, unknown>,
+          topicPerformance: result.topicPerformance as unknown[],
+          difficultyPerformance: result.difficultyPerformance as unknown[],
+          startedAt: session.startTime,
+          completedAt: endTime,
+        }).catch(() => {
+          // Silently fail — data is already in localStorage
+        });
 
         set({
           session: {

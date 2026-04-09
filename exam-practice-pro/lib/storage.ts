@@ -1,5 +1,11 @@
 import { QuizSession, QuizResult, DashboardStats, Bookmark, QuestionNote, QuestionReport, Achievement, AchievementType } from '@/lib/types';
 import { getStoragePrefix } from '@/components/layout/user-storage-provider';
+import {
+  addBookmarkToAPI,
+  removeBookmarkFromAPI,
+  saveNoteToAPI,
+  deleteNoteFromAPI,
+} from '@/lib/api';
 
 const BASE_KEYS = {
   SESSION: 'exam-practice-session',
@@ -305,6 +311,8 @@ export function saveBookmark(bookmark: Bookmark): void {
       bookmarks.push(bookmark);
       localStorage.setItem(STORAGE_KEYS.BOOKMARKS, JSON.stringify(bookmarks));
     }
+    // Sync to backend (fire-and-forget)
+    addBookmarkToAPI(bookmark.quizId, bookmark.questionId, bookmark.note).catch(() => {});
   } catch (error) {
     handleStorageError(error);
   }
@@ -317,6 +325,8 @@ export function removeBookmark(questionId: string, quizId: string): void {
       (b) => !(b.questionId === questionId && b.quizId === quizId)
     );
     localStorage.setItem(STORAGE_KEYS.BOOKMARKS, JSON.stringify(bookmarks));
+    // Sync to backend (fire-and-forget)
+    removeBookmarkFromAPI(quizId, questionId).catch(() => {});
   } catch (error) {
     console.error('Failed to remove bookmark:', error);
   }
@@ -354,6 +364,8 @@ export function saveNote(note: QuestionNote): void {
       notes.push(note);
     }
     localStorage.setItem(STORAGE_KEYS.NOTES, JSON.stringify(notes));
+    // Sync to backend (fire-and-forget)
+    saveNoteToAPI(note.quizId, note.questionId, note.content).catch(() => {});
   } catch (error) {
     handleStorageError(error);
   }
@@ -366,6 +378,8 @@ export function deleteNote(questionId: string, quizId: string): void {
       (n) => !(n.questionId === questionId && n.quizId === quizId)
     );
     localStorage.setItem(STORAGE_KEYS.NOTES, JSON.stringify(notes));
+    // Sync to backend (fire-and-forget)
+    deleteNoteFromAPI(quizId, questionId).catch(() => {});
   } catch (error) {
     console.error('Failed to delete note:', error);
   }

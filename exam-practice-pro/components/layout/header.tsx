@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
 import { useState } from 'react';
+import { clearTokenCache } from '@/lib/api';
 
 export function Header() {
   const { setTheme, theme } = useTheme();
@@ -56,6 +57,12 @@ export function Header() {
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             Bookmarks
+          </Link>
+          <Link
+            href="/pricing"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Pricing
           </Link>
         </nav>
 
@@ -122,7 +129,7 @@ export function Header() {
                     <DropdownMenuItem disabled className="text-xs text-muted-foreground">
                       {session.user.email || 'Guest account'}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/' })}>
+                    <DropdownMenuItem onClick={() => { clearTokenCache(); signOut({ callbackUrl: '/' }); }}>
                       <LogOut className="mr-2 h-4 w-4" />
                       Sign Out
                     </DropdownMenuItem>
@@ -170,6 +177,13 @@ export function Header() {
                 >
                   Bookmarks
                 </Link>
+                <Link
+                  href="/pricing"
+                  className="text-lg font-medium transition-colors hover:text-indigo-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Pricing
+                </Link>
                 <Separator className="my-2" />
                 {session?.user ? (
                   <>
@@ -197,6 +211,7 @@ export function Header() {
                       className="flex items-center gap-2 text-lg font-medium text-red-600 transition-colors hover:text-red-700"
                       onClick={() => {
                         setMobileMenuOpen(false);
+                        clearTokenCache();
                         signOut({ callbackUrl: '/' });
                       }}
                     >

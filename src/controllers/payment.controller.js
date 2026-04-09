@@ -1,8 +1,10 @@
 'use strict';
 
 const stripeService = require('../services/stripe.service');
+const userService = require('../services/user.service');
 const config = require('../config');
 const logger = require('../utils/logger');
+const db = require('../config/database');
 
 /**
  * POST /api/v1/payments/create-payment-intent
@@ -92,8 +94,22 @@ async function handleWebhook(req, res, next) {
           { paymentIntentId: paymentIntent.id, amount: paymentIntent.amount },
           'Payment succeeded'
         );
-        // TODO: update user's payment status in database
-        // await UserModel.updatePaymentStatus(paymentIntent.metadata.userId, 'paid');
+        // Update user's payment status in database
+        if (config.databaseUrl && paymentIntent.metadata?.userId) {
+          try {
+            await userService.updatePaymentStatus(paymentIntent.metadata.userId, 'paid');
+            // Record payment in payments table
+            await db.query(
+              `INSERT INTO payments (user_id, stripe_payment_intent_id, amount_cents, currency, status)
+               VALUES ($1, $2, $3, $4, 'succeeded')
+               ON CONFLICT (stripe_payment_intent_id) DO UPDATE SET status = 'succeeded', updated_at = NOW()`,
+              [paymentIntent.metadata.userId, paymentIntent.id, paymentIntent.amount, paymentIntent.currency]
+            );
+            logger.info({ userId: paymentIntent.metadata.userId }, 'User payment status updated to paid');
+          } catch (dbErr) {
+            logger.error({ err: dbErr }, 'Failed to update payment status in DB');
+          }
+        }
         break;
       }
 
@@ -106,7 +122,19 @@ async function handleWebhook(req, res, next) {
           },
           'Payment failed'
         );
-        // TODO: update user's payment status / notify
+        // Record failed payment
+        if (config.databaseUrl && paymentIntent.metadata?.userId) {
+          try {
+            await db.query(
+              `INSERT INTO payments (user_id, stripe_payment_intent_id, amount_cents, currency, status)
+               VALUES ($1, $2, $3, $4, 'failed')
+               ON CONFLICT (stripe_payment_intent_id) DO UPDATE SET status = 'failed', updated_at = NOW()`,
+              [paymentIntent.metadata.userId, paymentIntent.id, paymentIntent.amount, paymentIntent.currency]
+            );
+          } catch (dbErr) {
+            logger.error({ err: dbErr }, 'Failed to record payment failure in DB');
+          }
+        }
         break;
       }
 

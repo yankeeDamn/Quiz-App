@@ -10,9 +10,9 @@ on:
     branches: [main]
 
 jobs:
-  # ── Lint & Test ───────────────────────────────
-  test:
-    name: Lint & Test
+  # ── Backend: Lint & Test ─────────────────────
+  backend:
+    name: Backend – Lint & Test
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -41,8 +41,38 @@ jobs:
         env:
           NODE_ENV: test
           JWT_SECRET: ci-test-secret
+          AUTH_SECRET: ci-test-auth-secret
           STRIPE_SECRET_KEY: sk_test_placeholder
           STRIPE_WEBHOOK_SECRET: whsec_placeholder
+
+  # ── Frontend: Build ──────────────────────────
+  frontend:
+    name: Frontend – Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: exam-practice-pro/package-lock.json
+
+      - name: Install dependencies
+        working-directory: exam-practice-pro
+        run: npm ci
+
+      - name: Build Next.js app
+        working-directory: exam-practice-pro
+        run: npm run build
+        env:
+          AUTH_SECRET: ci-test-auth-secret
+          NEXT_PUBLIC_API_URL: http://localhost:3001
 
   # ── Docker Build ──────────────────────────────
   docker:
@@ -50,7 +80,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    needs: test
+    needs: [backend, frontend]
     if: github.ref == 'refs/heads/main'
 
     steps:
@@ -65,6 +95,7 @@ jobs:
           docker run -d --name test-api \
             -e NODE_ENV=development \
             -e JWT_SECRET=ci-test-secret \
+            -e AUTH_SECRET=ci-test-auth-secret \
             -p 3000:3000 \
             exam-practice-pro-api
 

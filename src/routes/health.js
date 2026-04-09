@@ -1,6 +1,7 @@
 'use strict';
 
 const { Router } = require('express');
+const db = require('../config/database');
 
 const router = Router();
 
@@ -10,7 +11,9 @@ const router = Router();
  * Lightweight health-check endpoint for load balancers,
  * container orchestrators, and monitoring systems.
  */
-router.get('/', (_req, res) => {
+router.get('/', async (_req, res) => {
+  const dbHealthy = await db.isHealthy();
+
   res.json({
     success: true,
     data: {
@@ -18,6 +21,7 @@ router.get('/', (_req, res) => {
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       version: process.env.npm_package_version || '1.0.0',
+      database: dbHealthy ? 'connected' : 'unavailable',
     },
   });
 });
