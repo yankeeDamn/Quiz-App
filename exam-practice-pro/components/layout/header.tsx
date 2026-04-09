@@ -58,6 +58,12 @@ export function Header() {
           >
             Bookmarks
           </Link>
+          <Link
+            href="/pricing"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Pricing
+          </Link>
         </nav>
 
         {/* Right Side Actions */}
@@ -170,6 +176,13 @@ export function Header() {
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Bookmarks
+                </Link>
+                <Link
+                  href="/pricing"
+                  className="text-lg font-medium transition-colors hover:text-indigo-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Pricing
                 </Link>
                 <Separator className="my-2" />
                 {session?.user ? (
