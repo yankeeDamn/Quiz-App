@@ -13,6 +13,9 @@ const config = {
   env: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT, 10) || 3000,
 
+  // ── Database ─────────────────────────────────────────
+  databaseUrl: process.env.DATABASE_URL || '',
+
   // ── Stripe ───────────────────────────────────────────
   stripe: {
     secretKey: process.env.STRIPE_SECRET_KEY || '',
@@ -29,11 +32,16 @@ const config = {
     expiresIn: process.env.JWT_EXPIRES_IN || '24h',
   },
 
+  // ── NextAuth (Auth.js) ───────────────────────────────
+  // The AUTH_SECRET used by the Next.js frontend to sign session JWTs.
+  // The backend verifies tokens signed with this same secret.
+  authSecret: process.env.AUTH_SECRET || '',
+
   // ── CORS ─────────────────────────────────────────────
   cors: {
     origins: process.env.CORS_ORIGINS
       ? process.env.CORS_ORIGINS.split(',').map((o) => o.trim())
-      : ['http://localhost:3000'],
+      : ['http://localhost:3000', 'http://localhost:3001'],
   },
 
   // ── Logging ──────────────────────────────────────────

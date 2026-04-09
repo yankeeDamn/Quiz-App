@@ -3,6 +3,7 @@
 const app = require('./app');
 const config = require('./config');
 const logger = require('./utils/logger');
+const db = require('./config/database');
 
 // ──────────────────────────────────────────────────────────
 // Start server
@@ -13,6 +14,7 @@ const server = app.listen(config.port, () => {
       port: config.port,
       env: config.env,
       stripeMode: config.stripe.secretKey?.startsWith('sk_live') ? 'LIVE' : 'TEST',
+      database: config.databaseUrl ? 'configured' : 'not configured',
     },
     `🚀 Exam Practice Pro API running on port ${config.port}`
   );
@@ -21,11 +23,12 @@ const server = app.listen(config.port, () => {
 // ──────────────────────────────────────────────────────────
 // Graceful shutdown
 // ──────────────────────────────────────────────────────────
-function gracefulShutdown(signal) {
+async function gracefulShutdown(signal) {
   logger.info({ signal }, 'Received shutdown signal — closing server…');
-  server.close(() => {
+  server.close(async () => {
     logger.info('HTTP server closed');
-    // Close database connections, flush logs, etc.
+    await db.end();
+    logger.info('Database pool closed');
     process.exit(0);
   });
 
