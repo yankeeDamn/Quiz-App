@@ -71,12 +71,15 @@ export default function PricingPage() {
         return;
       }
 
-      // Use Stripe's payment element (redirect flow)
+      // Redirect to Stripe's hosted payment page.
+      // Using redirect: 'always' sends the user to Stripe's UI
+      // to complete payment — no mounted Payment Element needed.
       const { error: confirmError } = await stripe.confirmPayment({
         clientSecret: res.data.clientSecret,
         confirmParams: {
           return_url: `${window.location.origin}/pricing?success=true`,
         },
+        redirect: 'always',
       });
 
       if (confirmError) {

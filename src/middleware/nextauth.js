@@ -161,6 +161,10 @@ async function allowNextAuthGuest(req, _res, next) {
 /**
  * Upsert a user by provider + provider_id (or email fallback).
  *
+ * Security note: the email fallback could link accounts across providers
+ * if they share an email. In production, consider requiring email
+ * verification before allowing cross-provider account linking.
+ *
  * @param {{ id: string, email: string|null, name: string|null, image: string|null, provider: string }} user
  * @returns {Promise<Object>} the database row
  */

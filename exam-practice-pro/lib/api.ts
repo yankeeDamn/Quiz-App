@@ -196,7 +196,7 @@ export async function addBookmarkToAPI(quizId: string, questionId: string, note?
 }
 
 export async function removeBookmarkFromAPI(quizId: string, questionId: string) {
-  return api('/api/v1/user/bookmarks/' + encodeURIComponent(quizId) + '/' + encodeURIComponent(questionId), {
+  return api(`/api/v1/user/bookmarks/${encodeURIComponent(quizId)}/${encodeURIComponent(questionId)}`, {
     method: 'DELETE',
   });
 }
@@ -215,7 +215,7 @@ export async function saveNoteToAPI(quizId: string, questionId: string, content:
 }
 
 export async function deleteNoteFromAPI(quizId: string, questionId: string) {
-  return api('/api/v1/user/notes/' + encodeURIComponent(quizId) + '/' + encodeURIComponent(questionId), {
+  return api(`/api/v1/user/notes/${encodeURIComponent(quizId)}/${encodeURIComponent(questionId)}`, {
     method: 'DELETE',
   });
 }
