@@ -4,8 +4,7 @@ const { Router } = require('express');
 const { body } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authLimiter } = require('../middleware/rate-limiter');
-const { allowGuest } = require('../middleware/auth');
-const { allowFirebaseGuest } = require('../middleware/firebase-auth');
+const { authenticateToken, allowGuest } = require('../middleware/auth');
 const authController = require('../controllers/auth.controller');
 
 const router = Router();
@@ -49,29 +48,13 @@ router.post(
 );
 
 /**
- * POST /firebase
- * Exchange a Firebase ID token for a custom backend JWT.
- */
-router.post(
-  '/firebase',
-  authLimiter,
-  [
-    body('idToken')
-      .notEmpty()
-      .withMessage('Firebase ID token is required'),
-  ],
-  validate,
-  authController.firebaseExchange
-);
-
-/**
  * POST /guest
  */
 router.post('/guest', authLimiter, authController.guest);
 
 /**
- * GET /me — supports custom JWT, Firebase, NextAuth, and guest
+ * GET /me
  */
-router.get('/me', allowFirebaseGuest, authController.me);
+router.get('/me', allowGuest, authController.me);
 
 module.exports = router;
