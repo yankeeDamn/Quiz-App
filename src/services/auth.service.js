@@ -109,6 +109,35 @@ class AuthService {
   }
 
   /**
+   * Issue a custom JWT for a verified Firebase user.
+   *
+   * @param {Object} params
+   * @param {string} params.uid - Firebase UID
+   * @param {string} [params.email]
+   * @param {string} [params.name]
+   * @param {string} [params.picture]
+   * @returns {{token: string, user: Object}}
+   */
+  issueTokenForFirebaseUser({ uid, email, name, picture }) {
+    const user = {
+      id: uid,
+      email: email || null,
+      name: name || '',
+      picture: picture || '',
+      role: 'user',
+      provider: 'firebase',
+    };
+
+    logger.info({ userId: user.id, email }, 'Custom JWT issued for Firebase user');
+
+    const token = this._signToken(user);
+    return {
+      token,
+      user: { id: user.id, email: user.email, name: user.name, role: user.role },
+    };
+  }
+
+  /**
    * Sign a JWT for the given user payload.
    *
    * @private
