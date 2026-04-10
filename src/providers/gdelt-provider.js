@@ -98,15 +98,11 @@ class GdeltProvider extends BaseProvider {
 
   _parseGdeltDate(dateStr) {
     try {
-      // GDELT format: "20250409T120000Z" or "2025-04-09T12:00:00Z"
-      if (dateStr.includes('T') && !dateStr.includes('-')) {
-        const y = dateStr.slice(0, 4);
-        const m = dateStr.slice(4, 6);
-        const d = dateStr.slice(6, 8);
-        const h = dateStr.slice(9, 11);
-        const min = dateStr.slice(11, 13);
-        const s = dateStr.slice(13, 15);
-        return new Date(`${y}-${m}-${d}T${h}:${min}:${s}Z`).toISOString();
+      // GDELT compact format: "20250409T120000Z" (YYYYMMDDTHHmmssZ)
+      const gdeltCompact = /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z?$/;
+      const match = dateStr.match(gdeltCompact);
+      if (match) {
+        return new Date(`${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:${match[6]}Z`).toISOString();
       }
       return new Date(dateStr).toISOString();
     } catch {
