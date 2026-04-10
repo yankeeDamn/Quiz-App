@@ -12,9 +12,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Exam Practice Pro',
-  description: 'Practice smarter. Score higher. Professional exam practice platform.',
-  keywords: ['exam', 'practice', 'quiz', 'study', 'test', 'certification'],
+  title: 'NewsHub - Fresh News from Around the World',
+  description: 'A modern news platform aggregating fresh, diverse news from multiple sources including GDELT, RSS feeds, and HackerNews.',
+  keywords: ['news', 'india', 'world news', 'technology', 'hacker news', 'rss', 'aggregator'],
 };
 
 export default function RootLayout({

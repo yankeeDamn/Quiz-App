@@ -1,6 +1,8 @@
 'use strict';
 
 const authService = require('../services/auth.service');
+const { verifyFirebaseToken } = require('../middleware/firebase-auth');
+const logger = require('../utils/logger');
 
 /**
  * POST /api/v1/auth/register
@@ -37,6 +39,47 @@ async function login(req, res, next) {
 }
 
 /**
+ * POST /api/v1/auth/firebase
+ *
+ * Exchange a Firebase ID token for a custom JWT.
+ * This avoids repeated Firebase verification on every request.
+ */
+async function firebaseExchange(req, res, next) {
+  try {
+    const { idToken } = req.body;
+    if (!idToken) {
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Firebase ID token is required' },
+      });
+    }
+
+    const firebaseUser = await verifyFirebaseToken(idToken);
+
+    // Issue custom JWT with Firebase user info
+    const result = authService.issueTokenForFirebaseUser({
+      uid: firebaseUser.sub || firebaseUser.user_id,
+      email: firebaseUser.email || null,
+      name: firebaseUser.name || '',
+      picture: firebaseUser.picture || '',
+    });
+
+    logger.info({ uid: firebaseUser.sub }, 'Firebase token exchanged for custom JWT');
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (err) {
+    logger.warn({ error: err.message }, 'Firebase token exchange failed');
+    return res.status(401).json({
+      success: false,
+      error: { message: 'Invalid Firebase ID token' },
+    });
+  }
+}
+
+/**
  * POST /api/v1/auth/guest
  */
 function guest(_req, res) {
@@ -63,4 +106,4 @@ function me(req, res) {
   });
 }
 
-module.exports = { register, login, guest, me };
+module.exports = { register, login, firebaseExchange, guest, me };
