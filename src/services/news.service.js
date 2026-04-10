@@ -104,7 +104,7 @@ async function getNews(options = {}) {
         a.region === 'IN' ||
         a.title.toLowerCase().includes('india') ||
         a.title.toLowerCase().includes('indian') ||
-        a.description.toLowerCase().includes('india')
+        (a.description || '').toLowerCase().includes('india')
     );
   }
 

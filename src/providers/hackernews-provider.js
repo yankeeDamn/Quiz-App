@@ -5,6 +5,20 @@ const logger = require('../utils/logger');
 
 const HN_API_BASE = 'https://hacker-news.firebaseio.com/v0';
 
+/**
+ * Strip HTML tags safely, handling nested/incomplete tags.
+ */
+function stripHtml(str) {
+  if (!str) return '';
+  let prev;
+  let result = str;
+  do {
+    prev = result;
+    result = result.replace(/<[^>]*>/g, '');
+  } while (result !== prev);
+  return result.trim();
+}
+
 class HackerNewsProvider extends BaseProvider {
   constructor() {
     super('HackerNews');
@@ -73,7 +87,7 @@ class HackerNewsProvider extends BaseProvider {
         source: 'HackerNews',
         sourceDomain: story.url ? new URL(story.url).hostname : 'news.ycombinator.com',
         description: story.text
-          ? story.text.replace(/<[^>]*>/g, '').slice(0, 500)
+          ? stripHtml(story.text).slice(0, 500)
           : `${story.score || 0} points | ${story.descendants || 0} comments`,
         imageUrl: '',
         author: story.by || 'anonymous',

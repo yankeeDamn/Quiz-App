@@ -42,6 +42,21 @@ function parseRssXml(xml) {
   return items;
 }
 
+/**
+ * Strip HTML tags safely, handling nested/incomplete tags.
+ */
+function stripHtml(str) {
+  if (!str) return '';
+  // Iteratively strip tags to handle nested cases like <scr<script>ipt>
+  let prev;
+  let result = str;
+  do {
+    prev = result;
+    result = result.replace(/<[^>]*>/g, '');
+  } while (result !== prev);
+  return result.trim();
+}
+
 function extractTag(xml, tagName) {
   // Handle CDATA and regular content
   const regex = new RegExp(
@@ -51,8 +66,7 @@ function extractTag(xml, tagName) {
   const match = xml.match(regex);
   if (match) {
     const val = (match[1] || match[2] || '').trim();
-    // Strip HTML tags for descriptions
-    return val.replace(/<[^>]*>/g, '').trim();
+    return stripHtml(val);
   }
   return '';
 }
@@ -66,15 +80,15 @@ function extractAttr(xml, tagName, attrName) {
 // Default RSS feeds organized by region
 const DEFAULT_FEEDS = {
   global: [
-    { url: 'https://feeds.bbci.co.uk/news/rss.xml', name: 'BBC News' },
-    { url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml', name: 'NY Times' },
-    { url: 'https://feeds.reuters.com/reuters/topNews', name: 'Reuters' },
+    { url: 'https://feeds.bbci.co.uk/news/rss.xml', name: 'BBC News', region: '' },
+    { url: 'https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml', name: 'NY Times', region: '' },
+    { url: 'https://feeds.reuters.com/reuters/topNews', name: 'Reuters', region: '' },
   ],
   IN: [
-    { url: 'https://timesofindia.indiatimes.com/rssfeedstopstories.cms', name: 'Times of India' },
-    { url: 'https://www.thehindu.com/news/national/feeder/default.rss', name: 'The Hindu' },
-    { url: 'https://indianexpress.com/feed/', name: 'Indian Express' },
-    { url: 'https://feeds.feedburner.com/ndtvnews-top-stories', name: 'NDTV' },
+    { url: 'https://timesofindia.indiatimes.com/rssfeedstopstories.cms', name: 'Times of India', region: 'IN' },
+    { url: 'https://www.thehindu.com/news/national/feeder/default.rss', name: 'The Hindu', region: 'IN' },
+    { url: 'https://indianexpress.com/feed/', name: 'Indian Express', region: 'IN' },
+    { url: 'https://feeds.feedburner.com/ndtvnews-top-stories', name: 'NDTV', region: 'IN' },
   ],
 };
 
@@ -159,7 +173,7 @@ class RssProvider extends BaseProvider {
           author: item.author || feed.name,
           publishedAt: item.pubDate ? this._parseDate(item.pubDate) : new Date().toISOString(),
           category: item.category || '',
-          region: feed.url.includes('india') || feed.url.includes('thehindu') || feed.url.includes('ndtv') ? 'IN' : '',
+          region: feed.region || '',
           language: 'English',
         }));
     } catch (err) {

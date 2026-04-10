@@ -86,7 +86,7 @@ class GdeltProvider extends BaseProvider {
       url: a.url || '',
       source: 'GDELT',
       sourceDomain: a.domain || '',
-      description: a.seendate ? `Published on ${a.seendate}` : '',
+      description: '',
       imageUrl: a.socialimage || '',
       author: a.domain || '',
       publishedAt: a.seendate ? this._parseGdeltDate(a.seendate) : new Date().toISOString(),
