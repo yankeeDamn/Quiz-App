@@ -226,86 +226,30 @@ export async function getUserProfile() {
   return api<BackendUserProfile>('/api/v1/user/profile');
 }
 
-// ── News ───────────────────────────────────────────────
+// ── Payments ───────────────────────────────────────────
 
-export interface NewsArticle {
-  id: string;
-  title: string;
-  url: string;
-  source: string;
-  sourceDomain: string;
-  description: string;
-  imageUrl: string;
-  author: string;
-  publishedAt: string;
-  category: string;
-  region: string;
+export async function getStripeConfig() {
+  return api<{ publishableKey: string; amount: number; currency: string }>(
+    '/api/v1/payments/config',
+    { public: true }
+  );
 }
 
-export interface NewsPagination {
-  page: number;
-  pageSize: number;
-  total: number;
-  totalPages: number;
-  hasMore: boolean;
-}
-
-export interface NewsResponse {
-  articles: NewsArticle[];
-  pagination: NewsPagination;
-  sources: Record<string, number>;
-}
-
-export async function getNews(params: {
-  page?: number;
-  pageSize?: number;
-  query?: string;
-  region?: string;
-  category?: string;
-} = {}) {
-  const searchParams = new URLSearchParams();
-  if (params.page) searchParams.set('page', String(params.page));
-  if (params.pageSize) searchParams.set('pageSize', String(params.pageSize));
-  if (params.query) searchParams.set('query', params.query);
-  if (params.region) searchParams.set('region', params.region);
-  if (params.category) searchParams.set('category', params.category);
-
-  return api<NewsResponse>(`/api/v1/news?${searchParams.toString()}`, { public: true });
-}
-
-export async function getTopNews(region?: string) {
-  const params = region ? `?region=${region}` : '';
-  return api<NewsResponse>(`/api/v1/news/top${params}`, { public: true });
-}
-
-// ── Sokal Bela ─────────────────────────────────────────
-
-export async function createBooking(data: {
-  customerName: string;
-  customerEmail: string;
-  customerPhone?: string;
-  serviceType: string;
-  preferredDate: string;
-  preferredTime?: string;
-  notes?: string;
-}) {
-  return api('/api/v1/sokal-bela/book', {
+export async function createPaymentIntent(email?: string) {
+  return api<{
+    clientSecret: string;
+    paymentIntentId: string;
+    amount: number;
+    currency: string;
+  }>('/api/v1/payments/create-payment-intent', {
     method: 'POST',
-    body: data,
-    public: true,
+    body: { email },
   });
 }
 
-export async function createOrder(data: {
-  customerName: string;
-  customerEmail: string;
-  items: Array<{ itemName: string; quantity: number; pricePerUnit: number }>;
-  deliveryAddress?: string;
-  notes?: string;
-}) {
-  return api('/api/v1/sokal-bela/order', {
-    method: 'POST',
-    body: data,
-    public: true,
-  });
+export async function getPaymentStatus(paymentIntentId: string) {
+  return api<{ id: string; status: string; amount: number; currency: string }>(
+    `/api/v1/payments/status/${paymentIntentId}`,
+    { public: true }
+  );
 }

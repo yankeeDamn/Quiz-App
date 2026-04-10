@@ -3,135 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NewsHub - Fresh News from Around the World</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0a0a;
-            color: #f5f5f0;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        header {
-            border-bottom: 1px solid #2a2a2a;
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .logo { color: #D4AF37; font-size: 1.5rem; font-weight: bold; text-decoration: none; }
-        nav a { color: #a0a0a0; text-decoration: none; margin-left: 2rem; transition: color 0.2s; }
-        nav a:hover { color: #D4AF37; }
-        main { flex: 1; max-width: 1200px; margin: 0 auto; padding: 2rem; width: 100%; }
-        .hero { text-align: center; padding: 3rem 0; }
-        .hero h1 { font-size: 3rem; background: linear-gradient(to right, #D4AF37, #F0D060); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .hero p { color: #a0a0a0; margin-top: 1rem; font-size: 1.1rem; }
-        #news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
-        .article-card {
-            background: #141414;
-            border: 1px solid #2a2a2a;
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-        .article-card:hover { border-color: rgba(212, 175, 55, 0.5); box-shadow: 0 4px 20px rgba(212, 175, 55, 0.05); }
-        .article-card .source { color: #D4AF37; font-size: 0.75rem; font-weight: 500; text-transform: uppercase; }
-        .article-card h3 { margin: 0.5rem 0; font-size: 1.1rem; line-height: 1.4; }
-        .article-card .desc { color: #a0a0a0; font-size: 0.875rem; line-clamp: 2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-        .article-card .meta { color: #666; font-size: 0.75rem; margin-top: 1rem; }
-        .loading { text-align: center; padding: 3rem; color: #a0a0a0; }
-        .pagination { display: flex; justify-content: center; gap: 1rem; margin-top: 2rem; padding-bottom: 2rem; }
-        .pagination button {
-            background: transparent;
-            border: 1px solid #2a2a2a;
-            color: #a0a0a0;
-            padding: 0.5rem 1.5rem;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .pagination button:hover:not(:disabled) { border-color: #D4AF37; color: #D4AF37; }
-        .pagination button:disabled { opacity: 0.3; cursor: default; }
-        footer { border-top: 1px solid #2a2a2a; padding: 1.5rem 2rem; text-align: center; color: #666; font-size: 0.875rem; }
-    </style>
+    <title>Exam Practice Pro</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <a href="/" class="logo">📰 NewsHub</a>
-        <nav>
-            <a href="/">Latest</a>
-            <a href="/?region=IN">India</a>
-            <a href="/?category=technology">Tech</a>
-        </nav>
-    </header>
-    <main>
-        <div class="hero">
-            <h1>NewsHub</h1>
-            <p>Fresh, diverse news from multiple sources</p>
+
+    <!-- Sign-In View -->
+    <div id="signin-container">
+        <div id="signin-box">
+            <div id="signin-logo">
+                <span class="logo-icon">🎓</span>
+                <span class="logo-text">Exam Practice Pro</span>
+            </div>
+            <h2>Sign In to Your Account</h2>
+            <p class="signin-subtitle">Access certification exam practice tests</p>
+
+            <div id="signin-error" class="signin-error" style="display:none;"></div>
+
+            <form id="signin-form" novalidate>
+                <div class="form-group">
+                    <label for="signin-email">Email Address</label>
+                    <input type="email" id="signin-email" placeholder="you@example.com" autocomplete="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="signin-password">Password</label>
+                    <input type="password" id="signin-password" placeholder="Your password" autocomplete="current-password" required>
+                </div>
+                <button type="submit" id="signin-btn" class="btn-primary">Sign In</button>
+            </form>
+
+            <div class="signin-divider"><span>or</span></div>
+
+            <button id="guest-btn" class="btn-guest">Continue as Guest</button>
+
+            <p class="signin-footer">
+                Don't have an account? <a href="#" id="signup-link">Sign up for free</a>
+            </p>
         </div>
-        <div id="news-grid"><div class="loading">Loading news...</div></div>
-        <div class="pagination">
-            <button id="prev-btn" disabled>← Previous</button>
-            <span id="page-info" style="color:#a0a0a0;padding:0.5rem;">Page 1</span>
-            <button id="next-btn">Next →</button>
+    </div>
+
+    <!-- Quiz View -->
+    <div id="quiz-view" style="display:none;">
+        <header id="app-header">
+            <div class="header-left">
+                <span class="logo-icon">🎓</span>
+                <span class="logo-text">Exam Practice Pro</span>
+            </div>
+            <div class="header-right">
+                <span id="user-display"></span>
+                <button id="signout-btn" class="btn-signout">Sign Out</button>
+            </div>
+        </header>
+
+        <div id="quiz-container">
+            <div id="quiz-header">
+                <h1 id="quiz-title">Practice Quiz</h1>
+                <div id="timer-box">
+                    <span class="timer-label">Time Remaining</span>
+                    <span id="timer-display">30:00</span>
+                </div>
+            </div>
+
+            <form id="quiz-form">
+                <!-- Questions will be dynamically loaded here -->
+            </form>
+
+            <div id="quiz-actions">
+                <button id="start-payment" class="btn-primary">Submit Quiz &amp; Pay</button>
+            </div>
         </div>
-    </main>
-    <footer>© 2026 NewsHub — Powered by GDELT, RSS, and HackerNews</footer>
-    <script>
-        let currentPage = 1;
-        const params = new URLSearchParams(window.location.search);
 
-        async function fetchNews(page) {
-            const grid = document.getElementById('news-grid');
-            grid.innerHTML = '<div class="loading">Loading news...</div>';
+        <!-- Results Panel (shown after submission) -->
+        <div id="results-container" style="display:none;">
+            <h2>Quiz Results</h2>
+            <p id="results-score"></p>
+            <button id="retake-btn" class="btn-primary">Retake Quiz</button>
+            <button id="proceed-payment-btn" class="btn-primary">Get Full Access</button>
+        </div>
 
-            const qp = new URLSearchParams();
-            qp.set('page', page);
-            qp.set('pageSize', '20');
-            if (params.get('region')) qp.set('region', params.get('region'));
-            if (params.get('category')) qp.set('category', params.get('category'));
-            if (params.get('query')) qp.set('query', params.get('query'));
+        <div id="payment-container" style="display:none;">
+            <h2>Complete Payment</h2>
+            <p>Unlock unlimited practice exams for <strong>$50</strong></p>
+            <form id="payment-form">
+                <div id="card-element"></div>
+                <button id="submit-payment" class="btn-primary">Pay Now</button>
+            </form>
+        </div>
+    </div>
 
-            try {
-                const res = await fetch('/api/v1/news?' + qp.toString());
-                const data = await res.json();
-                if (data.success && data.articles.length > 0) {
-                    grid.innerHTML = data.articles.map(a => `
-                        <a href="${a.url}" target="_blank" rel="noopener" class="article-card">
-                            <div class="source">${a.sourceDomain || a.source}</div>
-                            <h3>${a.title}</h3>
-                            ${a.description ? '<p class="desc">' + a.description + '</p>' : ''}
-                            <div class="meta">${timeAgo(a.publishedAt)}</div>
-                        </a>
-                    `).join('');
-                    document.getElementById('page-info').textContent = 'Page ' + page + ' of ' + (data.pagination.totalPages || 1);
-                    document.getElementById('prev-btn').disabled = page <= 1;
-                    document.getElementById('next-btn').disabled = page >= data.pagination.totalPages;
-                } else {
-                    grid.innerHTML = '<div class="loading">No articles found</div>';
-                }
-            } catch {
-                grid.innerHTML = '<div class="loading">Unable to load news</div>';
-            }
-        }
-
-        function timeAgo(d) {
-            const diff = Date.now() - new Date(d).getTime();
-            const m = Math.floor(diff / 60000);
-            if (m < 60) return m + 'm ago';
-            const h = Math.floor(m / 60);
-            if (h < 24) return h + 'h ago';
-            return Math.floor(h / 24) + 'd ago';
-        }
-
-        document.getElementById('prev-btn').onclick = () => { currentPage--; fetchNews(currentPage); };
-        document.getElementById('next-btn').onclick = () => { currentPage++; fetchNews(currentPage); };
-        fetchNews(1);
-    </script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="script.js"></script>
 </body>
 </html>

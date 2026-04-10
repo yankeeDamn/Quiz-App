@@ -37,11 +37,6 @@ const config = {
   // The backend verifies tokens signed with this same secret.
   authSecret: process.env.AUTH_SECRET || '',
 
-  // ── Firebase ─────────────────────────────────────────
-  firebase: {
-    projectId: process.env.FIREBASE_PROJECT_ID || '',
-  },
-
   // ── CORS ─────────────────────────────────────────────
   cors: {
     origins: process.env.CORS_ORIGINS
