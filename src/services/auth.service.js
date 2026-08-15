@@ -32,7 +32,7 @@ class AuthService {
       id: uuidv4(),
       email,
       password: hashedPassword,
-      role: 'user',
+      role: config.adminEmails.includes(email.toLowerCase()) ? 'admin' : 'user',
       createdAt: new Date().toISOString(),
     };
 
@@ -75,7 +75,7 @@ class AuthService {
     const user = {
       id: uuidv4(),
       email,
-      role: 'user',
+      role: config.adminEmails.includes(email.toLowerCase()) ? 'admin' : 'user',
     };
 
     logger.info({ userId: user.id, email }, 'User logged in (demo)');

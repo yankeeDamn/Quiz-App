@@ -226,7 +226,167 @@ export async function getUserProfile() {
   return api<BackendUserProfile>('/api/v1/user/profile');
 }
 
-// ── Payments ───────────────────────────────────────────
+// ── Admin ─────────────────────────────────────────────
+
+export interface AdminStats {
+  totalUsers: number;
+  paidUsers: number;
+  totalAttempts: number;
+  totalRevenueCents: number;
+  recentUsers: Array<{
+    id: string;
+    email: string | null;
+    name: string | null;
+    role: string;
+    payment_status: string;
+    created_at: string;
+  }>;
+}
+
+export interface AdminUser {
+  id: string;
+  email: string | null;
+  name: string | null;
+  image: string | null;
+  role: string;
+  payment_status: string;
+  provider: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdminPayment {
+  id: string;
+  stripe_payment_intent_id: string;
+  amount_cents: number;
+  currency: string;
+  status: string;
+  created_at: string;
+  user_email: string | null;
+  user_name: string | null;
+}
+
+export interface AdminQuestion {
+  id: string;
+  quiz_id: string;
+  subject: string;
+  topic: string;
+  difficulty: string;
+  type: string;
+  question_text: string;
+  options: Array<{ id: string; text: string }>;
+  correct_answers: string[];
+  explanation: string;
+  image_url: string | null;
+  created_at: string;
+}
+
+export interface AdminCourse {
+  id: string;
+  name: string;
+  description: string;
+  color: string;
+  exam_code: string;
+  question_count: number;
+  created_at: string;
+}
+
+export async function getAdminStats() {
+  return api<AdminStats>('/api/v1/admin/stats');
+}
+
+export async function getAdminUsers(limit = 50, offset = 0) {
+  return api<{ users: AdminUser[]; total: number }>(
+    `/api/v1/admin/users?limit=${limit}&offset=${offset}`
+  );
+}
+
+export async function updateAdminUserRole(userId: string, role: string) {
+  return api<AdminUser>(`/api/v1/admin/users/${userId}/role`, {
+    method: 'PATCH',
+    body: { role },
+  });
+}
+
+export async function getAdminPayments(limit = 50, offset = 0) {
+  return api<{ payments: AdminPayment[]; total: number }>(
+    `/api/v1/admin/payments?limit=${limit}&offset=${offset}`
+  );
+}
+
+export async function getAdminQuestions(opts?: {
+  limit?: number;
+  offset?: number;
+  quizId?: string;
+  topic?: string;
+}) {
+  const params = new URLSearchParams();
+  if (opts?.limit) params.set('limit', String(opts.limit));
+  if (opts?.offset) params.set('offset', String(opts.offset));
+  if (opts?.quizId) params.set('quizId', opts.quizId);
+  if (opts?.topic) params.set('topic', opts.topic);
+  return api<{ questions: AdminQuestion[]; total: number }>(
+    `/api/v1/admin/questions?${params}`
+  );
+}
+
+export async function createAdminQuestion(data: {
+  quizId: string;
+  subject: string;
+  topic: string;
+  difficulty: string;
+  type: string;
+  questionText: string;
+  options: Array<{ id: string; text: string }>;
+  correctAnswers: string[];
+  explanation: string;
+}) {
+  return api<AdminQuestion>('/api/v1/admin/questions', {
+    method: 'POST',
+    body: data,
+  });
+}
+
+export async function updateAdminQuestion(
+  id: string,
+  data: Partial<{
+    quizId: string;
+    subject: string;
+    topic: string;
+    difficulty: string;
+    type: string;
+    questionText: string;
+    options: Array<{ id: string; text: string }>;
+    correctAnswers: string[];
+    explanation: string;
+  }>
+) {
+  return api<AdminQuestion>(`/api/v1/admin/questions/${id}`, {
+    method: 'PUT',
+    body: data,
+  });
+}
+
+export async function deleteAdminQuestion(id: string) {
+  return api(`/api/v1/admin/questions/${id}`, { method: 'DELETE' });
+}
+
+export async function getAdminCourses() {
+  return api<AdminCourse[]>('/api/v1/admin/courses');
+}
+
+export async function createAdminCourse(data: {
+  name: string;
+  description?: string;
+  color?: string;
+  examCode?: string;
+}) {
+  return api<AdminCourse>('/api/v1/admin/courses', {
+    method: 'POST',
+    body: data,
+  });
+}
+
 
 export async function getStripeConfig() {
   return api<{ publishableKey: string; amount: number; currency: string }>(

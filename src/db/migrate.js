@@ -156,6 +156,41 @@ CREATE TABLE IF NOT EXISTS user_stats (
   topic_stats      JSONB        NOT NULL DEFAULT '{}',
   updated_at       TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
+-- ────────────────────────────────────────────────
+-- courses  (exam providers managed via admin panel)
+-- ────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS courses (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name        VARCHAR(255) NOT NULL,
+  description TEXT         NOT NULL DEFAULT '',
+  color       VARCHAR(20)  NOT NULL DEFAULT '#6366F1',
+  exam_code   VARCHAR(50)  NOT NULL DEFAULT '',
+  created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+-- ────────────────────────────────────────────────
+-- questions  (dynamic question bank)
+-- ────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS questions (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  quiz_id         VARCHAR(100) NOT NULL,
+  subject         VARCHAR(255) NOT NULL,
+  topic           VARCHAR(255) NOT NULL DEFAULT '',
+  difficulty      VARCHAR(20)  NOT NULL DEFAULT 'Medium',
+  type            VARCHAR(20)  NOT NULL DEFAULT 'single',
+  question_text   TEXT         NOT NULL,
+  options         JSONB        NOT NULL DEFAULT '[]',
+  correct_answers JSONB        NOT NULL DEFAULT '[]',
+  explanation     TEXT         NOT NULL DEFAULT '',
+  image_url       VARCHAR(512),
+  created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_questions_quiz ON questions(quiz_id);
+CREATE INDEX IF NOT EXISTS idx_questions_subject ON questions(subject);
+CREATE INDEX IF NOT EXISTS idx_questions_topic ON questions(topic);
 `;
 
 async function migrate() {

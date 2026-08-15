@@ -8,7 +8,8 @@
     "dev": "node --watch src/server.js",
     "lint": "echo 'No linter configured'",
     "test": "echo 'No tests configured yet' && exit 0",
-    "db:migrate": "node src/db/migrate.js"
+    "db:migrate": "node src/db/migrate.js",
+    "db:seed": "node src/db/seed.js"
   },
   "keywords": [
     "quiz",

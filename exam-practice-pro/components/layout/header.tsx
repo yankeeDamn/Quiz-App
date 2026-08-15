@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
 import { useSession, signOut } from 'next-auth/react';
-import { GraduationCap, Moon, Sun, LayoutDashboard, Menu, BookmarkCheck, LogIn, LogOut, User } from 'lucide-react';
+import { GraduationCap, Moon, Sun, LayoutDashboard, Menu, BookmarkCheck, LogIn, LogOut, User, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -24,6 +24,7 @@ export function Header() {
   const { setTheme, theme } = useTheme();
   const { data: session, status } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isAdmin = (session?.user as { role?: string } | undefined)?.role === 'admin';
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -64,6 +65,14 @@ export function Header() {
           >
             Pricing
           </Link>
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className="text-sm font-medium text-indigo-600 transition-colors hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+            >
+              Admin
+            </Link>
+          )}
         </nav>
 
         {/* Right Side Actions */}
@@ -129,6 +138,14 @@ export function Header() {
                     <DropdownMenuItem disabled className="text-xs text-muted-foreground">
                       {session.user.email || 'Guest account'}
                     </DropdownMenuItem>
+                    {isAdmin && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin">
+                          <ShieldCheck className="mr-2 h-4 w-4" />
+                          Admin Panel
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem onClick={() => { clearTokenCache(); signOut({ callbackUrl: '/' }); }}>
                       <LogOut className="mr-2 h-4 w-4" />
                       Sign Out
@@ -184,6 +201,15 @@ export function Header() {
                 >
                   Pricing
                 </Link>
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    className="text-lg font-medium text-indigo-600 transition-colors hover:text-indigo-700"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Admin Panel
+                  </Link>
+                )}
                 <Separator className="my-2" />
                 {session?.user ? (
                   <>

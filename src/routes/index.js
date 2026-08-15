@@ -7,6 +7,7 @@ const authRoutes = require('./auth');
 const quizRoutes = require('./quiz');
 const bookmarkRoutes = require('./bookmarks');
 const userRoutes = require('./user');
+const adminRoutes = require('./admin');
 
 const router = Router();
 
@@ -16,6 +17,7 @@ router.use('/payments', paymentRoutes);
 router.use('/auth', authRoutes);
 router.use('/quiz', quizRoutes);
 router.use('/user', userRoutes);
+router.use('/admin', adminRoutes);
 
 // Bookmarks & Notes share the /user namespace
 router.use('/user', bookmarkRoutes);

@@ -66,6 +66,7 @@ Quiz-App/
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) v18 or later
+- [PostgreSQL](https://www.postgresql.org/) 14+ (for persistent data and the admin panel)
 - A [Stripe account](https://stripe.com/) (for payment processing)
 
 ### 1. Clone the repository
@@ -78,7 +79,11 @@ cd Quiz-App
 ### 2. Install dependencies
 
 ```bash
+# Express backend
 npm install
+
+# Next.js frontend
+cd exam-practice-pro && npm install && cd ..
 ```
 
 ### 3. Configure environment variables
@@ -87,35 +92,29 @@ npm install
 cp .env.example .env
 ```
 
-Edit `.env` and fill in your values:
+Edit `.env` and fill in your values (see reference table below).
 
-```env
-NODE_ENV=development
-PORT=3000
-
-# Stripe — get keys from https://dashboard.stripe.com/apikeys
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_PUBLISHABLE_KEY=pk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-
-# JWT — generate with: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
-JWT_SECRET=your-random-secret
-
-CORS_ORIGINS=http://localhost:3000
-LOG_LEVEL=info
-```
-
-### 4. Run the server
+### 4. Run the database migration
 
 ```bash
-# Development (with auto-reload)
-npm run dev
-
-# Production
-npm start
+npm run db:migrate
 ```
 
-The app will be available at **http://localhost:3000**.
+Optionally seed the built-in questions:
+
+```bash
+npm run db:seed
+```
+
+### 5. Start the servers
+
+```bash
+# Terminal 1 — Express backend (http://localhost:3001)
+npm run dev
+
+# Terminal 2 — Next.js frontend (http://localhost:3000)
+cd exam-practice-pro && npm run dev
+```
 
 ---
 
@@ -317,7 +316,57 @@ fly deploy
 - [ ] Multiple exam categories (AWS, Azure, CompTIA, etc.)
 - [ ] Score history and progress dashboard API
 - [ ] Question explanations and review mode API
-- [ ] Admin panel for quiz management
+- [x] Admin panel for quiz management
+
+---
+
+## 🛡️ Admin Panel
+
+The admin panel lives at `/admin` in the Next.js frontend and is protected by role-based access control.
+
+### Gaining Admin Access
+
+**Development / demo mode (no PostgreSQL required)**
+
+Add your email to `ADMIN_EMAILS` in your `.env` file:
+
+```env
+ADMIN_EMAILS=you@example.com
+```
+
+Any login or registration from that address will automatically receive the `admin` role in the JWT.
+
+**Production (PostgreSQL connected)**
+
+Run a one-time SQL statement after the user has registered:
+
+```sql
+UPDATE users SET role = 'admin' WHERE email = 'you@example.com';
+```
+
+### Admin Pages
+
+| Path | Description |
+|---|---|
+| `/admin` | Dashboard — user/payment stats, recent signups |
+| `/admin/users` | List all users, change roles inline |
+| `/admin/payments` | Full payment history with Stripe IDs |
+| `/admin/questions` | Add / edit / delete quiz questions |
+| `/admin/courses` | Manage exam providers and courses |
+
+### Database Setup for Question Management
+
+Run the migration then seed the initial questions:
+
+```bash
+# 1. Create all tables (including questions + courses)
+npm run db:migrate
+
+# 2. Import the built-in question set
+npm run db:seed
+```
+
+After seeding, questions are managed exclusively through the admin panel — do **not** edit `exam-practice-pro/data/quizzes.ts` directly.
 
 ---
 

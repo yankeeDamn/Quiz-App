@@ -16,6 +16,13 @@ const config = {
   // ── Database ─────────────────────────────────────────
   databaseUrl: process.env.DATABASE_URL || '',
 
+  // ── Admin ─────────────────────────────────────────────
+  // Comma-separated list of emails that should always receive the 'admin' role.
+  // Used when PostgreSQL is not yet connected (demo mode).
+  adminEmails: process.env.ADMIN_EMAILS
+    ? process.env.ADMIN_EMAILS.split(',').map((e) => e.trim().toLowerCase())
+    : [],
+
   // ── Stripe ───────────────────────────────────────────
   stripe: {
     secretKey: process.env.STRIPE_SECRET_KEY || '',
