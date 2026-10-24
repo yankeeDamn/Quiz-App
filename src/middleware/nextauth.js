@@ -79,6 +79,8 @@ async function authenticateNextAuth(req, res, next) {
         const dbUser = await upsertUser(user);
         user.id = dbUser.id; // use the database UUID as canonical ID
         user.paymentStatus = dbUser.payment_status;
+        user.plan = dbUser.plan;
+        user.planExpiresAt = dbUser.plan_expires_at;
         user.role = dbUser.role;
       } catch (dbErr) {
         logger.warn({ err: dbErr }, 'DB upsert failed — using token identity');
@@ -142,6 +144,8 @@ async function allowNextAuthGuest(req, _res, next) {
         const dbUser = await upsertUser(user);
         user.id = dbUser.id;
         user.paymentStatus = dbUser.payment_status;
+        user.plan = dbUser.plan;
+        user.planExpiresAt = dbUser.plan_expires_at;
         user.role = dbUser.role;
       } catch {
         // proceed with token identity
@@ -173,7 +177,7 @@ async function upsertUser(user) {
   const findResult = await db.query(
     `SELECT * FROM users
      WHERE (provider = $1 AND provider_id = $2)
-        OR (email = $3 AND email IS NOT NULL)
+        OR (LOWER(email) = LOWER($3) AND email IS NOT NULL)
      ORDER BY
        CASE WHEN provider = $1 AND provider_id = $2 THEN 0 ELSE 1 END
      LIMIT 1`,

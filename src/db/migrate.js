@@ -46,7 +46,8 @@ CREATE TABLE IF NOT EXISTS users (
   provider_id     VARCHAR(255),
   role            VARCHAR(20)  NOT NULL DEFAULT 'user',
   payment_status  VARCHAR(20)  NOT NULL DEFAULT 'unpaid',
-  stripe_customer_id VARCHAR(255),
+  plan            VARCHAR(20)  NOT NULL DEFAULT 'free',
+  plan_expires_at TIMESTAMPTZ,
   created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
   updated_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
@@ -78,22 +79,25 @@ CREATE INDEX IF NOT EXISTS idx_quiz_attempts_user ON quiz_attempts(user_id);
 CREATE INDEX IF NOT EXISTS idx_quiz_attempts_quiz ON quiz_attempts(quiz_id);
 CREATE INDEX IF NOT EXISTS idx_quiz_attempts_completed ON quiz_attempts(completed_at DESC);
 
+-- Plans were added after the first release; this keeps existing databases working.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS plan VARCHAR(20) NOT NULL DEFAULT 'free';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS plan_expires_at TIMESTAMPTZ;
+
 -- ────────────────────────────────────────────────
--- payments
+-- plan_grants (one row per plan unlocked after a WhatsApp payment)
 -- ────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS payments (
-  id                       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id                  UUID         NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  stripe_payment_intent_id VARCHAR(255) UNIQUE NOT NULL,
-  amount_cents             INTEGER      NOT NULL,
-  currency                 VARCHAR(10)  NOT NULL DEFAULT 'usd',
-  status                   VARCHAR(30)  NOT NULL,
-  created_at               TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
-  updated_at               TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+CREATE TABLE IF NOT EXISTS plan_grants (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID         NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  plan        VARCHAR(20)  NOT NULL,
+  months      INTEGER      NOT NULL,
+  amount_inr  INTEGER,
+  note        VARCHAR(255),
+  expires_at  TIMESTAMPTZ  NOT NULL,
+  granted_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_payments_user ON payments(user_id);
-CREATE INDEX IF NOT EXISTS idx_payments_stripe ON payments(stripe_payment_intent_id);
+CREATE INDEX IF NOT EXISTS idx_plan_grants_user ON plan_grants(user_id);
 
 -- ────────────────────────────────────────────────
 -- scores (best-score leaderboard)

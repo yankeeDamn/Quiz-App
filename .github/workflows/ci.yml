@@ -42,8 +42,7 @@ jobs:
           NODE_ENV: test
           JWT_SECRET: ci-test-secret
           AUTH_SECRET: ci-test-auth-secret
-          STRIPE_SECRET_KEY: sk_test_placeholder
-          STRIPE_WEBHOOK_SECRET: whsec_placeholder
+          ADMIN_API_KEY: ci-test-admin-key-0123456789abcdef
 
   # ── Frontend: Build ──────────────────────────
   frontend:

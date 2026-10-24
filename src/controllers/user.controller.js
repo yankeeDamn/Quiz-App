@@ -1,6 +1,7 @@
 'use strict';
 
 const userService = require('../services/user.service');
+const { isPlanActive } = require('../services/plan.service');
 
 /**
  * GET /api/v1/user/profile — get current user profile
@@ -39,6 +40,9 @@ async function getProfile(req, res, next) {
           image: user.image,
           role: user.role,
           paymentStatus: user.payment_status,
+          plan: user.plan || 'free',
+          planActive: isPlanActive(user.plan, user.plan_expires_at),
+          planExpiresAt: user.plan_expires_at,
           createdAt: user.created_at,
         },
         isGuest: false,

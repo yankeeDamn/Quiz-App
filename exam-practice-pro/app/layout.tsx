@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/layout/theme-provider';
 import { AuthProvider } from '@/components/layout/auth-provider';
 import { UserStorageProvider } from '@/components/layout/user-storage-provider';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { FloatingWhatsApp } from '@/components/mocks/whatsapp-button';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -13,7 +14,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: 'Exam Practice Pro',
-  description: 'Practice smarter. Score higher. Professional exam practice platform.',
+  description: 'Mock tests for SSC, Banking, Railways, UPSC and campus placements, plus certification practice. Doubts answered on WhatsApp.',
   keywords: ['exam', 'practice', 'quiz', 'study', 'test', 'certification'],
 };
 
@@ -36,6 +37,7 @@ export default function RootLayout({
               <TooltipProvider delay={300}>
                 <div className="relative flex min-h-screen flex-col bg-background">
                   {children}
+                  <FloatingWhatsApp />
                 </div>
               </TooltipProvider>
             </UserStorageProvider>

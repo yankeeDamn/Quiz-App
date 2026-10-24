@@ -11,14 +11,20 @@ import { QuizCard } from '@/components/quiz/quiz-card';
 import { ProviderCard } from '@/components/quiz/provider-card';
 import { quizzes, getUniqueSubjects, examProviders, exams, getAllQuizzes } from '@/data/quizzes';
 import Link from 'next/link';
-import Image from 'next/image';
-import { indiaExams } from '@/data/india-exams';
 import { Button } from '@/components/ui/button';
 
 const difficultyFilters = [
   { id: 'Easy', label: 'Easy' },
   { id: 'Medium', label: 'Medium' },
   { id: 'Hard', label: 'Hard' },
+];
+
+const INDIA_EXAMS = [
+  { name: 'SSC CGL', filter: 'SSC', blurb: '2 full mocks. Reasoning, quant, English and GK.' },
+  { name: 'Banking', filter: 'Banking', blurb: '2 Bank PO prelims mocks with sectional timing.' },
+  { name: 'Railways', filter: 'Railways', blurb: '2 RRB NTPC CBT-1 mocks with 1/3 negative marking.' },
+  { name: 'UPSC / PSC', filter: 'UPSC / PSC', blurb: '2 general studies mini mocks on polity, history and science.' },
+  { name: 'Campus', filter: 'Placements', blurb: '3 aptitude tests for placement drives.' },
 ];
 
 export default function HomePage() {
@@ -106,25 +112,27 @@ export default function HomePage() {
       <main className="flex-1">
         <section className="border-b bg-blue-50 px-4 py-4 dark:bg-blue-950/30">
           <div className="container mx-auto flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <Image src="/testguru-logo.svg" alt="TestGuru" width={160} height={43} />
-              <p className="text-sm text-slate-700 dark:text-slate-200">White-label mock tests for coaching institutes</p>
-            </div>
+            <p className="text-sm text-slate-700 dark:text-slate-200">New: 21 India mock tests with explanations, plus doubts answered on WhatsApp</p>
             <Link href="/india-mocks" className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700">Explore Indian Mock Tests →</Link>
           </div>
         </section>
         <section className="container mx-auto px-4 py-12" aria-labelledby="india-mocks-heading">
           <div className="flex flex-wrap items-end justify-between gap-4">
-            <div><p className="text-sm font-semibold text-blue-600">NEW · INDIA EXAM PRACTICE</p><h2 id="india-mocks-heading" className="mt-2 text-3xl font-bold">Prepare for India's top exams</h2><p className="mt-2 text-muted-foreground">SSC, Banking, Railway, UPSC, JEE, NEET, school and IT certification starter mocks.</p></div>
-            <Link href="/india-mocks" className="font-semibold text-blue-600 hover:underline">See all 8 categories →</Link>
+            <div>
+              <p className="text-sm font-semibold text-blue-700 dark:text-blue-400">INDIA EXAM PRACTICE</p>
+              <h2 id="india-mocks-heading" className="mt-2 text-3xl font-bold">Prepare for India&apos;s top exams</h2>
+              <p className="mt-2 text-muted-foreground">Full mocks with sections, timers and negative marking, plus short topic tests.</p>
+            </div>
+            <Link href="/india-mocks" className="font-semibold text-blue-700 hover:underline dark:text-blue-400">See all tests →</Link>
           </div>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {indiaExams.map(exam => <Link key={exam.id} href={'/india-mocks/' + exam.id} className="rounded-xl border bg-white p-5 transition hover:border-blue-400 hover:shadow-md dark:bg-zinc-900">
-              <p className="text-xs font-semibold uppercase text-blue-600">{exam.category}</p>
-              <h3 className="mt-2 font-semibold">{exam.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{exam.questions.length} sample questions · 10 min</p>
-              <span className="mt-4 inline-block text-sm font-semibold text-blue-600">Start practice →</span>
-            </Link>)}
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            {INDIA_EXAMS.map((exam) => (
+              <Link key={exam.filter} href={'/india-mocks?exam=' + encodeURIComponent(exam.filter)} className="rounded-xl border bg-white p-5 transition hover:border-blue-400 hover:shadow-md dark:bg-zinc-900">
+                <h3 className="font-semibold">{exam.name}</h3>
+                <p className="mt-2 text-sm text-muted-foreground">{exam.blurb}</p>
+                <span className="mt-4 inline-block text-sm font-semibold text-blue-700 dark:text-blue-400">View tests →</span>
+              </Link>
+            ))}
           </div>
         </section>
         {/* Hero Section */}

@@ -21,24 +21,6 @@ const generalLimiter = rateLimit({
 });
 
 /**
- * Strict rate limiter for payment endpoints — 10 requests per 15-minute window.
- * Protects against brute-force / replay attacks on the payment flow.
- */
-const paymentLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  handler: (_req, res) => {
-    logger.warn('Payment rate limit exceeded');
-    res.status(429).json({
-      success: false,
-      error: { message: 'Too many payment attempts. Please wait before trying again.' },
-    });
-  },
-});
-
-/**
  * Auth rate limiter — 20 requests per 15-minute window.
  */
 const authLimiter = rateLimit({
@@ -55,4 +37,4 @@ const authLimiter = rateLimit({
   },
 });
 
-module.exports = { generalLimiter, paymentLimiter, authLimiter };
+module.exports = { generalLimiter, authLimiter };

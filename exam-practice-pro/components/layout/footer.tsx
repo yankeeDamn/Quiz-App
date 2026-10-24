@@ -1,5 +1,6 @@
 import { GraduationCap } from 'lucide-react';
 import Link from 'next/link';
+import { formatWhatsappNumber, whatsappLink } from '@/lib/plans';
 
 export function Footer() {
   return (
@@ -33,6 +34,26 @@ export function Footer() {
             >
               Dashboard
             </Link>
+            <Link
+              href="/india-mocks"
+              className="transition-colors hover:text-foreground"
+            >
+              India Mocks
+            </Link>
+            <Link
+              href="/pricing"
+              className="transition-colors hover:text-foreground"
+            >
+              Pricing
+            </Link>
+            <a
+              href={whatsappLink('Hi, I have a question about Exam Practice Pro.')}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-colors hover:text-foreground"
+            >
+              WhatsApp {formatWhatsappNumber()}
+            </a>
           </nav>
 
           {/* Copyright */}

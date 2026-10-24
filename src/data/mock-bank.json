@@ -1,0 +1,2018 @@
+{
+ "topics": [
+  {
+   "id": "percent",
+   "name": "Percentage, Profit & Loss",
+   "category": "Quantitative",
+   "questions": [
+    {
+     "q": "What is 15% of 240?",
+     "options": [
+      "30",
+      "36",
+      "40",
+      "24"
+     ],
+     "answer": 1,
+     "explanation": "0.15 × 240 = 36."
+    },
+    {
+     "q": "A number increased by 20% becomes 360. The number is:",
+     "options": [
+      "280",
+      "300",
+      "320",
+      "288"
+     ],
+     "answer": 1,
+     "explanation": "Number × 1.2 = 360, so the number is 300."
+    },
+    {
+     "q": "An article bought for ₹500 is sold for ₹575. The profit percentage is:",
+     "options": [
+      "12%",
+      "15%",
+      "18%",
+      "20%"
+     ],
+     "answer": 1,
+     "explanation": "Profit 75 on cost 500 is 15%."
+    },
+    {
+     "q": "An item marked ₹800 is sold at a 10% discount. The selling price is:",
+     "options": [
+      "₹640",
+      "₹700",
+      "₹720",
+      "₹760"
+     ],
+     "answer": 2,
+     "explanation": "Discount = 80, so 800 − 80 = 720."
+    },
+    {
+     "q": "Sugar becomes 25% costlier. By what percent must consumption fall to keep spending the same?",
+     "options": [
+      "15%",
+      "12.5%",
+      "25%",
+      "20%"
+     ],
+     "answer": 3,
+     "explanation": "Reduction = 25 ÷ 125 × 100 = 20%."
+    },
+    {
+     "q": "A trader sells at a 12% loss for ₹440. The cost price is:",
+     "options": [
+      "₹480",
+      "₹500",
+      "₹520",
+      "₹550"
+     ],
+     "answer": 1,
+     "explanation": "SP is 88% of CP, so CP = 440 ÷ 0.88 = 500."
+    },
+    {
+     "q": "Two successive discounts of 10% and 20% equal a single discount of:",
+     "options": [
+      "30%",
+      "25%",
+      "32%",
+      "28%"
+     ],
+     "answer": 3,
+     "explanation": "Net factor 0.9 × 0.8 = 0.72, so 28% off."
+    },
+    {
+     "q": "In an exam 40% of the students failed. If 360 passed, how many appeared?",
+     "options": [
+      "500",
+      "540",
+      "600",
+      "650"
+     ],
+     "answer": 2,
+     "explanation": "60% of total = 360, so total = 600."
+    },
+    {
+     "q": "A shopkeeper sells at cost price but uses a 900 g weight for 1 kg. His gain percentage is:",
+     "options": [
+      "10%",
+      "11 1/9%",
+      "12.5%",
+      "9%"
+     ],
+     "answer": 1,
+     "explanation": "Gain = 100 ÷ 900 × 100 = 11 1/9%."
+    },
+    {
+     "q": "A town of 20,000 people grows 10% every year. After 2 years the population is:",
+     "options": [
+      "24,000",
+      "24,200",
+      "24,400",
+      "22,000"
+     ],
+     "answer": 1,
+     "explanation": "20,000 × 1.1 × 1.1 = 24,200."
+    },
+    {
+     "q": "35% of a number is 84. The number is:",
+     "options": [
+      "220",
+      "260",
+      "200",
+      "240"
+     ],
+     "answer": 3,
+     "explanation": "84 ÷ 0.35 = 240."
+    },
+    {
+     "q": "A sells to B at 20% profit and B sells to C at 25% profit. C pays ₹300. A’s cost price is:",
+     "options": [
+      "₹180",
+      "₹200",
+      "₹210",
+      "₹225"
+     ],
+     "answer": 1,
+     "explanation": "1.2 × 1.25 = 1.5, and 300 ÷ 1.5 = 200."
+    }
+   ]
+  },
+  {
+   "id": "tsw",
+   "name": "Time, Speed & Work",
+   "category": "Quantitative",
+   "questions": [
+    {
+     "q": "Convert 54 km/h into m/s.",
+     "options": [
+      "12 m/s",
+      "15 m/s",
+      "18 m/s",
+      "20 m/s"
+     ],
+     "answer": 1,
+     "explanation": "54 × 5/18 = 15."
+    },
+    {
+     "q": "A 120 m long train crosses a pole in 6 seconds. Its speed is:",
+     "options": [
+      "15 m/s",
+      "24 m/s",
+      "18 m/s",
+      "20 m/s"
+     ],
+     "answer": 3,
+     "explanation": "120 ÷ 6 = 20 m/s."
+    },
+    {
+     "q": "A can finish a job in 10 days and B in 15 days. Together they take:",
+     "options": [
+      "5 days",
+      "6 days",
+      "8 days",
+      "12 days"
+     ],
+     "answer": 1,
+     "explanation": "1/10 + 1/15 = 1/6 per day."
+    },
+    {
+     "q": "A and B together finish a job in 12 days. A alone takes 20 days. B alone takes:",
+     "options": [
+      "25 days",
+      "30 days",
+      "32 days",
+      "36 days"
+     ],
+     "answer": 1,
+     "explanation": "1/12 − 1/20 = 1/30."
+    },
+    {
+     "q": "A man reaches 10 minutes late at 5 km/h and 10 minutes early at 6 km/h. The distance is:",
+     "options": [
+      "8 km",
+      "12 km",
+      "10 km",
+      "15 km"
+     ],
+     "answer": 2,
+     "explanation": "d/5 − d/6 = 20/60 hours, so d = 10 km."
+    },
+    {
+     "q": "A person goes at 60 km/h and returns at 40 km/h. Average speed for the round trip:",
+     "options": [
+      "50 km/h",
+      "48 km/h",
+      "52 km/h",
+      "45 km/h"
+     ],
+     "answer": 1,
+     "explanation": "2 × 60 × 40 ÷ (60 + 40) = 48."
+    },
+    {
+     "q": "A pipe fills a tank in 20 minutes and another empties it in 30 minutes. Both open, the tank fills in:",
+     "options": [
+      "30 min",
+      "50 min",
+      "60 min",
+      "80 min"
+     ],
+     "answer": 2,
+     "explanation": "1/20 − 1/30 = 1/60 per minute."
+    },
+    {
+     "q": "Two trains, each 150 m long, run in opposite directions at 36 km/h and 54 km/h. They cross in:",
+     "options": [
+      "10 s",
+      "12 s",
+      "15 s",
+      "8 s"
+     ],
+     "answer": 1,
+     "explanation": "Relative speed 90 km/h = 25 m/s, and 300 ÷ 25 = 12 s."
+    },
+    {
+     "q": "12 men finish a job in 15 days. How many days will 18 men take?",
+     "options": [
+      "8 days",
+      "12 days",
+      "10 days",
+      "9 days"
+     ],
+     "answer": 2,
+     "explanation": "Total work = 12 × 15 = 180 man-days; 180 ÷ 18 = 10."
+    },
+    {
+     "q": "A boat does 12 km/h in still water and the stream flows at 3 km/h. Distance downstream in 5 hours:",
+     "options": [
+      "60 km",
+      "75 km",
+      "80 km",
+      "65 km"
+     ],
+     "answer": 1,
+     "explanation": "Downstream speed is 15 km/h; 15 × 5 = 75."
+    },
+    {
+     "q": "One third of a job takes 5 days. The whole job takes:",
+     "options": [
+      "10 days",
+      "12 days",
+      "15 days",
+      "20 days"
+     ],
+     "answer": 2,
+     "explanation": "5 × 3 = 15 days."
+    },
+    {
+     "q": "Two stations are 240 km apart. Trains leave both at 50 km/h and 70 km/h towards each other. They meet after:",
+     "options": [
+      "2 hours",
+      "3 hours",
+      "2.5 hours",
+      "1.5 hours"
+     ],
+     "answer": 0,
+     "explanation": "Closing speed is 120 km/h; 240 ÷ 120 = 2 hours."
+    }
+   ]
+  },
+  {
+   "id": "series",
+   "name": "Number Series & Simplification",
+   "category": "Quantitative",
+   "questions": [
+    {
+     "q": "Find the next term: 2, 6, 12, 20, 30, ?",
+     "options": [
+      "40",
+      "42",
+      "44",
+      "36"
+     ],
+     "answer": 1,
+     "explanation": "Differences are 4, 6, 8, 10, 12, so 30 + 12 = 42."
+    },
+    {
+     "q": "Find the next term: 3, 6, 12, 24, ?",
+     "options": [
+      "36",
+      "42",
+      "48",
+      "54"
+     ],
+     "answer": 2,
+     "explanation": "Each term doubles."
+    },
+    {
+     "q": "Find the next term: 1, 4, 9, 16, 25, ?",
+     "options": [
+      "30",
+      "36",
+      "49",
+      "35"
+     ],
+     "answer": 1,
+     "explanation": "Squares of natural numbers: 6² = 36."
+    },
+    {
+     "q": "Find the next term: 2, 3, 5, 7, 11, ?",
+     "options": [
+      "12",
+      "13",
+      "15",
+      "14"
+     ],
+     "answer": 1,
+     "explanation": "These are prime numbers; the next is 13."
+    },
+    {
+     "q": "Find the next term: 100, 91, 82, 73, ?",
+     "options": [
+      "62",
+      "64",
+      "66",
+      "63"
+     ],
+     "answer": 1,
+     "explanation": "Subtract 9 each time."
+    },
+    {
+     "q": "Find the next term: 1, 1, 2, 3, 5, 8, ?",
+     "options": [
+      "11",
+      "12",
+      "13",
+      "14"
+     ],
+     "answer": 2,
+     "explanation": "Fibonacci series: 5 + 8 = 13."
+    },
+    {
+     "q": "25 + 15 × 2 − 10 ÷ 5 = ?",
+     "options": [
+      "53",
+      "80",
+      "43",
+      "55"
+     ],
+     "answer": 0,
+     "explanation": "BODMAS: 25 + 30 − 2 = 53."
+    },
+    {
+     "q": "12² − 8² = ?",
+     "options": [
+      "64",
+      "80",
+      "96",
+      "72"
+     ],
+     "answer": 1,
+     "explanation": "144 − 64 = 80."
+    },
+    {
+     "q": "√1521 = ?",
+     "options": [
+      "37",
+      "41",
+      "39",
+      "43"
+     ],
+     "answer": 2,
+     "explanation": "39 × 39 = 1521."
+    },
+    {
+     "q": "0.5 × 0.4 × 10 = ?",
+     "options": [
+      "0.2",
+      "20",
+      "0.02",
+      "2"
+     ],
+     "answer": 3,
+     "explanation": "0.5 × 0.4 = 0.2, and 0.2 × 10 = 2."
+    },
+    {
+     "q": "7/8 − 3/4 = ?",
+     "options": [
+      "1/8",
+      "1/4",
+      "1/2",
+      "5/8"
+     ],
+     "answer": 0,
+     "explanation": "7/8 − 6/8 = 1/8."
+    },
+    {
+     "q": "Find the next term: 2, 5, 10, 17, 26, ?",
+     "options": [
+      "35",
+      "36",
+      "37",
+      "38"
+     ],
+     "answer": 2,
+     "explanation": "Terms are n² + 1, so 6² + 1 = 37."
+    }
+   ]
+  },
+  {
+   "id": "ratio",
+   "name": "Ratio, Average & Interest",
+   "category": "Quantitative",
+   "questions": [
+    {
+     "q": "₹1,200 is divided in the ratio 3 : 5. The larger share is:",
+     "options": [
+      "₹450",
+      "₹600",
+      "₹720",
+      "₹750"
+     ],
+     "answer": 3,
+     "explanation": "5/8 × 1200 = 750."
+    },
+    {
+     "q": "The average of 4 numbers is 15. A fifth number is added and the average becomes 18. The fifth number is:",
+     "options": [
+      "28",
+      "30",
+      "33",
+      "25"
+     ],
+     "answer": 1,
+     "explanation": "5 × 18 − 4 × 15 = 90 − 60 = 30."
+    },
+    {
+     "q": "Simple interest on ₹5,000 at 8% per year for 3 years:",
+     "options": [
+      "₹1,000",
+      "₹1,200",
+      "₹1,400",
+      "₹1,600"
+     ],
+     "answer": 1,
+     "explanation": "5000 × 8 × 3 ÷ 100 = 1200."
+    },
+    {
+     "q": "Compound interest on ₹10,000 at 10% per year for 2 years:",
+     "options": [
+      "₹2,000",
+      "₹2,100",
+      "₹2,200",
+      "₹2,050"
+     ],
+     "answer": 1,
+     "explanation": "Amount = 10000 × 1.1 × 1.1 = 12,100, so interest = 2,100."
+    },
+    {
+     "q": "If A : B = 2 : 3 and B : C = 4 : 5, then A : B : C =",
+     "options": [
+      "2 : 3 : 5",
+      "8 : 12 : 15",
+      "6 : 8 : 10",
+      "8 : 10 : 15"
+     ],
+     "answer": 1,
+     "explanation": "Make B equal: A : B = 8 : 12 and B : C = 12 : 15."
+    },
+    {
+     "q": "The average age of three people is 24. Two are 20 and 26. The third is:",
+     "options": [
+      "24",
+      "28",
+      "26",
+      "30"
+     ],
+     "answer": 2,
+     "explanation": "72 − (20 + 26) = 26."
+    },
+    {
+     "q": "A sum doubles in 10 years at simple interest. The yearly rate is:",
+     "options": [
+      "5%",
+      "8%",
+      "10%",
+      "12.5%"
+     ],
+     "answer": 2,
+     "explanation": "Interest equals principal in 10 years, so rate = 100 ÷ 10 = 10%."
+    },
+    {
+     "q": "A 40 L mixture has milk and water in the ratio 3 : 1. Water to add for a 1 : 1 mixture:",
+     "options": [
+      "10 L",
+      "15 L",
+      "20 L",
+      "25 L"
+     ],
+     "answer": 2,
+     "explanation": "Milk is 30 L and water 10 L, so add 20 L water."
+    },
+    {
+     "q": "The mean of the first 10 natural numbers is:",
+     "options": [
+      "5",
+      "5.5",
+      "6",
+      "6.5"
+     ],
+     "answer": 1,
+     "explanation": "Sum 55 ÷ 10 = 5.5."
+    },
+    {
+     "q": "Two ages are in the ratio 4 : 5 and add up to 45 years. The younger is:",
+     "options": [
+      "16",
+      "18",
+      "20",
+      "25"
+     ],
+     "answer": 2,
+     "explanation": "4/9 × 45 = 20."
+    },
+    {
+     "q": "₹6,000 at 5% simple interest for 4 years amounts to:",
+     "options": [
+      "₹7,000",
+      "₹7,200",
+      "₹7,500",
+      "₹7,800"
+     ],
+     "answer": 1,
+     "explanation": "Interest is 1,200, so the amount is 7,200."
+    },
+    {
+     "q": "The fourth proportional to 4, 6 and 8 is:",
+     "options": [
+      "10",
+      "12",
+      "14",
+      "16"
+     ],
+     "answer": 1,
+     "explanation": "4 : 6 = 8 : x gives x = 12."
+    }
+   ]
+  },
+  {
+   "id": "reason",
+   "name": "Logical Reasoning",
+   "category": "Reasoning",
+   "questions": [
+    {
+     "q": "Doctor : Hospital :: Teacher : ?",
+     "options": [
+      "Student",
+      "School",
+      "Book",
+      "Class"
+     ],
+     "answer": 1,
+     "explanation": "A doctor works in a hospital; a teacher works in a school."
+    },
+    {
+     "q": "Find the odd one out: Apple, Mango, Potato, Banana.",
+     "options": [
+      "Apple",
+      "Mango",
+      "Potato",
+      "Banana"
+     ],
+     "answer": 2,
+     "explanation": "Potato is a vegetable; the others are fruits."
+    },
+    {
+     "q": "Pointing to a man, a woman says, “His mother is the only daughter of my mother.” The woman is his:",
+     "options": [
+      "Sister",
+      "Mother",
+      "Aunt",
+      "Grandmother"
+     ],
+     "answer": 1,
+     "explanation": "Her mother’s only daughter is herself, so she is his mother."
+    },
+    {
+     "q": "In a code each letter moves one step forward, so DOG becomes EPH. CAT becomes:",
+     "options": [
+      "DBU",
+      "DBS",
+      "BZS",
+      "DCU"
+     ],
+     "answer": 0,
+     "explanation": "C→D, A→B, T→U."
+    },
+    {
+     "q": "A man walks 5 km north, 5 km east, then 5 km south. How far is he from the start?",
+     "options": [
+      "0 km",
+      "5 km",
+      "10 km",
+      "15 km"
+     ],
+     "answer": 1,
+     "explanation": "North and south cancel; only the 5 km east remains."
+    },
+    {
+     "q": "Find the next letter: A, C, E, G, ?",
+     "options": [
+      "H",
+      "I",
+      "J",
+      "K"
+     ],
+     "answer": 1,
+     "explanation": "Alternate letters, so I follows G."
+    },
+    {
+     "q": "Today is Monday. What day will it be after 61 days?",
+     "options": [
+      "Friday",
+      "Saturday",
+      "Sunday",
+      "Wednesday"
+     ],
+     "answer": 1,
+     "explanation": "61 = 8 weeks + 5 days, and Monday + 5 days is Saturday."
+    },
+    {
+     "q": "All pens are books. All books are tables. Which conclusion definitely follows?",
+     "options": [
+      "All pens are tables",
+      "All tables are pens",
+      "Some tables are not books",
+      "No pen is a table"
+     ],
+     "answer": 0,
+     "explanation": "Pens sit inside books, which sit inside tables."
+    },
+    {
+     "q": "Ravi is 12th from the left in a row of 30 students. His position from the right is:",
+     "options": [
+      "17th",
+      "18th",
+      "19th",
+      "20th"
+     ],
+     "answer": 2,
+     "explanation": "30 − 12 + 1 = 19."
+    },
+    {
+     "q": "The angle between the clock hands at 3:00 is:",
+     "options": [
+      "60°",
+      "75°",
+      "90°",
+      "120°"
+     ],
+     "answer": 2,
+     "explanation": "Each hour mark is 30°, so three marks make 90°."
+    },
+    {
+     "q": "2 : 8 :: 3 : ?",
+     "options": [
+      "18",
+      "24",
+      "27",
+      "12"
+     ],
+     "answer": 2,
+     "explanation": "Cubes: 2³ = 8 and 3³ = 27."
+    },
+    {
+     "q": "Find the odd one out: 5, 7, 9, 11.",
+     "options": [
+      "5",
+      "7",
+      "9",
+      "11"
+     ],
+     "answer": 2,
+     "explanation": "9 is not a prime number."
+    }
+   ]
+  },
+  {
+   "id": "english",
+   "name": "English Language",
+   "category": "English",
+   "questions": [
+    {
+     "q": "Synonym of ABUNDANT:",
+     "options": [
+      "Scarce",
+      "Plentiful",
+      "Rare",
+      "Tiny"
+     ],
+     "answer": 1,
+     "explanation": "Abundant means existing in large quantity."
+    },
+    {
+     "q": "Antonym of ANCIENT:",
+     "options": [
+      "Old",
+      "Historic",
+      "Modern",
+      "Aged"
+     ],
+     "answer": 2,
+     "explanation": "Ancient means very old; modern is the opposite."
+    },
+    {
+     "q": "She ___ to school every day.",
+     "options": [
+      "go",
+      "goes",
+      "going",
+      "gone"
+     ],
+     "answer": 1,
+     "explanation": "A third person singular subject takes “goes”."
+    },
+    {
+     "q": "If I ___ you, I would apologise.",
+     "options": [
+      "am",
+      "was",
+      "were",
+      "be"
+     ],
+     "answer": 2,
+     "explanation": "The second conditional uses “were”."
+    },
+    {
+     "q": "Choose the correct spelling:",
+     "options": [
+      "Occurence",
+      "Occurrence",
+      "Ocurrence",
+      "Occurrance"
+     ],
+     "answer": 1,
+     "explanation": "Double c and double r."
+    },
+    {
+     "q": "One word for a person who loves books:",
+     "options": [
+      "Bibliophile",
+      "Philanthropist",
+      "Misanthrope",
+      "Linguist"
+     ],
+     "answer": 0,
+     "explanation": "Bibliophile means a lover of books."
+    },
+    {
+     "q": "Meaning of the idiom “a piece of cake”:",
+     "options": [
+      "A small gift",
+      "Something very easy",
+      "A tasty dessert",
+      "A difficult task"
+     ],
+     "answer": 1,
+     "explanation": "It describes something that takes little effort."
+    },
+    {
+     "q": "He is good ___ mathematics.",
+     "options": [
+      "in",
+      "on",
+      "at",
+      "with"
+     ],
+     "answer": 2,
+     "explanation": "“Good at” is the standard collocation."
+    },
+    {
+     "q": "Passive voice of “The cat chased the mouse”:",
+     "options": [
+      "The mouse chased the cat",
+      "The mouse was chased by the cat",
+      "The mouse is chased by the cat",
+      "The cat was chased by the mouse"
+     ],
+     "answer": 1,
+     "explanation": "Past tense active becomes “was” plus the past participle."
+    },
+    {
+     "q": "___ honest man never lies.",
+     "options": [
+      "A",
+      "An",
+      "The",
+      "No article"
+     ],
+     "answer": 1,
+     "explanation": "“Honest” starts with a vowel sound, so “an”."
+    },
+    {
+     "q": "Neither of the two boys ___ present.",
+     "options": [
+      "were",
+      "are",
+      "was",
+      "have been"
+     ],
+     "answer": 2,
+     "explanation": "“Neither” takes a singular verb."
+    },
+    {
+     "q": "Synonym of CANDID:",
+     "options": [
+      "Secretive",
+      "Frank",
+      "Rude",
+      "Silent"
+     ],
+     "answer": 1,
+     "explanation": "Candid means open and honest."
+    }
+   ]
+  },
+  {
+   "id": "polity",
+   "name": "Indian Polity",
+   "category": "General Awareness",
+   "questions": [
+    {
+     "q": "Who is called the Father of the Indian Constitution?",
+     "options": [
+      "Jawaharlal Nehru",
+      "B. R. Ambedkar",
+      "Sardar Patel",
+      "Rajendra Prasad"
+     ],
+     "answer": 1,
+     "explanation": "He chaired the Drafting Committee."
+    },
+    {
+     "q": "The Constitution of India came into force on:",
+     "options": [
+      "15 August 1947",
+      "26 November 1949",
+      "26 January 1950",
+      "2 October 1950"
+     ],
+     "answer": 2,
+     "explanation": "It was adopted on 26 November 1949 and took effect on 26 January 1950."
+    },
+    {
+     "q": "Fundamental Rights are in which Part of the Constitution?",
+     "options": [
+      "Part II",
+      "Part III",
+      "Part IV",
+      "Part V"
+     ],
+     "answer": 1,
+     "explanation": "Part III covers Articles 12 to 35."
+    },
+    {
+     "q": "Minimum age to contest a Lok Sabha election:",
+     "options": [
+      "21",
+      "25",
+      "30",
+      "35"
+     ],
+     "answer": 1,
+     "explanation": "A candidate must be at least 25."
+    },
+    {
+     "q": "Article 21 protects:",
+     "options": [
+      "Freedom of speech",
+      "Right to equality",
+      "Life and personal liberty",
+      "Right to property"
+     ],
+     "answer": 2,
+     "explanation": "Article 21 guarantees protection of life and personal liberty."
+    },
+    {
+     "q": "The President of India is elected by:",
+     "options": [
+      "Direct vote of citizens",
+      "An electoral college",
+      "Lok Sabha only",
+      "The Supreme Court"
+     ],
+     "answer": 1,
+     "explanation": "Elected MPs and MLAs form the electoral college."
+    },
+    {
+     "q": "The number of Fundamental Duties listed today is:",
+     "options": [
+      "8",
+      "10",
+      "11",
+      "12"
+     ],
+     "answer": 2,
+     "explanation": "The 86th Amendment (2002) added the eleventh."
+    },
+    {
+     "q": "Maximum strength of the Rajya Sabha:",
+     "options": [
+      "238",
+      "245",
+      "250",
+      "260"
+     ],
+     "answer": 2,
+     "explanation": "Article 80 sets a maximum of 250 members."
+    },
+    {
+     "q": "Who presides over a joint sitting of Parliament?",
+     "options": [
+      "The President",
+      "The Vice-President",
+      "Speaker of Lok Sabha",
+      "The Prime Minister"
+     ],
+     "answer": 2,
+     "explanation": "The Speaker of the Lok Sabha presides."
+    },
+    {
+     "q": "Directive Principles of State Policy were borrowed from the Constitution of:",
+     "options": [
+      "USA",
+      "Ireland",
+      "Canada",
+      "Australia"
+     ],
+     "answer": 1,
+     "explanation": "The idea came from the Irish Constitution."
+    },
+    {
+     "q": "The Right to Constitutional Remedies is under Article:",
+     "options": [
+      "14",
+      "19",
+      "21",
+      "32"
+     ],
+     "answer": 3,
+     "explanation": "Article 32 lets citizens approach the Supreme Court directly."
+    },
+    {
+     "q": "The normal term of the Lok Sabha is:",
+     "options": [
+      "4 years",
+      "5 years",
+      "6 years",
+      "7 years"
+     ],
+     "answer": 1,
+     "explanation": "Five years from its first sitting, unless dissolved earlier."
+    }
+   ]
+  },
+  {
+   "id": "hist",
+   "name": "History & Geography",
+   "category": "General Awareness",
+   "questions": [
+    {
+     "q": "The Battle of Plassey was fought in:",
+     "options": [
+      "1757",
+      "1764",
+      "1857",
+      "1707"
+     ],
+     "answer": 0,
+     "explanation": "Clive defeated Siraj-ud-Daulah in 1757."
+    },
+    {
+     "q": "Who founded the Mughal Empire in India?",
+     "options": [
+      "Akbar",
+      "Humayun",
+      "Babur",
+      "Shah Jahan"
+     ],
+     "answer": 2,
+     "explanation": "Babur won the First Battle of Panipat in 1526."
+    },
+    {
+     "q": "The Quit India Movement began in:",
+     "options": [
+      "1930",
+      "1942",
+      "1919",
+      "1947"
+     ],
+     "answer": 1,
+     "explanation": "Gandhi launched it in August 1942."
+    },
+    {
+     "q": "The first Governor-General of independent India was:",
+     "options": [
+      "C. Rajagopalachari",
+      "Lord Mountbatten",
+      "Lord Wavell",
+      "Lord Linlithgow"
+     ],
+     "answer": 1,
+     "explanation": "Mountbatten served from August 1947 to June 1948."
+    },
+    {
+     "q": "The longest river flowing mostly within India is:",
+     "options": [
+      "Godavari",
+      "Yamuna",
+      "Ganga",
+      "Narmada"
+     ],
+     "answer": 2,
+     "explanation": "The Ganga is about 2,525 km long."
+    },
+    {
+     "q": "The highest peak located in India is:",
+     "options": [
+      "Mount Everest",
+      "K2",
+      "Kangchenjunga",
+      "Nanda Devi"
+     ],
+     "answer": 2,
+     "explanation": "Kangchenjunga stands at 8,586 m."
+    },
+    {
+     "q": "The Tropic of Cancer passes through how many Indian states?",
+     "options": [
+      "6",
+      "7",
+      "8",
+      "9"
+     ],
+     "answer": 2,
+     "explanation": "Gujarat, Rajasthan, Madhya Pradesh, Chhattisgarh, Jharkhand, West Bengal, Tripura and Mizoram."
+    },
+    {
+     "q": "The largest Indian state by area is:",
+     "options": [
+      "Madhya Pradesh",
+      "Maharashtra",
+      "Rajasthan",
+      "Uttar Pradesh"
+     ],
+     "answer": 2,
+     "explanation": "Rajasthan covers about 342,000 sq km."
+    },
+    {
+     "q": "The Sun Temple at Konark is in:",
+     "options": [
+      "Tamil Nadu",
+      "Odisha",
+      "Gujarat",
+      "Karnataka"
+     ],
+     "answer": 1,
+     "explanation": "Konark is on the Odisha coast."
+    },
+    {
+     "q": "The ancient text Arthashastra was written by:",
+     "options": [
+      "Kalidasa",
+      "Kautilya",
+      "Banabhatta",
+      "Vishakhadatta"
+     ],
+     "answer": 1,
+     "explanation": "Kautilya, also known as Chanakya."
+    },
+    {
+     "q": "The Jallianwala Bagh massacre took place in:",
+     "options": [
+      "1915",
+      "1917",
+      "1919",
+      "1921"
+     ],
+     "answer": 2,
+     "explanation": "It happened on 13 April 1919 in Amritsar."
+    },
+    {
+     "q": "The smallest Indian state by area is:",
+     "options": [
+      "Sikkim",
+      "Goa",
+      "Tripura",
+      "Manipur"
+     ],
+     "answer": 1,
+     "explanation": "Goa covers about 3,700 sq km."
+    }
+   ]
+  },
+  {
+   "id": "science",
+   "name": "General Science",
+   "category": "General Awareness",
+   "questions": [
+    {
+     "q": "Chemical symbol of sodium:",
+     "options": [
+      "So",
+      "Sd",
+      "Na",
+      "S"
+     ],
+     "answer": 2,
+     "explanation": "Na comes from the Latin “natrium”."
+    },
+    {
+     "q": "SI unit of force:",
+     "options": [
+      "Joule",
+      "Newton",
+      "Pascal",
+      "Watt"
+     ],
+     "answer": 1,
+     "explanation": "Force is measured in newtons."
+    },
+    {
+     "q": "Which vitamin does the skin make in sunlight?",
+     "options": [
+      "Vitamin A",
+      "Vitamin C",
+      "Vitamin D",
+      "Vitamin K"
+     ],
+     "answer": 2,
+     "explanation": "Sunlight helps skin make vitamin D."
+    },
+    {
+     "q": "The powerhouse of the cell is the:",
+     "options": [
+      "Nucleus",
+      "Ribosome",
+      "Mitochondria",
+      "Golgi body"
+     ],
+     "answer": 2,
+     "explanation": "Mitochondria release energy from food."
+    },
+    {
+     "q": "Plants absorb which gas for photosynthesis?",
+     "options": [
+      "Oxygen",
+      "Nitrogen",
+      "Carbon dioxide",
+      "Hydrogen"
+     ],
+     "answer": 2,
+     "explanation": "They take in carbon dioxide and release oxygen."
+    },
+    {
+     "q": "pH of pure water at 25 °C:",
+     "options": [
+      "0",
+      "7",
+      "10",
+      "14"
+     ],
+     "answer": 1,
+     "explanation": "Pure water is neutral, with pH 7."
+    },
+    {
+     "q": "Speed of light in vacuum is about:",
+     "options": [
+      "3 × 10⁶ m/s",
+      "3 × 10⁸ m/s",
+      "3 × 10¹⁰ m/s",
+      "3 × 10⁵ m/s"
+     ],
+     "answer": 1,
+     "explanation": "About 300,000 km/s."
+    },
+    {
+     "q": "The hardest natural substance:",
+     "options": [
+      "Quartz",
+      "Graphite",
+      "Diamond",
+      "Iron"
+     ],
+     "answer": 2,
+     "explanation": "Diamond ranks 10 on the Mohs scale."
+    },
+    {
+     "q": "Number of chambers in the human heart:",
+     "options": [
+      "2",
+      "3",
+      "4",
+      "5"
+     ],
+     "answer": 2,
+     "explanation": "Two atria and two ventricles."
+    },
+    {
+     "q": "The universal blood donor group:",
+     "options": [
+      "AB positive",
+      "O negative",
+      "A positive",
+      "B negative"
+     ],
+     "answer": 1,
+     "explanation": "O negative red cells carry no A, B or Rh antigens."
+    },
+    {
+     "q": "The most abundant gas in Earth’s atmosphere:",
+     "options": [
+      "Oxygen",
+      "Nitrogen",
+      "Argon",
+      "Carbon dioxide"
+     ],
+     "answer": 1,
+     "explanation": "Nitrogen makes up about 78% of air."
+    },
+    {
+     "q": "SI unit of electrical resistance:",
+     "options": [
+      "Ampere",
+      "Volt",
+      "Ohm",
+      "Farad"
+     ],
+     "answer": 2,
+     "explanation": "Resistance is measured in ohms."
+    }
+   ]
+  },
+  {
+   "id": "computer",
+   "name": "Computer Awareness",
+   "category": "General Awareness",
+   "questions": [
+    {
+     "q": "CPU stands for:",
+     "options": [
+      "Central Processing Unit",
+      "Central Program Utility",
+      "Computer Personal Unit",
+      "Control Processing Unit"
+     ],
+     "answer": 0,
+     "explanation": "The CPU is the processor that runs instructions."
+    },
+    {
+     "q": "Which of these is an input device?",
+     "options": [
+      "Monitor",
+      "Printer",
+      "Keyboard",
+      "Speaker"
+     ],
+     "answer": 2,
+     "explanation": "A keyboard sends data into the computer."
+    },
+    {
+     "q": "One byte equals:",
+     "options": [
+      "4 bits",
+      "8 bits",
+      "16 bits",
+      "10 bits"
+     ],
+     "answer": 1,
+     "explanation": "1 byte = 8 bits."
+    },
+    {
+     "q": "Ctrl + C is the shortcut for:",
+     "options": [
+      "Cut",
+      "Copy",
+      "Paste",
+      "Close"
+     ],
+     "answer": 1,
+     "explanation": "Ctrl + C copies; Ctrl + V pastes."
+    },
+    {
+     "q": "RAM stands for:",
+     "options": [
+      "Read Access Memory",
+      "Random Access Memory",
+      "Rapid Action Memory",
+      "Run Access Module"
+     ],
+     "answer": 1,
+     "explanation": "Random Access Memory."
+    },
+    {
+     "q": "Which of these is an operating system?",
+     "options": [
+      "Python",
+      "HTML",
+      "Linux",
+      "Excel"
+     ],
+     "answer": 2,
+     "explanation": "Linux is an operating system; the others are a language, a markup language and an application."
+    },
+    {
+     "q": "Default file extension of a modern Word document:",
+     "options": [
+      ".doc",
+      ".docx",
+      ".txt",
+      ".xlsx"
+     ],
+     "answer": 1,
+     "explanation": "Word 2007 and later save as .docx."
+    },
+    {
+     "q": "Which memory loses its data when power is off?",
+     "options": [
+      "ROM",
+      "Hard disk",
+      "RAM",
+      "Pen drive"
+     ],
+     "answer": 2,
+     "explanation": "RAM is volatile."
+    },
+    {
+     "q": "WWW stands for:",
+     "options": [
+      "World Wide Web",
+      "World Web Window",
+      "Wide World Web",
+      "Web World Wire"
+     ],
+     "answer": 0,
+     "explanation": "World Wide Web."
+    },
+    {
+     "q": "Which protocol gives secure web browsing?",
+     "options": [
+      "HTTP",
+      "FTP",
+      "HTTPS",
+      "SMTP"
+     ],
+     "answer": 2,
+     "explanation": "HTTPS encrypts traffic between browser and site."
+    },
+    {
+     "q": "Binary form of decimal 10:",
+     "options": [
+      "1001",
+      "1010",
+      "1100",
+      "1110"
+     ],
+     "answer": 1,
+     "explanation": "8 + 2 = 1010."
+    },
+    {
+     "q": "Which language structures web pages?",
+     "options": [
+      "Python",
+      "SQL",
+      "HTML",
+      "C"
+     ],
+     "answer": 2,
+     "explanation": "HTML defines the structure of a page."
+    }
+   ]
+  }
+ ],
+ "mocks": [
+  {
+   "id": "ssc1",
+   "name": "SSC CGL Tier-I Mock 1",
+   "exam": "SSC",
+   "minutes": 30,
+   "marksPerCorrect": 2,
+   "negativeMarks": 0.5,
+   "level": "Moderate",
+   "tier": "free",
+   "sections": [
+    {
+     "name": "Reasoning",
+     "parts": [
+      {
+       "topic": "reason",
+       "from": 0,
+       "to": 6
+      }
+     ]
+    },
+    {
+     "name": "Quantitative Aptitude",
+     "parts": [
+      {
+       "topic": "percent",
+       "from": 0,
+       "to": 3
+      },
+      {
+       "topic": "tsw",
+       "from": 0,
+       "to": 3
+      },
+      {
+       "topic": "series",
+       "from": 0,
+       "to": 3
+      },
+      {
+       "topic": "ratio",
+       "from": 0,
+       "to": 3
+      }
+     ]
+    },
+    {
+     "name": "English",
+     "parts": [
+      {
+       "topic": "english",
+       "from": 0,
+       "to": 6
+      }
+     ]
+    },
+    {
+     "name": "General Awareness",
+     "parts": [
+      {
+       "topic": "polity",
+       "from": 0,
+       "to": 3
+      },
+      {
+       "topic": "hist",
+       "from": 0,
+       "to": 3
+      },
+      {
+       "topic": "science",
+       "from": 0,
+       "to": 3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ssc2",
+   "name": "SSC CGL Tier-I Mock 2",
+   "exam": "SSC",
+   "minutes": 30,
+   "marksPerCorrect": 2,
+   "negativeMarks": 0.5,
+   "level": "Moderate",
+   "tier": "premium",
+   "sections": [
+    {
+     "name": "Reasoning",
+     "parts": [
+      {
+       "topic": "reason",
+       "from": 6,
+       "to": 12
+      }
+     ]
+    },
+    {
+     "name": "Quantitative Aptitude",
+     "parts": [
+      {
+       "topic": "percent",
+       "from": 3,
+       "to": 6
+      },
+      {
+       "topic": "tsw",
+       "from": 3,
+       "to": 6
+      },
+      {
+       "topic": "series",
+       "from": 3,
+       "to": 6
+      },
+      {
+       "topic": "ratio",
+       "from": 3,
+       "to": 6
+      }
+     ]
+    },
+    {
+     "name": "English",
+     "parts": [
+      {
+       "topic": "english",
+       "from": 6,
+       "to": 12
+      }
+     ]
+    },
+    {
+     "name": "General Awareness",
+     "parts": [
+      {
+       "topic": "polity",
+       "from": 3,
+       "to": 6
+      },
+      {
+       "topic": "hist",
+       "from": 3,
+       "to": 6
+      },
+      {
+       "topic": "science",
+       "from": 3,
+       "to": 6
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bank1",
+   "name": "Bank PO Prelims Mock 1",
+   "exam": "Banking",
+   "minutes": 24,
+   "marksPerCorrect": 1,
+   "negativeMarks": 0.25,
+   "level": "Moderate",
+   "tier": "free",
+   "sections": [
+    {
+     "name": "English",
+     "parts": [
+      {
+       "topic": "english",
+       "from": 0,
+       "to": 6
+      }
+     ]
+    },
+    {
+     "name": "Quantitative Aptitude",
+     "parts": [
+      {
+       "topic": "percent",
+       "from": 6,
+       "to": 9
+      },
+      {
+       "topic": "tsw",
+       "from": 6,
+       "to": 9
+      },
+      {
+       "topic": "series",
+       "from": 6,
+       "to": 9
+      },
+      {
+       "topic": "ratio",
+       "from": 6,
+       "to": 9
+      }
+     ]
+    },
+    {
+     "name": "Reasoning",
+     "parts": [
+      {
+       "topic": "reason",
+       "from": 6,
+       "to": 12
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bank2",
+   "name": "Bank PO Prelims Mock 2",
+   "exam": "Banking",
+   "minutes": 24,
+   "marksPerCorrect": 1,
+   "negativeMarks": 0.25,
+   "level": "Hard",
+   "tier": "premium",
+   "sections": [
+    {
+     "name": "English",
+     "parts": [
+      {
+       "topic": "english",
+       "from": 6,
+       "to": 12
+      }
+     ]
+    },
+    {
+     "name": "Quantitative Aptitude",
+     "parts": [
+      {
+       "topic": "percent",
+       "from": 9,
+       "to": 12
+      },
+      {
+       "topic": "tsw",
+       "from": 9,
+       "to": 12
+      },
+      {
+       "topic": "series",
+       "from": 9,
+       "to": 12
+      },
+      {
+       "topic": "ratio",
+       "from": 9,
+       "to": 12
+      }
+     ]
+    },
+    {
+     "name": "Reasoning",
+     "parts": [
+      {
+       "topic": "reason",
+       "from": 0,
+       "to": 6
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "rrb1",
+   "name": "RRB NTPC CBT-1 Mock 1",
+   "exam": "Railways",
+   "minutes": 27,
+   "marksPerCorrect": 1,
+   "negativeMarks": 0.3333,
+   "level": "Moderate",
+   "tier": "free",
+   "sections": [
+    {
+     "name": "Mathematics",
+     "parts": [
+      {
+       "topic": "percent",
+       "from": 0,
+       "to": 3
+      },
+      {
+       "topic": "tsw",
+       "from": 0,
+       "to": 3
+      },
+      {
+       "topic": "series",
+       "from": 0,
+       "to": 3
+      }
+     ]
+    },
+    {
+     "name": "Reasoning",
+     "parts": [
+      {
+       "topic": "reason",
+       "from": 0,
+       "to": 6
+      }
+     ]
+    },
+    {
+     "name": "General Awareness",
+     "parts": [
+      {
+       "topic": "polity",
+       "from": 0,
+       "to": 3
+      },
+      {
+       "topic": "hist",
+       "from": 0,
+       "to": 3
+      },
+      {
+       "topic": "science",
+       "from": 6,
+       "to": 9
+      },
+      {
+       "topic": "computer",
+       "from": 0,
+       "to": 3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "rrb2",
+   "name": "RRB NTPC CBT-1 Mock 2",
+   "exam": "Railways",
+   "minutes": 27,
+   "marksPerCorrect": 1,
+   "negativeMarks": 0.3333,
+   "level": "Moderate",
+   "tier": "premium",
+   "sections": [
+    {
+     "name": "Mathematics",
+     "parts": [
+      {
+       "topic": "percent",
+       "from": 6,
+       "to": 9
+      },
+      {
+       "topic": "tsw",
+       "from": 6,
+       "to": 9
+      },
+      {
+       "topic": "series",
+       "from": 6,
+       "to": 9
+      }
+     ]
+    },
+    {
+     "name": "Reasoning",
+     "parts": [
+      {
+       "topic": "reason",
+       "from": 6,
+       "to": 12
+      }
+     ]
+    },
+    {
+     "name": "General Awareness",
+     "parts": [
+      {
+       "topic": "polity",
+       "from": 6,
+       "to": 9
+      },
+      {
+       "topic": "hist",
+       "from": 6,
+       "to": 9
+      },
+      {
+       "topic": "science",
+       "from": 9,
+       "to": 12
+      },
+      {
+       "topic": "computer",
+       "from": 6,
+       "to": 9
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gs1",
+   "name": "UPSC & State PSC GS Mini Mock 1",
+   "exam": "UPSC / PSC",
+   "minutes": 20,
+   "marksPerCorrect": 2,
+   "negativeMarks": 0.6667,
+   "level": "Hard",
+   "tier": "free",
+   "sections": [
+    {
+     "name": "General Studies",
+     "parts": [
+      {
+       "topic": "polity",
+       "from": 0,
+       "to": 6
+      },
+      {
+       "topic": "hist",
+       "from": 0,
+       "to": 6
+      },
+      {
+       "topic": "science",
+       "from": 0,
+       "to": 6
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gs2",
+   "name": "UPSC & State PSC GS Mini Mock 2",
+   "exam": "UPSC / PSC",
+   "minutes": 20,
+   "marksPerCorrect": 2,
+   "negativeMarks": 0.6667,
+   "level": "Hard",
+   "tier": "premium",
+   "sections": [
+    {
+     "name": "General Studies",
+     "parts": [
+      {
+       "topic": "polity",
+       "from": 6,
+       "to": 12
+      },
+      {
+       "topic": "hist",
+       "from": 6,
+       "to": 12
+      },
+      {
+       "topic": "science",
+       "from": 6,
+       "to": 12
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "camp1",
+   "name": "Campus Aptitude Test 1",
+   "exam": "Placements",
+   "minutes": 30,
+   "marksPerCorrect": 1,
+   "negativeMarks": 0,
+   "level": "Easy",
+   "tier": "free",
+   "sections": [
+    {
+     "name": "Aptitude",
+     "parts": [
+      {
+       "topic": "percent",
+       "from": 0,
+       "to": 4
+      },
+      {
+       "topic": "tsw",
+       "from": 0,
+       "to": 4
+      },
+      {
+       "topic": "series",
+       "from": 0,
+       "to": 4
+      },
+      {
+       "topic": "ratio",
+       "from": 0,
+       "to": 4
+      }
+     ]
+    },
+    {
+     "name": "Reasoning and Verbal",
+     "parts": [
+      {
+       "topic": "reason",
+       "from": 0,
+       "to": 4
+      },
+      {
+       "topic": "english",
+       "from": 0,
+       "to": 4
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "camp2",
+   "name": "Campus Aptitude Test 2",
+   "exam": "Placements",
+   "minutes": 30,
+   "marksPerCorrect": 1,
+   "negativeMarks": 0,
+   "level": "Moderate",
+   "tier": "premium",
+   "sections": [
+    {
+     "name": "Aptitude",
+     "parts": [
+      {
+       "topic": "percent",
+       "from": 4,
+       "to": 8
+      },
+      {
+       "topic": "tsw",
+       "from": 4,
+       "to": 8
+      },
+      {
+       "topic": "series",
+       "from": 4,
+       "to": 8
+      },
+      {
+       "topic": "ratio",
+       "from": 4,
+       "to": 8
+      }
+     ]
+    },
+    {
+     "name": "Reasoning and Verbal",
+     "parts": [
+      {
+       "topic": "reason",
+       "from": 4,
+       "to": 8
+      },
+      {
+       "topic": "english",
+       "from": 4,
+       "to": 8
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "camp3",
+   "name": "Campus Aptitude Test 3",
+   "exam": "Placements",
+   "minutes": 30,
+   "marksPerCorrect": 1,
+   "negativeMarks": 0,
+   "level": "Hard",
+   "tier": "premium",
+   "sections": [
+    {
+     "name": "Aptitude",
+     "parts": [
+      {
+       "topic": "percent",
+       "from": 8,
+       "to": 12
+      },
+      {
+       "topic": "tsw",
+       "from": 8,
+       "to": 12
+      },
+      {
+       "topic": "series",
+       "from": 8,
+       "to": 12
+      },
+      {
+       "topic": "ratio",
+       "from": 8,
+       "to": 12
+      }
+     ]
+    },
+    {
+     "name": "Reasoning and Verbal",
+     "parts": [
+      {
+       "topic": "reason",
+       "from": 8,
+       "to": 12
+      },
+      {
+       "topic": "english",
+       "from": 8,
+       "to": 12
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

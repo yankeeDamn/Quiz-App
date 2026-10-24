@@ -13,7 +13,7 @@ const server = app.listen(config.port, () => {
     {
       port: config.port,
       env: config.env,
-      stripeMode: config.stripe.secretKey?.startsWith('sk_live') ? 'LIVE' : 'TEST',
+      adminEndpoints: config.adminKey ? 'enabled' : 'disabled',
       database: config.databaseUrl ? 'configured' : 'not configured',
     },
     `🚀 Exam Practice Pro API running on port ${config.port}`

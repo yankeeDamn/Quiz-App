@@ -11,7 +11,6 @@ RUN npm ci --omit=dev
 
 # Copy application source
 COPY src/ ./src/
-COPY public/ ./public/
 
 # Non-root user for security
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup

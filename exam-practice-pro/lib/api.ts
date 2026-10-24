@@ -60,7 +60,7 @@ interface ApiOptions {
 export async function api<T = unknown>(
   path: string,
   options: ApiOptions = {}
-): Promise<{ success: boolean; data?: T; error?: { message: string } }> {
+): Promise<{ success: boolean; data?: T; error?: { message: string; code?: string } }> {
   const { method = 'GET', body, public: isPublic = false } = options;
 
   const headers: Record<string, string> = {
@@ -145,6 +145,9 @@ export interface BackendUserProfile {
     image: string | null;
     role: string;
     paymentStatus: string;
+    plan?: string;
+    planActive?: boolean;
+    planExpiresAt?: string | null;
     createdAt: string;
   };
   isGuest: boolean;
@@ -224,32 +227,4 @@ export async function deleteNoteFromAPI(quizId: string, questionId: string) {
 
 export async function getUserProfile() {
   return api<BackendUserProfile>('/api/v1/user/profile');
-}
-
-// ── Payments ───────────────────────────────────────────
-
-export async function getStripeConfig() {
-  return api<{ publishableKey: string; amount: number; currency: string }>(
-    '/api/v1/payments/config',
-    { public: true }
-  );
-}
-
-export async function createPaymentIntent(email?: string) {
-  return api<{
-    clientSecret: string;
-    paymentIntentId: string;
-    amount: number;
-    currency: string;
-  }>('/api/v1/payments/create-payment-intent', {
-    method: 'POST',
-    body: { email },
-  });
-}
-
-export async function getPaymentStatus(paymentIntentId: string) {
-  return api<{ id: string; status: string; amount: number; currency: string }>(
-    `/api/v1/payments/status/${paymentIntentId}`,
-    { public: true }
-  );
 }

@@ -16,15 +16,9 @@ const config = {
   // ── Database ─────────────────────────────────────────
   databaseUrl: process.env.DATABASE_URL || '',
 
-  // ── Stripe ───────────────────────────────────────────
-  stripe: {
-    secretKey: process.env.STRIPE_SECRET_KEY || '',
-    publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || '',
-    webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
-    currency: 'usd',
-    /** Amount in cents — $50.00 for full exam access */
-    fullAccessAmountCents: 5000,
-  },
+  // ── Admin (used to unlock plans after a WhatsApp payment) ──
+  // Leave empty to disable the admin endpoints.
+  adminKey: process.env.ADMIN_API_KEY || '',
 
   // ── JWT / Auth ───────────────────────────────────────
   jwt: {
@@ -55,9 +49,8 @@ const config = {
 function validateConfig() {
   const missing = [];
 
-  if (!config.stripe.secretKey) missing.push('STRIPE_SECRET_KEY');
-  if (!config.stripe.webhookSecret) missing.push('STRIPE_WEBHOOK_SECRET');
-  if (!config.jwt.secret) missing.push('JWT_SECRET');
+  if (!config.jwt.secret && !config.authSecret) missing.push('AUTH_SECRET (or JWT_SECRET)');
+  if (config.adminKey && config.adminKey.length < 24) missing.push('ADMIN_API_KEY (use at least 24 characters)');
 
   if (config.env === 'production' && missing.length > 0) {
     throw new Error(
