@@ -205,30 +205,7 @@ CREATE TABLE IF NOT EXISTS user_stats (
 );
 `;
 
-/** First run only: copy the starter content from src/data/mock-bank.json into the database. */
-async function seedContent(client) {
-  const { rows } = await client.query('SELECT COUNT(*)::int AS n FROM mock_topics');
-  if (rows[0].n > 0) return;
-  const bank = require('../data/mock-bank.json');
-  for (const t of bank.topics) {
-    await client.query('INSERT INTO mock_topics (id, name, category) VALUES ($1, $2, $3)', [t.id, t.name, t.category]);
-    for (let i = 0; i < t.questions.length; i += 1) {
-      const q = t.questions[i];
-      await client.query(
-        'INSERT INTO mock_questions (topic_id, position, question, options, answer, explanation) VALUES ($1, $2, $3, $4, $5, $6)',
-        [t.id, i, q.q, JSON.stringify(q.options), q.answer, q.explanation]
-      );
-    }
-  }
-  for (const m of bank.mocks) {
-    await client.query(
-      `INSERT INTO mock_tests (id, name, exam, minutes, marks_per_correct, negative_marks, level, tier, sections)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      [m.id, m.name, m.exam, m.minutes, m.marksPerCorrect, m.negativeMarks, m.level, m.tier, JSON.stringify(m.sections)]
-    );
-  }
-  console.log(`🌱 Seeded ${bank.topics.length} topics and ${bank.mocks.length} mock tests.`);
-}
+const { seedStarterContent } = require('./seed-content');
 
 async function migrate() {
   const client = await pool.connect();
@@ -236,7 +213,8 @@ async function migrate() {
     console.log('🔄 Running migrations…');
     await client.query('BEGIN');
     await client.query(MIGRATION_SQL);
-    await seedContent(client);
+    const seeded = await seedStarterContent(client);
+    console.log(`🌱 Starter content verified: ${seeded.topics} topics, ${seeded.questions} questions and ${seeded.mocks} mock tests.`);
     await client.query(fs.readFileSync(path.join(__dirname, 'pilot-schema.sql'), 'utf8'));
     await client.query('COMMIT');
     console.log('✅ Migrations complete.');
