@@ -11,6 +11,7 @@
  */
 
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
 const { Pool } = require('pg');
@@ -162,9 +163,13 @@ async function migrate() {
   const client = await pool.connect();
   try {
     console.log('🔄 Running migrations…');
+    await client.query('BEGIN');
     await client.query(MIGRATION_SQL);
+    await client.query(fs.readFileSync(path.join(__dirname, 'pilot-schema.sql'), 'utf8'));
+    await client.query('COMMIT');
     console.log('✅ Migrations complete.');
   } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
     console.error('❌ Migration failed:', err.message);
     process.exit(1);
   } finally {
