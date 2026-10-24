@@ -48,6 +48,12 @@ export function Header() {
           </Link>
           <Link href="/exampro" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">ExamPro</Link>
           <Link
+            href="/india-mocks"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            India Mocks
+          </Link>
+          <Link
             href="/dashboard"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
@@ -165,6 +171,13 @@ export function Header() {
                   Quizzes
                 </Link>
                 <Link href="/exampro" className="text-lg font-medium transition-colors hover:text-indigo-600" onClick={() => setMobileMenuOpen(false)}>ExamPro</Link>
+                <Link
+                  href="/india-mocks"
+                  className="text-lg font-medium transition-colors hover:text-indigo-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  India Mocks
+                </Link>
                 <Link
                   href="/dashboard"
                   className="text-lg font-medium transition-colors hover:text-indigo-600"

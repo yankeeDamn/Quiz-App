@@ -47,7 +47,8 @@ CREATE TABLE IF NOT EXISTS users (
   provider_id     VARCHAR(255),
   role            VARCHAR(20)  NOT NULL DEFAULT 'user',
   payment_status  VARCHAR(20)  NOT NULL DEFAULT 'unpaid',
-  stripe_customer_id VARCHAR(255),
+  plan            VARCHAR(20)  NOT NULL DEFAULT 'free',
+  plan_expires_at TIMESTAMPTZ,
   created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
   updated_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
@@ -79,22 +80,67 @@ CREATE INDEX IF NOT EXISTS idx_quiz_attempts_user ON quiz_attempts(user_id);
 CREATE INDEX IF NOT EXISTS idx_quiz_attempts_quiz ON quiz_attempts(quiz_id);
 CREATE INDEX IF NOT EXISTS idx_quiz_attempts_completed ON quiz_attempts(completed_at DESC);
 
+-- Plans were added after the first release; this keeps existing databases working.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS plan VARCHAR(20) NOT NULL DEFAULT 'free';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS plan_expires_at TIMESTAMPTZ;
+
 -- ────────────────────────────────────────────────
--- payments
+-- plan_grants (one row per plan unlocked after a WhatsApp payment)
 -- ────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS payments (
-  id                       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id                  UUID         NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  stripe_payment_intent_id VARCHAR(255) UNIQUE NOT NULL,
-  amount_cents             INTEGER      NOT NULL,
-  currency                 VARCHAR(10)  NOT NULL DEFAULT 'usd',
-  status                   VARCHAR(30)  NOT NULL,
-  created_at               TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
-  updated_at               TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+CREATE TABLE IF NOT EXISTS plan_grants (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID         NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  plan        VARCHAR(20)  NOT NULL,
+  months      INTEGER      NOT NULL,
+  amount_inr  INTEGER,
+  note        VARCHAR(255),
+  expires_at  TIMESTAMPTZ  NOT NULL,
+  granted_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_payments_user ON payments(user_id);
-CREATE INDEX IF NOT EXISTS idx_payments_stripe ON payments(stripe_payment_intent_id);
+CREATE INDEX IF NOT EXISTS idx_plan_grants_user ON plan_grants(user_id);
+
+-- ────────────────────────────────────────────────
+-- mock-test content (edited from the /admin page)
+-- ────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS mock_topics (
+  id         VARCHAR(40)  PRIMARY KEY,
+  name       VARCHAR(120) NOT NULL,
+  category   VARCHAR(60)  NOT NULL,
+  active     BOOLEAN      NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+-- A question is never deleted, only retired, so positions (and the ids built
+-- from them) stay stable for saved questions and test ranges.
+CREATE TABLE IF NOT EXISTS mock_questions (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  topic_id    VARCHAR(40)  NOT NULL REFERENCES mock_topics(id) ON DELETE CASCADE,
+  position    INTEGER      NOT NULL,
+  question    TEXT         NOT NULL,
+  options     JSONB        NOT NULL,
+  answer      INTEGER      NOT NULL CHECK (answer BETWEEN 0 AND 3),
+  explanation TEXT         NOT NULL,
+  active      BOOLEAN      NOT NULL DEFAULT TRUE,
+  created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  UNIQUE(topic_id, position)
+);
+
+CREATE TABLE IF NOT EXISTS mock_tests (
+  id                VARCHAR(40)  PRIMARY KEY,
+  name              VARCHAR(120) NOT NULL,
+  exam              VARCHAR(60)  NOT NULL,
+  minutes           INTEGER      NOT NULL CHECK (minutes BETWEEN 1 AND 300),
+  marks_per_correct NUMERIC(6,2) NOT NULL DEFAULT 1,
+  negative_marks    NUMERIC(6,4) NOT NULL DEFAULT 0,
+  level             VARCHAR(30)  NOT NULL DEFAULT 'Moderate',
+  tier              VARCHAR(10)  NOT NULL DEFAULT 'free' CHECK (tier IN ('free','premium')),
+  sections          JSONB        NOT NULL,
+  active            BOOLEAN      NOT NULL DEFAULT TRUE,
+  created_at        TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
 
 -- ────────────────────────────────────────────────
 -- scores (best-score leaderboard)
@@ -159,12 +205,38 @@ CREATE TABLE IF NOT EXISTS user_stats (
 );
 `;
 
+/** First run only: copy the starter content from src/data/mock-bank.json into the database. */
+async function seedContent(client) {
+  const { rows } = await client.query('SELECT COUNT(*)::int AS n FROM mock_topics');
+  if (rows[0].n > 0) return;
+  const bank = require('../data/mock-bank.json');
+  for (const t of bank.topics) {
+    await client.query('INSERT INTO mock_topics (id, name, category) VALUES ($1, $2, $3)', [t.id, t.name, t.category]);
+    for (let i = 0; i < t.questions.length; i += 1) {
+      const q = t.questions[i];
+      await client.query(
+        'INSERT INTO mock_questions (topic_id, position, question, options, answer, explanation) VALUES ($1, $2, $3, $4, $5, $6)',
+        [t.id, i, q.q, JSON.stringify(q.options), q.answer, q.explanation]
+      );
+    }
+  }
+  for (const m of bank.mocks) {
+    await client.query(
+      `INSERT INTO mock_tests (id, name, exam, minutes, marks_per_correct, negative_marks, level, tier, sections)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [m.id, m.name, m.exam, m.minutes, m.marksPerCorrect, m.negativeMarks, m.level, m.tier, JSON.stringify(m.sections)]
+    );
+  }
+  console.log(`🌱 Seeded ${bank.topics.length} topics and ${bank.mocks.length} mock tests.`);
+}
+
 async function migrate() {
   const client = await pool.connect();
   try {
     console.log('🔄 Running migrations…');
     await client.query('BEGIN');
     await client.query(MIGRATION_SQL);
+    await seedContent(client);
     await client.query(fs.readFileSync(path.join(__dirname, 'pilot-schema.sql'), 'utf8'));
     await client.query('COMMIT');
     console.log('✅ Migrations complete.');

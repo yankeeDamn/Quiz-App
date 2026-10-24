@@ -3,7 +3,7 @@ services:
   - type: web
     name: exam-practice-pro-api
     runtime: node
-    buildCommand: npm ci --omit=dev
+    buildCommand: npm ci --omit=dev && npm run db:migrate
     startCommand: node src/server.js
     healthCheckPath: /health
     envVars:
@@ -15,11 +15,11 @@ services:
         fromDatabase:
           name: exam-practice-pro-db
           property: connectionString
-      - key: STRIPE_SECRET_KEY
+      # Your Google or GitHub email(s), comma separated. Only these accounts can open /admin.
+      - key: ADMIN_EMAILS
         sync: false
-      - key: STRIPE_PUBLISHABLE_KEY
-        sync: false
-      - key: STRIPE_WEBHOOK_SECRET
+      # Long random string. Used only by you to unlock plans after a WhatsApp payment.
+      - key: ADMIN_API_KEY
         sync: false
       - key: JWT_SECRET
         generateValue: true
@@ -46,6 +46,8 @@ services:
         sync: false
       - key: NEXT_PUBLIC_API_URL
         sync: false
+      - key: NEXT_PUBLIC_WHATSAPP_NUMBER
+        value: "919986418638"
       - key: AUTH_GITHUB_ID
         sync: false
       - key: AUTH_GITHUB_SECRET

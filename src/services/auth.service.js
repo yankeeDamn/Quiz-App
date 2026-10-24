@@ -2,7 +2,7 @@
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('node:crypto');
 const config = require('../config');
 const logger = require('../utils/logger');
 
@@ -29,7 +29,7 @@ class AuthService {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const user = {
-      id: uuidv4(),
+      id: randomUUID(),
       email,
       password: hashedPassword,
       role: 'user',
@@ -73,7 +73,7 @@ class AuthService {
     }
 
     const user = {
-      id: uuidv4(),
+      id: randomUUID(),
       email,
       role: 'user',
     };
@@ -94,7 +94,7 @@ class AuthService {
    */
   createGuestSession() {
     const user = {
-      id: `guest-${uuidv4()}`,
+      id: `guest-${randomUUID()}`,
       email: null,
       role: 'guest',
     };
