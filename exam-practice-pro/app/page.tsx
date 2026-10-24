@@ -11,6 +11,7 @@ import { QuizCard } from '@/components/quiz/quiz-card';
 import { ProviderCard } from '@/components/quiz/provider-card';
 import { quizzes, getUniqueSubjects, examProviders, exams, getAllQuizzes } from '@/data/quizzes';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 
 const difficultyFilters = [
