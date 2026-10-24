@@ -1,0 +1,362 @@
+[
+  {
+    "id": "AZ900-001",
+    "exam_code": "AZ-900",
+    "subject": "Cloud Concepts",
+    "question": "Which cloud model provides virtual machines while the customer manages the guest operating system?",
+    "options": [
+      "Infrastructure as a Service",
+      "Platform as a Service",
+      "Software as a Service",
+      "Function as a Service"
+    ],
+    "correct_option": "A",
+    "explanation": "IaaS provides infrastructure such as VMs; the customer manages the guest OS.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "AZ900-002",
+    "exam_code": "AZ-900",
+    "subject": "Cloud Concepts",
+    "question": "Which cloud model typically lets developers deploy code without managing the underlying operating system?",
+    "options": [
+      "On-premises hosting",
+      "Platform as a Service",
+      "Colocation",
+      "Dedicated hardware"
+    ],
+    "correct_option": "B",
+    "explanation": "PaaS abstracts the operating system and much of the platform management.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "AZ900-003",
+    "exam_code": "AZ-900",
+    "subject": "Cloud Concepts",
+    "question": "What describes increasing resources automatically in response to demand?",
+    "options": [
+      "Elasticity",
+      "Encryption",
+      "Latency",
+      "Redundancy"
+    ],
+    "correct_option": "A",
+    "explanation": "Elasticity adjusts capacity as demand changes.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "AZ900-004",
+    "exam_code": "AZ-900",
+    "subject": "Azure Services",
+    "question": "Which Azure service provides object storage for unstructured data?",
+    "options": [
+      "Azure Blob Storage",
+      "Azure DNS",
+      "Azure Functions",
+      "Azure Key Vault"
+    ],
+    "correct_option": "A",
+    "explanation": "Blob Storage stores objects such as images and documents.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "AZ900-005",
+    "exam_code": "AZ-900",
+    "subject": "Azure Services",
+    "question": "Which Azure service manages secrets, keys and certificates?",
+    "options": [
+      "Azure Monitor",
+      "Azure Key Vault",
+      "Azure Front Door",
+      "Azure Bastion"
+    ],
+    "correct_option": "B",
+    "explanation": "Azure Key Vault is designed to manage secrets, keys and certificates.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "AZ900-006",
+    "exam_code": "AZ-900",
+    "subject": "Governance",
+    "question": "What can an Azure resource lock configured as CanNotDelete prevent?",
+    "options": [
+      "All read operations",
+      "Deletion of the locked resource",
+      "All billing charges",
+      "Every configuration change"
+    ],
+    "correct_option": "B",
+    "explanation": "A CanNotDelete lock prevents deletion but permits authorized modifications.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "AZ900-007",
+    "exam_code": "AZ-900",
+    "subject": "Governance",
+    "question": "Which Azure feature can apply rules to evaluate or enforce resource configurations?",
+    "options": [
+      "Azure Policy",
+      "Azure Blob Storage",
+      "Azure Queue Storage",
+      "Azure CDN"
+    ],
+    "correct_option": "A",
+    "explanation": "Azure Policy evaluates resources against organizational rules.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "AZ900-008",
+    "exam_code": "AZ-900",
+    "subject": "Identity",
+    "question": "What is the main benefit of multifactor authentication?",
+    "options": [
+      "It replaces authorization",
+      "It requires more than one authentication factor",
+      "It eliminates password rotation",
+      "It encrypts all stored files"
+    ],
+    "correct_option": "B",
+    "explanation": "MFA requires independent factors to reduce the risk from a compromised credential.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "AWSCLFC02-009",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Cloud Concepts",
+    "question": "Which AWS cloud benefit means capacity can increase or decrease as needed?",
+    "options": [
+      "Elasticity",
+      "Fixed provisioning",
+      "Manual procurement",
+      "Physical ownership"
+    ],
+    "correct_option": "A",
+    "explanation": "Elasticity matches resource capacity to changing demand.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "AWSCLFC02-010",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Compute",
+    "question": "Which AWS service runs virtual servers in the cloud?",
+    "options": [
+      "Amazon EC2",
+      "Amazon S3",
+      "Amazon Route 53",
+      "AWS IAM"
+    ],
+    "correct_option": "A",
+    "explanation": "Amazon EC2 provides configurable virtual machine instances.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "AWSCLFC02-011",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Storage",
+    "question": "Which AWS service provides object storage?",
+    "options": [
+      "Amazon S3",
+      "Amazon EBS",
+      "Amazon EFS",
+      "Amazon RDS"
+    ],
+    "correct_option": "A",
+    "explanation": "Amazon S3 is an object storage service.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "AWSCLFC02-012",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Security",
+    "question": "Which AWS service manages users, roles and permissions?",
+    "options": [
+      "AWS IAM",
+      "Amazon CloudFront",
+      "Amazon VPC",
+      "AWS Lambda"
+    ],
+    "correct_option": "A",
+    "explanation": "AWS Identity and Access Management controls access to AWS resources.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "AWSCLFC02-013",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Security",
+    "question": "Under the AWS shared responsibility model, who normally patches the guest OS on an EC2 instance?",
+    "options": [
+      "The customer",
+      "AWS only",
+      "The domain registrar",
+      "The internet provider"
+    ],
+    "correct_option": "A",
+    "explanation": "For EC2, customers manage and patch the guest operating system.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "AWSCLFC02-014",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Networking",
+    "question": "Which service translates domain names to destinations through DNS?",
+    "options": [
+      "Amazon Route 53",
+      "AWS CloudTrail",
+      "Amazon SQS",
+      "Amazon EBS"
+    ],
+    "correct_option": "A",
+    "explanation": "Amazon Route 53 provides DNS routing capabilities.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "AWSCLFC02-015",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Monitoring",
+    "question": "Which AWS service collects metrics and supports alarms?",
+    "options": [
+      "Amazon CloudWatch",
+      "AWS Artifact",
+      "AWS Organizations",
+      "Amazon Inspector"
+    ],
+    "correct_option": "A",
+    "explanation": "CloudWatch collects monitoring data and supports alarms.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "AWSCLFC02-016",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Billing",
+    "question": "Which AWS tool helps visualize and analyze historical AWS spending?",
+    "options": [
+      "AWS Cost Explorer",
+      "AWS CloudFormation",
+      "Amazon Athena",
+      "AWS WAF"
+    ],
+    "correct_option": "A",
+    "explanation": "Cost Explorer provides cost and usage analysis.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "CompTIAA-017",
+    "exam_code": "CompTIA-A+",
+    "subject": "Hardware",
+    "question": "Which component primarily performs general-purpose instructions in a computer?",
+    "options": [
+      "CPU",
+      "SSD",
+      "Power supply",
+      "Network switch"
+    ],
+    "correct_option": "A",
+    "explanation": "The CPU executes general-purpose program instructions.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "CompTIAA-018",
+    "exam_code": "CompTIA-A+",
+    "subject": "Hardware",
+    "question": "Which storage technology has no moving mechanical platters?",
+    "options": [
+      "Solid-state drive",
+      "Hard disk drive",
+      "Optical disc drive",
+      "Magnetic tape"
+    ],
+    "correct_option": "A",
+    "explanation": "SSDs store data in flash memory without spinning platters.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "CompTIAA-019",
+    "exam_code": "CompTIA-A+",
+    "subject": "Networking",
+    "question": "Which protocol commonly assigns IP configuration automatically on a local network?",
+    "options": [
+      "DHCP",
+      "SMTP",
+      "IMAP",
+      "SSH"
+    ],
+    "correct_option": "A",
+    "explanation": "DHCP distributes IP addresses and related network settings.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "CompTIAA-020",
+    "exam_code": "CompTIA-A+",
+    "subject": "Networking",
+    "question": "Which port is the default for HTTPS?",
+    "options": [
+      "443",
+      "80",
+      "25",
+      "53"
+    ],
+    "correct_option": "A",
+    "explanation": "HTTPS conventionally uses TCP port 443.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "CompTIAA-021",
+    "exam_code": "CompTIA-A+",
+    "subject": "Troubleshooting",
+    "question": "A computer powers on but shows no display. Which first step best isolates an external display problem?",
+    "options": [
+      "Check monitor power and video cable connections",
+      "Reinstall the operating system",
+      "Format the system drive",
+      "Replace the CPU immediately"
+    ],
+    "correct_option": "A",
+    "explanation": "Checking monitor power and cabling rules out common external display causes.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "CompTIAA-022",
+    "exam_code": "CompTIA-A+",
+    "subject": "Security",
+    "question": "Which practice helps reduce the risk of unauthorized account access?",
+    "options": [
+      "Enable multifactor authentication",
+      "Share passwords with teammates",
+      "Disable automatic updates",
+      "Use the same password everywhere"
+    ],
+    "correct_option": "A",
+    "explanation": "MFA adds an independent verification factor.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "CompTIAA-023",
+    "exam_code": "CompTIA-A+",
+    "subject": "Operating Systems",
+    "question": "Which Windows utility shows running processes and resource usage?",
+    "options": [
+      "Task Manager",
+      "Disk Cleanup",
+      "Notepad",
+      "Character Map"
+    ],
+    "correct_option": "A",
+    "explanation": "Task Manager displays processes and performance information.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "CompTIAA-024",
+    "exam_code": "CompTIA-A+",
+    "subject": "Networking",
+    "question": "Which command is commonly used to test reachability to another host using ICMP echo?",
+    "options": [
+      "ping",
+      "format",
+      "mkdir",
+      "tasklist"
+    ],
+    "correct_option": "A",
+    "explanation": "ping sends ICMP echo requests and reports responses when permitted.",
+    "review_status": "needs_review"
+  }
+]
