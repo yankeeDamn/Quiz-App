@@ -110,7 +110,10 @@ export default function HomePage() {
               <Image src="/testguru-logo.svg" alt="TestGuru" width={160} height={43} />
               <p className="text-sm text-slate-700 dark:text-slate-200">White-label mock tests for coaching institutes</p>
             </div>
-            <Link href="/india-mocks" className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700">Explore Indian Mock Tests →</Link>
+            <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto">
+              <Link href="/exampro" className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-orange-600 px-5 py-2.5 text-center text-sm font-bold text-white shadow-sm transition hover:bg-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600 sm:flex-none">Launch ExamPro →</Link>
+              <Link href="/india-mocks" className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-blue-700 sm:flex-none">Explore Indian Mock Tests →</Link>
+            </div>
           </div>
         </section>
         <section className="container mx-auto px-4 py-12" aria-labelledby="india-mocks-heading">
