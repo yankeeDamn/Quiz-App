@@ -11,6 +11,8 @@ import { QuizCard } from '@/components/quiz/quiz-card';
 import { ProviderCard } from '@/components/quiz/provider-card';
 import { quizzes, getUniqueSubjects, examProviders, exams, getAllQuizzes } from '@/data/quizzes';
 import Link from 'next/link';
+import Image from 'next/image';
+import { indiaExams } from '@/data/india-exams';
 import { Button } from '@/components/ui/button';
 
 const difficultyFilters = [
@@ -102,6 +104,29 @@ export default function HomePage() {
     <>
       <Header />
       <main className="flex-1">
+        <section className="border-b bg-blue-50 px-4 py-4 dark:bg-blue-950/30">
+          <div className="container mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <Image src="/testguru-logo.svg" alt="TestGuru" width={160} height={43} />
+              <p className="text-sm text-slate-700 dark:text-slate-200">White-label mock tests for coaching institutes</p>
+            </div>
+            <Link href="/india-mocks" className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700">Explore Indian Mock Tests →</Link>
+          </div>
+        </section>
+        <section className="container mx-auto px-4 py-12" aria-labelledby="india-mocks-heading">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div><p className="text-sm font-semibold text-blue-600">NEW · INDIA EXAM PRACTICE</p><h2 id="india-mocks-heading" className="mt-2 text-3xl font-bold">Prepare for India's top exams</h2><p className="mt-2 text-muted-foreground">SSC, Banking, Railway, UPSC, JEE, NEET, school and IT certification starter mocks.</p></div>
+            <Link href="/india-mocks" className="font-semibold text-blue-600 hover:underline">See all 8 categories →</Link>
+          </div>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {indiaExams.map(exam => <Link key={exam.id} href={'/india-mocks/' + exam.id} className="rounded-xl border bg-white p-5 transition hover:border-blue-400 hover:shadow-md dark:bg-zinc-900">
+              <p className="text-xs font-semibold uppercase text-blue-600">{exam.category}</p>
+              <h3 className="mt-2 font-semibold">{exam.title}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{exam.questions.length} sample questions · 10 min</p>
+              <span className="mt-4 inline-block text-sm font-semibold text-blue-600">Start practice →</span>
+            </Link>)}
+          </div>
+        </section>
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-gradient-to-b from-indigo-50 via-white to-white dark:from-indigo-950/30 dark:via-background dark:to-background">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOCAxOC04LjA1OSAxOC0xOC04LjA1OS0xOC0xOC0xOHptMCAzMmMtNy43MzIgMC0xNC02LjI2OC0xNC0xNHM2LjI2OC0xNCAxNC0xNCAxNCA2LjI2OCAxNCAxNC02LjI2OCAxNC0xNCAxNHoiIGZpbGw9IiM2MzY2ZjEiIGZpbGwtb3BhY2l0eT0iLjAzIi8+PC9nPjwvc3ZnPg==')] opacity-50" />
