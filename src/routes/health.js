@@ -14,10 +14,10 @@ const router = Router();
 router.get('/', async (_req, res) => {
   const dbHealthy = await db.isHealthy();
 
-  res.json({
-    success: true,
+  res.status(dbHealthy ? 200 : 503).json({
+    success: dbHealthy,
     data: {
-      status: 'healthy',
+      status: dbHealthy ? 'healthy' : 'unhealthy',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       version: process.env.npm_package_version || '1.0.0',
