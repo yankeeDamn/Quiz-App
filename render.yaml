@@ -15,6 +15,9 @@ services:
         fromDatabase:
           name: exam-practice-pro-db
           property: connectionString
+      # Your Google or GitHub email(s), comma separated. Only these accounts can open /admin.
+      - key: ADMIN_EMAILS
+        sync: false
       # Long random string. Used only by you to unlock plans after a WhatsApp payment.
       - key: ADMIN_API_KEY
         sync: false

@@ -100,6 +100,48 @@ CREATE TABLE IF NOT EXISTS plan_grants (
 CREATE INDEX IF NOT EXISTS idx_plan_grants_user ON plan_grants(user_id);
 
 -- ────────────────────────────────────────────────
+-- mock-test content (edited from the /admin page)
+-- ────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS mock_topics (
+  id         VARCHAR(40)  PRIMARY KEY,
+  name       VARCHAR(120) NOT NULL,
+  category   VARCHAR(60)  NOT NULL,
+  active     BOOLEAN      NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+-- A question is never deleted, only retired, so positions (and the ids built
+-- from them) stay stable for saved questions and test ranges.
+CREATE TABLE IF NOT EXISTS mock_questions (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  topic_id    VARCHAR(40)  NOT NULL REFERENCES mock_topics(id) ON DELETE CASCADE,
+  position    INTEGER      NOT NULL,
+  question    TEXT         NOT NULL,
+  options     JSONB        NOT NULL,
+  answer      INTEGER      NOT NULL CHECK (answer BETWEEN 0 AND 3),
+  explanation TEXT         NOT NULL,
+  active      BOOLEAN      NOT NULL DEFAULT TRUE,
+  created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  UNIQUE(topic_id, position)
+);
+
+CREATE TABLE IF NOT EXISTS mock_tests (
+  id                VARCHAR(40)  PRIMARY KEY,
+  name              VARCHAR(120) NOT NULL,
+  exam              VARCHAR(60)  NOT NULL,
+  minutes           INTEGER      NOT NULL CHECK (minutes BETWEEN 1 AND 300),
+  marks_per_correct NUMERIC(6,2) NOT NULL DEFAULT 1,
+  negative_marks    NUMERIC(6,4) NOT NULL DEFAULT 0,
+  level             VARCHAR(30)  NOT NULL DEFAULT 'Moderate',
+  tier              VARCHAR(10)  NOT NULL DEFAULT 'free' CHECK (tier IN ('free','premium')),
+  sections          JSONB        NOT NULL,
+  active            BOOLEAN      NOT NULL DEFAULT TRUE,
+  created_at        TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+-- ────────────────────────────────────────────────
 -- scores (best-score leaderboard)
 -- ────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS scores (
@@ -162,11 +204,37 @@ CREATE TABLE IF NOT EXISTS user_stats (
 );
 `;
 
+/** First run only: copy the starter content from src/data/mock-bank.json into the database. */
+async function seedContent(client) {
+  const { rows } = await client.query('SELECT COUNT(*)::int AS n FROM mock_topics');
+  if (rows[0].n > 0) return;
+  const bank = require('../data/mock-bank.json');
+  for (const t of bank.topics) {
+    await client.query('INSERT INTO mock_topics (id, name, category) VALUES ($1, $2, $3)', [t.id, t.name, t.category]);
+    for (let i = 0; i < t.questions.length; i += 1) {
+      const q = t.questions[i];
+      await client.query(
+        'INSERT INTO mock_questions (topic_id, position, question, options, answer, explanation) VALUES ($1, $2, $3, $4, $5, $6)',
+        [t.id, i, q.q, JSON.stringify(q.options), q.answer, q.explanation]
+      );
+    }
+  }
+  for (const m of bank.mocks) {
+    await client.query(
+      `INSERT INTO mock_tests (id, name, exam, minutes, marks_per_correct, negative_marks, level, tier, sections)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [m.id, m.name, m.exam, m.minutes, m.marksPerCorrect, m.negativeMarks, m.level, m.tier, JSON.stringify(m.sections)]
+    );
+  }
+  console.log(`🌱 Seeded ${bank.topics.length} topics and ${bank.mocks.length} mock tests.`);
+}
+
 async function migrate() {
   const client = await pool.connect();
   try {
     console.log('🔄 Running migrations…');
     await client.query(MIGRATION_SQL);
+    await seedContent(client);
     console.log('✅ Migrations complete.');
   } catch (err) {
     console.error('❌ Migration failed:', err.message);

@@ -19,6 +19,11 @@ const config = {
   // ── Admin (used to unlock plans after a WhatsApp payment) ──
   // Leave empty to disable the admin endpoints.
   adminKey: process.env.ADMIN_API_KEY || '',
+  // Emails allowed to open the /admin page (comma separated). Sign in with Google or GitHub using one of these.
+  adminEmails: (process.env.ADMIN_EMAILS || '')
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean),
 
   // ── JWT / Auth ───────────────────────────────────────
   jwt: {

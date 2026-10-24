@@ -32,6 +32,8 @@ app.use(
 // ──────────────────────────────────────────────────────────
 // 3. Body parsing
 // ──────────────────────────────────────────────────────────
+// The admin page can import many questions at once, so it gets a larger limit.
+app.use('/api/v1/admin', express.json({ limit: '1mb' }));
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: false, limit: '10kb' }));
 

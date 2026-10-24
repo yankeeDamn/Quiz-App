@@ -5,6 +5,7 @@ process.env.NODE_ENV = 'test';
 process.env.AUTH_SECRET = 'test-auth-secret-test-auth-secret';
 process.env.JWT_SECRET = 'test-jwt-secret';
 process.env.ADMIN_API_KEY = 'a-long-admin-key-for-tests-0123456789';
+process.env.ADMIN_EMAILS = 'owner@example.com';
 delete process.env.DATABASE_URL;
 
 const test = require('node:test');
@@ -56,6 +57,12 @@ test('an unknown mock is a 404', async () => {
 test('admin endpoints reject a missing or wrong key', async () => {
   assert.equal((await get('/api/v1/admin/user?email=a@b.com')).status, 401);
   assert.equal((await get('/api/v1/admin/user?email=a@b.com', { 'x-admin-key': 'wrong' })).status, 401);
+});
+
+test('admin content routes reject guests and bad keys', async () => {
+  assert.equal((await get('/api/v1/admin/topics')).status, 401);
+  assert.equal((await get('/api/v1/admin/tests', { 'x-admin-key': 'wrong' })).status, 401);
+  assert.equal((await get('/api/v1/admin/me', { authorization: 'Bearer not-a-token' })).status, 401);
 });
 
 test('old payment routes are gone', async () => {
