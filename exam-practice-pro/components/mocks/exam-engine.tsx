@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Bookmark, Clock, Flag, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { submitQuizAttempt } from '@/lib/api';
 import { WhatsAppButton } from '@/components/mocks/whatsapp-button';
 import {
   type MockTest,
@@ -141,6 +142,35 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
   };
 
   const result = useMemo(() => (finished ? scoreTest(test, items, answers) : null), [finished, test, items, answers]);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'unavailable'>('idle');
+  const submittedRun = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!finished || !result || submittedRun.current === startedAt) return;
+    submittedRun.current = startedAt;
+    let cancelled = false;
+    setSaveStatus('saving');
+    const payload = {
+      quizId: test.id,
+      quizTitle: test.name,
+      score: result.correct,
+      totalQuestions: items.length,
+      percentage: result.percent,
+      passed: result.percent >= 50,
+      timeTaken: Math.max(0, Math.round((Date.now() - startedAt) / 1000)),
+      answers: Object.fromEntries(items.map((item, i) => [item.question.id, answers[i] < 0 ? null : item.order[answers[i]]])),
+      topicPerformance: result.topics.map(t => ({ topic: t.name, correct: t.correct, total: t.attempted })),
+      difficultyPerformance: [],
+      startedAt,
+      completedAt: Date.now(),
+    };
+    submitQuizAttempt(payload).then(response => {
+      if (!cancelled) setSaveStatus(response.success ? 'saved' : 'unavailable');
+    }).catch(() => {
+      if (!cancelled) setSaveStatus('unavailable');
+    });
+    return () => { cancelled = true; };
+  }, [finished, result, startedAt, test.id, test.name, items, answers]);
 
   const retake = () => {
     setItems(shuffleTest(test, !practice));
@@ -159,6 +189,8 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
 
   if (finished && result) {
     return (
+      <>
+      <p role="status" className="mx-auto w-full max-w-6xl px-4 pt-3 text-sm text-muted-foreground">{saveStatus === 'saving' ? 'Saving result…' : saveStatus === 'saved' ? 'Result saved to your account.' : saveStatus === 'unavailable' ? 'Result not saved. Sign in and check your connection; this result is only visible on this page.' : ''}</p>
       <ResultView
         test={test}
         items={items}
@@ -172,6 +204,7 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
         tabSwitches={tabSwitches}
         onRetake={retake}
       />
+      </>
     );
   }
 
