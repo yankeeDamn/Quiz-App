@@ -114,6 +114,15 @@ export default function HomePage() {
           <div className="container mx-auto flex flex-wrap items-center justify-between gap-4">
             <p className="text-sm text-slate-700 dark:text-slate-200">New: 21 India mock tests with explanations, plus doubts answered on WhatsApp</p>
             <Link href="/india-mocks" className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700">Explore Indian Mock Tests →</Link>
+            <div className="flex items-center gap-4">
+              <Image src="/testguru-logo.svg" alt="TestGuru" width={160} height={43} />
+              <p className="text-sm text-slate-700 dark:text-slate-200">White-label mock tests for coaching institutes</p>
+            </div>
+            <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto">
+              <Link href="/institute-admin" className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-center text-sm font-semibold text-slate-900 transition hover:bg-slate-100 sm:flex-none">Institute Dashboard (Preview) →</Link>
+              <Link href="/exampro" className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-orange-600 px-5 py-2.5 text-center text-sm font-bold text-white shadow-sm transition hover:bg-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600 sm:flex-none">Launch ExamPro →</Link>
+              <Link href="/india-mocks" className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-blue-700 sm:flex-none">Explore Indian Mock Tests →</Link>
+            </div>
           </div>
         </section>
         <section className="container mx-auto px-4 py-12" aria-labelledby="india-mocks-heading">
