@@ -1,0 +1,1235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Exampro</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Hind:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout concept: an exam sheet. Left-aligned expanded headlines, OMR bubbles and timing marks as the one bold motif,
+   status colours borrowed from the NTA-style question palette so the demo exam feels like the real hall. */
+:root{
+  --bg:#F4F6FB; --surface:#FFFFFF; --surface2:#EAEFF8; --fg:#101A33; --muted:#566180; --line:#D8DFEE;
+  --accent:#D9480F; --accent-text:#B83A09; --on-accent:#FFFFFF; --accent-soft:#FDE7DC;
+  --band:#0F1A36; --band-fg:#EAEFFA; --band-muted:#A9B4D0; --band-line:#2A3860; --band-surface:#16244A;
+  --ok:#157A46; --ok-bg:#DDF3E7; --bad:#C23030; --bad-bg:#FBE3E3; --rev:#6B3FD0; --rev-bg:#EBE3FB; --warn:#9A6A00; --warn-bg:#FBF0D3;
+  --nv:#E1E7F2; --on-st:#FFFFFF;
+  --wa:#0F8A47; --on-wa:#FFFFFF; --wa-bubble:#D9F4DF;
+  --brand:var(--accent); --on-brand:var(--on-accent);
+  --f-display:'Archivo','Archivo Narrow',system-ui,sans-serif; --f-body:'Hind',system-ui,-apple-system,'Segoe UI',sans-serif; --f-mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0A1121; --surface:#111A31; --surface2:#18233F; --fg:#E7ECF7; --muted:#98A3C0; --line:#243153;
+  --accent:#FF7A45; --accent-text:#FF8F61; --on-accent:#1C0A02; --accent-soft:#3A1E12;
+  --band:#0E1831; --band-fg:#E7ECF7; --band-muted:#9AA6C6; --band-line:#26345C; --band-surface:#15213F;
+  --ok:#4BD08A; --ok-bg:#12301F; --bad:#FF7B7B; --bad-bg:#3A1717; --rev:#A98BFF; --rev-bg:#271D4A; --warn:#E0A93B; --warn-bg:#35290D;
+  --nv:#1D2845; --on-st:#06140C; --wa:#25C26A; --on-wa:#04210F; --wa-bubble:#0B3B2C; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0A1121; --surface:#111A31; --surface2:#18233F; --fg:#E7ECF7; --muted:#98A3C0; --line:#243153;
+  --accent:#FF7A45; --accent-text:#FF8F61; --on-accent:#1C0A02; --accent-soft:#3A1E12;
+  --band:#0E1831; --band-fg:#E7ECF7; --band-muted:#9AA6C6; --band-line:#26345C; --band-surface:#15213F;
+  --ok:#4BD08A; --ok-bg:#12301F; --bad:#FF7B7B; --bad-bg:#3A1717; --rev:#A98BFF; --rev-bg:#271D4A; --warn:#E0A93B; --warn-bg:#35290D;
+  --nv:#1D2845; --on-st:#06140C; --wa:#25C26A; --on-wa:#04210F; --wa-bubble:#0B3B2C; color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:96px}
+html.lock{overflow:hidden}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 16px/1.55 var(--f-body);-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+h1,h2,h3,h4{font-family:var(--f-display);margin:0;text-wrap:balance;overflow-wrap:break-word}
+h2{font-weight:800;font-stretch:112%;font-size:clamp(1.7rem,3.6vw,2.55rem);line-height:1.08;letter-spacing:-.015em}
+h3{font-weight:700;font-stretch:105%;font-size:1.15rem;line-height:1.25}
+p{margin:0}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1160px;margin-inline:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.eyebrow{font:600 12px/1.2 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent-text)}
+.muted{color:var(--muted)}
+.mono{font-family:var(--f-mono)}
+.sec{padding-block:72px}
+.sec-head{display:grid;gap:12px;max-width:760px;margin-bottom:36px}
+.sec-head p.sub{color:var(--muted);font-size:1.06rem;max-width:62ch}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 18px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font-weight:600;text-decoration:none;cursor:pointer;line-height:1.2}
+.btn:hover{border-color:var(--fg)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.brand{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
+.btn.wa{background:var(--wa);border-color:var(--wa);color:var(--on-wa)}
+.btn.wa:hover{filter:brightness(1.08)}
+.btn.sm{min-height:36px;padding:6px 12px;font-size:.92rem}
+.btn svg{flex:none}
+.chip{display:inline-flex;align-items:center;min-height:36px;padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-weight:500;font-size:.94rem;cursor:pointer}
+.chip[aria-pressed="true"],.chip.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.tag{display:inline-block;font:600 11px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;padding:5px 7px;border-radius:5px;background:var(--surface2);color:var(--muted)}
+.tag.live{background:var(--accent-soft);color:var(--accent-text)}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.top-in{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-block:10px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:800 1.3rem/1 var(--f-display);font-stretch:115%;letter-spacing:-.01em}
+.brand svg .m-bg{fill:var(--fg)} .brand svg .m-o{fill:none;stroke:var(--bg);stroke-width:2}
+.brand svg .m-f{fill:var(--accent)}
+.nav{flex:1;min-width:0;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav a{padding:8px 12px;border-radius:8px;text-decoration:none;font-weight:500;font-size:.95rem;white-space:nowrap;color:var(--muted)}
+.nav a:hover{color:var(--fg);background:var(--surface2)}
+@media (max-width:760px){.nav{order:3;flex-basis:100%}}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center;padding-block:56px 64px}
+.hero h1{font-weight:800;font-stretch:118%;font-size:clamp(2.1rem,5.2vw,3.8rem);line-height:1.02;letter-spacing:-.025em}
+.hero h1 em{font-style:normal;color:var(--accent-text)}
+.lead{font-size:1.14rem;color:var(--muted);max-width:56ch;margin-top:20px}
+.cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.facts{margin-top:28px;display:flex;gap:10px 22px;flex-wrap:wrap;font:500 .86rem/1.3 var(--f-mono);color:var(--muted)}
+.facts b{color:var(--fg);font-weight:600}
+@media (max-width:900px){.hero{grid-template-columns:1fr;gap:36px;padding-block:36px 48px}}
+
+/* OMR sample card: the one bold motif */
+.omr{position:relative;background:var(--surface);border:1.5px solid var(--fg);border-radius:14px;padding:22px 22px 22px 46px;overflow:hidden}
+.omr::before{content:"";position:absolute;left:16px;top:16px;bottom:16px;width:12px;background:repeating-linear-gradient(to bottom,var(--fg) 0 6px,transparent 6px 16px)}
+.omr-meta{display:flex;justify-content:space-between;font:600 12px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.omr-q{margin-top:14px;font-size:1.12rem;font-weight:500;display:flex;gap:12px}
+.omr-q .qn{font:600 .95rem var(--f-mono);color:var(--accent-text);padding-top:3px}
+.omr-opts{display:grid;gap:10px;margin-top:18px}
+.omr-o{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);cursor:pointer;min-height:48px}
+.omr-o:hover:not([disabled]){border-color:var(--accent)}
+.omr-o[disabled]{cursor:default}
+.omr-o.right{border-color:var(--ok);background:var(--ok-bg)}
+.omr-o.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.omr-fb{margin-top:16px;font-size:.95rem;color:var(--muted);min-height:3em}
+.omr-fb b{color:var(--fg)}
+.omr-again{margin-top:6px}
+
+/* OMR bubble */
+.bub{flex:none;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--accent);display:grid;place-items:center;font:600 13px var(--f-mono);color:var(--accent-text);background:transparent}
+.sel>.bub,.picked>.bub{background:var(--fg);border-color:var(--fg);color:var(--bg)}
+.right>.bub{background:var(--ok);border-color:var(--ok);color:var(--on-st)}
+.wrong>.bub{background:var(--bad);border-color:var(--bad);color:var(--on-st)}
+
+/* How it works (band) */
+.band{background:var(--band);color:var(--band-fg);border-block:1px solid var(--band-line)}
+.band .eyebrow{color:var(--accent)}
+.band .sec-head p.sub{color:var(--band-muted)}
+.band .field input,.band .field select,.band .field textarea{background:var(--band-surface);color:var(--band-fg);border-color:var(--band-line)}
+.band .field .hint,.band .note{color:var(--band-muted)}
+.band .chip{background:transparent;color:var(--band-fg);border-color:var(--band-line)}
+.band .chip:hover{border-color:var(--band-fg)}
+.band .pv{color:var(--fg)}
+.band .pv .hint{color:var(--muted)}
+.who{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.who span{padding:6px 12px;border:1px solid var(--band-line);border-radius:999px;font-size:.9rem;color:var(--band-muted)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px}
+.tabs button{min-height:44px;padding:8px 18px;border-radius:10px;border:1px solid var(--band-line);background:transparent;color:var(--band-fg);font-weight:600;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--band-fg);color:var(--band);border-color:var(--band-fg)}
+.role{display:grid;grid-template-columns:.8fr 1.2fr;gap:48px}
+.role h3{font-size:1.5rem;font-stretch:112%;font-weight:800;line-height:1.15}
+.role .out{margin-top:18px;padding:14px 16px;border-left:3px solid var(--accent);background:var(--band-surface);border-radius:0 10px 10px 0;color:var(--band-fg)}
+.role .lead2{color:var(--band-muted);margin-top:12px}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:0;counter-reset:s}
+.steps li{display:grid;grid-template-columns:44px 1fr;gap:14px;padding:16px 0;border-top:1px solid var(--band-line);counter-increment:s}
+.steps li:last-child{border-bottom:1px solid var(--band-line)}
+.steps li::before{content:counter(s);width:34px;height:34px;border-radius:50%;border:1.5px solid var(--accent);display:grid;place-items:center;font:600 13px var(--f-mono);color:var(--accent)}
+.steps h4{font-size:1.02rem;font-weight:700;font-stretch:105%}
+.steps p{color:var(--band-muted);margin-top:4px;max-width:60ch}
+@media (max-width:860px){.role{grid-template-columns:1fr;gap:24px}}
+
+/* features */
+.fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.fgroup{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px}
+.fgroup header{display:grid;gap:4px;margin-bottom:12px}
+.fgroup .insp{font:500 .8rem var(--f-mono);color:var(--muted);letter-spacing:.02em}
+.fgroup ul{list-style:none;margin:0;padding:0}
+.fgroup li{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.fgroup li span:first-child{min-width:0}
+@media (max-width:860px){.fgrid{grid-template-columns:1fr}}
+
+/* tests */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:16px}
+.tcard{display:flex;flex-direction:column;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}
+.tcard header{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.tcard h3{font-size:1.05rem}
+.tmeta{display:flex;flex-wrap:wrap;gap:6px 14px;font:500 .82rem var(--f-mono);color:var(--muted)}
+.tsecs{font-size:.88rem;color:var(--muted)}
+.tact{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
+.builder{margin-top:28px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;display:grid;gap:18px}
+.builder h3{margin-bottom:2px}
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.checks label{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;cursor:pointer;font-size:.93rem;background:var(--bg)}
+.checks input{accent-color:var(--accent);width:16px;height:16px}
+.frow{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+.field{display:grid;gap:6px;min-width:0}
+.field label,.field .lab{font-weight:600;font-size:.88rem}
+.field input[type=text],.field input[type=tel],.field input[type=url],.field select,.field textarea{width:100%;min-height:44px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.field textarea{min-height:92px;resize:vertical}
+.field .hint{font-size:.82rem;color:var(--muted)}
+
+/* progress */
+.pgrid{display:grid;grid-template-columns:.8fr 1.2fr;gap:24px}
+.pcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;min-width:0}
+.big{font:800 3.2rem/1 var(--f-display);font-stretch:118%;letter-spacing:-.03em}
+.bars{display:grid;gap:12px;margin-top:14px}
+.bar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;font-size:.93rem}
+.bar .trk{grid-column:1/-1;height:10px;background:var(--surface2);border-radius:6px;overflow:hidden}
+.bar .fill{display:block;height:100%;border-radius:6px;background:var(--fg)}
+.bar .fill.good{background:var(--ok)} .bar .fill.mid{background:var(--warn)} .bar .fill.low{background:var(--bad)}
+.bar .val{font:600 .85rem var(--f-mono);white-space:nowrap}
+.alist{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:0}
+.alist li{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:.94rem}
+.alist .s{font:600 .88rem var(--f-mono);white-space:nowrap}
+.note{font-size:.85rem;color:var(--muted)}
+.samplebar{display:inline-block;margin-bottom:10px}
+@media (max-width:860px){.pgrid{grid-template-columns:1fr}}
+
+/* portal builder */
+.pbuild{display:grid;grid-template-columns:.9fr 1.1fr;gap:32px;align-items:start}
+.pform{display:grid;gap:16px}
+.swatches{display:flex;gap:8px;flex-wrap:wrap}
+.sw{width:34px;height:34px;border-radius:50%;border:2px solid var(--bg);outline:1.5px solid var(--line);cursor:pointer;padding:0}
+.sw[aria-pressed="true"]{outline:2px solid var(--fg)}
+.pv{border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden;position:sticky;top:104px}
+.pv-bar{display:flex;align-items:center;gap:6px;padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--line)}
+.pv-bar i{width:9px;height:9px;border-radius:50%;background:var(--line);display:block}
+.pv-bar .url{margin-left:8px;font:500 .8rem var(--f-mono);color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pv-head{display:flex;align-items:center;gap:12px;padding:18px;background:var(--brand);color:var(--on-brand)}
+.pv-head b{font:800 1.2rem/1.1 var(--f-display);font-stretch:112%;display:block}
+.pv-head span.t{font-size:.92rem;opacity:.9}
+.lg{width:44px;height:44px;border-radius:10px;object-fit:cover;flex:none;background:#fff}
+.lg.ini{display:grid;place-items:center;font:800 1.05rem var(--f-display);background:var(--on-brand);color:var(--brand)}
+.pv-body{padding:18px;display:grid;gap:16px}
+.pv-body h4{font:600 .78rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.pchips{display:flex;gap:6px;flex-wrap:wrap}
+.pchips span{padding:5px 11px;border-radius:999px;background:var(--surface2);font-size:.88rem}
+.prow{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.prow div{min-width:0}
+.prow small{display:block;color:var(--muted);font:500 .78rem var(--f-mono)}
+.pv-act{display:flex;gap:8px;flex-wrap:wrap}
+@media (max-width:900px){.pbuild{grid-template-columns:1fr}.pv{position:static}}
+
+/* contact */
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+.touch{list-style:none;margin:22px 0 0;padding:0;display:grid;gap:0}
+.touch li{display:grid;grid-template-columns:34px 1fr;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
+.touch li:last-child{border-bottom:1px solid var(--line)}
+.touch svg{color:var(--wa);margin-top:2px}
+.touch b{display:block}
+.touch span{color:var(--muted);font-size:.95rem}
+.cform{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;display:grid;gap:16px}
+.bubble{background:var(--wa-bubble);border-radius:4px 14px 14px 14px;padding:12px 14px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.96rem;user-select:all;border:1px solid var(--line)}
+.bubble small{display:block;margin-top:6px;color:var(--muted);text-align:right;font:500 .72rem var(--f-mono)}
+.numline{font:500 .9rem var(--f-mono);color:var(--muted)}
+.numline b{color:var(--fg);user-select:all}
+@media (max-width:860px){.cgrid{grid-template-columns:1fr}}
+
+/* header actions, sign-in, pricing */
+.top-act{display:flex;gap:8px;align-items:center;margin-left:auto}
+.smodal{position:fixed;inset:0;z-index:200;background:rgba(5,10,25,.6);display:grid;place-items:center;padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.scard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px;max-width:440px;width:100%;max-height:100%;overflow:auto}
+.sform{display:grid;gap:14px}
+.sform .row,.scard .row{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.err{color:var(--bad);font-size:.88rem;min-height:1.2em}
+.ptoggles{display:flex;gap:12px 20px;flex-wrap:wrap;margin-bottom:24px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg button{min-height:44px;padding:8px 16px;border:0;background:transparent;font-weight:600;cursor:pointer;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:20px;align-items:stretch}
+.plan{display:flex;flex-direction:column;gap:16px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px;min-width:0}
+.plan.pop{border:2px solid var(--fg)}
+.plan header{display:grid;gap:6px}
+.plan .nm{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.plan .who{color:var(--muted);font-size:.94rem}
+.price{font:800 2.5rem/1 var(--f-display);font-stretch:118%;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.price small{display:block;font:400 .86rem/1.4 var(--f-body);letter-spacing:0;color:var(--muted);margin-top:6px}
+.plan .cap{font:600 .84rem var(--f-mono);color:var(--accent-text)}
+.plan ul{list-style:none;margin:0;padding:0;display:grid;gap:9px;flex:1;align-content:start}
+.plan li{display:grid;grid-template-columns:14px 1fr;gap:10px;align-items:start;font-size:.96rem}
+.plan li::before{content:"";width:12px;height:12px;border-radius:50%;border:1.5px solid var(--accent);margin-top:6px;box-sizing:border-box}
+.plan .btn{width:100%}
+.cmpwrap{margin-top:32px}
+.cmpwrap h3{margin-bottom:12px}
+.cmpwrap .tscroll{background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.cmpwrap .tbl td:first-child{font-weight:600}
+
+/* faq */
+.faq{display:grid;gap:0;max-width:820px}
+.faq details{border-top:1px solid var(--line);padding:16px 0}
+.faq details:last-child{border-bottom:1px solid var(--line)}
+.faq summary{cursor:pointer;font:700 1.05rem/1.3 var(--f-display);font-stretch:104%;list-style:none;display:flex;justify-content:space-between;gap:16px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font:500 1.3rem/1 var(--f-mono);color:var(--accent-text)}
+.faq details[open] summary::after{content:"−"}
+.faq p{margin-top:10px;color:var(--muted);max-width:64ch}
+footer.foot{padding-block:36px 96px;border-top:1px solid var(--line);color:var(--muted);font-size:.92rem}
+.foot-in{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+/* floating whatsapp + toast */
+.fab{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:25;display:inline-flex;align-items:center;gap:8px;min-height:50px;padding:0 18px;border-radius:999px;background:var(--wa);color:var(--on-wa);font-weight:600;text-decoration:none;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+#toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translate(-50%,12px);z-index:300;background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:.92rem;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:calc(100% - 32px)}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* exam engine */
+.eng{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;background:var(--bg);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.eng-top{display:flex;align-items:center;gap:12px;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));background:var(--brand);color:var(--on-brand);flex-wrap:wrap}
+.eng-top .lg{width:34px;height:34px;border-radius:8px}
+.eng-brand{display:flex;align-items:center;gap:10px;font:800 1rem/1.1 var(--f-display);font-stretch:110%;min-width:0}
+.eng-title{flex:1;min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;opacity:.95}
+.eng-top .btn{background:var(--on-brand);color:var(--brand);border-color:var(--on-brand)}
+.eng-top .btn.ghost{background:transparent;color:var(--on-brand);border-color:currentColor}
+.tm{font:600 1.15rem var(--f-mono);padding:5px 12px;border-radius:8px;background:var(--on-brand);color:var(--brand);min-width:84px;text-align:center}
+.tm.low{background:var(--bad);color:var(--on-st)}
+.eng-secs{display:flex;gap:6px;padding:8px max(16px,env(safe-area-inset-left,0px));overflow-x:auto;background:var(--surface);border-bottom:1px solid var(--line)}
+.eng-secs button{flex:none;min-height:38px;padding:6px 14px;border-radius:8px;border:1px solid var(--line);background:var(--bg);font-weight:600;font-size:.92rem;cursor:pointer}
+.eng-secs button.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.eng-body{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 300px}
+.q-pane{overflow:auto;padding:22px max(16px,env(safe-area-inset-left,0px)) 28px}
+.q-in{max-width:780px}
+.qmeta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font:500 .84rem var(--f-mono);color:var(--muted)}
+.qmeta .sp{flex:1}
+.qt{font:600 1.28rem/1.4 var(--f-body);margin:14px 0 20px;overflow-wrap:anywhere}
+.opts{display:grid;gap:10px}
+.opt{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);cursor:pointer;min-height:54px}
+.opt:hover:not([disabled]){border-color:var(--brand)}
+.opt.sel{border-color:var(--fg);background:var(--surface2)}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.opt[disabled]{cursor:default;color:inherit}
+.opt .otxt{min-width:0;overflow-wrap:anywhere}
+.eng .bub{border-color:var(--brand);color:var(--fg)}
+.eng .sel>.bub{background:var(--fg);border-color:var(--fg);color:var(--bg)}
+.eng .right>.bub{background:var(--ok);border-color:var(--ok);color:var(--on-st)}
+.eng .wrong>.bub{background:var(--bad);border-color:var(--bad);color:var(--on-st)}
+.expl{margin-top:18px;padding:14px 16px;border-radius:12px;background:var(--surface2);border-left:3px solid var(--muted)}
+.expl.ok{border-color:var(--ok);background:var(--ok-bg)}
+.expl.bad{border-color:var(--bad);background:var(--bad-bg)}
+.expl .row{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.pal{border-left:1px solid var(--line);overflow:auto;padding:16px;background:var(--surface);display:grid;gap:14px;align-content:start}
+.pal h4{font:600 .78rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.pgrid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:8px}
+.pb{height:40px;border:2px solid transparent;border-radius:8px;font:600 .9rem var(--f-mono);cursor:pointer;background:var(--nv);color:var(--fg);position:relative;padding:0}
+.pb.na{background:var(--bad);color:var(--on-st)}
+.pb.a{background:var(--ok);color:var(--on-st)}
+.pb.m{background:var(--rev);color:var(--on-st);border-radius:50%}
+.pb.am{background:var(--rev);color:var(--on-st);border-radius:50%}
+.pb.am::after{content:"";position:absolute;right:-2px;bottom:-2px;width:11px;height:11px;border-radius:50%;background:var(--ok);border:2px solid var(--surface)}
+.pb.cur{border-color:var(--fg);box-shadow:0 0 0 2px var(--bg) inset}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;font-size:.82rem}
+.legend span{display:flex;align-items:center;gap:7px}
+.legend i{width:16px;height:16px;border-radius:4px;background:var(--nv);flex:none}
+.legend i.na{background:var(--bad)} .legend i.a{background:var(--ok)} .legend i.m{background:var(--rev);border-radius:50%}
+.eng-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));background:var(--surface);border-top:1px solid var(--line)}
+.eng-actions .sp{flex:1}
+.palbtn{display:none}
+.modal{position:absolute;inset:0;background:rgba(5,10,25,.6);display:grid;place-items:center;padding:16px;z-index:5}
+.modal-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;max-width:520px;width:100%;display:grid;gap:14px;max-height:100%;overflow:auto}
+.modal-card .row{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.tbl th,.tbl td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+.tbl th{font:600 .75rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tscroll{overflow-x:auto}
+@media (max-width:820px){
+  .eng-body{grid-template-columns:minmax(0,1fr)}
+  .pal{position:fixed;left:0;right:0;bottom:0;max-height:72%;border-left:0;border-top:1px solid var(--line);border-radius:16px 16px 0 0;transform:translateY(105%);transition:transform .22s;z-index:4;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 30px rgba(0,0,0,.25)}
+  .pal.open{transform:none}
+  .palbtn{display:inline-flex}
+  .eng-title{flex-basis:100%;order:5}
+  .qt{font-size:1.15rem}
+}
+
+/* results */
+.res{flex:1;overflow:auto}
+.res-in{padding-block:28px 56px;display:grid;gap:28px}
+.score{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px}
+.score .n{font:800 4rem/1 var(--f-display);font-stretch:118%;letter-spacing:-.03em}
+.score .n small{font:600 1.1rem var(--f-mono);color:var(--muted);letter-spacing:0}
+.meter{height:12px;border-radius:7px;background:var(--surface2);overflow:hidden;margin-top:10px}
+.meter i{display:block;height:100%;background:var(--brand)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+.stat{padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.stat b{display:block;font:800 1.7rem/1.1 var(--f-display);font-stretch:112%}
+.stat span{font-size:.84rem;color:var(--muted)}
+.stat.ok b{color:var(--ok)} .stat.bad b{color:var(--bad)}
+.rcols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.rbox{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+.rbox h3{margin-bottom:10px}
+.ract{display:flex;gap:10px;flex-wrap:wrap}
+.cert{position:relative;background:var(--surface);border:1.5px solid var(--fg);border-radius:14px;padding:28px 28px 28px 56px;overflow:hidden}
+.cert::before{content:"";position:absolute;left:18px;top:18px;bottom:18px;width:14px;background:repeating-linear-gradient(to bottom,var(--brand) 0 7px,transparent 7px 17px)}
+.cert .who2{font:800 2rem/1.1 var(--f-display);font-stretch:115%;margin:10px 0;overflow-wrap:anywhere}
+.cert .row{display:flex;gap:14px;align-items:center;margin-bottom:6px}
+.rv-list{display:grid;gap:14px}
+.rv{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;border-left-width:4px}
+.rv.c{border-left-color:var(--ok)} .rv.w{border-left-color:var(--bad)} .rv.s{border-left-color:var(--warn)}
+.rv .qt{font-size:1.05rem;margin:10px 0 12px}
+.rv ol{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.rv li{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:8px;background:var(--bg);font-size:.96rem}
+.rv li.ans{background:var(--ok-bg)} .rv li.mine{background:var(--bad-bg)}
+.rv li .l{font:600 .8rem var(--f-mono);width:20px}
+.rv li .f{margin-left:auto;font:600 .72rem var(--f-mono);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.st{font:600 .72rem var(--f-mono);letter-spacing:.06em;text-transform:uppercase;padding:4px 7px;border-radius:5px}
+.st.c{background:var(--ok-bg);color:var(--ok)} .st.w{background:var(--bad-bg);color:var(--bad)} .st.s{background:var(--warn-bg);color:var(--warn)}
+.icon-btn{min-width:44px;min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:1rem}
+.bmk[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-text)}
+@media (max-width:760px){.score{grid-template-columns:1fr}.rcols{grid-template-columns:1fr}.score .n{font-size:3.2rem}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap top-in">
+    <a class="brand" href="#top" aria-label="Exampro home">
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect class="m-bg" width="30" height="30" rx="8"/><circle class="m-o" cx="10" cy="10" r="4"/><circle class="m-o" cx="20" cy="10" r="4"/><circle class="m-o" cx="10" cy="20" r="4"/><circle class="m-f" cx="20" cy="20" r="4.6"/></svg>
+      Exampro
+    </a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#how">How to use it</a><a href="#features">Features</a><a href="#tests">Mock tests</a><a href="#progress">My progress</a><a href="#portal">Portal builder</a><a href="#pricing">Pricing</a><a href="#contact">WhatsApp</a><a href="#faq">FAQ</a>
+    </nav>
+    <div class="top-act"><button class="btn sm" id="signBtn" type="button" aria-haspopup="dialog">Sign in</button>
+    <a class="btn wa sm wa-link" target="_blank" rel="noopener" data-wa-text="Hi, I would like to know more about Exampro for my coaching institute.">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.7-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>
+      WhatsApp us
+    </a></div>
+  </div>
+</header>
+
+<main id="top">
+<section class="wrap hero" aria-labelledby="h1">
+  <div>
+    <p class="eyebrow">Mock-test platform for coaching institutes</p>
+    <h1 id="h1" style="margin-top:14px">Your institute’s name on every <em>mock test</em>.</h1>
+    <p class="lead">Exampro gives each coaching institute its own branded portal. Create tests, manage batches and deliver auto-graded mock exams with instant results. Students practise on any phone, and doubts go straight to your WhatsApp.</p>
+    <div class="cta-row">
+      <a class="btn primary" href="#tests">Take a free mock test</a>
+      <a class="btn wa wa-link" target="_blank" rel="noopener" data-wa-text="Hi, I want a branded mock-test portal for my coaching institute.">Chat on WhatsApp</a>
+    </div>
+    <p class="facts" id="facts"></p>
+  </div>
+  <div class="omr" id="omr">
+    <div class="omr-meta"><span>Try it · sample question</span><span>+4 / −1</span></div>
+    <p class="omr-q"><span class="qn">01</span><span>A shirt priced at ₹800 is sold at 25% off. What is the sale price?</span></p>
+    <div class="omr-opts" role="group" aria-label="Answer options">
+      <button class="omr-o" data-i="0" type="button"><span class="bub">A</span><span>₹500</span></button>
+      <button class="omr-o" data-i="1" type="button"><span class="bub">B</span><span>₹600</span></button>
+      <button class="omr-o" data-i="2" type="button"><span class="bub">C</span><span>₹650</span></button>
+      <button class="omr-o" data-i="3" type="button"><span class="bub">D</span><span>₹700</span></button>
+    </div>
+    <p class="omr-fb" id="omrFb" aria-live="polite">Tap a bubble. Your students get the same instant feedback on every test.</p>
+    <button class="btn sm omr-again" id="omrAgain" type="button" hidden>Try again</button>
+  </div>
+</section>
+
+<section class="band sec" id="how" aria-labelledby="how-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">How to use it</p>
+      <h2 id="how-h">Pick your role and see the first day.</h2>
+      <p class="sub">Exampro works for anyone who runs or takes tests. Each role below lists the exact steps, in the order people do them.</p>
+      <div class="who" aria-label="Who uses Exampro"><span>Coaching institutes</span><span>School tuition teachers</span><span>College placement cells</span><span>Test-series sellers</span><span>Independent educators</span></div>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Roles" id="roleTabs"></div>
+    <div class="role" id="rolePanel" role="tabpanel" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="sec wrap" id="features" aria-labelledby="f-h">
+  <div class="sec-head">
+    <p class="eyebrow">Features</p>
+    <h2 id="f-h">What students and teachers already like, in one place.</h2>
+    <p class="sub">We studied how Physics Wallah, Udemy, IndiaBix and the national exam portals work, and kept the parts that help people finish tests and come back tomorrow. Items marked “Try it” work in this page. “In platform” items ship with your portal.</p>
+  </div>
+  <div class="fgrid" id="fgrid"></div>
+</section>
+
+<section class="sec wrap" id="tests" aria-labelledby="t-h" style="padding-top:24px">
+  <div class="sec-head">
+    <p class="eyebrow">Mock tests</p>
+    <h2 id="t-h">Pick a test and start. No sign-up.</h2>
+    <p class="sub">Full mocks follow real exam patterns. Topic tests are short and focused. Practice mode shows the answer and the reason right after each question, the way IndiaBix does.</p>
+  </div>
+  <div class="filters" id="filters" role="group" aria-label="Filter tests"></div>
+  <div class="tgrid" id="tgrid"></div>
+  <div class="builder" id="builder">
+    <div>
+      <h3>Build your own test</h3>
+      <p class="muted">Pick topics and a length. This is the same flow a teacher uses to build a batch test from the question bank.</p>
+    </div>
+    <div class="checks" id="bTopics" role="group" aria-label="Topics"></div>
+    <div class="frow">
+      <div class="field"><label for="bCount">Questions</label>
+        <select id="bCount"><option>10</option><option selected>15</option><option>20</option><option>30</option></select></div>
+      <div class="field"><label for="bMode">Mode</label>
+        <select id="bMode"><option value="test">Timed test</option><option value="practice">Practice with instant answers</option></select></div>
+      <button class="btn primary" id="bGo" type="button">Create and start</button>
+      <button class="btn" id="bBm" type="button">Revise saved questions</button>
+    </div>
+  </div>
+</section>
+
+<section class="sec wrap" id="progress" aria-labelledby="p-h" style="padding-top:24px">
+  <div class="sec-head">
+    <p class="eyebrow">My progress</p>
+    <h2 id="p-h">See what to practise next.</h2>
+    <p class="sub">After every test Exampro updates your accuracy by topic and your daily streak, so the weakest topic is always one tap away.</p>
+  </div>
+  <div class="pgrid" id="pgrid"></div>
+</section>
+
+<section class="band sec" id="portal" aria-labelledby="pb-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="eyebrow">Portal builder</p>
+      <h2 id="pb-h">Make it yours in a minute.</h2>
+      <p class="sub">Every institute gets a separate portal with its own logo, colours, students and results. Change the fields and the preview updates. Your branding also shows inside the exam window and on certificates when you take a test here.</p>
+    </div>
+    <div class="pbuild">
+      <form class="pform" id="pform" autocomplete="off" onsubmit="return false">
+        <div class="field"><span class="lab">Start from a sample</span>
+          <div class="pchips" id="presets" style="display:flex;gap:8px;flex-wrap:wrap"></div></div>
+        <div class="field"><label for="pName">Institute name</label><input type="text" id="pName" maxlength="40"></div>
+        <div class="field"><label for="pTag">Tagline</label><input type="text" id="pTag" maxlength="60"></div>
+        <div class="field"><span class="lab">Brand colour</span>
+          <div class="swatches" id="swatches"></div></div>
+        <div class="field"><label for="pLogo">Logo</label><input type="file" id="pLogo" accept="image/*"><span class="hint" id="logoHint">PNG or JPG under 500 KB. Without a logo, your initials are used.</span></div>
+        <div class="field"><label for="pBatches">Batches (comma separated)</label><input type="text" id="pBatches" maxlength="160"></div>
+        <div class="field"><label for="pWa">Counsellor WhatsApp number</label><input type="tel" id="pWa" inputmode="tel" placeholder="98765 43210"><span class="hint" id="waHint">Students tap WhatsApp on any question to reach this number. 10-digit Indian numbers get +91 added.</span></div>
+        <div class="field"><label for="pGroup">Discussion group invite link</label><input type="url" id="pGroup" placeholder="https://chat.whatsapp.com/..."><span class="hint" id="grpHint">Optional. Shows a “Join discussion group” button.</span></div>
+        <p class="note" style="color:var(--band-muted)">Saved only in this browser. Nothing is uploaded.</p>
+      </form>
+      <div class="pv tenant" id="pv" aria-label="Portal preview"></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec wrap" id="pricing" aria-labelledby="pr-h">
+  <div class="sec-head">
+    <p class="eyebrow">Pricing</p>
+    <h2 id="pr-h">Pay for the students you teach.</h2>
+    <p class="sub">Institutes pick a monthly plan by number of students. Learners practise free and upgrade for the full mock library. This demo has everything unlocked so you can try it.</p>
+  </div>
+  <div class="ptoggles">
+    <div class="seg" role="group" aria-label="Plan type"><button type="button" data-ptype="inst" aria-pressed="true">For institutes</button><button type="button" data-ptype="stu" aria-pressed="false">For learners</button></div>
+    <div class="seg" role="group" aria-label="Billing period"><button type="button" data-bill="m" aria-pressed="true">Monthly</button><button type="button" data-bill="y" aria-pressed="false">Yearly · 2 months free</button></div>
+  </div>
+  <div class="plans" id="plans"></div>
+  <p class="note" id="priceNote" style="margin-top:16px"></p>
+  <div class="cmpwrap" id="cmp"></div>
+</section>
+
+<section class="sec wrap" id="contact" aria-labelledby="c-h">
+  <div class="cgrid">
+    <div>
+      <p class="eyebrow">WhatsApp, built in</p>
+      <h2 id="c-h" style="margin-top:12px">Coaching and discussion where your students already are.</h2>
+      <p class="lead" style="margin-top:16px">Nobody has to learn a new chat tool. Exampro opens WhatsApp with the message already written, so a counsellor or teacher sees exactly what the student needs.</p>
+      <ul class="touch">
+        <li><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.7-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg><div><b>Coaching enquiries</b><span>Students and parents ask about batches, fees and demo classes in one tap.</span></div></li>
+        <li><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.5a2.5 2.5 0 1 1 3.4 2.3c-.7.3-1 .8-1 1.5M12 17h.01"/></svg><div><b>Doubt on a question</b><span>Every question in the review has a button that sends the question, your answer and the right answer to your teacher.</span></div></li>
+        <li><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M15.5 14.2c3 0 5.5 2 5.5 5"/></svg><div><b>Batch discussion group</b><span>Add your group invite link and students can join from the portal.</span></div></li>
+        <li><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 21h14"/></svg><div><b>Share a score</b><span>Students post results to friends and family. Teachers share result links in the batch group.</span></div></li>
+      </ul>
+    </div>
+    <form class="cform" id="cform" onsubmit="return false" autocomplete="off">
+      <h3>Message us on WhatsApp</h3>
+      <div class="field"><label for="cType">I want to</label>
+        <select id="cType">
+          <option>Get a branded portal for my coaching institute</option>
+          <option>Book a demo for my team</option>
+          <option>Get coaching guidance as a student</option>
+          <option>Discuss a doubt with a mentor</option>
+          <option>Join the discussion group</option>
+        </select></div>
+      <div class="frow">
+        <div class="field" style="flex:1;min-width:150px"><label for="cExam">Exam or course</label>
+          <select id="cExam"><option>SSC</option><option>Banking</option><option>Railways</option><option>UPSC / State PSC</option><option>Campus placement</option><option>School foundation</option><option>Other</option></select></div>
+        <div class="field" style="flex:1;min-width:150px"><label for="cName">Your name</label><input type="text" id="cName" maxlength="40" placeholder="Optional"></div>
+      </div>
+      <div class="field"><label for="cMsg">Anything else?</label><textarea id="cMsg" maxlength="400" placeholder="For example: 120 students, two branches, need Hindi and English questions."></textarea></div>
+      <div class="field"><span class="lab">Your message</span><div class="bubble" id="bubble"></div></div>
+      <div class="frow">
+        <a class="btn wa" id="cGo" target="_blank" rel="noopener">Open WhatsApp</a>
+        <button class="btn" id="cCopy" type="button">Copy message</button>
+      </div>
+      <p class="numline" id="numLine" hidden>Or message us directly: <b id="numTxt"></b></p>
+    </form>
+  </div>
+</section>
+
+<section class="sec wrap" id="faq" aria-labelledby="q-h" style="padding-top:24px">
+  <div class="sec-head"><p class="eyebrow">Questions</p><h2 id="q-h">Before you start</h2></div>
+  <div class="faq">
+    <details><summary>Do students need to install an app?</summary><p>No. Tests run in the phone browser. Students open your institute’s link, log in with their mobile number and start.</p></details>
+    <details><summary>Can I use my own logo and colours?</summary><p>Yes. Each institute has its own portal with its name, logo and colour on every page, in the exam window and on certificates. Try it in the portal builder above.</p></details>
+    <details><summary>How do students ask doubts?</summary><p>Each question in the review has a WhatsApp button. It opens a chat with your counsellor or teacher with the question, the student’s answer and the correct answer already filled in. You can also add a batch discussion group link.</p></details>
+    <details><summary>Can I upload my own questions?</summary><p>Yes. Teachers add questions one by one or upload a CSV with options, the right answer, an explanation and a topic tag. This page ships with a ready library so you can see how tests feel.</p></details>
+    <details><summary>Is my institute’s data separate from other institutes?</summary><p>Yes. Every institute is its own tenant with its own students, batches and results. Another institute cannot see yours.</p></details>
+    <details><summary>How do I pay for a plan?</summary><p>Choose a plan and Exampro opens WhatsApp with your choice written out. We confirm the plan there and share payment details. Yearly billing costs ten months’ price.</p></details>
+    <details><summary>Does this demo save my data?</summary><p>Attempts, bookmarks, your streak and the sign-in stay in this browser only. Nothing is uploaded, and clearing site data removes them. Mobile-OTP login arrives with your institute portal.</p></details>
+    <details><summary>Which exam patterns are supported?</summary><p>You set marks per question, negative marking, sections and time. The library includes SSC, banking, railway, UPSC and state PSC, and campus placement patterns as starting points.</p></details>
+  </div>
+</section>
+</main>
+
+<footer class="foot"><div class="wrap foot-in"><span>Exampro · mock tests under your institute’s brand</span><span id="footWa">Demo data runs in your browser.</span></div></footer>
+
+<a class="fab wa-link" target="_blank" rel="noopener" data-wa-text="Hi, I have a question about Exampro." aria-label="Chat on WhatsApp">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.7-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>
+  <span>WhatsApp</span>
+</a>
+<div class="smodal" id="signModal" hidden>
+  <div class="scard" role="dialog" aria-modal="true" aria-labelledby="signH"><div id="signBody"></div></div>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="engine" class="tenant" hidden></div>
+
+<script>
+(function(){
+'use strict';
+/* Owner setting: country code + number, digits only. */
+var SITE_WA='919986418638';
+var HAS_NUM=SITE_WA!=='910000000000';
+
+var $=function(s,r){return (r||document).querySelector(s)};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+var ls={get:function(k,d){try{var v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+var toastT;function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('on')},2800)}
+function num(n){return String(Math.round(n*100)/100)}
+function waLink(n,text){return 'https://wa.me/'+(n||'')+'?text='+encodeURIComponent(text)}
+function copyText(text,done){
+  var ok=function(){toast('Copied')};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(ok,function(){toast(done||'Copy blocked. Press Ctrl or ⌘ + C on the selected text.')})}
+  else toast(done||'Copy blocked. Press Ctrl or ⌘ + C on the selected text.');
+}
+
+/* ---------------- question bank: [question, options, correct index, explanation] ---------------- */
+var TOPICS=[
+{id:'percent',name:'Percentage, Profit & Loss',cat:'Quantitative',qs:[
+['What is 15% of 240?',['30','36','40','24'],1,'0.15 × 240 = 36.'],
+['A number increased by 20% becomes 360. The number is:',['280','300','320','288'],1,'Number × 1.2 = 360, so the number is 300.'],
+['An article bought for ₹500 is sold for ₹575. The profit percentage is:',['12%','15%','18%','20%'],1,'Profit 75 on cost 500 is 15%.'],
+['An item marked ₹800 is sold at a 10% discount. The selling price is:',['₹640','₹700','₹720','₹760'],2,'Discount = 80, so 800 − 80 = 720.'],
+['Sugar becomes 25% costlier. By what percent must consumption fall to keep spending the same?',['15%','12.5%','25%','20%'],3,'Reduction = 25 ÷ 125 × 100 = 20%.'],
+['A trader sells at a 12% loss for ₹440. The cost price is:',['₹480','₹500','₹520','₹550'],1,'SP is 88% of CP, so CP = 440 ÷ 0.88 = 500.'],
+['Two successive discounts of 10% and 20% equal a single discount of:',['30%','25%','32%','28%'],3,'Net factor 0.9 × 0.8 = 0.72, so 28% off.'],
+['In an exam 40% of the students failed. If 360 passed, how many appeared?',['500','540','600','650'],2,'60% of total = 360, so total = 600.'],
+['A shopkeeper sells at cost price but uses a 900 g weight for 1 kg. His gain percentage is:',['10%','11 1/9%','12.5%','9%'],1,'Gain = 100 ÷ 900 × 100 = 11 1/9%.'],
+['A town of 20,000 people grows 10% every year. After 2 years the population is:',['24,000','24,200','24,400','22,000'],1,'20,000 × 1.1 × 1.1 = 24,200.'],
+['35% of a number is 84. The number is:',['220','260','200','240'],3,'84 ÷ 0.35 = 240.'],
+['A sells to B at 20% profit and B sells to C at 25% profit. C pays ₹300. A’s cost price is:',['₹180','₹200','₹210','₹225'],1,'1.2 × 1.25 = 1.5, and 300 ÷ 1.5 = 200.']]},
+{id:'tsw',name:'Time, Speed & Work',cat:'Quantitative',qs:[
+['Convert 54 km/h into m/s.',['12 m/s','15 m/s','18 m/s','20 m/s'],1,'54 × 5/18 = 15.'],
+['A 120 m long train crosses a pole in 6 seconds. Its speed is:',['15 m/s','24 m/s','18 m/s','20 m/s'],3,'120 ÷ 6 = 20 m/s.'],
+['A can finish a job in 10 days and B in 15 days. Together they take:',['5 days','6 days','8 days','12 days'],1,'1/10 + 1/15 = 1/6 per day.'],
+['A and B together finish a job in 12 days. A alone takes 20 days. B alone takes:',['25 days','30 days','32 days','36 days'],1,'1/12 − 1/20 = 1/30.'],
+['A man reaches 10 minutes late at 5 km/h and 10 minutes early at 6 km/h. The distance is:',['8 km','12 km','10 km','15 km'],2,'d/5 − d/6 = 20/60 hours, so d = 10 km.'],
+['A person goes at 60 km/h and returns at 40 km/h. Average speed for the round trip:',['50 km/h','48 km/h','52 km/h','45 km/h'],1,'2 × 60 × 40 ÷ (60 + 40) = 48.'],
+['A pipe fills a tank in 20 minutes and another empties it in 30 minutes. Both open, the tank fills in:',['30 min','50 min','60 min','80 min'],2,'1/20 − 1/30 = 1/60 per minute.'],
+['Two trains, each 150 m long, run in opposite directions at 36 km/h and 54 km/h. They cross in:',['10 s','12 s','15 s','8 s'],1,'Relative speed 90 km/h = 25 m/s, and 300 ÷ 25 = 12 s.'],
+['12 men finish a job in 15 days. How many days will 18 men take?',['8 days','12 days','10 days','9 days'],2,'Total work = 12 × 15 = 180 man-days; 180 ÷ 18 = 10.'],
+['A boat does 12 km/h in still water and the stream flows at 3 km/h. Distance downstream in 5 hours:',['60 km','75 km','80 km','65 km'],1,'Downstream speed is 15 km/h; 15 × 5 = 75.'],
+['One third of a job takes 5 days. The whole job takes:',['10 days','12 days','15 days','20 days'],2,'5 × 3 = 15 days.'],
+['Two stations are 240 km apart. Trains leave both at 50 km/h and 70 km/h towards each other. They meet after:',['2 hours','3 hours','2.5 hours','1.5 hours'],0,'Closing speed is 120 km/h; 240 ÷ 120 = 2 hours.']]},
+{id:'series',name:'Number Series & Simplification',cat:'Quantitative',qs:[
+['Find the next term: 2, 6, 12, 20, 30, ?',['40','42','44','36'],1,'Differences are 4, 6, 8, 10, 12, so 30 + 12 = 42.'],
+['Find the next term: 3, 6, 12, 24, ?',['36','42','48','54'],2,'Each term doubles.'],
+['Find the next term: 1, 4, 9, 16, 25, ?',['30','36','49','35'],1,'Squares of natural numbers: 6² = 36.'],
+['Find the next term: 2, 3, 5, 7, 11, ?',['12','13','15','14'],1,'These are prime numbers; the next is 13.'],
+['Find the next term: 100, 91, 82, 73, ?',['62','64','66','63'],1,'Subtract 9 each time.'],
+['Find the next term: 1, 1, 2, 3, 5, 8, ?',['11','12','13','14'],2,'Fibonacci series: 5 + 8 = 13.'],
+['25 + 15 × 2 − 10 ÷ 5 = ?',['53','80','43','55'],0,'BODMAS: 25 + 30 − 2 = 53.'],
+['12² − 8² = ?',['64','80','96','72'],1,'144 − 64 = 80.'],
+['√1521 = ?',['37','41','39','43'],2,'39 × 39 = 1521.'],
+['0.5 × 0.4 × 10 = ?',['0.2','20','0.02','2'],3,'0.5 × 0.4 = 0.2, and 0.2 × 10 = 2.'],
+['7/8 − 3/4 = ?',['1/8','1/4','1/2','5/8'],0,'7/8 − 6/8 = 1/8.'],
+['Find the next term: 2, 5, 10, 17, 26, ?',['35','36','37','38'],2,'Terms are n² + 1, so 6² + 1 = 37.']]},
+{id:'ratio',name:'Ratio, Average & Interest',cat:'Quantitative',qs:[
+['₹1,200 is divided in the ratio 3 : 5. The larger share is:',['₹450','₹600','₹720','₹750'],3,'5/8 × 1200 = 750.'],
+['The average of 4 numbers is 15. A fifth number is added and the average becomes 18. The fifth number is:',['28','30','33','25'],1,'5 × 18 − 4 × 15 = 90 − 60 = 30.'],
+['Simple interest on ₹5,000 at 8% per year for 3 years:',['₹1,000','₹1,200','₹1,400','₹1,600'],1,'5000 × 8 × 3 ÷ 100 = 1200.'],
+['Compound interest on ₹10,000 at 10% per year for 2 years:',['₹2,000','₹2,100','₹2,200','₹2,050'],1,'Amount = 10000 × 1.1 × 1.1 = 12,100, so interest = 2,100.'],
+['If A : B = 2 : 3 and B : C = 4 : 5, then A : B : C =',['2 : 3 : 5','8 : 12 : 15','6 : 8 : 10','8 : 10 : 15'],1,'Make B equal: A : B = 8 : 12 and B : C = 12 : 15.'],
+['The average age of three people is 24. Two are 20 and 26. The third is:',['24','28','26','30'],2,'72 − (20 + 26) = 26.'],
+['A sum doubles in 10 years at simple interest. The yearly rate is:',['5%','8%','10%','12.5%'],2,'Interest equals principal in 10 years, so rate = 100 ÷ 10 = 10%.'],
+['A 40 L mixture has milk and water in the ratio 3 : 1. Water to add for a 1 : 1 mixture:',['10 L','15 L','20 L','25 L'],2,'Milk is 30 L and water 10 L, so add 20 L water.'],
+['The mean of the first 10 natural numbers is:',['5','5.5','6','6.5'],1,'Sum 55 ÷ 10 = 5.5.'],
+['Two ages are in the ratio 4 : 5 and add up to 45 years. The younger is:',['16','18','20','25'],2,'4/9 × 45 = 20.'],
+['₹6,000 at 5% simple interest for 4 years amounts to:',['₹7,000','₹7,200','₹7,500','₹7,800'],1,'Interest is 1,200, so the amount is 7,200.'],
+['The fourth proportional to 4, 6 and 8 is:',['10','12','14','16'],1,'4 : 6 = 8 : x gives x = 12.']]},
+{id:'reason',name:'Logical Reasoning',cat:'Reasoning',qs:[
+['Doctor : Hospital :: Teacher : ?',['Student','School','Book','Class'],1,'A doctor works in a hospital; a teacher works in a school.'],
+['Find the odd one out: Apple, Mango, Potato, Banana.',['Apple','Mango','Potato','Banana'],2,'Potato is a vegetable; the others are fruits.'],
+['Pointing to a man, a woman says, “His mother is the only daughter of my mother.” The woman is his:',['Sister','Mother','Aunt','Grandmother'],1,'Her mother’s only daughter is herself, so she is his mother.'],
+['In a code each letter moves one step forward, so DOG becomes EPH. CAT becomes:',['DBU','DBS','BZS','DCU'],0,'C→D, A→B, T→U.'],
+['A man walks 5 km north, 5 km east, then 5 km south. How far is he from the start?',['0 km','5 km','10 km','15 km'],1,'North and south cancel; only the 5 km east remains.'],
+['Find the next letter: A, C, E, G, ?',['H','I','J','K'],1,'Alternate letters, so I follows G.'],
+['Today is Monday. What day will it be after 61 days?',['Friday','Saturday','Sunday','Wednesday'],1,'61 = 8 weeks + 5 days, and Monday + 5 days is Saturday.'],
+['All pens are books. All books are tables. Which conclusion definitely follows?',['All pens are tables','All tables are pens','Some tables are not books','No pen is a table'],0,'Pens sit inside books, which sit inside tables.'],
+['Ravi is 12th from the left in a row of 30 students. His position from the right is:',['17th','18th','19th','20th'],2,'30 − 12 + 1 = 19.'],
+['The angle between the clock hands at 3:00 is:',['60°','75°','90°','120°'],2,'Each hour mark is 30°, so three marks make 90°.'],
+['2 : 8 :: 3 : ?',['18','24','27','12'],2,'Cubes: 2³ = 8 and 3³ = 27.'],
+['Find the odd one out: 5, 7, 9, 11.',['5','7','9','11'],2,'9 is not a prime number.']]},
+{id:'english',name:'English Language',cat:'English',qs:[
+['Synonym of ABUNDANT:',['Scarce','Plentiful','Rare','Tiny'],1,'Abundant means existing in large quantity.'],
+['Antonym of ANCIENT:',['Old','Historic','Modern','Aged'],2,'Ancient means very old; modern is the opposite.'],
+['She ___ to school every day.',['go','goes','going','gone'],1,'A third person singular subject takes “goes”.'],
+['If I ___ you, I would apologise.',['am','was','were','be'],2,'The second conditional uses “were”.'],
+['Choose the correct spelling:',['Occurence','Occurrence','Ocurrence','Occurrance'],1,'Double c and double r.'],
+['One word for a person who loves books:',['Bibliophile','Philanthropist','Misanthrope','Linguist'],0,'Bibliophile means a lover of books.'],
+['Meaning of the idiom “a piece of cake”:',['A small gift','Something very easy','A tasty dessert','A difficult task'],1,'It describes something that takes little effort.'],
+['He is good ___ mathematics.',['in','on','at','with'],2,'“Good at” is the standard collocation.'],
+['Passive voice of “The cat chased the mouse”:',['The mouse chased the cat','The mouse was chased by the cat','The mouse is chased by the cat','The cat was chased by the mouse'],1,'Past tense active becomes “was” plus the past participle.'],
+['___ honest man never lies.',['A','An','The','No article'],1,'“Honest” starts with a vowel sound, so “an”.'],
+['Neither of the two boys ___ present.',['were','are','was','have been'],2,'“Neither” takes a singular verb.'],
+['Synonym of CANDID:',['Secretive','Frank','Rude','Silent'],1,'Candid means open and honest.']]},
+{id:'polity',name:'Indian Polity',cat:'General Awareness',qs:[
+['Who is called the Father of the Indian Constitution?',['Jawaharlal Nehru','B. R. Ambedkar','Sardar Patel','Rajendra Prasad'],1,'He chaired the Drafting Committee.'],
+['The Constitution of India came into force on:',['15 August 1947','26 November 1949','26 January 1950','2 October 1950'],2,'It was adopted on 26 November 1949 and took effect on 26 January 1950.'],
+['Fundamental Rights are in which Part of the Constitution?',['Part II','Part III','Part IV','Part V'],1,'Part III covers Articles 12 to 35.'],
+['Minimum age to contest a Lok Sabha election:',['21','25','30','35'],1,'A candidate must be at least 25.'],
+['Article 21 protects:',['Freedom of speech','Right to equality','Life and personal liberty','Right to property'],2,'Article 21 guarantees protection of life and personal liberty.'],
+['The President of India is elected by:',['Direct vote of citizens','An electoral college','Lok Sabha only','The Supreme Court'],1,'Elected MPs and MLAs form the electoral college.'],
+['The number of Fundamental Duties listed today is:',['8','10','11','12'],2,'The 86th Amendment (2002) added the eleventh.'],
+['Maximum strength of the Rajya Sabha:',['238','245','250','260'],2,'Article 80 sets a maximum of 250 members.'],
+['Who presides over a joint sitting of Parliament?',['The President','The Vice-President','Speaker of Lok Sabha','The Prime Minister'],2,'The Speaker of the Lok Sabha presides.'],
+['Directive Principles of State Policy were borrowed from the Constitution of:',['USA','Ireland','Canada','Australia'],1,'The idea came from the Irish Constitution.'],
+['The Right to Constitutional Remedies is under Article:',['14','19','21','32'],3,'Article 32 lets citizens approach the Supreme Court directly.'],
+['The normal term of the Lok Sabha is:',['4 years','5 years','6 years','7 years'],1,'Five years from its first sitting, unless dissolved earlier.']]},
+{id:'hist',name:'History & Geography',cat:'General Awareness',qs:[
+['The Battle of Plassey was fought in:',['1757','1764','1857','1707'],0,'Clive defeated Siraj-ud-Daulah in 1757.'],
+['Who founded the Mughal Empire in India?',['Akbar','Humayun','Babur','Shah Jahan'],2,'Babur won the First Battle of Panipat in 1526.'],
+['The Quit India Movement began in:',['1930','1942','1919','1947'],1,'Gandhi launched it in August 1942.'],
+['The first Governor-General of independent India was:',['C. Rajagopalachari','Lord Mountbatten','Lord Wavell','Lord Linlithgow'],1,'Mountbatten served from August 1947 to June 1948.'],
+['The longest river flowing mostly within India is:',['Godavari','Yamuna','Ganga','Narmada'],2,'The Ganga is about 2,525 km long.'],
+['The highest peak located in India is:',['Mount Everest','K2','Kangchenjunga','Nanda Devi'],2,'Kangchenjunga stands at 8,586 m.'],
+['The Tropic of Cancer passes through how many Indian states?',['6','7','8','9'],2,'Gujarat, Rajasthan, Madhya Pradesh, Chhattisgarh, Jharkhand, West Bengal, Tripura and Mizoram.'],
+['The largest Indian state by area is:',['Madhya Pradesh','Maharashtra','Rajasthan','Uttar Pradesh'],2,'Rajasthan covers about 342,000 sq km.'],
+['The Sun Temple at Konark is in:',['Tamil Nadu','Odisha','Gujarat','Karnataka'],1,'Konark is on the Odisha coast.'],
+['The ancient text Arthashastra was written by:',['Kalidasa','Kautilya','Banabhatta','Vishakhadatta'],1,'Kautilya, also known as Chanakya.'],
+['The Jallianwala Bagh massacre took place in:',['1915','1917','1919','1921'],2,'It happened on 13 April 1919 in Amritsar.'],
+['The smallest Indian state by area is:',['Sikkim','Goa','Tripura','Manipur'],1,'Goa covers about 3,700 sq km.']]},
+{id:'science',name:'General Science',cat:'General Awareness',qs:[
+['Chemical symbol of sodium:',['So','Sd','Na','S'],2,'Na comes from the Latin “natrium”.'],
+['SI unit of force:',['Joule','Newton','Pascal','Watt'],1,'Force is measured in newtons.'],
+['Which vitamin does the skin make in sunlight?',['Vitamin A','Vitamin C','Vitamin D','Vitamin K'],2,'Sunlight helps skin make vitamin D.'],
+['The powerhouse of the cell is the:',['Nucleus','Ribosome','Mitochondria','Golgi body'],2,'Mitochondria release energy from food.'],
+['Plants absorb which gas for photosynthesis?',['Oxygen','Nitrogen','Carbon dioxide','Hydrogen'],2,'They take in carbon dioxide and release oxygen.'],
+['pH of pure water at 25 °C:',['0','7','10','14'],1,'Pure water is neutral, with pH 7.'],
+['Speed of light in vacuum is about:',['3 × 10⁶ m/s','3 × 10⁸ m/s','3 × 10¹⁰ m/s','3 × 10⁵ m/s'],1,'About 300,000 km/s.'],
+['The hardest natural substance:',['Quartz','Graphite','Diamond','Iron'],2,'Diamond ranks 10 on the Mohs scale.'],
+['Number of chambers in the human heart:',['2','3','4','5'],2,'Two atria and two ventricles.'],
+['The universal blood donor group:',['AB positive','O negative','A positive','B negative'],1,'O negative red cells carry no A, B or Rh antigens.'],
+['The most abundant gas in Earth’s atmosphere:',['Oxygen','Nitrogen','Argon','Carbon dioxide'],1,'Nitrogen makes up about 78% of air.'],
+['SI unit of electrical resistance:',['Ampere','Volt','Ohm','Farad'],2,'Resistance is measured in ohms.']]},
+{id:'computer',name:'Computer Awareness',cat:'General Awareness',qs:[
+['CPU stands for:',['Central Processing Unit','Central Program Utility','Computer Personal Unit','Control Processing Unit'],0,'The CPU is the processor that runs instructions.'],
+['Which of these is an input device?',['Monitor','Printer','Keyboard','Speaker'],2,'A keyboard sends data into the computer.'],
+['One byte equals:',['4 bits','8 bits','16 bits','10 bits'],1,'1 byte = 8 bits.'],
+['Ctrl + C is the shortcut for:',['Cut','Copy','Paste','Close'],1,'Ctrl + C copies; Ctrl + V pastes.'],
+['RAM stands for:',['Read Access Memory','Random Access Memory','Rapid Action Memory','Run Access Module'],1,'Random Access Memory.'],
+['Which of these is an operating system?',['Python','HTML','Linux','Excel'],2,'Linux is an operating system; the others are a language, a markup language and an application.'],
+['Default file extension of a modern Word document:',['.doc','.docx','.txt','.xlsx'],1,'Word 2007 and later save as .docx.'],
+['Which memory loses its data when power is off?',['ROM','Hard disk','RAM','Pen drive'],2,'RAM is volatile.'],
+['WWW stands for:',['World Wide Web','World Web Window','Wide World Web','Web World Wire'],0,'World Wide Web.'],
+['Which protocol gives secure web browsing?',['HTTP','FTP','HTTPS','SMTP'],2,'HTTPS encrypts traffic between browser and site.'],
+['Binary form of decimal 10:',['1001','1010','1100','1110'],1,'8 + 2 = 1010.'],
+['Which language structures web pages?',['Python','SQL','HTML','C'],2,'HTML defines the structure of a page.']]}
+];
+var TB={};TOPICS.forEach(function(t){TB[t.id]=t});
+
+/* full mocks: sections are [name, [[topic, from, to], ...]] */
+var FULL=[
+{id:'ssc1',name:'SSC CGL Tier-I Mock 1',exam:'SSC',mins:30,pos:2,neg:0.5,level:'Moderate',secs:[['Reasoning',[['reason',0,6]]],['Quantitative Aptitude',[['percent',0,3],['tsw',0,3],['series',0,3],['ratio',0,3]]],['English',[['english',0,6]]],['General Awareness',[['polity',0,3],['hist',0,3],['science',0,3]]]]},
+{id:'ssc2',name:'SSC CGL Tier-I Mock 2',exam:'SSC',mins:30,pos:2,neg:0.5,level:'Moderate',secs:[['Reasoning',[['reason',6,12]]],['Quantitative Aptitude',[['percent',3,6],['tsw',3,6],['series',3,6],['ratio',3,6]]],['English',[['english',6,12]]],['General Awareness',[['polity',3,6],['hist',3,6],['science',3,6]]]]},
+{id:'bank1',name:'Bank PO Prelims Mock 1',exam:'Banking',mins:24,pos:1,neg:0.25,level:'Moderate',secs:[['English',[['english',0,6]]],['Quantitative Aptitude',[['percent',6,9],['tsw',6,9],['series',6,9],['ratio',6,9]]],['Reasoning',[['reason',6,12]]]]},
+{id:'bank2',name:'Bank PO Prelims Mock 2',exam:'Banking',mins:24,pos:1,neg:0.25,level:'Hard',secs:[['English',[['english',6,12]]],['Quantitative Aptitude',[['percent',9,12],['tsw',9,12],['series',9,12],['ratio',9,12]]],['Reasoning',[['reason',0,6]]]]},
+{id:'rrb1',name:'RRB NTPC CBT-1 Mock 1',exam:'Railways',mins:27,pos:1,neg:1/3,level:'Moderate',secs:[['Mathematics',[['percent',0,3],['tsw',0,3],['series',0,3]]],['Reasoning',[['reason',0,6]]],['General Awareness',[['polity',0,3],['hist',0,3],['science',6,9],['computer',0,3]]]]},
+{id:'rrb2',name:'RRB NTPC CBT-1 Mock 2',exam:'Railways',mins:27,pos:1,neg:1/3,level:'Moderate',secs:[['Mathematics',[['percent',6,9],['tsw',6,9],['series',6,9]]],['Reasoning',[['reason',6,12]]],['General Awareness',[['polity',6,9],['hist',6,9],['science',9,12],['computer',6,9]]]]},
+{id:'gs1',name:'UPSC & State PSC GS Mini Mock 1',exam:'UPSC / PSC',mins:20,pos:2,neg:2/3,level:'Hard',secs:[['General Studies',[['polity',0,6],['hist',0,6],['science',0,6]]]]},
+{id:'gs2',name:'UPSC & State PSC GS Mini Mock 2',exam:'UPSC / PSC',mins:20,pos:2,neg:2/3,level:'Hard',secs:[['General Studies',[['polity',6,12],['hist',6,12],['science',6,12]]]]},
+{id:'camp1',name:'Campus Aptitude Test 1',exam:'Placements',mins:30,pos:1,neg:0,level:'Easy',secs:[['Aptitude',[['percent',0,4],['tsw',0,4],['series',0,4],['ratio',0,4]]],['Reasoning and Verbal',[['reason',0,4],['english',0,4]]]]},
+{id:'camp2',name:'Campus Aptitude Test 2',exam:'Placements',mins:30,pos:1,neg:0,level:'Moderate',secs:[['Aptitude',[['percent',4,8],['tsw',4,8],['series',4,8],['ratio',4,8]]],['Reasoning and Verbal',[['reason',4,8],['english',4,8]]]]},
+{id:'camp3',name:'Campus Aptitude Test 3',exam:'Placements',mins:30,pos:1,neg:0,level:'Hard',secs:[['Aptitude',[['percent',8,12],['tsw',8,12],['series',8,12],['ratio',8,12]]],['Reasoning and Verbal',[['reason',8,12],['english',8,12]]]]}
+];
+var TOPIC_TESTS=TOPICS.map(function(t){return{id:'t_'+t.id,topic:t.id,name:t.name+' Test',exam:t.cat,mins:12,pos:1,neg:0.25,level:'Practice',secs:[[t.name,[[t.id,0,12]]]]}});
+
+function mkQ(tid,i){
+  var t=TB[tid],r=t.qs[i],idx=[0,1,2,3];
+  for(var k=3;k>0;k--){var j=Math.floor(Math.random()*(k+1)),x=idx[k];idx[k]=idx[j];idx[j]=x}
+  return{t:r[0],o:idx.map(function(n){return r[1][n]}),a:idx.indexOf(r[2]),x:r[3],topic:tid,tn:t.name,key:tid+':'+i};
+}
+function cnt(def){var n=0;def.secs.forEach(function(s){s[1].forEach(function(p){n+=p[2]-p[1]})});return n}
+function build(def){
+  var qs=[],secs=[];
+  def.secs.forEach(function(s,si){var from=qs.length;s[1].forEach(function(p){for(var i=p[1];i<p[2];i++){var q=mkQ(p[0],i);q.sec=si;qs.push(q)}});secs.push({name:s[0],from:from,to:qs.length})});
+  return{id:def.id,name:def.name,exam:def.exam,mins:def.mins,pos:def.pos,neg:def.neg,qs:qs,secs:secs};
+}
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function shuffled(arr,r){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(r()*(i+1)),x=a[i];a[i]=a[j];a[j]=x}return a}
+function allKeys(){var k=[];TOPICS.forEach(function(t){t.qs.forEach(function(_,i){k.push([t.id,i])})});return k}
+function dyn(name,keys,mins,pos,neg,id){var qs=keys.map(function(k){var q=mkQ(k[0],k[1]);q.sec=0;return q});return{id:id,name:name,exam:'Mixed',mins:mins,pos:pos,neg:neg,qs:qs,secs:[{name:'Mixed topics',from:0,to:qs.length}]}}
+function dailyTest(){var d=new Date(),seed=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();return dyn('Daily Quick 10',shuffled(allKeys(),rng(seed)).slice(0,10),10,1,0.25,'daily')}
+function practiceOf(tid){var t=TB[tid],keys=t.qs.map(function(_,i){return[tid,i]});var p=dyn(t.name+' Practice',keys,0,1,0,'p_'+tid);return p}
+var TOTAL_Q=TOPICS.reduce(function(n,t){return n+t.qs.length},0);
+var TOTAL_TESTS=FULL.length+TOPIC_TESTS.length+1;
+
+/* ---------------- tenant (institute branding) ---------------- */
+var DEF={name:'Your Institute',tag:'Mock tests for every batch',color:'#D9480F',logo:'',wa:'',group:'',batches:'SSC CGL Morning, Bank PO Weekend, Foundation Class 10'};
+var T=Object.assign({},DEF,ls.get('exampro_tenant',{}));
+var U=ls.get('exampro_user',null);
+var PRESETS=[
+ {label:'SSC academy',name:'Sample SSC Academy',tag:'Crack CGL with weekly mocks',color:'#1D4ED8',batches:'CGL 2027 Morning, CGL 2027 Evening, CHSL Weekend'},
+ {label:'Bank exam academy',name:'Sample Bank Academy',tag:'Prelims and mains test series',color:'#0F766E',batches:'PO Prelims, Clerk Crash Course, Mains Weekend'},
+ {label:'School foundation',name:'Sample Foundation School',tag:'Class 8 to 10 foundation tests',color:'#B4236C',batches:'Class 8, Class 9, Class 10'}
+];
+var COLORS=['#D9480F','#1D4ED8','#0F766E','#B4236C','#6D28D9','#B45309','#15803D','#0F172A'];
+function onColor(hex){var h=hex.replace('#','');var r=parseInt(h.substr(0,2),16),g=parseInt(h.substr(2,2),16),b=parseInt(h.substr(4,2),16);return (0.299*r+0.587*g+0.114*b)/255>0.62?'#101A33':'#FFFFFF'}
+function okHex(h){return /^#[0-9a-fA-F]{6}$/.test(h)}
+function applyBrand(el){var c=okHex(T.color)?T.color:DEF.color;el.style.setProperty('--brand',c);el.style.setProperty('--on-brand',onColor(c))}
+function initials(n){var w=String(n).trim().split(/\s+/).filter(Boolean);return ((w[0]||'E')[0]+(w[1]?w[1][0]:'')).toUpperCase()}
+function logoHTML(){return (T.logo&&/^data:image\//.test(T.logo))?'<img class="lg" src="'+esc(T.logo)+'" alt="">':'<span class="lg ini" aria-hidden="true">'+esc(initials(T.name))+'</span>'}
+function tenantWa(){return T.wa||(HAS_NUM?SITE_WA:'')}
+function saveTenant(){ls.set('exampro_tenant',T)}
+
+/* ---------------- static page wiring ---------------- */
+$$('.wa-link').forEach(function(a){a.href=waLink(HAS_NUM?SITE_WA:'',a.getAttribute('data-wa-text')||'Hi')});
+$('#facts').innerHTML='<span><b>'+TOTAL_TESTS+'</b> mock tests</span><span><b>'+TOTAL_Q+'</b> questions with explanations</span><span><b>'+TOPICS.length+'</b> topics</span>';
+
+/* hero sample question */
+(function(){
+  var done=false,box=$('#omr'),fb=$('#omrFb'),again=$('#omrAgain'),btns=$$('.omr-o',box);
+  btns.forEach(function(b){b.addEventListener('click',function(){
+    if(done)return;done=true;var i=+b.getAttribute('data-i');
+    btns.forEach(function(x){x.disabled=true});
+    btns[1].classList.add('right');
+    if(i===1){fb.innerHTML='<b>Correct, +4.</b> 25% of ₹800 is ₹200, so the sale price is ₹600.'}
+    else{b.classList.add('wrong');fb.innerHTML='<b>Not quite, −1.</b> 25% of ₹800 is ₹200, so the sale price is ₹600.'}
+    again.hidden=false;
+  })});
+  again.addEventListener('click',function(){done=false;btns.forEach(function(x){x.disabled=false;x.classList.remove('right','wrong')});fb.textContent='Tap a bubble. Your students get the same instant feedback on every test.';again.hidden=true});
+})();
+
+/* roles */
+var ROLES=[
+{id:'owner',label:'Institute owner',head:'Go from sign-up to your first live test in about half a day.',out:'You keep your students, results and brand. Exampro runs the exam hall.',steps:[
+['Create your portal','Add your institute name, logo and brand colour. Students see your brand on every page, test window and certificate.'],
+['Add your teachers','Invite teachers by mobile number. Decide who can build tests, who can only view results and who manages batches.'],
+['Set up batches','Create one batch per course, such as SSC CGL Morning or Bank PO Weekend. Add students from a CSV or share an invite link.'],
+['Choose your tests','Start with the ready mocks, or let teachers build tests from your own question bank.'],
+['Share on WhatsApp','Post the test link in the batch group. Students open it on their phone and log in with their mobile number.'],
+['Read the numbers','See attendance, average score and weak topics for each batch, then follow up with parents on WhatsApp.']]},
+{id:'teacher',label:'Teacher',head:'Build a test in ten minutes and know who needs help before the next class.',out:'Every wrong answer is a topic to teach again, and every doubt reaches you with the question attached.',steps:[
+['Fill the question bank','Add questions one by one or upload a CSV. Each question carries options, the right answer, an explanation and a topic tag.'],
+['Build the test','Choose sections, marks, negative marking and duration. Shuffle questions so neighbours cannot copy.'],
+['Assign and schedule','Pick the batches and the start window. Release results instantly or after the window closes.'],
+['Review the analytics','See question-wise accuracy, the most skipped questions and the toppers.'],
+['Close the doubts','Students send doubts on WhatsApp with the question prefilled. Post the solution in the batch group.'],
+['Reuse what worked','Clone a test for the next batch and swap only the weak topics.']]},
+{id:'student',label:'Student',head:'Open one link, take the test and know your result before you put the phone down.',out:'You practise the way the real exam feels, then fix the topics that cost you marks.',steps:[
+['Open your institute’s link','Enter your mobile number and verify. Your batch and its tests are waiting.'],
+['Pick a test','Upcoming, live and completed tests are listed. Try Daily Quick 10 to build a streak.'],
+['Attempt like the real exam','Use the timer, the question palette and Mark for review. Wrong answers lose marks only if the test says so.'],
+['See the result at once','Get your score, accuracy, time per question and a section-wise breakdown.'],
+['Learn from the review','Read the explanation for every question and bookmark the ones to revise.'],
+['Ask on WhatsApp','Still stuck? Tap the WhatsApp button on the question and your teacher gets it with your answer attached.']]},
+{id:'parent',label:'Parent',head:'Know how your child is doing without chasing for marks.',out:'You get the score, the rank and the weak topics in the chat you already use.',steps:[
+['Share your number','Give the institute a WhatsApp number when your child joins a batch.'],
+['Get a summary after each test','The message carries the test name, score, rank in batch and attendance.'],
+['See the weak topics','Each summary names the topics where marks were lost, so you can ask the right questions at home.'],
+['Reach the counsellor','Reply on WhatsApp to talk to the counsellor about batches, fees or a study plan.']]}
+];
+var roleTabs=$('#roleTabs'),rolePanel=$('#rolePanel');
+roleTabs.innerHTML=ROLES.map(function(r,i){return '<button role="tab" id="rt-'+r.id+'" data-role="'+i+'" aria-selected="'+(i===0)+'" aria-controls="rolePanel" tabindex="'+(i===0?0:-1)+'">'+esc(r.label)+'</button>'}).join('');
+function showRole(i){
+  var r=ROLES[i];
+  $$('#roleTabs button').forEach(function(b,k){b.setAttribute('aria-selected',String(k===i));b.tabIndex=k===i?0:-1});
+  rolePanel.setAttribute('aria-labelledby','rt-'+r.id);
+  rolePanel.innerHTML='<div><p class="eyebrow">For the '+esc(r.label.toLowerCase())+'</p><h3 style="margin-top:12px">'+esc(r.head)+'</h3><p class="out">'+esc(r.out)+'</p></div><ol class="steps">'+r.steps.map(function(s){return '<li><div><h4>'+esc(s[0])+'</h4><p>'+esc(s[1])+'</p></div></li>'}).join('')+'</ol>';
+}
+showRole(0);
+
+/* feature groups */
+var FEATS=[
+{t:'Exam-hall realism',s:'Modelled on national exam portals',f:[
+ ['Countdown timer with auto-submit',1],['Question palette: answered, not answered, marked, not visited',1],['Mark for review and clear response',1],['Sections with section-wise marks',1],['Negative marking you set per test',1],['Tab-switch warnings',1],['Shuffle questions per student',0],['Hindi and English questions',0]]},
+{t:'Daily practice habit',s:'Inspired by IndiaBix and Physics Wallah daily practice',f:[
+ ['Topic-wise practice with instant answer and reason',1],['Aptitude, reasoning, English, GK and computer topics',1],['Daily Quick 10 and a streak counter',1],['Bookmark a question and revise it later',1],['Accuracy by topic and a weakest-topic shortcut',1],['Doubt on any question, sent to WhatsApp',1],['Notes and PDF handouts per batch',0]]},
+{t:'Course feel',s:'Inspired by Udemy',f:[
+ ['Certificate of completion with your branding',1],['Sign in with your mobile number',1],['Progress that carries across attempts',1],['Batch pages with schedule and progress bar',0],['Ratings and feedback after each test',0],['Lifetime access to attempted tests and solutions',0],['Live class links and recordings',0],['Announcements pushed to WhatsApp',0]]},
+{t:'Run your institute',s:'Multi-tenant by design',f:[
+ ['Your own portal with logo, colour and name',1],['Batches, teachers and role permissions',0],['Question bank with CSV upload',0],['Test scheduler and result release rules',0],['Batch analytics, toppers and weak topics',0],['Separate data for every institute',0],['WhatsApp updates to parents',0]]}
+];
+$('#fgrid').innerHTML=FEATS.map(function(g){return '<div class="fgroup"><header><h3>'+esc(g.t)+'</h3><span class="insp">'+esc(g.s)+'</span></header><ul>'+g.f.map(function(f){return '<li><span>'+esc(f[0])+'</span><span class="tag'+(f[1]?' live':'')+'">'+(f[1]?'Try it':'In platform')+'</span></li>'}).join('')+'</ul></div>'}).join('');
+
+/* ---------------- test library ---------------- */
+function fmtNeg(n){if(!n)return 'no negative marking';var s=Math.abs(n-1/3)<.001?'1/3':Math.abs(n-2/3)<.001?'2/3':num(n);return '−'+s+' per wrong'}
+var filter='all';
+var FILTERS=[['all','All tests'],['SSC','SSC'],['Banking','Banking'],['Railways','Railways'],['UPSC / PSC','UPSC / PSC'],['Placements','Placements'],['topic','Topic tests']];
+$('#filters').innerHTML=FILTERS.map(function(f){return '<button class="chip" type="button" data-filter="'+esc(f[0])+'" aria-pressed="'+(f[0]==='all')+'">'+esc(f[1])+'</button>'}).join('');
+function card(d,kind){
+  var n=kind==='daily'?10:cnt(d),secs=kind==='daily'?'Ten questions from every topic, new set each day':d.secs.map(function(s){return s[0]}).join(' · ');
+  var act=kind==='topic'?'<button class="btn primary sm" data-start="'+d.id+'" type="button">Timed test</button><button class="btn sm" data-practice="'+d.topic+'" type="button">Practice</button>':'<button class="btn primary sm" data-start="'+d.id+'" type="button">Start test</button>';
+  return '<article class="tcard"><header><h3>'+esc(d.name)+'</h3><span class="tag">'+esc(kind==='daily'?'Daily':d.exam)+'</span></header><div class="tmeta"><span>'+n+' questions</span><span>'+(kind==='daily'?10:d.mins)+' min</span><span>+'+num(d.pos)+' / '+fmtNeg(d.neg).replace(' per wrong','')+'</span></div><p class="tsecs">'+esc(secs)+'</p><div class="tact">'+act+'</div></article>';
+}
+function renderTests(){
+  var h='';
+  if(filter==='all'||filter==='Daily')h+=card({id:'daily',name:'Daily Quick 10',exam:'Daily',mins:10,pos:1,neg:0.25,secs:[]},'daily');
+  FULL.forEach(function(d){if(filter==='all'||filter===d.exam)h+=card(d,'full')});
+  if(filter==='all'||filter==='topic')TOPIC_TESTS.forEach(function(d){h+=card(d,'topic')});
+  $('#tgrid').innerHTML=h;
+}
+renderTests();
+$('#bTopics').innerHTML=TOPICS.map(function(t,i){return '<label><input type="checkbox" value="'+t.id+'"'+(i<4?' checked':'')+'>'+esc(t.name)+'</label>'}).join('');
+
+/* ---------------- progress ---------------- */
+var SAMPLE_STATS={percent:{c:14,a:20},tsw:{c:9,a:18},series:{c:15,a:18},ratio:{c:11,a:16},reason:{c:12,a:15},english:{c:13,a:16},polity:{c:8,a:14},hist:{c:7,a:12},science:{c:10,a:12},computer:{c:11,a:12}};
+var SAMPLE_ATT=[{name:'SSC CGL Tier-I Mock 1',date:'Example',score:41,total:66,pct:62},{name:'Campus Aptitude Test 1',date:'Example',score:17,total:24,pct:71},{name:'Daily Quick 10',date:'Example',score:6.5,total:10,pct:65}];
+function dayKey(d){return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
+function streakNow(){var s=ls.get('exampro_streak',{last:'',n:0});var t=new Date(),y=new Date(t.getTime()-864e5);return (s.last===dayKey(t)||s.last===dayKey(y))?s.n:0}
+function bumpStreak(){var s=ls.get('exampro_streak',{last:'',n:0}),t=new Date(),y=new Date(t.getTime()-864e5);if(s.last===dayKey(t))return;s.n=(s.last===dayKey(y))?s.n+1:1;s.last=dayKey(t);ls.set('exampro_streak',s)}
+function renderProgress(){
+  var att=ls.get('exampro_att',[]),stats=ls.get('exampro_stats',{}),sample=!att.length;
+  if(sample){att=SAMPLE_ATT;stats=SAMPLE_STATS}
+  var rows=TOPICS.map(function(t){var s=stats[t.id]||{c:0,a:0};return{id:t.id,n:t.name,c:s.c,a:s.a,p:s.a?Math.round(s.c/s.a*100):-1}});
+  var withData=rows.filter(function(r){return r.p>=0}).sort(function(a,b){return a.p-b.p});
+  var weak=withData[0];
+  var bars=rows.slice().sort(function(a,b){return (a.p<0?101:a.p)-(b.p<0?101:b.p)}).map(function(r){
+    var cls=r.p<0?'':r.p>=75?'good':r.p>=50?'mid':'low',lab=r.p<0?'Not attempted':r.p>=75?'Strong':r.p>=50?'Improving':'Needs work';
+    return '<div class="bar"><span>'+esc(r.n)+'</span><span class="val">'+(r.p<0?'–':r.p+'%')+' · '+lab+'</span><span class="trk"><span class="fill '+cls+'" style="width:'+Math.max(r.p,0)+'%"></span></span></div>';
+  }).join('');
+  var st=streakNow();
+  $('#pgrid').innerHTML='<div class="pcard"><p class="eyebrow">'+(U?'Hi, '+esc(U.name.split(' ')[0])+' · streak':'Streak')+'</p><p class="big" style="margin-top:10px">'+st+'<span class="mono" style="font-size:1rem;font-weight:600;letter-spacing:0"> day'+(st===1?'':'s')+'</span></p><p class="muted" style="margin-top:8px">'+(st?'Finish any test or practice set tomorrow to keep it going.':'Finish a test or practice set today to start a streak.')+'</p>'+
+    (weak?'<div style="margin-top:20px"><p class="note">Weakest topic</p><p style="font-weight:600;margin:2px 0 10px">'+esc(weak.n)+' · '+weak.p+'%</p><button class="btn primary sm" data-practice="'+weak.id+'" type="button">Practise it now</button></div>':'')+
+    (U?'':'<p class="note" style="margin-top:18px"><button class="btn sm" type="button" data-sign>Sign in</button> to put your name on certificates.</p>')+'<h3 style="margin-top:26px">Recent attempts</h3><ul class="alist">'+att.slice(0,5).map(function(a){return '<li><span>'+esc(a.name)+'<br><span class="note">'+esc(a.date)+'</span></span><span class="s">'+num(a.score)+' / '+num(a.total)+'</span></li>'}).join('')+'</ul></div>'+
+    '<div class="pcard">'+(sample?'<span class="tag samplebar">Sample report</span>':'')+'<h3>Accuracy by topic</h3><div class="bars">'+bars+'</div><p class="note" style="margin-top:14px">'+(sample?'These are example numbers. Your own results replace them after your first test.':'Accuracy counts only the questions you answered.')+'</p></div>';
+}
+renderProgress();
+
+/* ---------------- exam engine ---------------- */
+var S=null,tick=null;
+function mmss(s){s=Math.max(0,s);var h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return (h?h+':':'')+(h?('0'+m).slice(-2):m)+':'+('0'+x).slice(-2)}
+function bms(){return ls.get('exampro_bm',[])}
+function openEngine(test,mode){
+  if(!test.qs.length){toast('No questions to show');return}
+  S={test:test,mode:mode,i:0,ans:test.qs.map(function(){return -1}),mark:test.qs.map(function(){return false}),vis:test.qs.map(function(){return false}),spent:test.qs.map(function(){return 0}),chk:test.qs.map(function(){return false}),end:mode==='test'?Date.now()+test.mins*60000:0,left:test.mins*60,modal:'',pal:false,res:null,rf:'all',tab:0,t0:Date.now()};
+  S.vis[0]=true;
+  var e=$('#engine');e.hidden=false;applyBrand(e);
+  document.documentElement.classList.add('lock');
+  clearInterval(tick);tick=setInterval(onTick,1000);
+  draw();
+}
+function closeEngine(){clearInterval(tick);S=null;var e=$('#engine');e.hidden=true;e.innerHTML='';document.documentElement.classList.remove('lock')}
+function onTick(){
+  if(!S||S.res)return;
+  S.spent[S.i]++;
+  var tm=$('#tm');
+  if(S.mode==='test'){S.left=Math.max(0,Math.round((S.end-Date.now())/1000));if(tm){tm.textContent=mmss(S.left);tm.classList.toggle('low',S.left<=300)}if(S.left<=0){toast('Time is up. Your test was submitted.');submit()}}
+  else if(tm){tm.textContent=mmss(Math.round((Date.now()-S.t0)/1000))}
+}
+function st(i){var a=S.ans[i]>-1;if(S.mode==='practice')return S.chk[i]?(S.ans[i]===S.test.qs[i].a?'a':'na'):'nv';if(S.mark[i])return a?'am':'m';if(a)return 'a';return S.vis[i]?'na':'nv'}
+function draw(){if(!S)return;S.res?drawResult():drawTest()}
+function topBar(title,right){return '<div class="eng-top"><div class="eng-brand">'+logoHTML()+'<span>'+esc(T.name)+'</span></div><div class="eng-title">'+esc(title)+'</div>'+right+'</div>'}
+function drawTest(){
+  var t=S.test,i=S.i,q=t.qs[i],prac=S.mode==='practice',saved=bms().indexOf(q.key)>-1,last=i===t.qs.length-1;
+  var tabs=t.secs.length>1?'<div class="eng-secs" role="tablist" aria-label="Sections">'+t.secs.map(function(s,si){return '<button role="tab" type="button" class="'+(si===q.sec?'on':'')+'" aria-selected="'+(si===q.sec)+'" data-act="sec" data-k="'+si+'">'+esc(s.name)+'</button>'}).join('')+'</div>':'';
+  var opts=q.o.map(function(o,k){
+    var c='opt',done=prac&&S.chk[i];
+    if(done){if(k===q.a)c+=' right';else if(k===S.ans[i])c+=' wrong'}else if(S.ans[i]===k)c+=' sel';
+    return '<button type="button" class="'+c+'" data-act="o" data-k="'+k+'"'+(done?' disabled':'')+'><span class="bub">'+'ABCD'[k]+'</span><span class="otxt">'+esc(o)+'</span></button>';
+  }).join('');
+  var ex='';
+  if(prac&&S.chk[i]){var ok=S.ans[i]===q.a;ex='<div class="expl '+(ok?'ok':'bad')+'"><b>'+(ok?'Correct.':'Not quite. The answer is '+'ABCD'[q.a]+'.')+'</b> '+esc(q.x)+'<div class="row"><a class="btn sm wa" target="_blank" rel="noopener" href="'+esc(discussLink(q,i,S.ans[i]))+'">Discuss on WhatsApp</a></div></div>'}
+  var counts={a:0,na:0,m:0,nv:0};t.qs.forEach(function(_,k){var s=st(k);if(s==='a'||s==='am')counts.a++;else if(s==='na')counts.na++;else if(s==='m')counts.m++;else counts.nv++});
+  var pal=t.secs.map(function(s,si){var b='';for(var k=s.from;k<s.to;k++){b+='<button type="button" class="pb '+st(k)+(k===i?' cur':'')+'" data-act="go" data-k="'+k+'" aria-label="Question '+(k+1)+'">'+(k+1)+'</button>'}return '<div>'+(t.secs.length>1?'<h4>'+esc(s.name)+'</h4>':'')+'<div class="pgrid2">'+b+'</div></div>'}).join('');
+  var legend=prac?'<span><i class="a"></i>Correct</span><span><i class="na"></i>Wrong</span><span><i></i>Not tried</span>':'<span><i class="a"></i>Answered</span><span><i class="na"></i>Not answered</span><span><i></i>Not visited</span><span><i class="m"></i>Marked</span>';
+  var right='<span class="tm" id="tm">'+(prac?'0:00':mmss(S.left))+'</span><button type="button" class="btn sm palbtn" data-act="pal">Palette</button><button type="button" class="btn sm" data-act="'+(prac?'finish':'submit')+'">'+(prac?'Finish':'Submit')+'</button><button type="button" class="btn sm ghost" data-act="exit" aria-label="Leave test">Leave</button>';
+  var actions=prac?
+    '<button type="button" class="btn" data-act="prev"'+(i===0?' disabled':'')+'>Previous</button><span class="sp"></span><button type="button" class="btn brand" data-act="'+(last?'finish':'next')+'">'+(last?'Finish practice':'Next')+'</button>':
+    '<button type="button" class="btn" data-act="mark">Mark for review &amp; next</button><button type="button" class="btn" data-act="clear">Clear response</button><span class="sp"></span><button type="button" class="btn" data-act="prev"'+(i===0?' disabled':'')+'>Previous</button><button type="button" class="btn brand" data-act="save">'+(last?'Save &amp; review':'Save &amp; next')+'</button>';
+  var modal='';
+  if(S.modal==='submit'){
+    var rows=t.secs.map(function(s){var a=0,n=0,m=0;for(var k=s.from;k<s.to;k++){if(S.ans[k]>-1)a++;else n++;if(S.mark[k])m++}return '<tr><td>'+esc(s.name)+'</td><td>'+a+'</td><td>'+n+'</td><td>'+m+'</td></tr>'}).join('');
+    modal='<div class="modal"><div class="modal-card" role="alertdialog" aria-labelledby="mt"><h3 id="mt">'+(prac?'Finish this practice set?':'Submit this test?')+'</h3><div class="tscroll"><table class="tbl"><thead><tr><th>Section</th><th>Answered</th><th>Not answered</th><th>Marked</th></tr></thead><tbody>'+rows+'</tbody></table></div><p class="muted">'+(prac?'You will see your summary and can review every question.':'Time left '+mmss(S.left)+'. You cannot change answers after submitting.')+'</p><div class="row"><button type="button" class="btn" data-act="cancel">Go back</button><button type="button" class="btn brand" data-act="confirm">'+(prac?'Finish':'Submit test')+'</button></div></div></div>';
+  }else if(S.modal==='exit'){
+    modal='<div class="modal"><div class="modal-card" role="alertdialog" aria-labelledby="mt"><h3 id="mt">Leave this test?</h3><p class="muted">Your answers so far will not be saved.</p><div class="row"><button type="button" class="btn" data-act="cancel">Stay</button><button type="button" class="btn brand" data-act="leave">Leave test</button></div></div></div>';
+  }
+  $('#engine').innerHTML='<div class="eng" role="dialog" aria-modal="true" aria-label="'+esc(t.name)+'">'+topBar(t.name,right)+tabs+
+    '<div class="eng-body"><div class="q-pane"><div class="q-in"><div class="qmeta"><span>Question '+(i+1)+' of '+t.qs.length+'</span><span>·</span><span>'+esc(t.secs[q.sec].name)+'</span><span class="sp"></span>'+(prac?'<span>Practice</span>':'<span>+'+num(t.pos)+' / '+(t.neg?'−'+num(t.neg):'0')+'</span>')+'<button type="button" class="btn sm bmk" data-act="bm" aria-pressed="'+saved+'">'+(saved?'Saved':'Save question')+'</button></div><h2 class="qt">'+esc(q.t)+'</h2><div class="opts">'+opts+'</div>'+ex+'</div></div>'+
+    '<aside class="pal'+(S.pal?' open':'')+'" aria-label="Question palette"><div class="legend">'+legend+'</div>'+pal+'<div class="note">'+(prac?counts.a+' correct · '+counts.na+' wrong · '+counts.nv+' to go':counts.a+' answered · '+counts.na+' not answered · '+counts.m+' marked · '+counts.nv+' not visited')+'</div><button type="button" class="btn sm palbtn" data-act="pal">Close palette</button></aside></div>'+
+    '<div class="eng-actions">'+actions+'</div>'+modal+'</div>';
+}
+function discussLink(q,i,mine){
+  var n=tenantWa();
+  var txt='Hi, I have a doubt in "'+S.test.name+'", question '+(i+1)+'.\n\n'+q.t+'\n'+q.o.map(function(o,k){return 'ABCD'[k]+') '+o}).join('\n')+'\n\nMy answer: '+(mine>-1?'ABCD'[mine]:'not answered')+'. Correct answer: '+'ABCD'[q.a]+'.\nPlease explain.';
+  return waLink(n,txt);
+}
+function go(k){S.i=Math.max(0,Math.min(S.test.qs.length-1,k));S.vis[S.i]=true;S.pal=false;draw();var p=$('.q-pane');if(p)p.scrollTop=0}
+function pick(k){
+  var i=S.i;
+  if(S.mode==='practice'){if(S.chk[i])return;S.ans[i]=k;S.chk[i]=true}else S.ans[i]=k;
+  draw();
+}
+function compute(){
+  var t=S.test,r={c:0,w:0,s:0,score:0,total:t.qs.length*t.pos,secs:t.secs.map(function(s){return{name:s.name,n:s.to-s.from,c:0,w:0,s:0,score:0}}),topics:{}};
+  t.qs.forEach(function(q,i){
+    var a=S.ans[i],sc=r.secs[q.sec],tp=r.topics[q.topic]||(r.topics[q.topic]={n:q.tn,c:0,a:0});
+    if(a===-1){r.s++;sc.s++}
+    else{tp.a++;if(a===q.a){r.c++;sc.c++;tp.c++;r.score+=t.pos;sc.score+=t.pos}else{r.w++;sc.w++;r.score-=t.neg;sc.score-=t.neg}}
+  });
+  r.attempted=r.c+r.w;r.acc=r.attempted?Math.round(r.c/r.attempted*100):0;r.pct=r.total?Math.max(0,Math.round(r.score/r.total*100)):0;
+  r.time=Math.round((Date.now()-S.t0)/1000);return r;
+}
+function submit(){
+  if(!S||S.res)return;
+  clearInterval(tick);
+  var r=compute();S.res=r;S.modal='';
+  var stats=ls.get('exampro_stats',{});
+  Object.keys(r.topics).forEach(function(k){var s=stats[k]||{c:0,a:0};s.c+=r.topics[k].c;s.a+=r.topics[k].a;stats[k]=s});
+  ls.set('exampro_stats',stats);
+  var att=ls.get('exampro_att',[]);
+  var d=new Date();
+  att.unshift({name:S.test.name,date:d.toLocaleDateString('en-IN',{day:'numeric',month:'short'})+', '+d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}),score:Math.round(r.score*100)/100,total:Math.round(r.total*100)/100,pct:r.pct});
+  ls.set('exampro_att',att.slice(0,20));
+  bumpStreak();renderProgress();
+  draw();var p=$('.res');if(p)p.scrollTop=0;
+}
+function drawResult(){
+  var t=S.test,r=S.res,prac=S.mode==='practice',name=ls.get('exampro_name','');
+  var shareTxt=(prac?'I got '+r.c+' of '+t.qs.length+' right in "':'I scored '+num(r.score)+' out of '+num(r.total)+' ('+r.pct+'%) in "')+t.name+'" at '+T.name+'. Try it too!';
+  var secRows=r.secs.map(function(s){return '<tr><td>'+esc(s.name)+'</td><td>'+s.c+'</td><td>'+s.w+'</td><td>'+s.s+'</td><td>'+num(s.score)+'</td></tr>'}).join('');
+  var topicRows=Object.keys(r.topics).map(function(k){var x=r.topics[k],p=x.a?Math.round(x.c/x.a*100):0,cls=p>=75?'good':p>=50?'mid':'low',lab=p>=75?'Strong':p>=50?'Improving':'Needs work';return '<div class="bar"><span>'+esc(x.n)+'</span><span class="val">'+x.c+'/'+x.a+' · '+lab+'</span><span class="trk"><span class="fill '+cls+'" style="width:'+p+'%"></span></span></div>'}).join('');
+  var bm=bms();
+  var list=t.qs.map(function(q,i){return{q:q,i:i,a:S.ans[i]}}).filter(function(o){var s=o.a===-1?'s':o.a===o.q.a?'c':'w';return S.rf==='all'||(S.rf==='wrong'&&s==='w')||(S.rf==='skipped'&&s==='s')||(S.rf==='saved'&&bm.indexOf(o.q.key)>-1)});
+  var rv=list.length?list.map(function(o){
+    var q=o.q,s=o.a===-1?'s':o.a===q.a?'c':'w',sv=bm.indexOf(q.key)>-1;
+    return '<article class="rv '+s+'"><div class="qmeta"><span>Q'+(o.i+1)+'</span><span>·</span><span>'+esc(q.tn)+'</span><span class="sp"></span><span class="st '+s+'">'+(s==='c'?'Correct':s==='w'?'Wrong':'Skipped')+'</span><span>'+S.spent[o.i]+'s</span><button type="button" class="btn sm bmk" data-act="rbm" data-k="'+o.i+'" aria-pressed="'+sv+'">'+(sv?'Saved':'Save')+'</button></div><p class="qt">'+esc(q.t)+'</p><ol>'+q.o.map(function(x,k){var c=k===q.a?'ans':(k===o.a?'mine':'');return '<li class="'+c+'"><span class="l">'+'ABCD'[k]+'</span><span>'+esc(x)+'</span>'+(k===q.a?'<span class="f" style="color:var(--ok)">Right answer</span>':k===o.a?'<span class="f" style="color:var(--bad)">Your answer</span>':'')+'</li>'}).join('')+'</ol><div class="expl" style="margin-top:12px"><b>Why:</b> '+esc(q.x)+'<div class="row"><a class="btn sm wa" target="_blank" rel="noopener" href="'+esc(discussLink(q,o.i,o.a))+'">Discuss on WhatsApp</a></div></div></article>';
+  }).join(''):'<p class="muted">Nothing here yet.</p>';
+  var cert='';
+  if(!prac&&r.pct>=60){cert='<div class="cert"><div class="row">'+logoHTML()+'<b>'+esc(T.name)+'</b></div><p class="eyebrow">Certificate of completion</p><p class="who2" id="certWho">'+esc(name||'Your name')+'</p><p>scored <b>'+r.pct+'%</b> in <b>'+esc(t.name)+'</b>.</p><div class="field" style="margin-top:16px;max-width:320px"><label for="certName">Type your name for the certificate</label><input type="text" id="certName" maxlength="40" value="'+esc(name)+'"></div></div>'}
+  var right='<button type="button" class="btn sm" data-act="close">Close</button>';
+  $('#engine').innerHTML='<div class="eng results" role="dialog" aria-modal="true" aria-label="Result">'+topBar((prac?'Practice summary · ':'Result · ')+t.name,right)+
+  '<div class="res"><div class="wrap res-in">'+
+  '<div class="score"><div class="n">'+(prac?r.c:num(r.score))+'<small> / '+(prac?t.qs.length:num(r.total))+'</small></div><div><b>'+(prac?'Questions right':r.pct+'% of the total marks')+'</b><div class="meter" role="img" aria-label="'+(prac?Math.round(r.c/t.qs.length*100):r.pct)+' percent"><i style="width:'+(prac?Math.round(r.c/t.qs.length*100):r.pct)+'%"></i></div><p class="muted" style="margin-top:8px">'+(r.pct>=75||(prac&&r.c/t.qs.length>=.75)?'Strong attempt. Keep the streak going.':r.acc>=50?'Good base. Review the wrong answers below.':'Practise the topics below, then retake this test.')+'</p></div></div>'+
+  '<div class="stats"><div class="stat ok"><b>'+r.c+'</b><span>Correct</span></div><div class="stat bad"><b>'+r.w+'</b><span>Wrong</span></div><div class="stat"><b>'+r.s+'</b><span>Skipped</span></div><div class="stat"><b>'+r.acc+'%</b><span>Accuracy</span></div><div class="stat"><b>'+mmss(r.time)+'</b><span>Time taken</span></div></div>'+
+  '<div class="ract"><a class="btn wa" target="_blank" rel="noopener" href="'+esc(waLink('',shareTxt))+'">Share score on WhatsApp</a><a class="btn" target="_blank" rel="noopener" href="'+esc(waLink(tenantWa(),'Hi, I just finished "'+t.name+'" and scored '+(prac?r.c+' of '+t.qs.length:num(r.score)+' of '+num(r.total))+'. Can we plan what to practise next?'))+'">Talk to my teacher</a><button type="button" class="btn" data-act="retake">Retake</button></div>'+
+  '<div class="rcols"><div class="rbox"><h3>By section</h3><div class="tscroll"><table class="tbl"><thead><tr><th>Section</th><th>Right</th><th>Wrong</th><th>Skipped</th><th>Marks</th></tr></thead><tbody>'+secRows+'</tbody></table></div></div><div class="rbox"><h3>By topic</h3><div class="bars" style="margin-top:6px">'+topicRows+'</div></div></div>'+
+  (S.tabs?'<p class="note">Tab switches noted: '+S.tabs+'</p>':'')+cert+
+  '<div><h3 style="margin-bottom:12px">Review every question</h3><div class="filters" role="group" aria-label="Filter review">'+[['all','All'],['wrong','Wrong'],['skipped','Skipped'],['saved','Saved']].map(function(f){return '<button type="button" class="chip" data-act="rf" data-k="'+f[0]+'" aria-pressed="'+(S.rf===f[0])+'">'+f[1]+'</button>'}).join('')+'</div><div class="rv-list">'+rv+'</div></div>'+
+  '</div></div></div>';
+}
+function toggleBm(key){var b=bms(),k=b.indexOf(key);if(k>-1)b.splice(k,1);else b.push(key);ls.set('exampro_bm',b);return k===-1}
+
+document.addEventListener('visibilitychange',function(){if(S&&!S.res&&S.mode==='test'){if(document.hidden){S.tabs=(S.tabs||0)+1}else{toast('Tab switch noted ('+S.tabs+'). Stay on the test window.')}}});
+
+$('#engine').addEventListener('click',function(e){
+  var b=e.target.closest('[data-act]');if(!b||!S)return;
+  var a=b.getAttribute('data-act'),k=+b.getAttribute('data-k');
+  switch(a){
+    case 'o':pick(k);break;
+    case 'go':go(k);break;
+    case 'sec':go(S.test.secs[k].from);break;
+    case 'next':go(S.i+1);break;
+    case 'prev':go(S.i-1);break;
+    case 'save':if(S.i===S.test.qs.length-1){S.modal='submit';draw()}else go(S.i+1);break;
+    case 'mark':S.mark[S.i]=true;if(S.i<S.test.qs.length-1)go(S.i+1);else draw();break;
+    case 'clear':S.ans[S.i]=-1;S.mark[S.i]=false;draw();break;
+    case 'pal':S.pal=!S.pal;draw();break;
+    case 'submit':case 'finish':S.modal='submit';draw();break;
+    case 'confirm':submit();break;
+    case 'cancel':S.modal='';draw();break;
+    case 'exit':S.modal='exit';draw();break;
+    case 'leave':case 'close':closeEngine();break;
+    case 'bm':var on=toggleBm(S.test.qs[S.i].key);toast(on?'Question saved for revision':'Removed from saved');draw();break;
+    case 'rbm':toggleBm(S.test.qs[k].key);var p=$('.res');var y=p?p.scrollTop:0;draw();p=$('.res');if(p)p.scrollTop=y;break;
+    case 'rf':S.rf=b.getAttribute('data-k');draw();break;
+    case 'retake':openEngine(S.test,S.mode);break;
+  }
+});
+$('#engine').addEventListener('input',function(e){
+  if(e.target.id==='certName'){var v=e.target.value.slice(0,40);ls.set('exampro_name',v);$('#certWho').textContent=v||'Your name'}
+});
+document.addEventListener('keydown',function(e){
+  if(!S||S.res||S.modal)return;
+  var tg=e.target&&e.target.tagName;if(tg==='INPUT'||tg==='TEXTAREA'||tg==='SELECT')return;
+  var k=e.key.toLowerCase();
+  if('1234'.indexOf(k)>-1&&k.length===1)pick(+k-1);
+  else if('abcd'.indexOf(k)>-1&&k.length===1)pick('abcd'.indexOf(k));
+  else if(k==='arrowright'||k==='n')go(S.i+1);
+  else if(k==='arrowleft'||k==='p')go(S.i-1);
+  else if(k==='m'&&S.mode==='test'){S.mark[S.i]=true;draw()}
+  else if(k==='escape'){S.modal='exit';draw()}
+});
+
+/* start buttons, filters, tabs */
+function findDef(id){var all=FULL.concat(TOPIC_TESTS);for(var i=0;i<all.length;i++)if(all[i].id===id)return all[i]}
+document.addEventListener('click',function(e){
+  var el;
+  if((el=e.target.closest('[data-start]'))){var id=el.getAttribute('data-start');openEngine(id==='daily'?dailyTest():build(findDef(id)),'test');return}
+  if((el=e.target.closest('[data-practice]'))){openEngine(practiceOf(el.getAttribute('data-practice')),'practice');return}
+  if((el=e.target.closest('[data-filter]'))){filter=el.getAttribute('data-filter');$$('[data-filter]').forEach(function(b){b.setAttribute('aria-pressed',String(b===el))});renderTests();return}
+  if((el=e.target.closest('[data-role]'))){showRole(+el.getAttribute('data-role'));return}
+});
+roleTabs.addEventListener('keydown',function(e){
+  var tabs=$$('#roleTabs button'),i=tabs.findIndex(function(b){return b.getAttribute('aria-selected')==='true'});
+  if(e.key==='ArrowRight')i=(i+1)%tabs.length;else if(e.key==='ArrowLeft')i=(i+tabs.length-1)%tabs.length;else return;
+  e.preventDefault();showRole(i);tabs[i].focus();
+});
+
+/* custom test builder */
+$('#bGo').addEventListener('click',function(){
+  var ids=$$('#bTopics input:checked').map(function(c){return c.value});
+  if(!ids.length){toast('Pick at least one topic');return}
+  var keys=[];ids.forEach(function(id){TB[id].qs.forEach(function(_,i){keys.push([id,i])})});
+  var n=Math.min(+$('#bCount').value,keys.length),pick2=shuffled(keys,Math.random).slice(0,n),mode=$('#bMode').value;
+  var d=dyn('Custom test · '+n+' questions',pick2,mode==='test'?n:0,1,0.25,'custom');
+  openEngine(d,mode);
+});
+$('#bBm').addEventListener('click',function(){
+  var b=bms();if(!b.length){toast('Save a question in any test first');return}
+  var keys=b.map(function(k){var p=k.split(':');return[p[0],+p[1]]}).filter(function(k){return TB[k[0]]&&TB[k[0]].qs[k[1]]});
+  if(!keys.length){toast('Save a question in any test first');return}
+  openEngine(dyn('Saved questions',keys,0,1,0,'saved'),'practice');
+});
+
+/* ---------------- portal builder ---------------- */
+function syncForm(){$('#pName').value=T.name;$('#pTag').value=T.tag;$('#pBatches').value=T.batches;$('#pWa').value=T.wa?T.wa.replace(/^91(\d{10})$/,'$1'):'';$('#pGroup').value=T.group;paintSwatches()}
+function paintSwatches(){$('#swatches').innerHTML=COLORS.map(function(c){return '<button type="button" class="sw" data-c="'+c+'" style="background:'+c+'" aria-label="Brand colour '+c+'" aria-pressed="'+(T.color.toLowerCase()===c.toLowerCase())+'"></button>'}).join('')}
+$('#presets').innerHTML=PRESETS.map(function(p,i){return '<button type="button" class="chip" data-preset="'+i+'">'+esc(p.label)+'</button>'}).join('');
+function renderPreview(){
+  var el=$('#pv');applyBrand(el);
+  var slug=(T.name||'institute').toLowerCase().replace(/[^a-z0-9]+/g,'').slice(0,24)||'institute';
+  var bt=T.batches.split(',').map(function(s){return s.trim()}).filter(Boolean).slice(0,6);
+  var tests=FULL.slice(0,3);
+  el.innerHTML='<div class="pv-bar"><i></i><i></i><i></i><span class="url">'+esc(slug)+'.exampro.example</span></div>'+
+  '<div class="pv-head">'+logoHTML()+'<div style="min-width:0"><b>'+esc(T.name||'Your Institute')+'</b><span class="t">'+esc(T.tag)+'</span></div></div>'+
+  '<div class="pv-body"><div><h4>Your batches</h4><div class="pchips">'+(bt.length?bt.map(function(b){return '<span>'+esc(b)+'</span>'}).join(''):'<span>Add a batch</span>')+'</div></div>'+
+  '<div><h4>Live tests</h4>'+tests.map(function(d){return '<div class="prow"><div><b>'+esc(d.name)+'</b><small>'+cnt(d)+' questions · '+d.mins+' min</small></div><button class="btn brand sm" type="button" data-start="'+d.id+'">Start</button></div>'}).join('')+'</div>'+
+  '<div class="pv-act"><a class="btn wa sm" target="_blank" rel="noopener" href="'+esc(waLink(tenantWa(),'Hi, I want to know about batches at '+(T.name||'your institute')))+'">Talk to a counsellor</a>'+
+  (T.group?'<a class="btn sm" target="_blank" rel="noopener" href="'+esc(T.group)+'">Join discussion group</a>':'')+'</div></div>';
+  var c=$('#engine');applyBrand(c);
+}
+function onForm(){
+  T.name=$('#pName').value;T.tag=$('#pTag').value;T.batches=$('#pBatches').value;
+  var raw=$('#pWa').value.replace(/\D/g,'');if(raw.length===10)raw='91'+raw;T.wa=raw.length>=11?raw:'';
+  var g=$('#pGroup').value.trim();T.group=/^https:\/\/chat\.whatsapp\.com\//.test(g)?g:'';
+  $('#grpHint').textContent=(g&&!T.group)?'Use the invite link from WhatsApp. It starts with https://chat.whatsapp.com/':'Optional. Shows a “Join discussion group” button.';
+  $('#waHint').textContent=(raw&&!T.wa)?'Enter the number with country code, for example 98765 43210.':'Students tap WhatsApp on any question to reach this number. 10-digit Indian numbers get +91 added.';
+  saveTenant();renderPreview();
+}
+['pName','pTag','pBatches','pWa','pGroup'].forEach(function(id){$('#'+id).addEventListener('input',onForm)});
+$('#swatches').addEventListener('click',function(e){var b=e.target.closest('[data-c]');if(!b)return;T.color=b.getAttribute('data-c');paintSwatches();saveTenant();renderPreview()});
+$('#presets').addEventListener('click',function(e){var b=e.target.closest('[data-preset]');if(!b)return;var p=PRESETS[+b.getAttribute('data-preset')];T.name=p.name;T.tag=p.tag;T.color=p.color;T.batches=p.batches;T.logo='';syncForm();saveTenant();renderPreview()});
+$('#pLogo').addEventListener('change',function(e){
+  var f=e.target.files&&e.target.files[0];if(!f)return;
+  if(!/^image\//.test(f.type)){$('#logoHint').textContent='Choose an image file (PNG or JPG).';return}
+  if(f.size>500*1024){$('#logoHint').textContent='That file is over 500 KB. Choose a smaller image.';e.target.value='';return}
+  var r=new FileReader();r.onload=function(){T.logo=String(r.result);$('#logoHint').textContent='Logo added. It shows in the preview, the exam window and certificates.';saveTenant();renderPreview()};r.readAsDataURL(f);
+});
+syncForm();renderPreview();
+
+/* ---------------- sign in (demo, stored in this browser) ---------------- */
+var ROLE_LABEL={student:'Student',owner:'Institute owner',teacher:'Teacher',parent:'Parent'};
+function fmtPhone(p){return '+91 '+p.slice(0,5)+' '+p.slice(5)}
+function renderUser(){$('#signBtn').textContent=U?'Hi, '+U.name.split(' ')[0]:'Sign in'}
+function openSign(){
+  var body=$('#signBody');
+  if(U){
+    body.innerHTML='<div class="sform"><h3 id="signH">You are signed in</h3><p><b>'+esc(U.name)+'</b><br><span class="muted">'+esc(ROLE_LABEL[U.role]||'')+' · '+esc(fmtPhone(U.phone))+'</span></p><p class="note">Your name appears on certificates and in WhatsApp messages. These details stay in this browser.</p><div class="row"><button class="btn" type="button" data-sclose>Close</button><button class="btn" type="button" id="uOut">Sign out</button></div></div>';
+  }else{
+    body.innerHTML='<form class="sform" id="signForm" autocomplete="on"><h3 id="signH">Sign in to Exampro</h3><p class="muted">Use your name and mobile number. This demo keeps them in this browser only.</p>'+
+      '<div class="field"><label for="uName">Your name</label><input type="text" id="uName" maxlength="40" autocomplete="name"></div>'+
+      '<div class="field"><label for="uPhone">Mobile number</label><input type="tel" id="uPhone" inputmode="numeric" maxlength="14" autocomplete="tel-national" placeholder="98765 43210"></div>'+
+      '<div class="field"><label for="uRole">I am a</label><select id="uRole"><option value="student">Student</option><option value="owner">Institute owner</option><option value="teacher">Teacher</option><option value="parent">Parent</option></select></div>'+
+      '<p class="err" id="uErr" role="alert"></p><div class="row"><button class="btn" type="button" data-sclose>Cancel</button><button class="btn primary" type="submit">Continue</button></div></form>';
+  }
+  $('#signModal').hidden=false;
+  var f=$('#uName')||$('#uOut');if(f)f.focus();
+}
+function closeSign(restore){$('#signModal').hidden=true;if(restore!==false)$('#signBtn').focus()}
+function doSignIn(){
+  var name=$('#uName').value.trim(),ph=$('#uPhone').value.replace(/\D/g,''),err=$('#uErr');
+  if(ph.length===12&&ph.indexOf('91')===0)ph=ph.slice(2);
+  if(ph.length===11&&ph.charAt(0)==='0')ph=ph.slice(1);
+  if(name.length<2){err.textContent='Enter your name.';$('#uName').focus();return}
+  if(!/^[6-9]\d{9}$/.test(ph)){err.textContent='Enter a 10-digit Indian mobile number.';$('#uPhone').focus();return}
+  U={name:name.slice(0,40),phone:ph,role:$('#uRole').value};
+  ls.set('exampro_user',U);ls.set('exampro_name',U.name);
+  if(!$('#cName').value)$('#cName').value=U.name;
+  closeSign(false);renderUser();renderProgress();renderPricing();paintContact();toast('Signed in as '+U.name);
+}
+function signOut(){
+  U=null;try{localStorage.removeItem('exampro_user')}catch(e){}
+  closeSign(false);renderUser();renderProgress();renderPricing();toast('Signed out');
+}
+document.addEventListener('click',function(e){
+  if(e.target.closest('#signBtn')||e.target.closest('[data-sign]')){openSign();return}
+  if(e.target.closest('[data-sclose]')||e.target.id==='signModal'){closeSign();return}
+  if(e.target.closest('#uOut')){signOut();return}
+});
+document.addEventListener('submit',function(e){if(e.target.id==='signForm'){e.preventDefault();doSignIn()}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('#signModal').hidden)closeSign()});
+renderUser();
+
+/* ---------------- pricing ---------------- */
+var PLANS={
+ inst:[
+  {id:'starter',name:'Starter',price:999,who:'A solo tutor or a new institute',cap:'Up to 100 students',feat:['1 branded portal with your logo and colour','3 teachers','All '+TOTAL_TESTS+' ready mock tests','WhatsApp doubt button on every question','Instant results with explanations']},
+  {id:'growth',name:'Growth',price:2999,pop:true,who:'A coaching institute with several batches',cap:'Up to 500 students',feat:['Everything in Starter','15 teachers','Your own question bank with CSV upload','Batch analytics and weak topics','Score summaries to parents on WhatsApp','Certificates with your branding']},
+  {id:'scale',name:'Scale',price:7999,who:'Institutes with several branches',cap:'Up to 2,000 students',feat:['Everything in Growth','Unlimited teachers','Your own domain','Several branches under one account','Sell paid test series to your students','Priority support on WhatsApp']}
+ ],
+ stu:[
+  {id:'free',name:'Free',price:0,who:'Daily practice',cap:'For one learner',feat:['Daily Quick 10 and streak','All '+TOPICS.length+' topic tests and Practice mode','Bookmarks and accuracy by topic']},
+  {id:'pro',name:'Pro',price:199,pop:true,who:'Serious exam preparation',cap:'For one learner',feat:['Everything in Free','All full mocks: SSC, Bank, RRB, UPSC and campus','Section and time analysis','Certificates','A new full mock every week']}
+ ]};
+var CMP=[
+ ['Students','100','500','2,000'],['Teachers','3','15','Unlimited'],['Branded portal (logo, colour)',1,1,1],['Ready mock library',1,1,1],['WhatsApp doubt button',1,1,1],
+ ['Own question bank and CSV upload',0,1,1],['Batch analytics',0,1,1],['Parent score summaries on WhatsApp',0,1,1],['Own domain',0,0,1],['Several branches',0,0,1],['Paid test series',0,0,1],['Priority support',0,0,1]
+];
+var pType='inst',pBill='m';
+function inr(n){return '₹'+n.toLocaleString('en-IN')}
+function renderPricing(){
+  $$('[data-ptype]').forEach(function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-ptype')===pType))});
+  $$('[data-bill]').forEach(function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-bill')===pBill))});
+  $('#plans').innerHTML=PLANS[pType].map(function(p){
+    var price,sub;
+    if(!p.price){price='₹0';sub='free, no card needed'}
+    else if(pBill==='m'){price=inr(p.price);sub='per month'}
+    else{price=inr(p.price*10);sub='per year · about '+inr(Math.round(p.price*10/12))+' a month'}
+    var msg='Hi, I want the '+p.name+' plan ('+(pBill==='y'?'yearly':'monthly')+') on Exampro'+(pType==='inst'?' for my institute':'')+'.'+(U?'\nName: '+U.name:'');
+    var cta=p.price?'<a class="btn '+(p.pop?'primary':'wa')+'" target="_blank" rel="noopener" href="'+esc(waLink(HAS_NUM?SITE_WA:'',msg))+'">Choose '+esc(p.name)+' on WhatsApp</a>':'<a class="btn" href="#tests">Start free</a>';
+    return '<article class="plan'+(p.pop?' pop':'')+'"><header><div class="nm"><h3>'+esc(p.name)+'</h3>'+(p.pop?'<span class="tag live">Recommended</span>':'')+'</div><p class="who">'+esc(p.who)+'</p></header><p class="price">'+price+'<small>'+esc(sub)+'</small></p><p class="cap">'+esc(p.cap)+'</p><ul>'+p.feat.map(function(f){return '<li>'+esc(f)+'</li>'}).join('')+'</ul>'+cta+'</article>';
+  }).join('');
+  $('#priceNote').innerHTML=(pType==='inst'?'Need more than 2,000 students? <a class="wa-more" target="_blank" rel="noopener" href="'+esc(waLink(HAS_NUM?SITE_WA:'','Hi, I run a large institute and want to talk about Exampro pricing.'))+'">Talk to us on WhatsApp</a>. ':'Learners from an institute on Exampro get access through their institute at no extra cost. ')+'Tap a plan and we confirm it on WhatsApp and share payment details there. Yearly billing costs ten months’ price.';
+  $('#cmp').innerHTML=pType==='inst'?'<h3>Compare institute plans</h3><div class="tscroll"><table class="tbl"><thead><tr><th>Feature</th><th>Starter</th><th>Growth</th><th>Scale</th></tr></thead><tbody>'+CMP.map(function(r){return '<tr><td>'+esc(r[0])+'</td>'+[1,2,3].map(function(i){var v=r[i];return '<td>'+(v===1?'Included':v===0?'<span class="muted" aria-label="Not included">–</span>':esc(v))+'</td>'}).join('')+'</tr>'}).join('')+'</tbody></table></div>':'';
+}
+document.addEventListener('click',function(e){
+  var t=e.target.closest('[data-ptype]'),b=e.target.closest('[data-bill]');
+  if(t){pType=t.getAttribute('data-ptype');renderPricing()}
+  else if(b){pBill=b.getAttribute('data-bill');renderPricing()}
+});
+renderPricing();
+if(U&&!$('#cName').value)$('#cName').value=U.name;
+
+/* ---------------- WhatsApp contact form ---------------- */
+function contactText(){
+  var n=$('#cName').value.trim(),m=$('#cMsg').value.trim();
+  return 'Hi Exampro team,\nI want to: '+$('#cType').value+'.\nExam or course: '+$('#cExam').value+'.'+(m?'\n'+m:'')+(n?'\n\nThanks, '+n:'');
+}
+function paintContact(){var t=contactText();$('#bubble').innerHTML=esc(t)+'<small>now</small>';$('#cGo').href=waLink(HAS_NUM?SITE_WA:'',t)}
+['cType','cExam','cName','cMsg'].forEach(function(id){$('#'+id).addEventListener('input',paintContact);$('#'+id).addEventListener('change',paintContact)});
+$('#cCopy').addEventListener('click',function(){copyText(contactText(),'Copy blocked. Select the message above and press Ctrl or ⌘ + C.')});
+if(HAS_NUM){var shown='+'+SITE_WA.slice(0,2)+' '+SITE_WA.slice(2,7)+' '+SITE_WA.slice(7);$('#numLine').hidden=false;$('#numTxt').textContent=shown;$('#footWa').textContent='WhatsApp '+shown}
+paintContact();
+})();
+</script>
+
+</body>
+</html>
