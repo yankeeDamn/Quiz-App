@@ -11,7 +11,6 @@ import { QuizCard } from '@/components/quiz/quiz-card';
 import { ProviderCard } from '@/components/quiz/provider-card';
 import { quizzes, getUniqueSubjects, examProviders, exams, getAllQuizzes } from '@/data/quizzes';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 
 const difficultyFilters = [
@@ -113,11 +112,9 @@ export default function HomePage() {
       <main className="flex-1">
         <section className="border-b bg-blue-50 px-4 py-4 dark:bg-blue-950/30">
           <div className="container mx-auto flex flex-wrap items-center justify-between gap-4">
-            <p className="text-sm text-slate-700 dark:text-slate-200">New: 21 India mock tests with explanations, plus doubts answered on WhatsApp</p>
-            <Link href="/india-mocks" className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700">Explore Indian Mock Tests →</Link>
-            <div className="flex items-center gap-4">
-              <Image src="/testguru-logo.svg" alt="TestGuru" width={160} height={43} />
-              <p className="text-sm text-slate-700 dark:text-slate-200">White-label mock tests for coaching institutes</p>
+            <div>
+              <p className="text-sm text-slate-700 dark:text-slate-200">New: 21 India mock tests with explanations, plus doubts answered on WhatsApp</p>
+              <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">White-label mock tests for coaching institutes</p>
             </div>
             <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto">
               <Link href="/institute-admin" className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-center text-sm font-semibold text-slate-900 transition hover:bg-slate-100 sm:flex-none">Institute Dashboard (Preview) →</Link>
@@ -236,7 +233,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {examProviders.map((provider, index) => (
                 <ProviderCard
                   key={provider.id}

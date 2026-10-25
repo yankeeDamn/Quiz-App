@@ -1,4 +1,5 @@
 import { api, getUserProfile } from '@/lib/api';
+import { buildCertTest } from '@/lib/it-certs';
 
 export interface MockSummary {
   id: string;
@@ -44,6 +45,9 @@ export async function fetchCatalog(): Promise<MockSummary[]> {
 }
 
 export async function fetchMock(id: string): Promise<MockLoad> {
+  // Free IT certification starters ship with the site and do not need the API.
+  const cert = buildCertTest(id);
+  if (cert) return { status: 'ok', test: cert };
   try {
     const res = (await api<{ test: MockTest }>(`/api/v1/mocks/${encodeURIComponent(id)}`)) as {
       success: boolean;

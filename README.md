@@ -2,7 +2,7 @@
 
 A full-stack exam practice site in the style of CertyIQ and Udemy practice tests, with India exam mocks, premium plans and WhatsApp for coaching, doubts and payments.
 
-- **Learners:** 21 India mock tests (SSC, Banking, Railways, UPSC / PSC, campus), timed with sections, palette, mark for review and negative marking. Every question has an explanation and a "Discuss on WhatsApp" button. Certification quizzes and flashcards, bookmarks, notes and progress.
+- **Learners:** 21 India mock tests (SSC, Banking, Railways, UPSC / PSC, campus), timed with sections, palette, mark for review and negative marking. Every question has an explanation and a "Discuss on WhatsApp" button. Three free IT certification starter tests (AZ-900, AWS Cloud Practitioner, CompTIA A+; 8 questions each, pending expert review). Certification quizzes and flashcards, bookmarks, notes and progress.
 - **Money:** Free and Pro plans. Premium mocks are served by the API only to users with a running plan. Payment is confirmed on WhatsApp, then you unlock the plan with one request.
 - **Institutes:** an Institute plan sold the same way. Branding per institute is not built yet.
 
@@ -13,7 +13,11 @@ exam-practice-pro/   Next.js 16 site (Render service: exam-practice-pro-frontend
 src/                 Express API + PostgreSQL (Render service: exam-practice-pro-api)
 test/                API tests (node:test)
 render.yaml          Render blueprint for both services and the database
+exampro/             Separate static demo page, shown at /exampro (see note below)
+content/, docs/, scripts/   IT certification starter CSV, planning notes for the institute pilot, helper scripts
 ```
+
+**Note on `/exampro`:** this page is a standalone demo (`exampro/index.html`, loaded by `exam-practice-pro/app/exampro`). It has its own question copies, every test in it is free and its sign-in is simulated, so it is not the paid product. The real product is `/india-mocks`, `/pricing` and `/admin`.
 
 | API route | Who | What |
 |---|---|---|
@@ -94,4 +98,4 @@ The Render build runs `npm run db:migrate` for you. It adds the plan columns and
 
 ## Not built yet
 
-Online card or UPI checkout, per-institute logins and branding, CSV file upload (pasting lines works), an editor for certification quizzes (still in `exam-practice-pro/data/quizzes.ts`), batch analytics and automatic WhatsApp messages. Question explanations were written for this site and should be reviewed by a teacher before real students rely on them.
+Online card or UPI checkout, per-institute logins and branding, CSV file upload (pasting lines works), an editor for certification quizzes (still in `exam-practice-pro/data/quizzes.ts`) and for the IT certification starter questions (bundled in `exam-practice-pro/data/it-certification-questions.json`), Pro-only topics (every topic gets a free practice test, so a question added to any topic can be played free there; Pro mocks only re-arrange questions that already exist in topics), batch analytics and automatic WhatsApp messages. Question explanations were written for this site and should be reviewed by a teacher before real students rely on them.
