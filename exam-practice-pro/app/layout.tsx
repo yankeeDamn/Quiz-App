@@ -6,6 +6,7 @@ import { AuthProvider } from '@/components/layout/auth-provider';
 import { UserStorageProvider } from '@/components/layout/user-storage-provider';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { FloatingWhatsApp } from '@/components/mocks/whatsapp-button';
+import { MotionProvider } from '@/components/motion/motion-provider';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -26,6 +27,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
+        {/* If JS is unavailable, scroll-reveal content must still be visible. */}
+        <noscript>
+          <style>{'[data-reveal]{opacity:1!important;transform:none!important}'}</style>
+        </noscript>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -36,7 +41,7 @@ export default function RootLayout({
             <UserStorageProvider>
               <TooltipProvider delay={300}>
                 <div className="relative flex min-h-screen flex-col bg-background">
-                  {children}
+                  <MotionProvider>{children}</MotionProvider>
                   <FloatingWhatsApp />
                 </div>
               </TooltipProvider>
