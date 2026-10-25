@@ -71,6 +71,7 @@ function Catalogue() {
         )}
         {plan.active && <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300">Pro plan active</span>}
         </div>
+        </div>
       </section>
 
       <div className="mt-8 flex flex-wrap gap-2" role="group" aria-label="Filter tests">
