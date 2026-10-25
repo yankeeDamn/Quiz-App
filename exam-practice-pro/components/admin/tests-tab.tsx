@@ -25,13 +25,14 @@ const blank = (topic: string): Draft => ({
   sections: [{ name: '', parts: [{ topic, from: 0, to: 10 }] }], active: false,
 });
 
-const countOf = (t: AdminTest) => t.sections.reduce((n, s) => n + s.parts.reduce((m, p) => m + (p.to - p.from), 0), 0);
+const countOf = (t: AdminTest) => t.questionCount ?? t.sections.reduce((n, s) => n + s.parts.reduce((m, p) => m + (p.to - p.from), 0), 0);
 
 export function TestsTab() {
   const [tests, setTests] = useState<AdminTest[]>([]);
   const [topics, setTopics] = useState<AdminTopic[]>([]);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [preview, setPreview] = useState<{name:string;minutes:number;questionCount:number;questions:{id:string;question:string}[]}|null>(null);
   const [msg, setMsg] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
 
   const load = useCallback(async () => {
@@ -64,6 +65,11 @@ export function TestsTab() {
     const r = await admin(`/tests/${t.id}`, 'PUT', next);
     if (!r.ok) setMsg({ kind: 'error', text: r.message });
     void load();
+  };
+
+  const showPreview = async(t:AdminTest)=>{
+    const r=await admin<{name:string;minutes:number;questionCount:number;questions:{id:string;question:string}[]}>(`/tests/${t.id}/preview`);
+    if(r.ok)setPreview(r.data);else setMsg({kind:'error',text:r.message});
   };
 
   const edit = (t: AdminTest) => {
@@ -103,7 +109,7 @@ export function TestsTab() {
                       {t.active ? 'Published' : 'Draft'}
                     </button>
                   </td>
-                  <td className="text-right"><button className="underline" onClick={() => edit(t)}>Edit</button></td>
+                  <td className="text-right"><button className="underline" onClick={() => void showPreview(t)}>Preview</button> · <button className="underline" onClick={() => edit(t)}>Edit</button></td>
                 </tr>
               ))}
               {tests.length === 0 && <tr><td colSpan={6} className="py-3 text-muted-foreground">No mock tests yet.</td></tr>}
@@ -111,6 +117,8 @@ export function TestsTab() {
           </table>
         </div>
       </section>
+
+      {preview && <section className={card}><h2 className="text-lg font-semibold">Preview: {preview.name}</h2><p className="text-sm text-muted-foreground">{preview.questionCount} active questions · {preview.minutes} minutes. Only published tests appear in the student catalogue.</p><ol className="mt-3 list-inside list-decimal space-y-1 text-sm">{preview.questions.slice(0,30).map(q=><li key={q.id}>{q.question}</li>)}</ol><Button className="mt-4" variant="outline" onClick={()=>setPreview(null)}>Close preview</Button></section>}
 
       {draft && (
         <form onSubmit={save} className={`${card} grid gap-4`}>
