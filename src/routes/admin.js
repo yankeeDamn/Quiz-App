@@ -10,6 +10,7 @@ const { adminLimiter } = require('../middleware/rate-limiter');
 const { authenticateNextAuth } = require('../middleware/nextauth');
 const userService = require('../services/user.service');
 const content = require('../services/content.service');
+const importer = require('../services/question-import');
 const { PAID_PLANS, MAX_MONTHS, isPlanActive } = require('../services/plan.service');
 
 const EMAIL_OPTS = { gmail_remove_dots: false, gmail_remove_subaddress: false, gmail_convert_googlemaildotcom: false };
@@ -123,6 +124,12 @@ router.post('/topics', wrap(async (req, res) => {
   return r.ok ? ok(res, r.value) : bad(res, r.error);
 }));
 
+router.put('/topics/:id', wrap(async (req,res) => {
+  if (!SLUG.test(req.params.id)) return bad(res,'Bad topic id');
+  const result=await content.updateTopic(req.params.id,req.body||{});
+  return result.ok ? ok(res,result.value) : bad(res,result.error);
+}));
+
 router.post('/topics/:id/active', [body('active').isBoolean().toBoolean()], validate, wrap(async (req, res) => {
   if (!SLUG.test(req.params.id)) return bad(res, 'Bad topic id');
   return (await content.setTopicActive(req.params.id, req.body.active)) ? ok(res, {}) : bad(res, 'Topic not found', 404);
@@ -133,7 +140,18 @@ router.get('/topics/:id/questions', wrap(async (req, res) => {
   return ok(res, { questions: await content.listQuestions(req.params.id) });
 }));
 
-/** Body: { questions: [{ question, options: [4], answer: 0-3, explanation }] }. Up to 200 at once, all or nothing. */
+/** Validate and import CSV-mapped question rows; no partial writes. */
+router.post('/topics/:id/questions/preview', wrap(async (req,res) => {
+  if(!SLUG.test(req.params.id))return bad(res,'Bad topic id');
+  if(!await content.topicExists(req.params.id))return bad(res,'Topic not found',404);
+  return ok(res,await importer.preview(req.params.id,req.body?.questions));
+}));
+router.post('/topics/:id/import', wrap(async (req,res) => {
+  if(!SLUG.test(req.params.id))return bad(res,'Bad topic id');
+  return ok(res,await importer.importRows(req.params.id,req.body?.questions));
+}));
+
+/** Body: { questions: [{ question, options: [4], answer: 0-3, explanation }] }. Up to 200 at once. */
 router.post('/topics/:id/questions', wrap(async (req, res) => {
   if (!SLUG.test(req.params.id)) return bad(res, 'Bad topic id');
   if (!(await content.topicExists(req.params.id))) return bad(res, 'Topic not found', 404);
