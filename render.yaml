@@ -1,64 +1,27 @@
+# ExamPro: deploy only the existing Express backend to Render.
+# Next.js stays on Vercel. PostgreSQL is an EXTERNAL Neon project.
+# Do not provision a duplicate Render frontend or PostgreSQL database.
 services:
-  # ── Backend API ─────────────────────────────────
   - type: web
-    name: exam-practice-pro-api
+    name: exampro-api
     runtime: node
     buildCommand: npm ci --omit=dev && npm run db:migrate
-    startCommand: node src/server.js
-    healthCheckPath: /health
+    startCommand: npm start
+    healthCheckPath: /api/v1/health/ready
     envVars:
       - key: NODE_ENV
         value: production
       - key: NODE_VERSION
         value: 22
       - key: DATABASE_URL
-        fromDatabase:
-          name: exam-practice-pro-db
-          property: connectionString
-      # Your Google or GitHub email(s), comma separated. Only these accounts can open /admin.
-      - key: ADMIN_EMAILS
         sync: false
-      # Long random string. Used only by you to unlock plans after a WhatsApp payment.
-      - key: ADMIN_API_KEY
+      - key: AUTH_SECRET
         sync: false
       - key: JWT_SECRET
-        generateValue: true
-      - key: AUTH_SECRET
+        sync: false
+      - key: ADMIN_EMAILS
         sync: false
       - key: CORS_ORIGINS
         sync: false
       - key: LOG_LEVEL
         value: info
-
-  # ── Next.js Frontend ───────────────────────────
-  - type: web
-    name: exam-practice-pro-frontend
-    runtime: node
-    rootDir: exam-practice-pro
-    buildCommand: npm install && npm run build
-    startCommand: npm run start
-    envVars:
-      - key: NODE_VERSION
-        value: 22
-      - key: AUTH_SECRET
-        sync: false
-      - key: NEXTAUTH_URL
-        sync: false
-      - key: NEXT_PUBLIC_API_URL
-        sync: false
-      - key: NEXT_PUBLIC_WHATSAPP_NUMBER
-        value: "919986418638"
-      - key: AUTH_GITHUB_ID
-        sync: false
-      - key: AUTH_GITHUB_SECRET
-        sync: false
-      - key: AUTH_GOOGLE_ID
-        sync: false
-      - key: AUTH_GOOGLE_SECRET
-        sync: false
-
-databases:
-  - name: exam-practice-pro-db
-    plan: free
-    databaseName: exam_practice_pro
-    user: exam_user
