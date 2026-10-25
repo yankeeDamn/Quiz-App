@@ -26,4 +26,13 @@ router.get('/', async (_req, res) => {
   });
 });
 
+/** Readiness is separate from liveness: do not route traffic to an API without its database. */
+router.get('/ready', async (_req, res) => {
+  const connected = await db.isHealthy();
+  res.status(connected ? 200 : 503).json({
+    success: connected,
+    data: { status: connected ? 'ready' : 'not_ready', database: connected ? 'connected' : 'unavailable' },
+  });
+});
+
 module.exports = router;
