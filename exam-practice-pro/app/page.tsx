@@ -2,7 +2,21 @@
 
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { GraduationCap, Sparkles, Target, TrendingUp, Building2, Award } from 'lucide-react';
+import {
+  GraduationCap,
+  Sparkles,
+  Target,
+  TrendingUp,
+  Building2,
+  Award,
+  Layers,
+  CreditCard,
+  Users,
+  LayoutDashboard,
+  ShieldCheck,
+  School,
+  ArrowUpRight,
+} from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { SearchBar } from '@/components/shared/search-bar';
@@ -12,6 +26,27 @@ import { ProviderCard } from '@/components/quiz/provider-card';
 import { quizzes, getUniqueSubjects, examProviders, exams, getAllQuizzes } from '@/data/quizzes';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { FadeIn, StaggerContainer, StaggerItem, buttonMotion } from '@/components/motion';
+import { cn } from '@/lib/utils';
+
+type PlatformLink = {
+  href: string;
+  title: string;
+  blurb: string;
+  icon: React.ComponentType<{ className?: string }>;
+  status: 'live' | 'preview';
+};
+
+// Quick links to every major area. "Preview" marks features that are still
+// being built out so visitors can tell them apart from fully working ones.
+const PLATFORM_LINKS: PlatformLink[] = [
+  { href: '/exampro', title: 'ExamPro Studio', blurb: 'Build a white-label mock-test portal with your own logo and batches.', icon: Layers, status: 'live' },
+  { href: '/dashboard', title: 'Student Dashboard', blurb: 'Track attempts, scores and progress across every test.', icon: LayoutDashboard, status: 'live' },
+  { href: '/pricing', title: 'Pricing', blurb: 'Plans for students and coaching institutes.', icon: CreditCard, status: 'live' },
+  { href: '/institutes', title: 'Institutes', blurb: 'Browse coaching institutes running on ExamPro.', icon: School, status: 'live' },
+  { href: '/institute-admin', title: 'Institute Dashboard', blurb: 'Manage batches and students for your institute.', icon: Users, status: 'preview' },
+  { href: '/admin', title: 'Owner Admin', blurb: 'Manage tests, questions and plans (owner access only).', icon: ShieldCheck, status: 'live' },
+];
 
 const difficultyFilters = [
   { id: 'Easy', label: 'Easy' },
@@ -117,89 +152,98 @@ export default function HomePage() {
               <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">White-label mock tests for coaching institutes</p>
             </div>
             <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto">
-              <Link href="/institute-admin" className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-center text-sm font-semibold text-slate-900 transition hover:bg-slate-100 sm:flex-none">Institute Dashboard (Preview) →</Link>
-              <Link href="/certifications" className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-orange-600 px-5 py-2.5 text-center text-sm font-bold text-white shadow-sm transition hover:bg-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600 sm:flex-none">IT Certifications →</Link>
-              <Link href="/india-mocks" className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-blue-700 sm:flex-none">Explore Indian Mock Tests →</Link>
+              <Link href="/institute-admin" className={cn('inline-flex min-h-11 flex-1 items-center justify-center rounded-lg border border-dashed border-slate-400 bg-white px-5 py-2.5 text-center text-sm font-semibold text-slate-900 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500 sm:flex-none', buttonMotion)}>Institute Dashboard (Preview) →</Link>
+              <Link href="/certifications" className={cn('inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-orange-600 px-5 py-2.5 text-center text-sm font-bold text-white shadow-sm hover:bg-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600 sm:flex-none', buttonMotion)}>IT Certifications →</Link>
+              <Link href="/india-mocks" className={cn('inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 sm:flex-none', buttonMotion)}>Explore Indian Mock Tests →</Link>
             </div>
           </div>
         </section>
         <section className="container mx-auto px-4 py-12" aria-labelledby="india-mocks-heading">
-          <div className="flex flex-wrap items-end justify-between gap-4">
+          <FadeIn inView className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-sm font-semibold text-blue-700 dark:text-blue-400">INDIA EXAM PRACTICE</p>
               <h2 id="india-mocks-heading" className="mt-2 text-3xl font-bold">Prepare for India&apos;s top exams</h2>
               <p className="mt-2 text-muted-foreground">Full mocks with sections, timers and negative marking, plus short topic tests.</p>
             </div>
             <Link href="/india-mocks" className="font-semibold text-blue-700 hover:underline dark:text-blue-400">See all tests →</Link>
-          </div>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          </FadeIn>
+          <StaggerContainer className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {INDIA_EXAMS.map((exam) => (
-              <Link key={exam.filter} href={'/india-mocks?exam=' + encodeURIComponent(exam.filter)} className="rounded-xl border bg-white p-5 transition hover:border-blue-400 hover:shadow-md dark:bg-zinc-900">
-                <h3 className="font-semibold">{exam.name}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{exam.blurb}</p>
-                <span className="mt-4 inline-block text-sm font-semibold text-blue-700 dark:text-blue-400">View tests →</span>
-              </Link>
+              <StaggerItem key={exam.filter} className="h-full">
+                <Link
+                  href={'/india-mocks?exam=' + encodeURIComponent(exam.filter)}
+                  className="group relative flex h-full flex-col rounded-xl border bg-white p-5 transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-1 hover:border-blue-400 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 motion-reduce:transition-none motion-reduce:hover:translate-y-0 dark:bg-zinc-900"
+                >
+                  <h3 className="font-semibold">{exam.name}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">{exam.blurb}</p>
+                  <span className="mt-auto inline-flex items-center gap-1 pt-4 text-sm font-semibold text-blue-700 dark:text-blue-400">
+                    View tests
+                    <span aria-hidden className="transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0">→</span>
+                  </span>
+                </Link>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         </section>
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-gradient-to-b from-indigo-50 via-white to-white dark:from-indigo-950/30 dark:via-background dark:to-background">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOCAxOC04LjA1OSAxOC0xOC04LjA1OS0xOC0xOC0xOHptMCAzMmMtNy43MzIgMC0xNC02LjI2OC0xNC0xNHM2LjI2OC0xNCAxNC0xNCAxNCA2LjI2OCAxNCAxNC02LjI2OCAxNC0xNCAxNHoiIGZpbGw9IiM2MzY2ZjEiIGZpbGwtb3BhY2l0eT0iLjAzIi8+PC9nPjwvc3ZnPg==')] opacity-50" />
+          <div aria-hidden className="hero-glow hero-glow-a" />
+          <div aria-hidden className="hero-glow hero-glow-b" />
 
           <div className="container relative mx-auto px-4 py-16 md:py-24">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="mx-auto max-w-3xl text-center"
-            >
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.1 }}
-                className="mb-6 inline-flex items-center gap-2 rounded-full bg-indigo-100 px-4 py-1.5 text-sm font-medium text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300"
-              >
-                <Sparkles className="h-4 w-4" />
-                Professional Exam Practice Platform
-              </motion.div>
+            <StaggerContainer inView={false} stagger={0.09} className="mx-auto max-w-3xl text-center">
+              <StaggerItem duration={0.45}>
+                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-200/70 bg-indigo-100/80 px-4 py-1.5 text-sm font-medium text-indigo-700 backdrop-blur-sm dark:border-indigo-400/20 dark:bg-indigo-900/50 dark:text-indigo-300">
+                  <Sparkles className="h-4 w-4" />
+                  Professional Exam Practice Platform
+                </div>
+              </StaggerItem>
 
-              <h1 className="mb-4 text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
-                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  Exam Practice
-                </span>{' '}
-                Pro
-              </h1>
+              <StaggerItem duration={0.45}>
+                <h1 className="mb-4 text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
+                  <span className="bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Exam Practice
+                  </span>{' '}
+                  Pro
+                </h1>
+              </StaggerItem>
 
-              <p className="mb-8 text-lg text-muted-foreground md:text-xl">
-                Practice smarter. Score higher. Master your exams with our
-                comprehensive quiz platform.
-              </p>
+              <StaggerItem duration={0.45}>
+                <p className="mb-8 text-lg text-muted-foreground md:text-xl">
+                  Practice smarter. Score higher. Master your exams with our
+                  comprehensive quiz platform.
+                </p>
+              </StaggerItem>
 
-              <div className="flex flex-wrap items-center justify-center gap-4">
-                <Button
-                  size="lg"
-                  className="bg-indigo-600 hover:bg-indigo-700"
-                  asChild
-                >
-                  <Link href="#quizzes">
-                    <Target className="mr-2 h-5 w-5" />
-                    Start Practicing
-                  </Link>
-                </Button>
-                <Button size="lg" variant="outline" asChild>
-                  <Link href="/dashboard">
-                    <TrendingUp className="mr-2 h-5 w-5" />
-                    View Dashboard
-                  </Link>
-                </Button>
-              </div>
-            </motion.div>
+              <StaggerItem duration={0.45}>
+                <div className="flex flex-wrap items-center justify-center gap-4">
+                  <Button
+                    size="lg"
+                    className={cn('bg-indigo-600 shadow-lg shadow-indigo-600/25 hover:bg-indigo-700', buttonMotion)}
+                    asChild
+                  >
+                    <Link href="#quizzes">
+                      <Target className="mr-2 h-5 w-5" />
+                      Start Practicing
+                    </Link>
+                  </Button>
+                  <Button size="lg" variant="outline" className={buttonMotion} asChild>
+                    <Link href="/dashboard">
+                      <TrendingUp className="mr-2 h-5 w-5" />
+                      View Dashboard
+                    </Link>
+                  </Button>
+                </div>
+              </StaggerItem>
+            </StaggerContainer>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="mx-auto mt-12 grid max-w-2xl grid-cols-4 gap-6"
+              transition={{ delay: 0.45, duration: 0.5 }}
+              data-reveal
+              className="mx-auto mt-12 grid max-w-2xl grid-cols-2 gap-6 rounded-2xl border border-indigo-100 bg-white/60 p-6 shadow-sm backdrop-blur-sm sm:grid-cols-4 dark:border-white/10 dark:bg-white/5"
             >
               {[
                 { label: 'Questions', value: `${totalQuestions}+` },
@@ -220,10 +264,83 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Platform quick links */}
+        <section className="border-b bg-white dark:bg-background" aria-labelledby="platform-heading">
+          <div className="container mx-auto px-4 py-12">
+            <FadeIn inView className="mb-8">
+              <h2 id="platform-heading" className="flex items-center gap-2 text-2xl font-bold">
+                <Layers className="h-6 w-6 text-indigo-600" />
+                Everything in ExamPro
+              </h2>
+              <p className="mt-1 text-muted-foreground">
+                For students, coaching institutes and platform owners.{' '}
+                <span className="whitespace-nowrap">
+                  <span className="mx-1 inline-block h-2 w-2 rounded-full bg-emerald-500 align-middle" aria-hidden /> Live
+                </span>{' '}
+                features work today;{' '}
+                <span className="whitespace-nowrap">
+                  <span className="mx-1 inline-block h-2 w-2 rounded-full border border-amber-500 bg-amber-200 align-middle" aria-hidden /> Preview
+                </span>{' '}
+                ones are still being built.
+              </p>
+            </FadeIn>
+            <StaggerContainer className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {PLATFORM_LINKS.map((item) => {
+                const Icon = item.icon;
+                const isPreview = item.status === 'preview';
+                return (
+                  <StaggerItem key={item.href} className="h-full">
+                    <Link
+                      href={item.href}
+                      className={cn(
+                        'group relative flex h-full items-start gap-4 rounded-2xl border bg-card p-5 transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-1 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 motion-reduce:transition-none motion-reduce:hover:translate-y-0',
+                        isPreview
+                          ? 'border-dashed border-amber-300 hover:border-amber-400 dark:border-amber-500/40'
+                          : 'hover:border-indigo-300 dark:hover:border-indigo-500/60'
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl',
+                          isPreview
+                            ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300'
+                            : 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+                        )}
+                      >
+                        <Icon className="h-5 w-5" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex flex-wrap items-center gap-2">
+                          <span className="font-semibold">{item.title}</span>
+                          <span
+                            className={cn(
+                              'rounded-full px-2 py-0.5 text-xs font-medium',
+                              isPreview
+                                ? 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300'
+                                : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300'
+                            )}
+                          >
+                            {isPreview ? 'Preview' : 'Live'}
+                          </span>
+                        </span>
+                        <span className="mt-1 block text-sm text-muted-foreground">{item.blurb}</span>
+                      </span>
+                      <ArrowUpRight
+                        aria-hidden
+                        className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0 motion-reduce:group-hover:translate-y-0"
+                      />
+                    </Link>
+                  </StaggerItem>
+                );
+              })}
+            </StaggerContainer>
+          </div>
+        </section>
+
         {/* Exam Providers Section */}
         <section className="border-b bg-white dark:bg-background">
           <div className="container mx-auto px-4 py-12">
-            <div className="mb-8">
+            <FadeIn inView className="mb-8">
               <h2 className="text-2xl font-bold flex items-center gap-2">
                 <Building2 className="h-6 w-6 text-indigo-600" />
                 Certification Providers
@@ -231,7 +348,7 @@ export default function HomePage() {
               <p className="text-muted-foreground mt-1">
                 Prepare for industry-leading certifications
               </p>
-            </div>
+            </FadeIn>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {examProviders.map((provider, index) => (
