@@ -51,7 +51,7 @@ export async function fetchMock(id: string, mode: 'test' | 'practice' = 'test'):
   if (cert) return { status: 'error', message: 'These introductory certification questions are practice-only. Choose Practice to view explanations.' };
   try {
     const endpoint = `/api/v1/mocks/${encodeURIComponent(id)}${mode === 'practice' ? '/practice' : ''}`;
-    const res = (await api<{ test: MockTest }>(endpoint)) as {
+    const res = (await api<{ test: MockTest }>(endpoint, {optionalAuth:true})) as {
       success: boolean;
       data?: { test: MockTest | MockSummary };
       error?: { message: string; code?: string };
