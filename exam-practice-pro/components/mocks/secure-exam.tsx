@@ -26,7 +26,6 @@ export function SecureExam({testId}:{testId:string}) {
  const [saved,setSaved] = useState(true);
  const submitLock=useRef(false);
  const latest=useRef<Record<string,number>>({});
- const started=useRef(false);
 
  const update = useCallback((id:string,value:number) => {
    setResponses(previous => {
@@ -37,8 +36,7 @@ export function SecureExam({testId}:{testId:string}) {
  },[]);
 
  useEffect(()=>{
-   if (status!=='authenticated'||!session?.user?.email||started.current)return;
-   started.current=true;
+   if (status!=='authenticated'||!session?.user?.email)return;
    let cancelled=false;
    void api<{attempt:Attempt}>('/api/v1/exam-attempts/start',{method:'POST',body:{testId}})
     .then(r=>{
@@ -76,14 +74,16 @@ export function SecureExam({testId}:{testId:string}) {
 
  useEffect(()=>{
    if(!attempt||attempt.submittedAt||saved)return;
+   let cancelled=false;
    const timeout=window.setTimeout(async()=>{
+     const saving=latest.current;
      try {
-       const r=await api<{attempt:Attempt}>(`/api/v1/exam-attempts/${attempt.id}/progress`,{method:'PUT',body:{responses:latest.current}});
+       const r=await api<{attempt:Attempt}>(`/api/v1/exam-attempts/${attempt.id}/progress`,{method:'PUT',body:{responses:saving}});
        if(!r.success)throw Error(r.error?.message||'Could not save progress');
-       setSaved(true);setError('');
-     } catch(e) {setError(e instanceof Error?e.message:'Progress not saved. Try submitting.')}
+       if(!cancelled && saving===latest.current){setSaved(true);setError('');}
+     } catch(e) {if(!cancelled)setError(e instanceof Error?e.message:'Progress not saved. Try submitting.')}
    },500);
-   return()=>window.clearTimeout(timeout);
+   return()=>{cancelled=true;window.clearTimeout(timeout)};
  },[attempt,saved,responses]);
 
  if(status==='loading')return <p className="p-6" aria-busy="true">Checking sign-in…</p>;
