@@ -35,6 +35,7 @@ function checkTest(input, topicIds) {
   const minutes = Number(input && input.minutes);
   const marks = Number(input && input.marksPerCorrect);
   const negative = Number(input && input.negativeMarks);
+  const passPercent = Number(input && (input.passPercent ?? 50));
   const sections = input && input.sections;
 
   if (name.length < 3 || name.length > 120) return fail('Name must be 3 to 120 characters.');
@@ -44,6 +45,7 @@ function checkTest(input, topicIds) {
   if (!Number.isInteger(minutes) || minutes < 1 || minutes > 300) return fail('Minutes must be 1 to 300.');
   if (!(marks > 0 && marks <= 10)) return fail('Marks per correct answer must be above 0 and at most 10.');
   if (!(negative >= 0 && negative <= marks)) return fail('Negative marks cannot be below 0 or above the marks for a right answer.');
+  if (!Number.isInteger(passPercent) || passPercent < 0 || passPercent > 100) return fail('Passing score must be from 0 to 100 percent.');
   if (!Array.isArray(sections) || sections.length < 1 || sections.length > 8) return fail('Add 1 to 8 sections.');
 
   const clean = [];
@@ -61,7 +63,7 @@ function checkTest(input, topicIds) {
     }
     clean.push({ name: sname, parts });
   }
-  return { ok: true, value: { name, exam, level, tier, minutes, marksPerCorrect: marks, negativeMarks: negative, sections: clean } };
+  return { ok: true, value: { name, exam, level, tier, minutes, marksPerCorrect: marks, negativeMarks: negative, passPercent, sections: clean } };
 }
 
 class ContentService {
@@ -145,7 +147,7 @@ class ContentService {
   // ── Tests ────────────────────────────────────────────
   async listTests() {
     const { rows } = await db.query(
-      `SELECT id, name, exam, minutes, marks_per_correct, negative_marks, level, tier, sections, active
+      `SELECT id, name, exam, minutes, marks_per_correct, negative_marks, pass_percent, level, tier, sections, active
          FROM mock_tests ORDER BY created_at, id`
     );
     return rows.map((r) => ({
@@ -155,6 +157,7 @@ class ContentService {
       minutes: r.minutes,
       marksPerCorrect: Number(r.marks_per_correct),
       negativeMarks: Number(r.negative_marks),
+      passPercent: Number(r.pass_percent),
       level: r.level,
       tier: r.tier,
       sections: r.sections,
@@ -174,9 +177,9 @@ class ContentService {
     const exists = await db.query('SELECT 1 FROM mock_tests WHERE id = $1', [slug]);
     if (exists.rowCount) return fail('A test with this id already exists.');
     await db.query(
-      `INSERT INTO mock_tests (id, name, exam, minutes, marks_per_correct, negative_marks, level, tier, sections)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      [slug, v.name, v.exam, v.minutes, v.marksPerCorrect, v.negativeMarks, v.level, v.tier, JSON.stringify(v.sections)]
+      `INSERT INTO mock_tests (id, name, exam, minutes, marks_per_correct, negative_marks, level, tier, sections, pass_percent, active)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+      [slug, v.name, v.exam, v.minutes, v.marksPerCorrect, v.negativeMarks, v.level, v.tier, JSON.stringify(v.sections), v.passPercent, false]
     );
     mocks.invalidate();
     return { ok: true, value: { id: slug } };
@@ -185,9 +188,9 @@ class ContentService {
   async updateTest(id, v, active) {
     const r = await db.query(
       `UPDATE mock_tests SET name = $2, exam = $3, minutes = $4, marks_per_correct = $5, negative_marks = $6,
-              level = $7, tier = $8, sections = $9, active = $10, updated_at = NOW()
+              level = $7, tier = $8, sections = $9, active = $10, pass_percent=$11, updated_at = NOW()
         WHERE id = $1`,
-      [id, v.name, v.exam, v.minutes, v.marksPerCorrect, v.negativeMarks, v.level, v.tier, JSON.stringify(v.sections), active]
+      [id, v.name, v.exam, v.minutes, v.marksPerCorrect, v.negativeMarks, v.level, v.tier, JSON.stringify(v.sections), active, v.passPercent]
     );
     mocks.invalidate();
     return r.rowCount > 0;
