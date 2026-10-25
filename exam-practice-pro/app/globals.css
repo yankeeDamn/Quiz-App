@@ -117,6 +117,54 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* ---------- Motion: hero ambient glow ----------
+   Soft radial gradients (no blur filters) that drift using transform only.
+   Disabled for reduced-motion users and on small/low-power screens. */
+@keyframes hero-drift-a {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(3%, 4%, 0) scale(1.06); }
+}
+@keyframes hero-drift-b {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(-4%, -3%, 0) scale(1.08); }
+}
+
+.hero-glow {
+  pointer-events: none;
+  position: absolute;
+  border-radius: 9999px;
+  opacity: 0.55;
+}
+.hero-glow-a {
+  top: -12rem;
+  left: -8rem;
+  height: 32rem;
+  width: 32rem;
+  background: radial-gradient(closest-side, oklch(0.62 0.19 270 / 0.28), transparent);
+}
+.hero-glow-b {
+  right: -10rem;
+  top: -4rem;
+  height: 30rem;
+  width: 30rem;
+  background: radial-gradient(closest-side, oklch(0.62 0.2 300 / 0.22), transparent);
+}
+.dark .hero-glow { opacity: 0.4; }
+
+/* Safety net: visitors who prefer reduced motion get all revealed content
+   immediately, regardless of what the JS animation state is. */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) and (min-width: 768px) {
+  .hero-glow-a { animation: hero-drift-a 22s ease-in-out infinite; }
+  .hero-glow-b { animation: hero-drift-b 26s ease-in-out infinite; }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
