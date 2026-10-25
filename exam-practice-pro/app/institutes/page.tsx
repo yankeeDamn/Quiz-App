@@ -1,0 +1,6 @@
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { Header } from '@/components/layout/header';
+import { Footer } from '@/components/layout/footer';
+export const metadata:Metadata={title:'For Institutes | ExamPro'};
+export default function InstitutesPage(){return <><Header/><main className="mx-auto max-w-4xl flex-1 px-4 py-14"><p className="font-semibold text-indigo-600">ExamPro for coaching institutes</p><h1 className="mt-2 text-3xl font-bold">Institute onboarding</h1><p className="mt-4 text-muted-foreground">A shared exam delivery platform for IT certification and aptitude coaching. Institute-specific accounts, batch assignments, analytics and subscriptions are planned but are not yet active.</p><div className="mt-6 flex flex-wrap gap-3"><Link href="/institute-admin" className="rounded-lg border px-5 py-3 font-medium">View labelled preview</Link><Link href="/auth/signin?callbackUrl=/admin" className="rounded-lg bg-indigo-600 px-5 py-3 font-medium text-white">Owner sign-in</Link></div><p className="mt-6 text-sm text-muted-foreground">The owner admin workflow is restricted to approved accounts; institute preview does not grant institute access.</p></main><Footer/></>}

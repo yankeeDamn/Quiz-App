@@ -37,7 +37,7 @@ async function fromDatabase() {
          FROM mock_questions WHERE active ORDER BY topic_id, position`
     ),
     db.query(
-      `SELECT id, name, exam, minutes, marks_per_correct, negative_marks, level, tier, sections
+      `SELECT id, name, exam, minutes, marks_per_correct, negative_marks, pass_percent, level, tier, sections
          FROM mock_tests WHERE active ORDER BY created_at, id`
     ),
   ]);
@@ -55,6 +55,7 @@ async function fromDatabase() {
       minutes: m.minutes,
       marksPerCorrect: Number(m.marks_per_correct),
       negativeMarks: Number(m.negative_marks),
+      passPercent: Number(m.pass_percent),
       level: m.level,
       tier: m.tier,
       active: true,
@@ -91,6 +92,7 @@ function topicDefinitions(bank) {
       minutes: 12,
       marksPerCorrect: 1,
       negativeMarks: 0.25,
+      passPercent: 50,
       level: 'Practice',
       tier: 'free',
       sections: [{ name: t.name, parts: [{ topic: t.id, from: 0, to: Number.MAX_SAFE_INTEGER }] }],
@@ -126,6 +128,7 @@ function summarise(bank, def) {
     questionCount: questionCount(bank, def),
     marksPerCorrect: def.marksPerCorrect,
     negativeMarks: def.negativeMarks,
+    passPercent: def.passPercent ?? 50,
     sections: def.sections.map((s) => s.name),
   };
 }

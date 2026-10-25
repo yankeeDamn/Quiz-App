@@ -8,12 +8,14 @@ const bookmarkRoutes = require('./bookmarks');
 const userRoutes = require('./user');
 const mocksRoutes = require('./mocks');
 const adminRoutes = require('./admin');
+const examAttemptRoutes = require('./exam-attempts');
 
 const router = Router();
 
 // ── API v1 routes ──────────────────────────────────────
 router.use('/health', healthRoutes);
 router.use('/mocks', mocksRoutes);
+router.use('/exam-attempts', examAttemptRoutes);
 router.use('/admin', adminRoutes);
 router.use('/auth', authRoutes);
 router.use('/quiz', quizRoutes);

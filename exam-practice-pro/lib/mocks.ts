@@ -44,12 +44,14 @@ export async function fetchCatalog(): Promise<MockSummary[]> {
   return res.data.tests;
 }
 
-export async function fetchMock(id: string): Promise<MockLoad> {
+export async function fetchMock(id: string, mode: 'test' | 'practice' = 'test'): Promise<MockLoad> {
   // Free IT certification starters ship with the site and do not need the API.
   const cert = buildCertTest(id);
-  if (cert) return { status: 'ok', test: cert };
+  if (cert && mode === 'practice') return { status: 'ok', test: cert };
+  if (cert) return { status: 'error', message: 'These introductory certification questions are practice-only. Choose Practice to view explanations.' };
   try {
-    const res = (await api<{ test: MockTest }>(`/api/v1/mocks/${encodeURIComponent(id)}`)) as {
+    const endpoint = `/api/v1/mocks/${encodeURIComponent(id)}${mode === 'practice' ? '/practice' : ''}`;
+    const res = (await api<{ test: MockTest }>(endpoint, {optionalAuth:true})) as {
       success: boolean;
       data?: { test: MockTest | MockSummary };
       error?: { message: string; code?: string };
@@ -61,7 +63,7 @@ export async function fetchMock(id: string): Promise<MockLoad> {
     if (res.error?.message === 'Test not found') return { status: 'missing' };
     return { status: 'error', message: res.error?.message || 'Could not load this test' };
   } catch {
-    return { status: 'error', message: 'The server is waking up. Wait a few seconds and try again.' };
+    return { status: 'error', message: 'Cannot reach the ExamPro API. Check the API URL and connection, then retry.' };
   }
 }
 

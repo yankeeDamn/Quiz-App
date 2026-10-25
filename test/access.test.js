@@ -35,10 +35,17 @@ test('catalogue is public', async () => {
   assert.equal(body.data.tests.length, 21);
 });
 
-test('a free mock opens for a guest and includes answers', async () => {
+test('a free scored mock opens for a guest but hides correct answers', async () => {
   const { status, body } = await get('/api/v1/mocks/ssc1');
   assert.equal(status, 200);
   assert.ok(body.data.test.questions.length > 0);
+  assert.equal('answer' in body.data.test.questions[0], false);
+  assert.equal('explanation' in body.data.test.questions[0], false);
+});
+
+test('unscored practice deliberately includes answers', async () => {
+  const { status, body } = await get('/api/v1/mocks/topic-reason/practice');
+  assert.equal(status, 200);
   assert.ok('answer' in body.data.test.questions[0]);
 });
 
@@ -63,6 +70,16 @@ test('admin content routes reject guests and bad keys', async () => {
   assert.equal((await get('/api/v1/admin/topics')).status, 401);
   assert.equal((await get('/api/v1/admin/tests', { 'x-admin-key': 'wrong' })).status, 401);
   assert.equal((await get('/api/v1/admin/me', { authorization: 'Bearer not-a-token' })).status, 401);
+});
+
+test('API enforces signed-in sessions for stored scored attempts',async()=>{
+  assert.equal((await get('/api/v1/exam-attempts')).status,401);
+});
+
+test('owner key works but invalid admin access fails',async()=>{
+  const allowed=await get('/api/v1/admin/me',{'x-admin-key':'a-long-admin-key-for-tests-0123456789'});
+  assert.equal(allowed.status,200);
+  assert.equal(allowed.body.data.via,'key');
 });
 
 test('old payment routes are gone', async () => {

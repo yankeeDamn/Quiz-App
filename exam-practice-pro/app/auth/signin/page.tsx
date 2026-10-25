@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { useEffect, useState } from 'react';
+import { getProviders, signIn } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { GraduationCap, User } from 'lucide-react';
@@ -13,9 +13,12 @@ import { Separator } from '@/components/ui/separator';
 
 function SignInForm() {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/';
+  const rawCallback = searchParams.get('callbackUrl') || '/';
+  const callbackUrl = rawCallback.startsWith('/') && !rawCallback.startsWith('//') && !rawCallback.includes('\\') ? rawCallback : '/';
   const error = searchParams.get('error');
   const [guestName, setGuestName] = useState('');
+  const [providers, setProviders] = useState<string[] | null>(null);
+  useEffect(() => { void getProviders().then(p=>setProviders(p?Object.keys(p):[])).catch(()=>setProviders([])); },[]);
   const [isLoading, setIsLoading] = useState<string | null>(null);
 
   const handleOAuthSignIn = async (provider: string) => {
@@ -39,7 +42,7 @@ function SignInForm() {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
             <GraduationCap className="h-7 w-7" />
           </div>
-          <CardTitle className="text-2xl">Welcome to Exam Practice Pro</CardTitle>
+          <CardTitle className="text-2xl">Welcome to ExamPro</CardTitle>
           <CardDescription>
             Sign in to save your progress across devices
           </CardDescription>
@@ -53,7 +56,7 @@ function SignInForm() {
         </CardHeader>
         <CardContent className="space-y-4">
           {/* OAuth Providers */}
-          <Button
+          {providers?.includes('github') && <Button
             variant="outline"
             className="w-full h-11"
             onClick={() => handleOAuthSignIn('github')}
@@ -67,9 +70,9 @@ function SignInForm() {
               </svg>
             )}
             Continue with GitHub
-          </Button>
+          </Button>}
 
-          <Button
+          {providers?.includes('google') && <Button
             variant="outline"
             className="w-full h-11"
             onClick={() => handleOAuthSignIn('google')}
@@ -98,8 +101,9 @@ function SignInForm() {
               </svg>
             )}
             Continue with Google
-          </Button>
+          </Button>}
 
+          {providers && !providers.includes('github') && !providers.includes('google') && <p className="rounded-lg border p-3 text-sm" role="status">Account sign-in is not configured yet. The owner must add Google or GitHub OAuth credentials in Vercel. Guest practice remains available.</p>}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <Separator className="w-full" />

@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { api } from '@/lib/api';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
@@ -23,7 +25,18 @@ import { AchievementGrid } from '@/components/dashboard/achievement-badge';
 import { loadDashboardStats, loadQuizHistory, loadAchievements } from '@/lib/storage';
 import { DashboardStats, QuizResult, Achievement } from '@/lib/types';
 
+type CloudAttempt = {id:string;testId:string;title:string;startedAt:string;submittedAt:string|null;result:{score:number;total:number;percentage:number;passed:boolean}|null};
 export default function DashboardPage() {
+  const {data:session,status} = useSession();
+  const [cloud,setCloud] = useState<CloudAttempt[]>([]);
+  const [cloudError,setCloudError] = useState('');
+  useEffect(()=>{if(status!=='authenticated'||!session?.user?.email)return;
+    let active=true;
+    void api<{attempts:CloudAttempt[]}>('/api/v1/exam-attempts').then(r=>{if(!active)return;
+      if(r.success&&r.data)setCloud(r.data.attempts);
+      else setCloudError(r.error?.message||'Could not retrieve cloud history');
+    });return()=>{active=false};
+  },[status,session?.user?.email]);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [history, setHistory] = useState<QuizResult[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
@@ -51,7 +64,7 @@ export default function DashboardPage() {
     );
   }
 
-  const hasActivity = stats && (stats.totalAttempts > 0 || history.length > 0);
+  const hasActivity = stats && (stats.totalAttempts > 0 || history.length > 0 || cloud.length > 0);
 
   return (
     <>
@@ -66,6 +79,12 @@ export default function DashboardPage() {
             </p>
           </div>
 
+          <section className="mb-8 rounded-xl border bg-card p-5"><h2 className="text-xl font-bold">Synced exam results</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Completed scored ExamPro tests appear here after you sign in with the same verified account on any device. Guest and legacy practice progress stays local to this browser.</p>
+            {status !== 'authenticated' || !session?.user?.email ? <p className="mt-3 text-sm"><Link href="/auth/signin?callbackUrl=/dashboard" className="underline">Sign in to sync results</Link></p> : null}
+            {cloudError&&<p role="alert" className="mt-3 text-sm text-red-600">{cloudError}</p>}
+            <ul className="mt-3 divide-y">{cloud.map(item=><li key={item.id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm"><span><strong>{item.title}</strong><span className="ml-2 text-muted-foreground">{item.submittedAt?'Submitted':'In progress'}</span></span><span>{item.result?`${item.result.score}/${item.result.total} (${item.result.percentage}%)`:''} <Link className="ml-2 underline" href={`/dashboard/attempts/${item.id}`}>{item.submittedAt?'Review':'Resume / inspect'}</Link></span></li>)}</ul>
+          </section>
           {!hasActivity ? (
             /* Empty State */
             <motion.div

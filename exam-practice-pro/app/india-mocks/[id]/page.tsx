@@ -8,6 +8,8 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
 import { ExamEngine } from '@/components/mocks/exam-engine';
+import { SecureExam } from '@/components/mocks/secure-exam';
+
 import { WhatsAppButton } from '@/components/mocks/whatsapp-button';
 import { fetchMock, negativeLabel, type MockLoad } from '@/lib/mocks';
 
@@ -27,17 +29,17 @@ function MockPage() {
   const mode = useSearchParams().get('mode') === 'practice' ? 'practice' : 'test';
   const [attempt, setAttempt] = useState(0);
   const [started, setStarted] = useState(false);
-  const key = `${id}#${attempt}`;
+  const key = `${id}#${mode}#${attempt}`;
   const [loaded, setLoaded] = useState<{ key: string; load: MockLoad } | null>(null);
   const load = loaded?.key === key ? loaded.load : null;
 
   useEffect(() => {
     let cancelled = false;
-    fetchMock(id).then((r) => !cancelled && setLoaded({ key, load: r }));
+    fetchMock(id, mode).then((r) => !cancelled && setLoaded({ key, load: r }));
     return () => {
       cancelled = true;
     };
-  }, [id, key]);
+  }, [id, key, mode]);
 
   if (!load) {
     return (
@@ -103,7 +105,7 @@ function MockPage() {
     return (
       <Notice title={test.name}>
         <ul className="space-y-1">
-          <li>{test.questions.length} questions in {test.minutes} minutes</li>
+          <li>{test.questionCount} questions in {test.minutes} minutes</li>
           <li>
             +{test.marksPerCorrect} per correct answer, {negativeLabel(test.negativeMarks)}
           </li>
@@ -120,7 +122,7 @@ function MockPage() {
     );
   }
 
-  return <ExamEngine test={test} mode={mode} />;
+  return mode === 'practice' ? <ExamEngine test={test} mode="practice" /> : <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8"><SecureExam testId={test.id} /></main>;
 }
 
 export default function MockTestPage() {

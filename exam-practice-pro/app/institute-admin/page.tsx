@@ -93,7 +93,7 @@ export default function InstituteAdminPreview() {
     <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-zinc-950 dark:text-zinc-100">
       <div className="mx-auto max-w-6xl px-4 py-8 sm:py-12">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <Link href="/" className="text-sm font-semibold text-blue-700 dark:text-blue-400">← Back to TestGuru</Link>
+          <Link href="/" className="text-sm font-semibold text-blue-700 dark:text-blue-400">← Back to ExamPro</Link>
           <span className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">DEMO PREVIEW · NOT AN ADMIN LOGIN</span>
         </div>
         <div className="mb-8">

@@ -5,8 +5,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { admin, parseBulk, type AdminQuestion, type AdminTopic, type QuestionInput } from '@/lib/admin';
 import { Field, LETTERS, Notice, card, input } from '@/components/admin/ui';
+import { CsvImport } from '@/components/admin/csv-import';
 
-const EMPTY: QuestionInput = { question: '', options: ['', '', '', ''], answer: 0, explanation: '' };
+const EMPTY: QuestionInput = { question: '', options: ['', '', '', ''], answer: 0, explanation: '', difficulty:'Moderate' };
 const BULK_HINT = 'question | option A | option B | option C | option D | right answer (A-D) | explanation';
 
 export function QuestionsTab() {
@@ -19,6 +20,7 @@ export function QuestionsTab() {
   const [bulk, setBulk] = useState('');
   const [newTopic, setNewTopic] = useState({ id: '', name: '', category: '' });
   const [showInactive, setShowInactive] = useState(false);
+  const [topicDetails,setTopicDetails] = useState({name:'',category:''});
 
   const loadTopics = useCallback(async () => {
     const r = await admin<{ topics: AdminTopic[] }>('/topics');
@@ -38,6 +40,12 @@ export function QuestionsTab() {
   useEffect(() => { void loadTopics(); }, [loadTopics]);
   useEffect(() => { void loadQuestions(topic); }, [topic, loadQuestions]);
 
+  useEffect(()=>{const current=topics.find(t=>t.id===topic);if(current)setTopicDetails({name:current.name,category:current.category});},[topics,topic]);
+  const saveTopic=async(e:React.FormEvent)=>{e.preventDefault();
+    const r=await admin(`/topics/${topic}`,'PUT',topicDetails);
+    if(r.ok){setMsg({kind:'ok',text:'Topic updated.'});void loadTopics()}
+    else setMsg({kind:'error',text:r.message});
+  };
   const refresh = async () => { await Promise.all([loadTopics(), loadQuestions(topic)]); };
 
   const save = async (e: React.FormEvent) => {
@@ -98,6 +106,7 @@ export function QuestionsTab() {
           </Field>
           {current && <p className="pb-2 text-sm text-muted-foreground">{current.category} · {current.live} live, {current.total - current.live} retired · topic id <code>{current.id}</code></p>}
         </div>
+        <details><summary className="cursor-pointer text-sm font-semibold">Edit this topic</summary><form onSubmit={saveTopic} className="mt-3 flex flex-wrap items-end gap-3"><Field label="Name"><input className={input} required value={topicDetails.name} onChange={e=>setTopicDetails({...topicDetails,name:e.target.value})}/></Field><Field label="Category"><input className={input} required value={topicDetails.category} onChange={e=>setTopicDetails({...topicDetails,category:e.target.value})}/></Field><Button type="submit" disabled={!topic}>Save topic</Button></form></details>
         <details>
           <summary className="cursor-pointer text-sm font-semibold">Create a new topic</summary>
           <form onSubmit={addTopic} className="mt-3 grid gap-3 sm:grid-cols-4">
@@ -109,6 +118,7 @@ export function QuestionsTab() {
         </details>
       </section>
 
+      <CsvImport topic={topic} onSaved={()=>void refresh()} />
       <div className="grid gap-6 lg:grid-cols-2">
         <form onSubmit={save} className={`${card} grid h-fit gap-3`}>
           <h2 className="text-lg font-bold">{editing ? 'Edit question' : 'Add a question'}</h2>
@@ -121,6 +131,7 @@ export function QuestionsTab() {
               </label>
             </div>
           ))}
+          <Field label="Difficulty"><select className={input} value={draft.difficulty||'Moderate'} onChange={e=>setDraft({...draft,difficulty:e.target.value})}>{['Easy','Moderate','Hard'].map(d=><option key={d}>{d}</option>)}</select></Field>
           <Field label="Explanation" hint="Shown to the learner after the answer."><textarea className={`${input} min-h-16`} required value={draft.explanation} onChange={(e) => setDraft({ ...draft, explanation: e.target.value })} /></Field>
           <div className="flex gap-2">
             <Button type="submit" disabled={!topic}>{editing ? 'Save changes' : 'Add question'}</Button>
@@ -158,7 +169,7 @@ export function QuestionsTab() {
               </p>
               <p className="text-xs text-muted-foreground">Why: {q.explanation}</p>
               <div className="flex gap-3 text-sm">
-                <button className="underline" onClick={() => { setEditing(q.id); setDraft({ question: q.question, options: q.options, answer: q.answer, explanation: q.explanation }); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Edit</button>
+                <button className="underline" onClick={() => { setEditing(q.id); setDraft({ question: q.question, options: q.options, answer: q.answer, explanation: q.explanation, difficulty:q.difficulty }); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Edit</button>
                 <button className="underline" onClick={() => void setActive(q.id, !q.active)}>{q.active ? 'Retire' : 'Bring back'}</button>
               </div>
             </li>

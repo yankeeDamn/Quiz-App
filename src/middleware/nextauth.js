@@ -64,6 +64,11 @@ async function authenticateNextAuth(req, res, next) {
       algorithms: ['HS256'],
     });
 
+    // Only the Next.js session bridge may mint verified OAuth identities.
+    if (!['google', 'github'].includes(payload.provider) || payload.emailVerified !== true || typeof payload.email !== 'string' || !payload.email.includes('@')) {
+      return res.status(403).json({success:false,error:{code:'VERIFIED_OAUTH_REQUIRED',message:'Sign in using a verified Google or GitHub email to save results.'}});
+    }
+
     // payload: { sub, email, name, image, provider, iat, exp }
     const user = {
       id: payload.sub,
@@ -74,7 +79,8 @@ async function authenticateNextAuth(req, res, next) {
     };
 
     // Upsert user into PostgreSQL (if DB is configured)
-    if (config.databaseUrl) {
+    if (!config.databaseUrl) return res.status(503).json({success:false,error:{code:'DATABASE_UNAVAILABLE',message:'Database is not configured.'}});
+    {
       try {
         const dbUser = await upsertUser(user);
         user.id = dbUser.id; // use the database UUID as canonical ID
@@ -83,7 +89,8 @@ async function authenticateNextAuth(req, res, next) {
         user.planExpiresAt = dbUser.plan_expires_at;
         user.role = dbUser.role;
       } catch (dbErr) {
-        logger.warn({ err: dbErr }, 'DB upsert failed — using token identity');
+        logger.error({ err: dbErr }, 'DB upsert failed');
+        return res.status(503).json({success:false,error:{code:'DATABASE_UNAVAILABLE',message:'Database unavailable. Try again after connectivity is restored.'}});
       }
     }
 
@@ -139,7 +146,7 @@ async function allowNextAuthGuest(req, _res, next) {
       provider: payload.provider || 'credentials',
     };
 
-    if (config.databaseUrl) {
+    if (config.databaseUrl && ['google','github'].includes(payload.provider) && payload.emailVerified === true && payload.email) {
       try {
         const dbUser = await upsertUser(user);
         user.id = dbUser.id;
@@ -148,7 +155,9 @@ async function allowNextAuthGuest(req, _res, next) {
         user.planExpiresAt = dbUser.plan_expires_at;
         user.role = dbUser.role;
       } catch {
-        // proceed with token identity
+        req.user = { id: 'guest', role:'guest' };
+        req.isGuest = true;
+        return next();
       }
     }
 

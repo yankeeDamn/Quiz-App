@@ -6,6 +6,7 @@ const mocks = require('./mocks.service');
 const SLUG = /^[a-z0-9][a-z0-9-]{1,38}$/;
 const LEVELS = ['Easy', 'Moderate', 'Hard', 'Practice'];
 const TIERS = ['free', 'premium'];
+const DIFFICULTIES = ['Easy','Moderate','Hard'];
 
 const str = (v) => (typeof v === 'string' ? v.trim() : '');
 const fail = (message) => ({ ok: false, error: message });
@@ -16,14 +17,16 @@ function checkQuestion(input) {
   const explanation = str(input && input.explanation);
   const options = Array.isArray(input && input.options) ? input.options.map(str) : [];
   const answer = Number(input && input.answer);
+  const difficulty = str(input && input.difficulty) || 'Moderate';
 
   if (question.length < 5 || question.length > 600) return fail('Question must be 5 to 600 characters.');
   if (options.length !== 4) return fail('Give exactly four options.');
   if (options.some((o) => !o || o.length > 200)) return fail('Every option needs 1 to 200 characters.');
   if (new Set(options.map((o) => o.toLowerCase())).size !== 4) return fail('The four options must all be different.');
   if (!Number.isInteger(answer) || answer < 0 || answer > 3) return fail('The right answer must be A, B, C or D.');
+  if (!DIFFICULTIES.includes(difficulty)) return fail('Difficulty must be Easy, Moderate or Hard.');
   if (explanation.length < 3 || explanation.length > 1000) return fail('Explanation must be 3 to 1000 characters.');
-  return { ok: true, value: { question, options, answer, explanation } };
+  return { ok: true, value: { question, options, answer, explanation, difficulty } };
 }
 
 /** Check a full mock test. topicIds is the list of existing topic ids. */
@@ -35,6 +38,7 @@ function checkTest(input, topicIds) {
   const minutes = Number(input && input.minutes);
   const marks = Number(input && input.marksPerCorrect);
   const negative = Number(input && input.negativeMarks);
+  const passPercent = Number(input && (input.passPercent ?? 50));
   const sections = input && input.sections;
 
   if (name.length < 3 || name.length > 120) return fail('Name must be 3 to 120 characters.');
@@ -44,9 +48,11 @@ function checkTest(input, topicIds) {
   if (!Number.isInteger(minutes) || minutes < 1 || minutes > 300) return fail('Minutes must be 1 to 300.');
   if (!(marks > 0 && marks <= 10)) return fail('Marks per correct answer must be above 0 and at most 10.');
   if (!(negative >= 0 && negative <= marks)) return fail('Negative marks cannot be below 0 or above the marks for a right answer.');
+  if (!Number.isInteger(passPercent) || passPercent < 0 || passPercent > 100) return fail('Passing score must be from 0 to 100 percent.');
   if (!Array.isArray(sections) || sections.length < 1 || sections.length > 8) return fail('Add 1 to 8 sections.');
 
   const clean = [];
+  const usedPositions = new Set();
   for (const s of sections) {
     const sname = str(s && s.name);
     if (!sname || sname.length > 60) return fail('Every section needs a name of up to 60 characters.');
@@ -57,11 +63,18 @@ function checkTest(input, topicIds) {
       const to = Number(p && p.to);
       if (!topicIds.includes(p && p.topic)) return fail(`Section "${sname}" uses a topic that does not exist.`);
       if (!Number.isInteger(from) || !Number.isInteger(to) || from < 0 || to <= from) return fail(`Section "${sname}" has a bad question range. "To" must be above "from".`);
+      // Prevent two sections from assigning the same question (responses use stable IDs).
+      if (to-from > 500) return fail('Each range must contain no more than 500 positions.');
+      for(let i=from;i<to;i++){
+        const key=p.topic+':'+i;
+        if(usedPositions.has(key))return fail('A question range appears more than once in this test.');
+        usedPositions.add(key);
+      }
       parts.push({ topic: p.topic, from, to });
     }
     clean.push({ name: sname, parts });
   }
-  return { ok: true, value: { name, exam, level, tier, minutes, marksPerCorrect: marks, negativeMarks: negative, sections: clean } };
+  return { ok: true, value: { name, exam, level, tier, minutes, marksPerCorrect: marks, negativeMarks: negative, passPercent, sections: clean } };
 }
 
 class ContentService {
@@ -89,6 +102,14 @@ class ContentService {
     return { ok: true, value: { id: slug } };
   }
 
+  async updateTopic(id, input) {
+    const name = str(input?.name), category = str(input?.category);
+    if (name.length < 3 || name.length > 120 || category.length < 2 || category.length > 60) return fail('Topic name or category is invalid.');
+    const r = await db.query('UPDATE mock_topics SET name=$2, category=$3 WHERE id=$1',[id,name,category]);
+    mocks.invalidate();
+    return r.rowCount ? {ok:true,value:{id,name,category}} : fail('Topic not found');
+  }
+
   async setTopicActive(id, active) {
     const r = await db.query('UPDATE mock_topics SET active = $2 WHERE id = $1', [id, Boolean(active)]);
     mocks.invalidate();
@@ -98,7 +119,7 @@ class ContentService {
   // ── Questions ────────────────────────────────────────
   async listQuestions(topicId) {
     const { rows } = await db.query(
-      `SELECT id, position, question, options, answer, explanation, active
+      `SELECT id, position, question, options, answer, explanation, difficulty, active
          FROM mock_questions WHERE topic_id = $1 ORDER BY position`,
       [topicId]
     );
@@ -116,9 +137,9 @@ class ContentService {
     let position = rows[0].last + 1;
     for (const v of values) {
       await db.query(
-        `INSERT INTO mock_questions (topic_id, position, question, options, answer, explanation)
-         VALUES ($1, $2, $3, $4, $5, $6)`,
-        [topicId, position, v.question, JSON.stringify(v.options), v.answer, v.explanation]
+        `INSERT INTO mock_questions (topic_id, position, question, options, answer, explanation, difficulty)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [topicId, position, v.question, JSON.stringify(v.options), v.answer, v.explanation, v.difficulty]
       );
       position += 1;
     }
@@ -128,9 +149,9 @@ class ContentService {
 
   async updateQuestion(id, v) {
     const r = await db.query(
-      `UPDATE mock_questions SET question = $2, options = $3, answer = $4, explanation = $5, updated_at = NOW()
+      `UPDATE mock_questions SET question = $2, options = $3, answer = $4, explanation = $5, difficulty = $6, updated_at = NOW()
         WHERE id = $1`,
-      [id, v.question, JSON.stringify(v.options), v.answer, v.explanation]
+      [id, v.question, JSON.stringify(v.options), v.answer, v.explanation, v.difficulty]
     );
     mocks.invalidate();
     return r.rowCount > 0;
@@ -143,23 +164,33 @@ class ContentService {
   }
 
   // ── Tests ────────────────────────────────────────────
+  async previewTest(definition) {
+    const bank = await mocks.loadBank();
+    const built = mocks.build(bank,{...definition,kind:'mock'});
+    return {id:definition.id,name:definition.name,questionCount:built.questions.length,minutes:definition.minutes,
+      questionIds:built.questions.map(q=>q.id),questions:built.questions.map(q=>({id:q.id,question:q.question,topic:q.topic}))};
+  }
+
   async listTests() {
     const { rows } = await db.query(
-      `SELECT id, name, exam, minutes, marks_per_correct, negative_marks, level, tier, sections, active
+      `SELECT id, name, exam, minutes, marks_per_correct, negative_marks, pass_percent, level, tier, sections, active
          FROM mock_tests ORDER BY created_at, id`
     );
-    return rows.map((r) => ({
+    const result = rows.map((r) => ({
       id: r.id,
       name: r.name,
       exam: r.exam,
       minutes: r.minutes,
       marksPerCorrect: Number(r.marks_per_correct),
       negativeMarks: Number(r.negative_marks),
+      passPercent: Number(r.pass_percent),
       level: r.level,
       tier: r.tier,
       sections: r.sections,
       active: r.active,
     }));
+    const bank = await mocks.loadBank();
+    return result.map(t => ({...t, questionCount:mocks.build(bank,{...t,kind:'mock'}).questions.length}));
   }
 
   async topicIds() {
@@ -174,9 +205,9 @@ class ContentService {
     const exists = await db.query('SELECT 1 FROM mock_tests WHERE id = $1', [slug]);
     if (exists.rowCount) return fail('A test with this id already exists.');
     await db.query(
-      `INSERT INTO mock_tests (id, name, exam, minutes, marks_per_correct, negative_marks, level, tier, sections)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      [slug, v.name, v.exam, v.minutes, v.marksPerCorrect, v.negativeMarks, v.level, v.tier, JSON.stringify(v.sections)]
+      `INSERT INTO mock_tests (id, name, exam, minutes, marks_per_correct, negative_marks, level, tier, sections, pass_percent, active)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+      [slug, v.name, v.exam, v.minutes, v.marksPerCorrect, v.negativeMarks, v.level, v.tier, JSON.stringify(v.sections), v.passPercent, false]
     );
     mocks.invalidate();
     return { ok: true, value: { id: slug } };
@@ -185,9 +216,9 @@ class ContentService {
   async updateTest(id, v, active) {
     const r = await db.query(
       `UPDATE mock_tests SET name = $2, exam = $3, minutes = $4, marks_per_correct = $5, negative_marks = $6,
-              level = $7, tier = $8, sections = $9, active = $10, updated_at = NOW()
+              level = $7, tier = $8, sections = $9, active = $10, pass_percent=$11, updated_at = NOW()
         WHERE id = $1`,
-      [id, v.name, v.exam, v.minutes, v.marksPerCorrect, v.negativeMarks, v.level, v.tier, JSON.stringify(v.sections), active]
+      [id, v.name, v.exam, v.minutes, v.marksPerCorrect, v.negativeMarks, v.level, v.tier, JSON.stringify(v.sections), active, v.passPercent]
     );
     mocks.invalidate();
     return r.rowCount > 0;

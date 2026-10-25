@@ -1,3 +1,7 @@
+> **ExamPro unified Vercel + Render + Neon milestone (draft PR #21):** The current deployment architecture uses **one Next.js frontend on Vercel**, **one existing Express API on Render**, and **one external Neon PostgreSQL database**. Do not deploy the legacy Render frontend/database Blueprint. /exampro now redirects to the native Next.js mock catalogue; /institute-admin is only a labelled preview. For updated setup, migration, safe rollback, OAuth, and the nine-step owner verification checklist see [the current rollout guide](docs/exampro-unified-rollout.md). The older instructions below describe pre-consolidation behavior and should not be used to configure production.
+
+---
+
 # Exam Practice Pro
 
 A full-stack exam practice site in the style of CertyIQ and Udemy practice tests, with India exam mocks, premium plans and WhatsApp for coaching, doubts and payments.
