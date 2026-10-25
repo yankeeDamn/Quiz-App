@@ -30,6 +30,7 @@ export default function AdminPage() {
   const check = useCallback(async () => {
     const r = await admin('/me');
     if (r.ok) setGate({ state: 'ok' });
+    else if (/verified|OAuth provider|AUTH_SECRET/i.test(r.message)) setGate({state:'error',message:r.message});
     else if (r.status === 401 || /sign|token|authentication/i.test(r.message)) setGate({ state: 'signin' });
     else if (/not an admin/i.test(r.message)) setGate({ state: 'denied', email: null });
     else setGate({ state: 'error', message: r.message });
