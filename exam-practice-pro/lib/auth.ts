@@ -5,8 +5,8 @@ import Credentials from 'next-auth/providers/credentials';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
-    GitHub,
-    Google,
+    ...(process.env.AUTH_GITHUB_ID && process.env.AUTH_GITHUB_SECRET ? [GitHub({ authorization: { params: { scope: 'read:user user:email' } } })] : []),
+    ...(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET ? [Google] : []),
     Credentials({
       id: 'guest',
       name: 'Guest',
@@ -30,9 +30,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     signIn: '/auth/signin',
   },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
+    async jwt({ token, user, account, profile }) {
+      if (user) token.id = user.id;
+      if (account) {
+        token.provider = account.provider;
+        token.emailVerified = false;
+        if (account.provider === 'google') {
+          token.emailVerified = profile?.email_verified === true;
+        } else if (account.provider === 'github' && account.access_token && user.email) {
+          try {
+            const response = await fetch('https://api.github.com/user/emails', {
+              headers: { Authorization: `Bearer ${account.access_token}`, Accept: 'application/vnd.github+json' },
+              cache: 'no-store',
+            });
+            if (response.ok) {
+              const emails = await response.json() as Array<{ email: string; verified: boolean }>;
+              token.emailVerified = emails.some((entry) => entry.verified && entry.email.toLowerCase() === user.email?.toLowerCase());
+            }
+          } catch { /* fail closed if GitHub email verification is unavailable */ }
+        }
       }
       return token;
     },
@@ -40,10 +56,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (session.user && token.id) {
         session.user.id = token.id as string;
       }
+      (session as typeof session & { provider?: string; emailVerified?: boolean }).provider = String(token.provider || '');
+      (session as typeof session & { provider?: string; emailVerified?: boolean }).emailVerified = token.emailVerified === true;
       return session;
     },
   },
   session: {
     strategy: 'jwt',
   },
+  trustHost: true,
+
+
 });
