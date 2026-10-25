@@ -72,6 +72,16 @@ test('admin content routes reject guests and bad keys', async () => {
   assert.equal((await get('/api/v1/admin/me', { authorization: 'Bearer not-a-token' })).status, 401);
 });
 
+test('API enforces signed-in sessions for stored scored attempts',async()=>{
+  assert.equal((await get('/api/v1/exam-attempts')).status,401);
+});
+
+test('owner key works but invalid admin access fails',async()=>{
+  const allowed=await get('/api/v1/admin/me',{'x-admin-key':'a-long-admin-key-for-tests-0123456789'});
+  assert.equal(allowed.status,200);
+  assert.equal(allowed.body.data.via,'key');
+});
+
 test('old payment routes are gone', async () => {
   assert.equal((await get('/api/v1/payments/config')).status, 404);
 });
