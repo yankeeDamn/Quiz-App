@@ -1,13 +1,13 @@
 import { api } from '@/lib/api';
 
 export interface AdminTopic { id: string; name: string; category: string; active: boolean; total: number; live: number }
-export interface AdminQuestion { id: string; position: number; question: string; options: string[]; answer: number; explanation: string; active: boolean }
-export interface QuestionInput { question: string; options: string[]; answer: number; explanation: string }
+export interface AdminQuestion { id: string; position: number; question: string; options: string[]; answer: number; explanation: string; difficulty: string; active: boolean }
+export interface QuestionInput { question: string; options: string[]; answer: number; explanation: string; difficulty?: string }
 export interface TestPart { topic: string; from: number; to: number }
 export interface TestSection { name: string; parts: TestPart[] }
 export interface AdminTest {
   id: string; name: string; exam: string; minutes: number; marksPerCorrect: number; negativeMarks: number;
-  level: string; tier: 'free' | 'premium'; sections: TestSection[]; active: boolean;
+  level: string; tier: 'free' | 'premium'; passPercent: number; sections: TestSection[]; active: boolean;
 }
 export interface AdminUser { email: string; name: string | null; plan: string; plan_expires_at: string | null; planActive: boolean }
 export interface AdminGrant { plan: string; months: number; amount_inr: number | null; note: string | null; expires_at: string; granted_at: string; email: string }
@@ -21,7 +21,7 @@ export async function admin<T = unknown>(path: string, method = 'GET', body?: un
     if (res.success) return { ok: true, data: res.data as T };
     return { ok: false, message: res.error?.message || 'Something went wrong' };
   } catch {
-    return { ok: false, message: 'Could not reach the server. It may be waking up. Try again in a few seconds.' };
+    return { ok: false, message: 'Cannot reach the ExamPro API. Verify its address and deployment status.' };
   }
 }
 
