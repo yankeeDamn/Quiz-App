@@ -39,7 +39,7 @@ export function Header() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden xl:flex items-center gap-6">
           <Link
             href="/"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -84,7 +84,7 @@ export function Header() {
             variant="ghost"
             size="sm"
             asChild
-            className="hidden md:flex"
+            className="hidden xl:flex"
           >
             <Link href="/dashboard">
               <LayoutDashboard className="mr-2 h-4 w-4" />
@@ -120,7 +120,7 @@ export function Header() {
               {session?.user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="hidden md:flex gap-2">
+                    <Button variant="ghost" size="sm" className="hidden xl:flex gap-2">
                       {session.user.image ? (
                         <img
                           src={session.user.image}
@@ -147,7 +147,7 @@ export function Header() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Button variant="ghost" size="sm" asChild className="hidden md:flex">
+                <Button variant="ghost" size="sm" asChild className="hidden xl:flex">
                   <Link href="/auth/signin">
                     <LogIn className="mr-2 h-4 w-4" />
                     Sign In
@@ -159,7 +159,7 @@ export function Header() {
 
           {/* Mobile Menu */}
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild className="md:hidden">
+            <SheetTrigger asChild className="xl:hidden">
               <Button variant="ghost" size="icon" className="h-9 w-9">
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Open menu</span>
