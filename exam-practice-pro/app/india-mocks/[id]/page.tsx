@@ -29,7 +29,7 @@ function MockPage() {
   const mode = useSearchParams().get('mode') === 'practice' ? 'practice' : 'test';
   const [attempt, setAttempt] = useState(0);
   const [started, setStarted] = useState(false);
-  const key = `${id}#${attempt}`;
+  const key = `${id}#${mode}#${attempt}`;
   const [loaded, setLoaded] = useState<{ key: string; load: MockLoad } | null>(null);
   const load = loaded?.key === key ? loaded.load : null;
 
