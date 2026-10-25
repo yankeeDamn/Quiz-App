@@ -9,6 +9,7 @@ import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
 import { WhatsAppButton } from '@/components/mocks/whatsapp-button';
 import { usePlan } from '@/hooks/use-plan';
+import { IT_CERTS, buildCertTest } from '@/lib/it-certs';
 import { fetchCatalog, negativeLabel, type MockSummary } from '@/lib/mocks';
 
 const FILTERS: { id: string; label: string }[] = [
@@ -165,18 +166,17 @@ function Catalogue() {
   );
 }
 
-const CERTS = [
-  { id: 'az-900', name: 'Microsoft AZ-900' },
-  { id: 'aws-cloud-practitioner', name: 'AWS Cloud Practitioner' },
-  { id: 'comptia-a-plus', name: 'CompTIA A+' },
-];
-
 function StarterCertifications() {
   return <section className="mx-auto w-full max-w-6xl px-4 py-8" aria-label="IT certification practice">
     <h2 className="text-2xl font-bold">IT Certification Starter Practice</h2>
     <p className="mt-2 text-sm text-muted-foreground">Original introductory questions with explanations; pending expert review, not official exams.</p>
     <div className="mt-4 grid gap-3 sm:grid-cols-3">
-      {CERTS.map(cert => <Link key={cert.id} href={`/india-mocks/${cert.id}`} className="rounded-lg border p-4 font-semibold hover:bg-muted">{cert.name} — Start practice →</Link>)}
+      {IT_CERTS.map(cert => (
+        <Link key={cert.id} href={`/india-mocks/${cert.id}`} className="rounded-lg border p-4 font-semibold hover:bg-muted">
+          {cert.name} — Start practice →
+          <span className="mt-1 block text-xs font-normal text-muted-foreground">{buildCertTest(cert.id)?.questionCount ?? 0} questions · free</span>
+        </Link>
+      ))}
     </div>
   </section>;
 }
