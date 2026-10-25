@@ -52,6 +52,7 @@ function checkTest(input, topicIds) {
   if (!Array.isArray(sections) || sections.length < 1 || sections.length > 8) return fail('Add 1 to 8 sections.');
 
   const clean = [];
+  const usedPositions = new Set();
   for (const s of sections) {
     const sname = str(s && s.name);
     if (!sname || sname.length > 60) return fail('Every section needs a name of up to 60 characters.');
@@ -62,6 +63,13 @@ function checkTest(input, topicIds) {
       const to = Number(p && p.to);
       if (!topicIds.includes(p && p.topic)) return fail(`Section "${sname}" uses a topic that does not exist.`);
       if (!Number.isInteger(from) || !Number.isInteger(to) || from < 0 || to <= from) return fail(`Section "${sname}" has a bad question range. "To" must be above "from".`);
+      // Prevent two sections from assigning the same question (responses use stable IDs).
+      if (to-from > 500) return fail('Each range must contain no more than 500 positions.');
+      for(let i=from;i<to;i++){
+        const key=p.topic+':'+i;
+        if(usedPositions.has(key))return fail('A question range appears more than once in this test.');
+        usedPositions.add(key);
+      }
       parts.push({ topic: p.topic, from, to });
     }
     clean.push({ name: sname, parts });
@@ -156,12 +164,19 @@ class ContentService {
   }
 
   // ── Tests ────────────────────────────────────────────
+  async previewTest(definition) {
+    const bank = await mocks.loadBank();
+    const built = mocks.build(bank,{...definition,kind:'mock'});
+    return {id:definition.id,name:definition.name,questionCount:built.questions.length,minutes:definition.minutes,
+      questionIds:built.questions.map(q=>q.id),questions:built.questions.map(q=>({id:q.id,question:q.question,topic:q.topic}))};
+  }
+
   async listTests() {
     const { rows } = await db.query(
       `SELECT id, name, exam, minutes, marks_per_correct, negative_marks, pass_percent, level, tier, sections, active
          FROM mock_tests ORDER BY created_at, id`
     );
-    return rows.map((r) => ({
+    const result = rows.map((r) => ({
       id: r.id,
       name: r.name,
       exam: r.exam,
@@ -174,6 +189,8 @@ class ContentService {
       sections: r.sections,
       active: r.active,
     }));
+    const bank = await mocks.loadBank();
+    return result.map(t => ({...t, questionCount:mocks.build(bank,{...t,kind:'mock'}).questions.length}));
   }
 
   async topicIds() {
