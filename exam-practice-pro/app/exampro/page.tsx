@@ -2,6 +2,7 @@
 /* eslint-disable react-hooks/set-state-in-effect -- restoring browser-only branding after mount */
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { Reveal } from '@/components/motion/reveal';
 import { BookOpen, Building2, ChevronRight, Clock3, LayoutDashboard, MessageCircle, Palette, RotateCcw, ShieldCheck } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
@@ -119,23 +120,23 @@ export default function ExamProStudioPage() {
           <a href="#how">How to use it</a><a href="#practice">Mock tests</a><a href="#progress">My progress</a><a href="#portal">Portal builder</a><a href="#contact">WhatsApp</a>
         </nav>
       </div>
-      <section className="mx-auto grid max-w-6xl gap-8 px-4 py-14 lg:grid-cols-2 lg:items-center lg:py-20">
-        <div>
-          <p className="font-mono text-xs font-bold uppercase tracking-[.15em] text-orange-700 dark:text-orange-400">Mock tests for everyone</p>
-          <h1 className="mt-4 text-4xl font-black leading-tight sm:text-5xl">A little practice.<br/><span className="text-orange-700 dark:text-orange-400">A stronger attempt.</span></h1>
+      <section className="ep-hero relative mx-auto grid max-w-6xl gap-10 overflow-hidden rounded-b-3xl px-4 py-16 lg:grid-cols-2 lg:items-center lg:py-24">
+        <Reveal className="relative">
+          <p className="ep-eyebrow">Mock tests for everyone</p>
+          <h1 className="mt-5 text-4xl font-black leading-[1.1] tracking-tight sm:text-5xl lg:text-6xl">A little practice.<br/><span className="text-orange-700 dark:text-orange-400">A stronger attempt.</span></h1>
           <p className="mt-5 max-w-xl text-lg text-slate-600 dark:text-slate-300">Practice for India&apos;s exams, learn from explanations and try the original Exampro-inspired institute portal builder—all inside your unified ExamPro.</p>
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Link href="/india-mocks" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-orange-700 px-5 py-3 font-bold text-white">Explore mock tests <ChevronRight size={18}/></Link>
-            <a href="#portal" className="inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-900">Try portal builder</a>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link href="/india-mocks" className="ep-link-motion inline-flex min-h-11 items-center gap-2 rounded-xl bg-indigo-700 px-6 py-3 font-bold text-white shadow-lg shadow-indigo-700/20 hover:bg-indigo-600">Explore mock tests <ChevronRight size={18}/></Link>
+            <a href="#portal" className="ep-link-motion inline-flex min-h-11 items-center rounded-xl border border-slate-300 bg-white px-6 py-3 font-semibold text-slate-900 shadow-sm hover:border-indigo-400">Try portal builder</a>
           </div>
           <p className="mt-5 text-sm text-slate-500 dark:text-slate-400">Exam submissions and results continue to use Render and Neon.</p>
-        </div>
-        <div className="rounded-2xl border-2 border-slate-900 bg-white p-6 shadow-lg dark:border-slate-700 dark:bg-slate-900">
+        </Reveal>
+        <div className="ep-preview-surface relative rounded-3xl border border-indigo-200 bg-white p-6 shadow-xl dark:border-indigo-900 dark:bg-slate-900 sm:p-8">
           <div className="flex justify-between gap-2 font-mono text-xs font-bold uppercase text-slate-500"><span>Sample OMR question</span><span>+4 / −1</span></div>
           <h2 className="mt-5 text-lg font-semibold">A shirt priced at ₹800 is sold at 25% off. What is the sale price?</h2>
           <div className="mt-5 grid gap-3">{['₹500','₹600','₹650','₹700'].map((value,i)=>
             <button key={value} type="button" disabled={picked!==null} onClick={()=>setPicked(i)}
-              className={'flex min-h-12 items-center gap-3 rounded-xl border p-3 text-left ' + (picked!==null && i===1 ? 'border-green-600 bg-green-50 text-green-950' : picked===i ? 'border-red-600 bg-red-50 text-red-950' : 'border-slate-200 hover:border-orange-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white')}>
+              className={'ep-link-motion flex min-h-12 items-center gap-3 rounded-xl border p-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 ' + (picked!==null && i===1 ? 'border-green-600 bg-green-50 text-green-950' : picked===i ? 'border-red-600 bg-red-50 text-red-950' : 'border-slate-200 hover:border-orange-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white')}>
               <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-current font-mono text-sm font-bold">{'ABCD'[i]}</span>{value}
             </button>)}
           </div>
@@ -144,7 +145,7 @@ export default function ExamProStudioPage() {
         </div>
       </section>
 
-      <section id="how" className="bg-[#101a33] py-16 text-white">
+      <section id="how" className="ep-studio-panel py-16 text-white">
         <div className="mx-auto max-w-6xl px-4">
           <p className="font-mono text-xs font-bold uppercase tracking-widest text-orange-400">How to use it</p>
           <h2 className="mt-3 text-3xl font-extrabold">Pick your role and see the first steps.</h2>
@@ -153,7 +154,7 @@ export default function ExamProStudioPage() {
               className={'rounded-lg border px-4 py-3 font-semibold ' + (role===id ? 'border-white bg-white text-slate-900' : 'border-slate-500')}>{label}</button>)}
           </div>
           <div className="mt-8 grid gap-4 md:grid-cols-3">{ROLES[role].map((step,i)=>
-            <article key={step.title} className="rounded-xl border border-slate-700 bg-[#172548] p-5">
+            <article key={step.title} className="ep-link-motion rounded-2xl border border-slate-700 bg-[#172548] p-6 hover:border-indigo-300/60">
               <span className="grid h-10 w-10 place-items-center rounded-full border border-orange-400 font-mono text-orange-300">{i+1}</span>
               <h3 className="mt-4 text-lg font-bold">{step.title}</h3><p className="mt-2 text-slate-300">{step.detail}</p>
             </article>)}
@@ -174,7 +175,7 @@ export default function ExamProStudioPage() {
               className={'rounded-full border px-4 py-2 text-sm font-semibold ' + (filter===c?'border-slate-900 bg-slate-900 text-white dark:bg-white dark:text-slate-900':'border-slate-300 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white')}>{c}</button>)}
           </div>
           <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">{shown.map(t=>
-            <article key={t.id} className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-5 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+            <article key={t.id} className="ep-card flex h-full flex-col gap-3 rounded-2xl p-6 text-slate-900 dark:text-white">
               <div className="flex justify-between gap-2"><h3 className="font-bold">{t.name}</h3><span className={'h-fit rounded px-2 py-1 text-xs font-semibold ' + (t.tier==='free'?'bg-emerald-100 text-emerald-900':'bg-amber-100 text-amber-900')}>{t.tier==='free'?'Free':'Pro'}</span></div>
               <p className="text-sm text-slate-500 dark:text-slate-300">{t.exam} · {t.questionCount} questions · {t.minutes} min</p>
               <p className="text-xs text-slate-500 dark:text-slate-300">{t.sections.join(' · ')}</p>
@@ -192,13 +193,13 @@ export default function ExamProStudioPage() {
             { icon: Clock3, name: 'Timed exam practice', text: 'Automatic saving, timing and server scoring.', url: '/india-mocks' },
             { icon: LayoutDashboard, name: 'My practice progress', text: 'View scores, attempt history and explanations.', url: '/dashboard' },
             { icon: ShieldCheck, name: 'Owner question publishing', text: 'Create questions and publish reviewed tests.', url: '/admin' },
-          ].map(item=><Link href={item.url} key={item.name} className="rounded-xl border border-slate-200 p-6 hover:border-orange-400 dark:border-slate-700">
+          ].map(item=><Link href={item.url} key={item.name} className="ep-link-motion rounded-2xl border border-slate-200 p-6 hover:border-indigo-400 hover:bg-indigo-50/30 dark:border-slate-700 dark:hover:bg-indigo-950/20">
             <item.icon className="h-7 w-7 text-orange-600"/><h2 className="mt-4 text-lg font-bold">{item.name}</h2><p className="mt-2 text-slate-600 dark:text-slate-300">{item.text}</p><span className="mt-4 inline-flex items-center gap-1 font-semibold text-orange-700 dark:text-orange-400">Open feature <ChevronRight size={16}/></span>
           </Link>)}
         </div>
       </section>
 
-      <section id="portal" className="bg-[#101a33] py-16 text-white">
+      <section id="portal" className="ep-studio-panel py-16 text-white">
         <div className="mx-auto max-w-6xl px-4">
           <p className="flex items-center gap-2 font-mono text-xs font-bold uppercase text-orange-400"><Palette size={15}/> Portal builder</p>
           <h2 className="mt-3 text-3xl font-extrabold">Make it yours in a minute.</h2>
@@ -224,7 +225,7 @@ export default function ExamProStudioPage() {
               <p className="text-sm text-slate-300" role="status">{notice || 'Changes stay in this browser and are not uploaded.'}</p>
               <button type="button" onClick={()=>{setPortal(INITIAL);setLogoError('');}} className="inline-flex w-fit items-center gap-2 rounded-lg border border-slate-500 px-4 py-2 text-sm font-semibold"><RotateCcw size={16}/> Reset preview</button>
             </form>
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-xl lg:sticky lg:top-24 lg:self-start">
+            <div className="ep-preview-surface overflow-hidden rounded-3xl border border-slate-200 bg-white text-slate-900 shadow-xl lg:sticky lg:top-24 lg:self-start">
               <div className="flex gap-1 border-b border-slate-200 bg-slate-100 px-4 py-3"><span className="h-2 w-2 rounded-full bg-slate-400"/><span className="h-2 w-2 rounded-full bg-slate-400"/><span className="h-2 w-2 rounded-full bg-slate-400"/><span className="ml-3 truncate font-mono text-xs text-slate-500">institute-preview.exampro.example</span></div>
               <div className="flex items-center gap-4 p-5" style={{background:portal.color,color:ink}}>
                 {portal.logo ? <img src={portal.logo} alt="Preview of institute logo" className="h-14 w-14 rounded-xl bg-white object-contain"/> : <span className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-white text-xl font-black" style={{color:portal.color}}>{initials}</span>}
@@ -260,7 +261,7 @@ export default function ExamProStudioPage() {
       </section>
       <section className="mx-auto max-w-6xl px-4 pb-16"><div className="flex flex-wrap items-center justify-between gap-5 rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
         <div className="flex items-start gap-3"><Building2 className="mt-1 text-orange-600"/><div><h2 className="text-lg font-bold">Institute accounts are the next milestone.</h2><p className="mt-2 max-w-2xl text-sm text-slate-500 dark:text-slate-300">Student batches, tenant-specific results, shared branding and billing are not enabled yet. The existing owner-admin exam tools remain available.</p></div></div>
-        <div className="flex flex-wrap gap-2"><Link href="/institute-admin" className="rounded-lg border px-4 py-3 font-semibold">Institute preview</Link><Link href="/admin" className="rounded-lg bg-orange-700 px-4 py-3 font-bold text-white">Owner admin</Link></div>
+        <div className="flex flex-wrap gap-2"><Link href="/institute-admin" className="ep-link-motion rounded-lg border px-4 py-3 font-semibold">Institute preview</Link><Link href="/admin" className="rounded-lg bg-orange-700 px-4 py-3 font-bold text-white">Owner admin</Link></div>
       </div></section>
     </main>
     <Footer/>
