@@ -3,7 +3,7 @@
 # Do not provision a duplicate Render frontend or PostgreSQL database.
 services:
   - type: web
-    name: exampro-api
+    name: exam-practice-pro-api
     runtime: node
     buildCommand: npm ci --omit=dev && npm run db:migrate
     startCommand: npm start
