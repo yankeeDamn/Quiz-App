@@ -35,4 +35,11 @@ router.get('/ready', async (_req, res) => {
   });
 });
 
+router.get('/ready', async (_req,res) => {
+  const authConfigured = Boolean(process.env.AUTH_SECRET);
+  const dbConfigured = Boolean(process.env.DATABASE_URL);
+  const dbReady = dbConfigured && await db.isHealthy();
+  const ready = authConfigured && dbReady;
+  return res.status(ready?200:503).json({success:ready,data:{api:'available',database:dbReady?'connected':dbConfigured?'unavailable':'not_configured',authentication:authConfigured?'configured':'not_configured'}});
+});
 module.exports = router;
