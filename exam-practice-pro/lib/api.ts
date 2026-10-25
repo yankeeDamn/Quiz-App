@@ -7,18 +7,13 @@
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-let cachedToken: string | null = null;
-let tokenExpiresAt = 0;
+// Do not cache bearer tokens across account switches in a browser tab.
 
 /**
  * Get a fresh backend access token from the NextAuth bridge route.
  * Caches the token for 50 minutes (tokens are valid for 1 hour).
  */
 async function getBackendToken(): Promise<string | null> {
-  if (cachedToken && Date.now() < tokenExpiresAt) {
-    return cachedToken;
-  }
-
   try {
     const res = await fetch('/api/auth/backend-token', {
       method: 'POST',
@@ -26,25 +21,19 @@ async function getBackendToken(): Promise<string | null> {
     });
 
     if (!res.ok) {
-      cachedToken = null;
       return null;
     }
 
     const data = await res.json();
-    cachedToken = data.token;
-    // Cache for 50 minutes (tokens last 1 hour)
-    tokenExpiresAt = Date.now() + 50 * 60 * 1000;
-    return cachedToken;
+    return data.token;
   } catch {
-    cachedToken = null;
     return null;
   }
 }
 
 /** Clear the cached token (call on sign-out). */
 export function clearTokenCache(): void {
-  cachedToken = null;
-  tokenExpiresAt = 0;
+  // No token cache. Kept for backwards compatibility with sign-out handlers.
 }
 
 interface ApiOptions {
@@ -52,6 +41,8 @@ interface ApiOptions {
   body?: unknown;
   /** Skip authentication (for public endpoints). */
   public?: boolean;
+  /** Permit an anonymous request while attaching identity if available (public mocks). */
+  optionalAuth?: boolean;
 }
 
 /**
@@ -61,7 +52,7 @@ export async function api<T = unknown>(
   path: string,
   options: ApiOptions = {}
 ): Promise<{ success: boolean; data?: T; error?: { message: string; code?: string } }> {
-  const { method = 'GET', body, public: isPublic = false } = options;
+  const { method = 'GET', body, public: isPublic = false, optionalAuth = false } = options;
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -71,6 +62,8 @@ export async function api<T = unknown>(
     const token = await getBackendToken();
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
+    } else if (!optionalAuth) {
+      return {success:false,error:{code:'VERIFIED_OAUTH_REQUIRED',message:'Verified Google or GitHub login is required. If already signed in, check OAuth provider email verification and Vercel AUTH_SECRET.'}};
     }
   }
 
