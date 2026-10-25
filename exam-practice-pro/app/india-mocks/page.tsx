@@ -35,7 +35,7 @@ function Catalogue() {
     let cancelled = false;
     fetchCatalog()
       .then((t) => !cancelled && setTests(t))
-      .catch(() => !cancelled && setError('The server is waking up. This can take up to a minute on the first visit.'));
+      .catch(() => !cancelled && setError('Could not reach the ExamPro API. Check the backend URL and deployment status, then retry.'));
     return () => {
       cancelled = true;
     };
@@ -172,7 +172,7 @@ function StarterCertifications() {
     <p className="mt-2 text-sm text-muted-foreground">Original introductory questions with explanations; pending expert review, not official exams.</p>
     <div className="mt-4 grid gap-3 sm:grid-cols-3">
       {IT_CERTS.map(cert => (
-        <Link key={cert.id} href={`/india-mocks/${cert.id}`} className="rounded-lg border p-4 font-semibold hover:bg-muted">
+        <Link key={cert.id} href={`/india-mocks/${cert.id}?mode=practice`} className="rounded-lg border p-4 font-semibold hover:bg-muted">
           {cert.name} — Start practice →
           <span className="mt-1 block text-xs font-normal text-muted-foreground">{buildCertTest(cert.id)?.questionCount ?? 0} questions · free</span>
         </Link>
