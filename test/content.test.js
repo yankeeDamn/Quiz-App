@@ -56,3 +56,11 @@ test('bad tests are rejected with a reason', () => {
     assert.match(r.error, re);
   });
 });
+
+test('test validation rejects duplicate selected question ranges and bad pass percentage',()=>{
+ const input={name:'A new test',exam:'SSC',level:'Moderate',tier:'free',minutes:10,marksPerCorrect:1,negativeMarks:0,passPercent:150,sections:[{name:'One',parts:[{topic:'reason',from:0,to:2}]}]};
+ assert.equal(content.checkTest(input,['reason']).ok,false);
+ input.passPercent=70;
+ input.sections.push({name:'Duplicate',parts:[{topic:'reason',from:1,to:3}]});
+ assert.equal(content.checkTest(input,['reason']).ok,false);
+});
