@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ExamProvider } from '@/lib/types';
@@ -21,18 +21,19 @@ export function ProviderCard({
   index = 0,
   className 
 }: ProviderCardProps) {
+  const reduceMotion = useReducedMotion();
   const displayCount = examCount ?? provider.examCount;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1, duration: 0.3 }}
+      transition={{ delay: reduceMotion ? 0 : Math.min(index * 0.065, 0.3), duration: reduceMotion ? 0 : 0.35 }}
     >
       <Card
         onClick={onClick}
         className={cn(
-          'group cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1',
+          'group cursor-pointer rounded-2xl border-indigo-100/80 bg-card transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-xl hover:shadow-indigo-500/10 motion-reduce:hover:translate-y-0 dark:border-slate-800 dark:hover:border-indigo-700',
           className
         )}
       >
