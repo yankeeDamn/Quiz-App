@@ -15,13 +15,14 @@ interface Draft {
   minutes: string;
   marksPerCorrect: string;
   negativeMarks: string;
+  passPercent: string;
   sections: TestSection[];
   active: boolean;
 }
 
 const blank = (topic: string): Draft => ({
-  id: '', name: '', exam: '', level: 'Moderate', tier: 'free', minutes: '30', marksPerCorrect: '1', negativeMarks: '0.25',
-  sections: [{ name: '', parts: [{ topic, from: 0, to: 10 }] }], active: true,
+  id: '', name: '', exam: '', level: 'Moderate', tier: 'free', minutes: '30', marksPerCorrect: '1', negativeMarks: '0.25', passPercent:'50',
+  sections: [{ name: '', parts: [{ topic, from: 0, to: 10 }] }], active: false,
 });
 
 const countOf = (t: AdminTest) => t.sections.reduce((n, s) => n + s.parts.reduce((m, p) => m + (p.to - p.from), 0), 0);
@@ -42,7 +43,7 @@ export function TestsTab() {
 
   const toBody = (d: Draft) => ({
     id: d.id, name: d.name, exam: d.exam, level: d.level, tier: d.tier, minutes: Number(d.minutes),
-    marksPerCorrect: Number(d.marksPerCorrect), negativeMarks: Number(d.negativeMarks), sections: d.sections, active: d.active,
+    marksPerCorrect: Number(d.marksPerCorrect), negativeMarks: Number(d.negativeMarks), passPercent:Number(d.passPercent), sections: d.sections, active: d.active,
   });
 
   const save = async (e: React.FormEvent) => {
@@ -51,7 +52,7 @@ export function TestsTab() {
     setMsg(null);
     const r = editingId ? await admin(`/tests/${editingId}`, 'PUT', toBody(draft)) : await admin('/tests', 'POST', toBody(draft));
     if (r.ok) {
-      setMsg({ kind: 'ok', text: editingId ? 'Test saved.' : 'Test created. It is live now.' });
+      setMsg({ kind: 'ok', text: editingId ? 'Test saved.' : 'Draft created. Publish it when ready.' });
       setDraft(null);
       setEditingId(null);
       void load();
@@ -67,7 +68,7 @@ export function TestsTab() {
 
   const edit = (t: AdminTest) => {
     setEditingId(t.id);
-    setDraft({ ...t, minutes: String(t.minutes), marksPerCorrect: String(t.marksPerCorrect), negativeMarks: String(t.negativeMarks) });
+    setDraft({ ...t, minutes: String(t.minutes), marksPerCorrect: String(t.marksPerCorrect), negativeMarks: String(t.negativeMarks), passPercent:String(t.passPercent??50) });
   };
 
   const setSection = (i: number, s: TestSection) => draft && setDraft({ ...draft, sections: draft.sections.map((x, k) => (k === i ? s : x)) });
@@ -98,8 +99,8 @@ export function TestsTab() {
                     </button>
                   </td>
                   <td className="pr-3">
-                    <button className="rounded border px-2 py-1 text-xs font-semibold" onClick={() => void quick(t, { active: !t.active })} aria-label={`Show or hide ${t.name}`}>
-                      {t.active ? 'Live' : 'Hidden'}
+                    <button className="rounded border px-2 py-1 text-xs font-semibold" onClick={() => void quick(t, { active: !t.active })} aria-label={`Publish or unpublish ${t.name}`}>
+                      {t.active ? 'Published' : 'Draft'}
                     </button>
                   </td>
                   <td className="text-right"><button className="underline" onClick={() => edit(t)}>Edit</button></td>
@@ -131,6 +132,7 @@ export function TestsTab() {
             </Field>
             <Field label="Minutes"><input className={input} type="number" min={1} max={300} required value={draft.minutes} onChange={(e) => setDraft({ ...draft, minutes: e.target.value })} /></Field>
             <Field label="Marks per right answer"><input className={input} type="number" step="0.25" min={0.25} required value={draft.marksPerCorrect} onChange={(e) => setDraft({ ...draft, marksPerCorrect: e.target.value })} /></Field>
+            <Field label="Pass percentage"><input className={input} type="number" min={0} max={100} required value={draft.passPercent} onChange={e=>setDraft({...draft,passPercent:e.target.value})}/></Field>
             <Field label="Marks lost per wrong answer"><input className={input} type="number" step="0.01" min={0} required value={draft.negativeMarks} onChange={(e) => setDraft({ ...draft, negativeMarks: e.target.value })} /></Field>
           </div>
 
