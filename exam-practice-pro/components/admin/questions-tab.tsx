@@ -20,6 +20,7 @@ export function QuestionsTab() {
   const [bulk, setBulk] = useState('');
   const [newTopic, setNewTopic] = useState({ id: '', name: '', category: '' });
   const [showInactive, setShowInactive] = useState(false);
+  const [topicDetails,setTopicDetails] = useState({name:'',category:''});
 
   const loadTopics = useCallback(async () => {
     const r = await admin<{ topics: AdminTopic[] }>('/topics');
@@ -39,6 +40,12 @@ export function QuestionsTab() {
   useEffect(() => { void loadTopics(); }, [loadTopics]);
   useEffect(() => { void loadQuestions(topic); }, [topic, loadQuestions]);
 
+  useEffect(()=>{const current=topics.find(t=>t.id===topic);if(current)setTopicDetails({name:current.name,category:current.category});},[topics,topic]);
+  const saveTopic=async(e:React.FormEvent)=>{e.preventDefault();
+    const r=await admin(`/topics/${topic}`,'PUT',topicDetails);
+    if(r.ok){setMsg({kind:'ok',text:'Topic updated.'});void loadTopics()}
+    else setMsg({kind:'error',text:r.message});
+  };
   const refresh = async () => { await Promise.all([loadTopics(), loadQuestions(topic)]); };
 
   const save = async (e: React.FormEvent) => {
@@ -99,6 +106,7 @@ export function QuestionsTab() {
           </Field>
           {current && <p className="pb-2 text-sm text-muted-foreground">{current.category} · {current.live} live, {current.total - current.live} retired · topic id <code>{current.id}</code></p>}
         </div>
+        <details><summary className="cursor-pointer text-sm font-semibold">Edit this topic</summary><form onSubmit={saveTopic} className="mt-3 flex flex-wrap items-end gap-3"><Field label="Name"><input className={input} required value={topicDetails.name} onChange={e=>setTopicDetails({...topicDetails,name:e.target.value})}/></Field><Field label="Category"><input className={input} required value={topicDetails.category} onChange={e=>setTopicDetails({...topicDetails,category:e.target.value})}/></Field><Button type="submit" disabled={!topic}>Save topic</Button></form></details>
         <details>
           <summary className="cursor-pointer text-sm font-semibold">Create a new topic</summary>
           <form onSubmit={addTopic} className="mt-3 grid gap-3 sm:grid-cols-4">
