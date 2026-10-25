@@ -67,6 +67,7 @@ export function Header() {
           >
             Bookmarks
           </Link>
+          <Link href="/admin" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Owner admin</Link>
           <Link
             href="/pricing"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -195,6 +196,7 @@ export function Header() {
                 >
                   Bookmarks
                 </Link>
+                <Link href="/admin" className="text-lg font-medium transition-colors hover:text-indigo-600" onClick={() => setMobileMenuOpen(false)}>Owner admin</Link>
                 <Link
                   href="/pricing"
                   className="text-lg font-medium transition-colors hover:text-indigo-600"
