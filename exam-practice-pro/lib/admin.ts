@@ -7,7 +7,7 @@ export interface TestPart { topic: string; from: number; to: number }
 export interface TestSection { name: string; parts: TestPart[] }
 export interface AdminTest {
   id: string; name: string; exam: string; minutes: number; marksPerCorrect: number; negativeMarks: number;
-  level: string; tier: 'free' | 'premium'; passPercent: number; sections: TestSection[]; active: boolean;
+  level: string; tier: 'free' | 'premium'; passPercent: number; sections: TestSection[]; active: boolean; questionCount?: number;
 }
 export interface AdminUser { email: string; name: string | null; plan: string; plan_expires_at: string | null; planActive: boolean }
 export interface AdminGrant { plan: string; months: number; amount_inr: number | null; note: string | null; expires_at: string; granted_at: string; email: string }
