@@ -34,7 +34,7 @@ export function Header() {
             <GraduationCap className="h-5 w-5" />
           </div>
           <span className="hidden font-bold text-xl sm:inline-block">
-            Exam Practice Pro
+            ExamPro
           </span>
         </Link>
 
@@ -46,7 +46,7 @@ export function Header() {
           >
             Quizzes
           </Link>
-          <Link href="/exampro" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">ExamPro</Link>
+          <Link href="/certifications" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Certifications</Link>
           <Link
             href="/india-mocks"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -59,6 +59,8 @@ export function Header() {
           >
             Dashboard
           </Link>
+          <Link
+            href="/institutes" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Institutes</Link>
           <Link
             href="/bookmarks"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -185,6 +187,7 @@ export function Header() {
                 >
                   Dashboard
                 </Link>
+                <Link href="/institutes" className="text-lg font-medium transition-colors hover:text-indigo-600" onClick={() => setMobileMenuOpen(false)}>Institutes</Link>
                 <Link
                   href="/bookmarks"
                   className="text-lg font-medium transition-colors hover:text-indigo-600"
