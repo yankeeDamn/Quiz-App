@@ -238,6 +238,7 @@ async function migrate() {
     await client.query(MIGRATION_SQL);
     await seedContent(client);
     await client.query(fs.readFileSync(path.join(__dirname, 'pilot-schema.sql'), 'utf8'));
+    await client.query(fs.readFileSync(path.join(__dirname, 'exampro-v2.sql'), 'utf8'));
     await client.query('COMMIT');
     console.log('✅ Migrations complete.');
   } catch (err) {
