@@ -6,6 +6,7 @@ const mocks = require('./mocks.service');
 const SLUG = /^[a-z0-9][a-z0-9-]{1,38}$/;
 const LEVELS = ['Easy', 'Moderate', 'Hard', 'Practice'];
 const TIERS = ['free', 'premium'];
+const DIFFICULTIES = ['Easy','Moderate','Hard'];
 
 const str = (v) => (typeof v === 'string' ? v.trim() : '');
 const fail = (message) => ({ ok: false, error: message });
@@ -16,14 +17,16 @@ function checkQuestion(input) {
   const explanation = str(input && input.explanation);
   const options = Array.isArray(input && input.options) ? input.options.map(str) : [];
   const answer = Number(input && input.answer);
+  const difficulty = str(input && input.difficulty) || 'Moderate';
 
   if (question.length < 5 || question.length > 600) return fail('Question must be 5 to 600 characters.');
   if (options.length !== 4) return fail('Give exactly four options.');
   if (options.some((o) => !o || o.length > 200)) return fail('Every option needs 1 to 200 characters.');
   if (new Set(options.map((o) => o.toLowerCase())).size !== 4) return fail('The four options must all be different.');
   if (!Number.isInteger(answer) || answer < 0 || answer > 3) return fail('The right answer must be A, B, C or D.');
+  if (!DIFFICULTIES.includes(difficulty)) return fail('Difficulty must be Easy, Moderate or Hard.');
   if (explanation.length < 3 || explanation.length > 1000) return fail('Explanation must be 3 to 1000 characters.');
-  return { ok: true, value: { question, options, answer, explanation } };
+  return { ok: true, value: { question, options, answer, explanation, difficulty } };
 }
 
 /** Check a full mock test. topicIds is the list of existing topic ids. */
@@ -91,6 +94,14 @@ class ContentService {
     return { ok: true, value: { id: slug } };
   }
 
+  async updateTopic(id, input) {
+    const name = str(input?.name), category = str(input?.category);
+    if (name.length < 3 || name.length > 120 || category.length < 2 || category.length > 60) return fail('Topic name or category is invalid.');
+    const r = await db.query('UPDATE mock_topics SET name=$2, category=$3 WHERE id=$1',[id,name,category]);
+    mocks.invalidate();
+    return r.rowCount ? {ok:true,value:{id,name,category}} : fail('Topic not found');
+  }
+
   async setTopicActive(id, active) {
     const r = await db.query('UPDATE mock_topics SET active = $2 WHERE id = $1', [id, Boolean(active)]);
     mocks.invalidate();
@@ -100,7 +111,7 @@ class ContentService {
   // ── Questions ────────────────────────────────────────
   async listQuestions(topicId) {
     const { rows } = await db.query(
-      `SELECT id, position, question, options, answer, explanation, active
+      `SELECT id, position, question, options, answer, explanation, difficulty, active
          FROM mock_questions WHERE topic_id = $1 ORDER BY position`,
       [topicId]
     );
@@ -118,9 +129,9 @@ class ContentService {
     let position = rows[0].last + 1;
     for (const v of values) {
       await db.query(
-        `INSERT INTO mock_questions (topic_id, position, question, options, answer, explanation)
-         VALUES ($1, $2, $3, $4, $5, $6)`,
-        [topicId, position, v.question, JSON.stringify(v.options), v.answer, v.explanation]
+        `INSERT INTO mock_questions (topic_id, position, question, options, answer, explanation, difficulty)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [topicId, position, v.question, JSON.stringify(v.options), v.answer, v.explanation, v.difficulty]
       );
       position += 1;
     }
@@ -130,9 +141,9 @@ class ContentService {
 
   async updateQuestion(id, v) {
     const r = await db.query(
-      `UPDATE mock_questions SET question = $2, options = $3, answer = $4, explanation = $5, updated_at = NOW()
+      `UPDATE mock_questions SET question = $2, options = $3, answer = $4, explanation = $5, difficulty = $6, updated_at = NOW()
         WHERE id = $1`,
-      [id, v.question, JSON.stringify(v.options), v.answer, v.explanation]
+      [id, v.question, JSON.stringify(v.options), v.answer, v.explanation, v.difficulty]
     );
     mocks.invalidate();
     return r.rowCount > 0;
