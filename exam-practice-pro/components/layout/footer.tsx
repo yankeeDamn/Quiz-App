@@ -13,7 +13,7 @@ export function Footer() {
               <GraduationCap className="h-4 w-4" />
             </div>
             <div className="flex flex-col">
-              <span className="font-semibold">Exam Practice Pro</span>
+              <span className="font-semibold">ExamPro</span>
               <span className="text-xs text-muted-foreground">
                 Practice smarter. Score higher.
               </span>
@@ -28,6 +28,8 @@ export function Footer() {
             >
               Quizzes
             </Link>
+            <Link href="/certifications" className="transition-colors hover:text-foreground">Certifications</Link>
+            <Link href="/institutes" className="transition-colors hover:text-foreground">Institutes</Link>
             <Link
               href="/dashboard"
               className="transition-colors hover:text-foreground"
@@ -47,7 +49,7 @@ export function Footer() {
               Pricing
             </Link>
             <a
-              href={whatsappLink('Hi, I have a question about Exam Practice Pro.')}
+              href={whatsappLink('Hi, I have a question about ExamPro.')}
               target="_blank"
               rel="noopener noreferrer"
               className="transition-colors hover:text-foreground"
@@ -58,7 +60,7 @@ export function Footer() {
 
           {/* Copyright */}
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Exam Practice Pro
+            © {new Date().getFullYear()} ExamPro
           </p>
         </div>
       </div>
