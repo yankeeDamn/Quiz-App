@@ -30,6 +30,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     signIn: '/auth/signin',
   },
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      try { const destination = new URL(url, baseUrl); return destination.origin === new URL(baseUrl).origin ? destination.href : baseUrl; }
+      catch { return baseUrl; }
+    },
     async jwt({ token, user, account, profile }) {
       if (user) token.id = user.id;
       if (account) {
@@ -64,7 +68,5 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   session: {
     strategy: 'jwt',
   },
-  trustHost: true,
-
-
+  trustHost: Boolean(process.env.VERCEL || process.env.AUTH_TRUST_HOST),
 });
