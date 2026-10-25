@@ -21,6 +21,11 @@ export async function POST() {
     );
   }
 
+  const verified = session as typeof session & { provider?: string; emailVerified?: boolean };
+  if (!['github', 'google'].includes(verified.provider || '') || verified.emailVerified !== true || !session.user.email) {
+    return NextResponse.json({error:'Verified Google or GitHub sign-in required.'}, {status:403});
+  }
+
   const secret = process.env.AUTH_SECRET;
   if (!secret) {
     return NextResponse.json(
@@ -31,9 +36,7 @@ export async function POST() {
 
   const secretKey = new TextEncoder().encode(secret);
 
-  // Determine provider from session — guest IDs start with "guest-"
-  const isGuest = session.user.id?.startsWith('guest-');
-  const provider = isGuest ? 'guest' : 'oauth';
+  const provider = verified.provider;
 
   const token = await new SignJWT({
     sub: session.user.id,
@@ -41,6 +44,7 @@ export async function POST() {
     name: session.user.name || undefined,
     image: session.user.image || undefined,
     provider,
+    emailVerified: true,
   })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
