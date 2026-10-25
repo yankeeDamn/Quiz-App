@@ -129,7 +129,6 @@ function summarise(bank, def) {
     marksPerCorrect: def.marksPerCorrect,
     negativeMarks: def.negativeMarks,
     passPercent: def.passPercent ?? 50,
-    passPercent: def.passPercent ?? 50,
     sections: def.sections.map((s) => s.name),
   };
 }
