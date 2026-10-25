@@ -177,7 +177,7 @@ router.put('/tests/:id', wrap(async (req, res) => {
   if (!SLUG.test(req.params.id)) return bad(res, 'Bad test id');
   const r = content.checkTest(req.body, await content.topicIds());
   if (!r.ok) return bad(res, r.error);
-  const active = req.body.active === undefined ? true : Boolean(req.body.active);
+  const active = req.body.active === true;
   return (await content.updateTest(req.params.id, r.value, active)) ? ok(res, {}) : bad(res, 'Test not found', 404);
 }));
 
