@@ -10,7 +10,8 @@ const logger = require('../utils/logger');
  */
 // eslint-disable-next-line no-unused-vars
 function errorHandler(err, _req, res, _next) {
-  const statusCode = err.statusCode || 500;
+  const databaseUnavailable = ['ECONNREFUSED','ENOTFOUND','ETIMEDOUT','57P03','08006','08001','53300'].includes(err.code);
+  const statusCode = databaseUnavailable ? 503 : (err.statusCode || 500);
   const isProduction = process.env.NODE_ENV === 'production';
 
   logger.error({ err, statusCode }, err.message);
@@ -18,7 +19,8 @@ function errorHandler(err, _req, res, _next) {
   res.status(statusCode).json({
     success: false,
     error: {
-      message: isProduction && statusCode === 500
+      code: databaseUnavailable ? 'DATABASE_UNAVAILABLE' : (statusCode===503?'SERVICE_UNAVAILABLE':undefined),
+      message: databaseUnavailable ? 'PostgreSQL is unavailable. Check Neon and DATABASE_URL.' : isProduction && statusCode === 500
         ? 'Internal server error'
         : err.message,
       ...(!isProduction && { stack: err.stack }),
