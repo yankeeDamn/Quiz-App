@@ -51,8 +51,20 @@ router.get(
       }
     }
 
-    return res.json({ success: true, data: { test: found.build() } });
+    const test = found.build();
+    // A scored test must NEVER reveal its correct answers or explanations.
+    test.questions = test.questions.map(({ answer, explanation, ...question }) => question);
+    return res.json({ success: true, data: { test } });
   })
 );
+
+/** Explicit unscored practice only: answers may be revealed by the tutor UI. */
+router.get('/:id/practice', allowNextAuthGuest, wrap(async (req,res) => {
+  const found = await mocks.findMock(req.params.id);
+  if (!found || found.summary.kind !== 'topic' || found.tier !== 'free') {
+    return res.status(404).json({success:false,error:{message:'Practice unavailable'}});
+  }
+  return res.json({success:true,data:{test:found.build()}});
+}));
 
 module.exports = router;
