@@ -184,6 +184,13 @@ router.post('/questions/:qid/active', [body('active').isBoolean().toBoolean()], 
 
 router.get('/tests', wrap(async (_req, res) => ok(res, { tests: await content.listTests() })));
 
+router.get('/tests/:id/preview', wrap(async (req,res)=>{
+  if(!SLUG.test(req.params.id))return bad(res,'Bad test id');
+  const definition=(await content.listTests()).find(t=>t.id===req.params.id);
+  if(!definition)return bad(res,'Test not found',404);
+  return ok(res,await content.previewTest(definition));
+}));
+
 router.post('/tests', wrap(async (req, res) => {
   const r = content.checkTest(req.body, await content.topicIds());
   if (!r.ok) return bad(res, r.error);
@@ -196,6 +203,10 @@ router.put('/tests/:id', wrap(async (req, res) => {
   const r = content.checkTest(req.body, await content.topicIds());
   if (!r.ok) return bad(res, r.error);
   const active = req.body.active === true;
+  if(active){
+    const preview = await content.previewTest({...r.value,id:req.params.id});
+    if(preview.questionCount===0)return bad(res,'Cannot publish a test without active questions.');
+  }
   return (await content.updateTest(req.params.id, r.value, active)) ? ok(res, {}) : bad(res, 'Test not found', 404);
 }));
 
