@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   Clock,
   FileQuestion,
@@ -20,6 +20,7 @@ interface QuizCardProps {
 }
 
 export function QuizCard({ quiz }: QuizCardProps) {
+  const reduceMotion = useReducedMotion();
   const subjectIcons: Record<string, React.ReactNode> = {
     Mathematics: <GraduationCap className="h-5 w-5" />,
     'Computer Science': <BookOpen className="h-5 w-5" />,
@@ -28,12 +29,12 @@ export function QuizCard({ quiz }: QuizCardProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.2 }}
+      whileHover={reduceMotion ? undefined : { y: -3 }}
+      transition={{ duration: reduceMotion ? 0 : 0.22 }}
     >
-      <Card className="group relative overflow-hidden border-2 transition-all duration-300 hover:border-indigo-300 hover:shadow-lg dark:hover:border-indigo-700">
+      <Card className="group relative h-full overflow-hidden rounded-2xl border border-indigo-100 bg-card shadow-sm transition-[border-color,box-shadow] duration-200 hover:border-indigo-300 hover:shadow-xl hover:shadow-indigo-500/10 dark:border-slate-800 dark:hover:border-indigo-700">
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 transition-opacity group-hover:opacity-100" />
 
