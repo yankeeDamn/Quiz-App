@@ -76,13 +76,16 @@ export async function api<T = unknown>(
 
   const url = `${API_BASE_URL}${path}`;
 
-  const res = await fetch(url, {
+  let res: Response;
+  try { res = await fetch(url, {
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
-  });
-
-  const json = await res.json();
+    cache: 'no-store',
+  }); } catch { return {success:false,error:{code:'API_UNAVAILABLE',message:'ExamPro API unavailable. Check the Render service and NEXT_PUBLIC_API_URL.'}}; }
+  let json;
+  try { json = await res.json(); } catch { return {success:false,error:{code:'INVALID_API_RESPONSE',message:'The configured API returned a non-JSON response. Check which service runs on Render.'}}; }
+  if (!res.ok && json.success === undefined) return {success:false,error:{code:'API_ERROR',message:'API request failed ('+res.status+')'}};
   return json;
 }
 
