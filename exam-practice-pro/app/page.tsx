@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
+import { Reveal } from '@/components/motion/reveal';
 import { GraduationCap, Sparkles, Target, TrendingUp, Building2, Award } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
@@ -28,6 +29,7 @@ const INDIA_EXAMS = [
 ];
 
 export default function HomePage() {
+  const reduceMotion = useReducedMotion();
   const [search, setSearch] = useState('');
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>([]);
@@ -110,75 +112,54 @@ export default function HomePage() {
     <>
       <Header />
       <main className="flex-1">
-        <section className="border-b bg-blue-50 px-4 py-4 dark:bg-blue-950/30">
+        <section className="border-b border-indigo-100/70 bg-indigo-50/80 px-4 py-3 dark:border-indigo-900 dark:bg-indigo-950/40">
           <div className="container mx-auto flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-sm text-slate-700 dark:text-slate-200">New: 21 India mock tests with explanations, plus doubts answered on WhatsApp</p>
               <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">White-label mock tests for coaching institutes</p>
             </div>
-            <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto">
+            <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
               <Link href="/institute-admin" className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-center text-sm font-semibold text-slate-900 transition hover:bg-slate-100 sm:flex-none">Institute Dashboard (Preview) →</Link>
               <Link href="/certifications" className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-orange-600 px-5 py-2.5 text-center text-sm font-bold text-white shadow-sm transition hover:bg-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600 sm:flex-none">IT Certifications →</Link>
               <Link href="/india-mocks" className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-blue-700 sm:flex-none">Explore Indian Mock Tests →</Link>
             </div>
           </div>
         </section>
-        <section className="container mx-auto px-4 py-12" aria-labelledby="india-mocks-heading">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold text-blue-700 dark:text-blue-400">INDIA EXAM PRACTICE</p>
-              <h2 id="india-mocks-heading" className="mt-2 text-3xl font-bold">Prepare for India&apos;s top exams</h2>
-              <p className="mt-2 text-muted-foreground">Full mocks with sections, timers and negative marking, plus short topic tests.</p>
-            </div>
-            <Link href="/india-mocks" className="font-semibold text-blue-700 hover:underline dark:text-blue-400">See all tests →</Link>
-          </div>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            {INDIA_EXAMS.map((exam) => (
-              <Link key={exam.filter} href={'/india-mocks?exam=' + encodeURIComponent(exam.filter)} className="rounded-xl border bg-white p-5 transition hover:border-blue-400 hover:shadow-md dark:bg-zinc-900">
-                <h3 className="font-semibold">{exam.name}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{exam.blurb}</p>
-                <span className="mt-4 inline-block text-sm font-semibold text-blue-700 dark:text-blue-400">View tests →</span>
-              </Link>
-            ))}
-          </div>
-        </section>
-        {/* Hero Section */}
-        <section className="relative overflow-hidden bg-gradient-to-b from-indigo-50 via-white to-white dark:from-indigo-950/30 dark:via-background dark:to-background">
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOCAxOC04LjA1OSAxOC0xOC04LjA1OS0xOC0xOC0xOHptMCAzMmMtNy43MzIgMC0xNC02LjI2OC0xNC0xNHM2LjI2OC0xNCAxNC0xNCAxNCA2LjI2OCAxNCAxNC02LjI2OCAxNC0xNCAxNHoiIGZpbGw9IiM2MzY2ZjEiIGZpbGwtb3BhY2l0eT0iLjAzIi8+PC9nPjwvc3ZnPg==')] opacity-50" />
 
-          <div className="container relative mx-auto px-4 py-16 md:py-24">
+        {/* Hero Section */}
+        <section className="ep-hero relative overflow-hidden">
+          <div aria-hidden="true" className="ep-hero-grid" />
+          <div aria-hidden="true" className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOCAxOC04LjA1OSAxOC0xOC04LjA1OS0xOC0xOC0xOHptMCAzMmMtNy43MzIgMC0xNC02LjI2OC0xNC0xNHM2LjI2OC0xNCAxNC0xNCAxNCA2LjI2OCAxNCAxNC02LjI2OCAxNC0xNCAxNHoiIGZpbGw9IiM2MzY2ZjEiIGZpbGwtb3BhY2l0eT0iLjAzIi8+PC9nPjwvc3ZnPg==')] opacity-50" />
+
+          <div className="container relative mx-auto px-4 py-20 md:py-28">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={reduceMotion ? false : { opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: reduceMotion ? 0 : 0.5 }}
               className="mx-auto max-w-3xl text-center"
             >
               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={reduceMotion ? false : { opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.1 }}
-                className="mb-6 inline-flex items-center gap-2 rounded-full bg-indigo-100 px-4 py-1.5 text-sm font-medium text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300"
+                transition={{ delay: reduceMotion ? 0 : 0.1, duration: reduceMotion ? 0 : 0.35 }}
+                className="mb-7 inline-flex items-center gap-2 rounded-full border border-indigo-200/60 bg-white/80 px-4 py-2 text-sm font-semibold text-indigo-700 shadow-sm dark:border-indigo-700/50 dark:bg-indigo-950/70 dark:text-indigo-200"
               >
                 <Sparkles className="h-4 w-4" />
-                Professional Exam Practice Platform
+                Modern exam preparation, built for you
               </motion.div>
 
               <h1 className="mb-4 text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
-                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  Exam Practice
-                </span>{' '}
-                Pro
+                <span className="ep-gradient-text">ExamPro</span>
               </h1>
 
               <p className="mb-8 text-lg text-muted-foreground md:text-xl">
-                Practice smarter. Score higher. Master your exams with our
-                comprehensive quiz platform.
+                Discover mock tests, build confidence, and track your progress in one focused learning space.
               </p>
 
               <div className="flex flex-wrap items-center justify-center gap-4">
                 <Button
                   size="lg"
-                  className="bg-indigo-600 hover:bg-indigo-700"
+                  className="ep-link-motion bg-indigo-600 px-7 shadow-lg shadow-indigo-500/20 hover:bg-indigo-700 hover:shadow-indigo-500/30"
                   asChild
                 >
                   <Link href="#quizzes">
@@ -186,7 +167,7 @@ export default function HomePage() {
                     Start Practicing
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild>
+                <Button size="lg" variant="outline" asChild className="ep-link-motion border-indigo-200 bg-white/70 dark:border-indigo-700 dark:bg-slate-900/70">
                   <Link href="/dashboard">
                     <TrendingUp className="mr-2 h-5 w-5" />
                     View Dashboard
@@ -196,10 +177,10 @@ export default function HomePage() {
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={reduceMotion ? false : { opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="mx-auto mt-12 grid max-w-2xl grid-cols-4 gap-6"
+              transition={{ delay: reduceMotion ? 0 : 0.3, duration: reduceMotion ? 0 : 0.5 }}
+              className="mx-auto mt-14 grid max-w-2xl grid-cols-2 gap-3 sm:grid-cols-4"
             >
               {[
                 { label: 'Questions', value: `${totalQuestions}+` },
@@ -207,7 +188,7 @@ export default function HomePage() {
                 { label: 'Providers', value: String(examProviders.length) },
                 { label: 'Quiz Modes', value: '2' },
               ].map((stat) => (
-                <div key={stat.label} className="text-center">
+                <div key={stat.label} className="rounded-2xl border border-white/70 bg-white/65 px-3 py-5 text-center shadow-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/65">
                   <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400 md:text-3xl">
                     {stat.value}
                   </div>
@@ -220,9 +201,33 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Discover exam categories after the main value proposition. */}
+        <section className="container mx-auto px-4 py-16" aria-labelledby="india-mocks-heading">
+          <Reveal>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="ep-eyebrow">INDIA EXAM PRACTICE</p>
+              <h2 id="india-mocks-heading" className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">Prepare for India&apos;s top exams</h2>
+              <p className="mt-2 text-muted-foreground">Full mocks with sections, timers and negative marking, plus short topic tests.</p>
+            </div>
+            <Link href="/india-mocks" className="font-semibold text-blue-700 hover:underline dark:text-blue-400">See all tests →</Link>
+          </div>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            {INDIA_EXAMS.map((exam) => (
+              <Link key={exam.filter} href={'/india-mocks?exam=' + encodeURIComponent(exam.filter)} className="ep-card group flex h-full flex-col rounded-2xl p-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500">
+                <span aria-hidden="true" className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-300"><GraduationCap className="h-5 w-5" /></span>
+                <h3 className="font-semibold">{exam.name}</h3>
+                <p className="mt-2 text-sm text-muted-foreground">{exam.blurb}</p>
+                <span className="mt-auto inline-block pt-5 text-sm font-semibold text-indigo-700 transition-colors group-hover:text-indigo-600 dark:text-indigo-300">View tests →</span>
+              </Link>
+            ))}
+          </div>
+          </Reveal>
+        </section>
+
         {/* Exam Providers Section */}
-        <section className="border-b bg-white dark:bg-background">
-          <div className="container mx-auto px-4 py-12">
+        <section className="border-b bg-white/60 dark:bg-background">
+          <div className="container mx-auto px-4 py-16">
             <div className="mb-8">
               <h2 className="text-2xl font-bold flex items-center gap-2">
                 <Building2 className="h-6 w-6 text-indigo-600" />
