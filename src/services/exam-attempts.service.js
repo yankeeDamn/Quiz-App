@@ -84,4 +84,26 @@ async function history(userId) {
       result: a.result ? {correct:a.result.correct,incorrect:a.result.incorrect,skipped:a.result.skipped,score:a.result.score,total:a.result.total,percentage:a.result.percentage,passed:a.result.passed} : null };
   });
 }
-module.exports = { start, get, save, history };
+/** Verified user's topic accuracy from graded, submitted server-authoritative attempts. */
+async function competitiveAccuracy(userId) {
+  const { rows }=await db.query(
+    `SELECT snapshot, responses
+       FROM exam_attempts_v2
+      WHERE user_id=$1 AND submitted_at IS NOT NULL
+      ORDER BY submitted_at DESC LIMIT 100`,[userId]);
+  const stats = new Map();
+  for(const row of rows){
+    for(const question of row.snapshot?.questions || []){
+      if(typeof question.topic!=='string'||!question.topic.startsWith('comp-'))continue;
+      const selected=row.responses?.[question.id];
+      if(!Number.isInteger(selected)||selected<0||selected>3)continue;
+      const prev=stats.get(question.topic)||{topicId:question.topic,attempted:0,correct:0};
+      prev.attempted++;
+      if(selected===question.answer)prev.correct++;
+      stats.set(question.topic,prev);
+    }
+  }
+  return [...stats.values()].map(x=>({...x,accuracy:Math.round(x.correct/x.attempted*100)}));
+}
+
+module.exports = { start, get, save, history, competitiveAccuracy };
