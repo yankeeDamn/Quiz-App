@@ -1,18 +1,19 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Reveal } from '@/components/motion/reveal';
-import { GraduationCap, Sparkles, Target, TrendingUp, Building2, Award } from 'lucide-react';
+import { GraduationCap, Sparkles, Target, TrendingUp, Building2, Award, BookOpen, FileQuestion2, ClipboardCheck, Layers3, ArrowUpRight } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { SearchBar } from '@/components/shared/search-bar';
 import { FilterChips } from '@/components/shared/filter-chips';
 import { QuizCard } from '@/components/quiz/quiz-card';
 import { ProviderCard } from '@/components/quiz/provider-card';
-import { quizzes, getUniqueSubjects, examProviders, exams, getAllQuizzes } from '@/data/quizzes';
-import { fetchPracticeOverrides, applyHomepageOverrides, type PracticeOverride } from '@/lib/practice-overrides';
-import { useEffect } from 'react';
+import { getUniqueSubjects, examProviders, exams, getAllQuizzes } from '@/data/quizzes';
+import { fetchPracticeLibrary, applyHomepageOverrides, type PracticeLibraryData } from '@/lib/practice-overrides';
+import { api } from '@/lib/api';
+import { IT_CERTS } from '@/lib/it-certs';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
@@ -22,12 +23,21 @@ const difficultyFilters = [
   { id: 'Hard', label: 'Hard' },
 ];
 
+type HomeStats = {
+  bankQuestions: number;
+  availableQuestions: number;
+  notYetAvailable: number;
+  liveTests: number;
+  publishedMocks: number;
+  topicTests: number;
+};
+
 const INDIA_EXAMS = [
-  { name: 'SSC CGL', filter: 'SSC', blurb: '2 full mocks. Reasoning, quant, English and GK.' },
-  { name: 'Banking', filter: 'Banking', blurb: '2 Bank PO prelims mocks with sectional timing.' },
-  { name: 'Railways', filter: 'Railways', blurb: '2 RRB NTPC CBT-1 mocks with 1/3 negative marking.' },
-  { name: 'UPSC / PSC', filter: 'UPSC / PSC', blurb: '2 general studies mini mocks on polity, history and science.' },
-  { name: 'Campus', filter: 'Placements', blurb: '3 aptitude tests for placement drives.' },
+  { name: 'SSC CGL', filter: 'SSC', blurb: 'General studies, reasoning and quantitative practice.' },
+  { name: 'Banking', filter: 'Banking', blurb: 'Banking aptitude, reasoning and English preparation.' },
+  { name: 'Railways', filter: 'Railways', blurb: 'Railway exam practice with scoring and explanations.' },
+  { name: 'UPSC / PSC', filter: 'UPSC / PSC', blurb: 'General studies, polity, history and science.' },
+  { name: 'Campus', filter: 'Placements', blurb: 'Quantitative and reasoning practice for campus recruitment.' },
 ];
 
 export default function HomePage() {
@@ -37,15 +47,26 @@ export default function HomePage() {
   const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>([]);
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
 
-  const [practiceOverrides, setPracticeOverrides] = useState<PracticeOverride[]>([]);
+  const [practiceLibrary, setPracticeLibrary] = useState<PracticeLibraryData>({overrides: [], additions: []});
+  const [homeStats, setHomeStats] = useState<HomeStats | null>(null);
+  const [statsUnavailable, setStatsUnavailable] = useState(false);
   useEffect(() => {
     let mounted = true;
-    fetchPracticeOverrides().then(rows => { if (mounted) setPracticeOverrides(rows); }).catch(() => {});
+    fetchPracticeLibrary()
+      .then(data => { if (mounted) setPracticeLibrary(data); })
+      .catch(() => {}); // Bundled practice remains available when the API is offline.
+    api<HomeStats>('/api/v1/mocks/stats', {public: true})
+      .then(result => {
+        if (!mounted) return;
+        if (result.success && result.data) setHomeStats(result.data);
+        else setStatsUnavailable(true);
+      })
+      .catch(() => { if (mounted) setStatsUnavailable(true); });
     return () => { mounted = false; };
   }, []);
   const allQuizzes = useMemo(
-    () => getAllQuizzes().map(quiz => applyHomepageOverrides(quiz, practiceOverrides)),
-    [practiceOverrides]
+    () => getAllQuizzes().map(quiz => applyHomepageOverrides(quiz, practiceLibrary.overrides, practiceLibrary.additions)),
+    [practiceLibrary]
   );
 
   const subjectFilters = useMemo(() => {
@@ -53,8 +74,8 @@ export default function HomePage() {
     return subjects.map((s) => ({ id: s, label: s }));
   }, []);
 
-  const totalQuestions = useMemo(
-    () => allQuizzes.reduce((sum, q) => sum + q.questions.length, 0),
+  const uniqueHomeQuestions = useMemo(
+    () => new Set(allQuizzes.flatMap(quiz => quiz.questions.map(question => question.id))).size,
     [allQuizzes]
   );
 
@@ -123,97 +144,100 @@ export default function HomePage() {
     <>
       <Header />
       <main className="flex-1">
-        <section className="border-b border-indigo-100/70 bg-indigo-50/80 px-4 py-3 dark:border-indigo-900 dark:bg-indigo-950/40">
-          <div className="container mx-auto flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="text-sm text-slate-700 dark:text-slate-200">New: 21 India mock tests with explanations, plus doubts answered on WhatsApp</p>
-              <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">White-label mock tests for coaching institutes</p>
-            </div>
-            <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
-              <Link href="/institute-admin" className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-center text-sm font-semibold text-slate-900 transition hover:bg-slate-100 sm:flex-none">Institute Dashboard (Preview) →</Link>
-              <Link href="/certifications" className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-orange-600 px-5 py-2.5 text-center text-sm font-bold text-white shadow-sm transition hover:bg-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600 sm:flex-none">IT Certifications →</Link>
-              <Link href="/india-mocks" className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-blue-700 sm:flex-none">Explore Indian Mock Tests →</Link>
+        {/* Compact quick links; avoid crowding the mobile hero. */}
+        <div className="border-b border-indigo-100/70 bg-indigo-50/70 px-4 py-2.5 text-xs dark:border-indigo-950 dark:bg-indigo-950/40">
+          <div className="container mx-auto flex flex-wrap items-center justify-between gap-x-5 gap-y-2">
+            <span className="font-medium text-slate-600 dark:text-slate-300">Practice quizzes · Mock tests · Skill-building</span>
+            <div className="flex flex-wrap gap-x-5 gap-y-2 font-semibold text-indigo-700 dark:text-indigo-300">
+              <Link href="/certifications" className="hover:underline">IT certifications</Link>
+              <Link href="/institute-admin" className="hover:underline">Institute tools</Link>
             </div>
           </div>
-        </section>
+        </div>
 
-        {/* Hero Section */}
-        <section className="ep-hero relative overflow-hidden">
+        {/* Compact mobile-first hero. Stats are verified from the live catalogue. */}
+        <section className="ep-hero border-b border-indigo-100/60 dark:border-slate-800">
           <div aria-hidden="true" className="ep-hero-grid" />
-          <div aria-hidden="true" className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOCAxOC04LjA1OSAxOC0xOC04LjA1OS0xOC0xOC0xOHptMCAzMmMtNy43MzIgMC0xNC02LjI2OC0xNC0xNHM2LjI2OC0xNCAxNC0xNCAxNCA2LjI2OCAxNCAxNC02LjI2OCAxNC0xNCAxNHoiIGZpbGw9IiM2MzY2ZjEiIGZpbGwtb3BhY2l0eT0iLjAzIi8+PC9nPjwvc3ZnPg==')] opacity-50" />
-
-          <div className="container relative mx-auto px-4 py-20 md:py-28">
+          <div className="container relative mx-auto px-4 py-10 sm:py-16 lg:py-20">
             <motion.div
-              initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+              initial={reduceMotion ? false : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: reduceMotion ? 0 : 0.5 }}
-              className="mx-auto max-w-3xl text-center"
+              transition={{ duration: reduceMotion ? 0 : 0.4 }}
+              className="mx-auto max-w-6xl"
             >
-              <motion.div
-                initial={reduceMotion ? false : { opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: reduceMotion ? 0 : 0.1, duration: reduceMotion ? 0 : 0.35 }}
-                className="mb-7 inline-flex items-center gap-2 rounded-full border border-indigo-200/60 bg-white/80 px-4 py-2 text-sm font-semibold text-indigo-700 shadow-sm dark:border-indigo-700/50 dark:bg-indigo-950/70 dark:text-indigo-200"
-              >
-                <Sparkles className="h-4 w-4" />
-                Modern exam preparation, built for you
-              </motion.div>
-
-              <h1 className="mb-4 text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
-                <span className="ep-gradient-text">ExamPro</span>
-              </h1>
-
-              <p className="mb-8 text-lg text-muted-foreground md:text-xl">
-                Discover mock tests, build confidence, and track your progress in one focused learning space.
-              </p>
-
-              <div className="flex flex-wrap items-center justify-center gap-4">
-                <Button
-                  size="lg"
-                  className="ep-link-motion bg-indigo-600 px-7 shadow-lg shadow-indigo-500/20 hover:bg-indigo-700 hover:shadow-indigo-500/30"
-                  asChild
-                >
-                  <Link href="#quizzes">
-                    <Target className="mr-2 h-5 w-5" />
-                    Start Practicing
-                  </Link>
-                </Button>
-                <Button size="lg" variant="outline" asChild className="ep-link-motion border-indigo-200 bg-white/70 dark:border-indigo-700 dark:bg-slate-900/70">
-                  <Link href="/dashboard">
-                    <TrendingUp className="mr-2 h-5 w-5" />
-                    View Dashboard
-                  </Link>
-                </Button>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={reduceMotion ? false : { opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: reduceMotion ? 0 : 0.3, duration: reduceMotion ? 0 : 0.5 }}
-              className="mx-auto mt-14 grid max-w-2xl grid-cols-2 gap-3 sm:grid-cols-4"
-            >
-              {[
-                { label: 'Questions', value: `${totalQuestions}+` },
-                { label: 'Exams', value: String(allQuizzes.length) },
-                { label: 'Providers', value: String(examProviders.length) },
-                { label: 'Quiz Modes', value: '2' },
-              ].map((stat) => (
-                <div key={stat.label} className="rounded-2xl border border-white/70 bg-white/65 px-3 py-5 text-center shadow-sm backdrop-blur-sm dark:border-slate-700/60 dark:bg-slate-900/65">
-                  <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400 md:text-3xl">
-                    {stat.value}
+              <div className="grid items-center gap-9 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
+                <div className="text-left">
+                  <p className="ep-eyebrow"><Sparkles className="h-4 w-4" /> EXAMPRO · LEARN WITH CONFIDENCE</p>
+                  <h1 className="mt-4 max-w-3xl text-4xl font-extrabold leading-[1.12] tracking-tight text-slate-950 dark:text-white sm:text-5xl lg:text-6xl">
+                    Practice for your <span className="ep-gradient-text">next big exam.</span>
+                  </h1>
+                  <p className="mt-4 max-w-xl text-base leading-relaxed text-slate-600 dark:text-slate-300 sm:text-lg">
+                    Prepare for SSC, Banking, Railways and IT certifications. Choose a live test,
+                    practise at your pace and learn from detailed explanations.
+                  </p>
+                  <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap">
+                    <Button size="lg" className="ep-link-motion min-h-12 bg-indigo-600 px-6 text-white shadow-md shadow-indigo-500/20 hover:bg-indigo-700" asChild>
+                      <Link href="/india-mocks"><Target className="mr-2 h-5 w-5" /> Browse live tests <ArrowUpRight className="ml-2 h-4 w-4" /></Link>
+                    </Button>
+                    <Button size="lg" variant="outline" className="ep-link-motion min-h-12 border-indigo-200 bg-white/70 px-6 dark:border-slate-700 dark:bg-slate-900/70" asChild>
+                      <Link href="#quizzes"><BookOpen className="mr-2 h-5 w-5" /> Free practice quizzes</Link>
+                    </Button>
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    {stat.label}
-                  </div>
+                  <Link href="/dashboard" className="mt-5 inline-flex min-h-9 items-center gap-2 text-sm font-medium text-indigo-700 underline-offset-4 hover:underline dark:text-indigo-300">
+                    <TrendingUp className="h-4 w-4" /> Track your progress in the dashboard
+                  </Link>
                 </div>
-              ))}
+                <div aria-label="ExamPro content statistics">
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                    {[
+                      {
+                        label: 'Question bank',
+                        value: homeStats?.bankQuestions.toLocaleString('en-IN') ?? '—',
+                        note: homeStats ? `${homeStats.notYetAvailable.toLocaleString('en-IN')} not yet available` : 'Live database total',
+                        icon: FileQuestion2,
+                      },
+                      {
+                        label: 'Live tests',
+                        value: homeStats?.liveTests.toLocaleString('en-IN') ?? '—',
+                        note: homeStats ? `${homeStats.publishedMocks} mocks · ${homeStats.topicTests} topic tests` : 'Published catalogue',
+                        icon: ClipboardCheck,
+                      },
+                      {
+                        label: 'Free quiz tracks',
+                        value: String(allQuizzes.length),
+                        note: `${uniqueHomeQuestions} distinct practice questions`,
+                        icon: Layers3,
+                      },
+                      {
+                        label: 'IT starter tracks',
+                        value: String(IT_CERTS.length),
+                        note: 'Azure · AWS · CompTIA',
+                        icon: GraduationCap,
+                      },
+                    ].map(stat => (
+                      <div key={stat.label} className="ep-home-stat min-w-0 rounded-2xl p-4 sm:p-5">
+                        <stat.icon aria-hidden="true" className="mb-3 h-5 w-5 text-indigo-600 dark:text-indigo-300" />
+                        <div className="text-3xl font-extrabold tracking-tight tabular-nums text-slate-900 dark:text-white">{stat.value}</div>
+                        <div className="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-200">{stat.label}</div>
+                        <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{stat.note}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-3 text-center text-xs leading-relaxed text-slate-500 dark:text-slate-400" role="status">
+                    {statsUnavailable
+                      ? 'Live database counts temporarily unavailable. The practice library still works.'
+                      : homeStats
+                        ? 'Question bank includes unpublished content; only live tests are available to students.'
+                        : 'Checking the live exam catalogue…'}
+                  </p>
+                </div>
+              </div>
             </motion.div>
           </div>
         </section>
 
         {/* Discover exam categories after the main value proposition. */}
-        <section className="container mx-auto px-4 py-16" aria-labelledby="india-mocks-heading">
+        <section className="container mx-auto px-4 py-12 sm:py-16" aria-labelledby="india-mocks-heading">
           <Reveal>
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -238,7 +262,7 @@ export default function HomePage() {
 
         {/* Exam Providers Section */}
         <section className="border-b bg-white/60 dark:bg-background">
-          <div className="container mx-auto px-4 py-16">
+          <div className="container mx-auto px-4 py-12 sm:py-16">
             <div className="mb-8">
               <h2 className="text-2xl font-bold flex items-center gap-2">
                 <Building2 className="h-6 w-6 text-indigo-600" />
@@ -275,7 +299,7 @@ export default function HomePage() {
               <p className="text-muted-foreground mt-1">
                 {selectedProvider
                   ? `Showing exams from ${examProviders.find((p) => p.id === selectedProvider)?.name || 'selected provider'}`
-                  : 'All available practice exams'}
+                  : 'All available free practice quizzes'}
               </p>
             </div>
             {selectedProvider && (
