@@ -5,7 +5,8 @@
 - **Vercel** hosts Next.js under `exam-practice-pro`.
 - **Render** hosts the existing Express API (autoDeploy is disabled).
 - **Neon** remains the sole source of `mock_topics`, `mock_questions`, `mock_tests` and scored attempts.
-- New API routes are `GET /api/v1/exampro/competitive-topics` (public metadata only) and
+- New API routes are `GET /api/v1/exampro/competitive-topics` (public metadata only),
+  `GET /api/v1/exampro/topic-accuracy` (authenticated, private aggregates only), and
   `POST /api/v1/exampro/translate` (optional paid Azure Translator proxy).
 - No new database tables, schema migrations or destructive SQL.
 
@@ -17,8 +18,9 @@
 4. Deploy Vercel `main` and test `/exampro`, `/india-mocks`, `/india-mocks/{id}`.
 5. Test one published topic with `?mode=practice`, an unpaid premium mock and a secure scored attempt. Verify original answers, scoring and result history are unchanged.
 6. Test `/exampro?test=<PUBLISHED_TEST_ID>&lang=bn` and the Copy/WhatsApp actions. A link only resolves to a public catalogue ID, then opens the **test's start/confirmation page**. It does not bypass sign-in or start the server deadline.
-7. Review the four competitive topic cards. The three inactive topics are visible as *Coming soon*, **not selectable**, and their question/answer content is **not exposed**. Owner can later activate/publish them via `/admin` after reviewing quality.
-8. For custom practice, select any available competitive topic(s), then start `/exampro/custom-practice?topics=...`. This intentionally uses the existing unscored `ExamEngine`; it is **not** a server-scored mock and its topic accuracy is shown in that session's results.
+7. Review the four competitive topic cards in both the Mock Tests grid and Custom Builder. Personal topic-accuracy bars are computed only from the signed-in user's completed **server-scored** attempts; no completed scored attempts means no percentage, rather than a fabricated 0%.
+8. Review the four competitive topic cards. The three inactive topics are visible as *Coming soon*, **not selectable**, and their question/answer content is **not exposed**. Owner can later activate/publish them via `/admin` after reviewing quality.
+9. For custom practice, select any available competitive topic(s), then start `/exampro/custom-practice?topics=...`. This intentionally uses the existing unscored `ExamEngine`; it is **not** a server-scored mock and its topic accuracy is shown in that session's results.
 
 ## Bengali / Hindi translation configuration
 
