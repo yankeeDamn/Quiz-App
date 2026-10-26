@@ -40,14 +40,25 @@ function readLanguage():ExamLanguage {
 export function useExamLanguage() {
   const [language,setLanguage] = useState<ExamLanguage>('en');
   useEffect(()=>{
-    const sync=()=>setLanguage(readLanguage());
+    const sync=()=>{
+      const next=readLanguage();
+      setLanguage(next);
+      document.documentElement.setAttribute('data-exampro-lang',next);
+    };
     sync();
     window.addEventListener('exampro-language-changed',sync);
     window.addEventListener('storage',sync);
     return ()=>{ window.removeEventListener('exampro-language-changed',sync);window.removeEventListener('storage',sync); };
   },[]);
   const change=(next:ExamLanguage)=>{
-    try {localStorage.setItem(STORAGE,next);} catch { /* storage unavailable */ }
+    try {
+      localStorage.setItem(STORAGE,next);
+      const url=new URL(window.location.href);
+      if(url.searchParams.has('lang')){
+        url.searchParams.set('lang',next);
+        window.history.replaceState(window.history.state,'',url.toString());
+      }
+    } catch { /* storage unavailable */ }
     setLanguage(next);
     window.dispatchEvent(new Event('exampro-language-changed'));
   };
