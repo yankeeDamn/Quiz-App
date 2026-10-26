@@ -256,3 +256,7 @@
     border-color: rgb(148 163 184 / 24%);
   }
 }
+
+/* Script-sensitive fonts are loaded locally through next/font, never browser CDNs. */
+html[data-exampro-lang="bn"] body { font-family: var(--font-bangla), var(--font-inter), sans-serif; }
+html[data-exampro-lang="hi"] body { font-family: var(--font-hindi), var(--font-inter), sans-serif; }
