@@ -10,6 +10,7 @@ const mocksRoutes = require('./mocks');
 const adminRoutes = require('./admin');
 const examAttemptRoutes = require('./exam-attempts');
 const practiceRoutes = require('./practice');
+const paymentRoutes = require('./payments');
 const { router: examproFeatures } = require('./exampro-features');
 
 const router = Router();
@@ -19,6 +20,7 @@ router.use('/health', healthRoutes);
 router.use('/mocks', mocksRoutes);
 router.use('/exampro', examproFeatures);
 router.use('/practice', practiceRoutes);
+router.use('/payments', paymentRoutes);
 router.use('/exam-attempts', examAttemptRoutes);
 router.use('/admin', adminRoutes);
 router.use('/auth', authRoutes);
