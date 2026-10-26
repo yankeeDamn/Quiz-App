@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { fetchPracticeLibrary, applyHomepageOverrides } from '@/lib/practice-overrides';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
   Clock,
@@ -21,6 +23,16 @@ interface QuizCardProps {
 
 export function QuizCard({ quiz }: QuizCardProps) {
   const reduceMotion = useReducedMotion();
+  const [questionCount, setQuestionCount] = useState(quiz.questionCount);
+  useEffect(() => {
+    let alive = true;
+    fetchPracticeLibrary()
+      .then(data => {
+        if (alive) setQuestionCount(applyHomepageOverrides(quiz, data.overrides, data.additions).questionCount);
+      })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [quiz]);
   const subjectIcons: Record<string, React.ReactNode> = {
     Mathematics: <GraduationCap className="h-5 w-5" />,
     'Computer Science': <BookOpen className="h-5 w-5" />,
@@ -63,7 +75,7 @@ export function QuizCard({ quiz }: QuizCardProps) {
           <div className="flex flex-wrap gap-4 text-sm">
             <div className="flex items-center gap-1.5 text-muted-foreground">
               <FileQuestion className="h-4 w-4" />
-              <span>{quiz.questionCount} questions</span>
+              <span>{questionCount} questions</span>
             </div>
             <div className="flex items-center gap-1.5 text-muted-foreground">
               <Clock className="h-4 w-4" />

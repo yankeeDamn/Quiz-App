@@ -92,6 +92,20 @@ router.put('/practice/questions/:source/:id', wrap(async (req, res) => {
   }
 }));
 
+// New practice-only questions are validated and assigned server-generated unique IDs.
+router.post('/practice/questions', wrap(async (req, res) => {
+  try {
+    const { source, groupId, question } = req.body || {};
+    const addition = await practiceOverrides.addQuestion(source, groupId, question);
+    return ok(res, { addition });
+  } catch (error) {
+    if (/^(Unknown practice|Question ID|Provide a question|Certification questions|Certification code|Homepage question|Options must|Correct answers)/.test(error.message)) {
+      return bad(res, error.message, 400);
+    }
+    throw error;
+  }
+}));
+
 // ── Plans ──────────────────────────────────────────────
 
 router.get('/users', [query('q').optional().isString().isLength({ max: 100 })], validate, wrap(async (req, res) => {

@@ -1,11 +1,23 @@
 'use strict';
 
 const db = require('../config/database');
+const { randomUUID } = require('node:crypto');
 
 const VALID_SOURCE = new Set(['homepage', 'certification']);
 const ID = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,100}$/;
 const DIFFICULTIES = new Set(['Easy', 'Medium', 'Hard']);
 const TYPES = new Set(['single', 'multiple', 'true-false']);
+const HOMEPAGE_GROUPS = new Set([
+  'math-fundamentals','cs-essentials','mixed-challenge','az-900',
+  'aws-clf-c02','gcp-cloud-digital-leader','security-plus','all-cloud',
+]);
+const CERTIFICATION_GROUPS = new Set(['AZ-900','AWS-CLF-C02','CompTIA-A+']);
+
+function validGroup(source, groupId) {
+  return source === 'homepage' ? HOMEPAGE_GROUPS.has(groupId)
+    : source === 'certification' && CERTIFICATION_GROUPS.has(groupId);
+}
+
 
 function nonEmpty(value, min = 1, max = 600) {
   return typeof value === 'string' && value.trim().length >= min && value.trim().length <= max;
@@ -80,4 +92,35 @@ async function saveOverride(source, id, question) {
   return checked;
 }
 
-module.exports = { validatePracticeOverride, listOverrides, saveOverride };
+
+/** Validate a new row without trusting its ID, source, or exam affiliation. */
+function makeAddition(source, groupId, body, id = 'extra-' + randomUUID()) {
+  if (!validGroup(source, groupId)) throw new Error('Unknown practice quiz');
+  const question = validatePracticeOverride(source, id, { ...body, id });
+  if (source === 'certification' && question.exam_code !== groupId) {
+    throw new Error('Certification code must match the selected quiz');
+  }
+  return { source, groupId, id, question };
+}
+
+async function listAdditions() {
+  const { rows } = await db.query(
+    `SELECT source, group_id AS "groupId", question_id AS id, content AS question
+       FROM practice_question_additions ORDER BY created_at, question_id`
+  );
+  return rows;
+}
+
+async function addQuestion(source, groupId, body) {
+  const item = makeAddition(source, groupId, body);
+  await db.query(
+    `INSERT INTO practice_question_additions(source, group_id, question_id, content)
+       VALUES($1, $2, $3, $4::jsonb)`,
+    [source, groupId, item.id, JSON.stringify(item.question)]
+  );
+  return item;
+}
+
+module.exports = { validatePracticeOverride, listOverrides, saveOverride,
+  makeAddition, listAdditions, addQuestion };
+

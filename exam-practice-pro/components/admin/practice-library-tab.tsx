@@ -8,7 +8,8 @@ import starter from '@/data/it-certification-questions.json';
 import { IT_CERTS } from '@/lib/it-certs';
 import type { Question } from '@/lib/types';
 import { admin } from '@/lib/admin';
-import { fetchPracticeOverrides, type PracticeOverride } from '@/lib/practice-overrides';
+import { fetchPracticeLibrary, type PracticeOverride, type PracticeAddition } from '@/lib/practice-overrides';
+import { PracticeAddQuestion } from '@/components/admin/practice-add-question';
 import { Field, Notice, card, input } from '@/components/admin/ui';
 
 type Source = 'homepage' | 'certification';
@@ -33,6 +34,7 @@ export function PracticeLibraryTab() {
   const [groupId, setGroupId] = useState('aws-clf-c02');
   const [questionId, setQuestionId] = useState('');
   const [overrides, setOverrides] = useState<PracticeOverride[]>([]);
+  const [additions, setAdditions] = useState<PracticeAddition[]>([]);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -46,7 +48,10 @@ export function PracticeLibraryTab() {
     const base: EditableQuestion[] = source === 'homepage'
       ? (getAnyQuizById(groupId)?.questions ?? [])
       : starter.filter(q => q.exam_code === groupId);
-    return base.map(q => {
+    const added = additions.filter(a => a.source === source && a.groupId === groupId)
+      .map(a => a.question as EditableQuestion)
+      .filter(q => q && typeof q.id === 'string' && !base.some(item => item.id === q.id));
+    return [...base, ...added].map(q => {
       const saved = overrides.find(o => o.source === source && o.id === q.id);
       const replacement = saved?.question as EditableQuestion | undefined;
       // Do not change the identity or exam code of a bundled item.
@@ -55,12 +60,12 @@ export function PracticeLibraryTab() {
           ('exam_code' in replacement && replacement.exam_code !== q.exam_code)) return q;
       return replacement;
     });
-  }, [source, groupId, overrides]);
+  }, [source, groupId, overrides, additions]);
 
   useEffect(() => {
     let mounted = true;
-    fetchPracticeOverrides()
-      .then(rows => { if (mounted) setOverrides(rows); })
+    fetchPracticeLibrary()
+      .then(data => { if (mounted) { setOverrides(data.overrides); setAdditions(data.additions); } })
       .catch(e => { if (mounted) setMessage({kind:'error',text:String(e.message || e)}); })
       .finally(() => { if (mounted) setLoading(false); });
     return () => { mounted = false; };
@@ -141,6 +146,9 @@ export function PracticeLibraryTab() {
         </select></Field>
       </div>
     </section>
+    <PracticeAddQuestion key={`${source}:${groupId}`} source={source} groupId={groupId}
+      onAdded={addition => {setAdditions(rows => [...rows, addition]);setQuestionId(addition.id);
+        setMessage({kind:'ok',text:'New question added to this quiz.'});}} />
     {loading && <p className="text-sm text-muted-foreground">Loading saved edits…</p>}
     {current && draft && <section className={`${card} grid gap-4`}>
       <div className="flex flex-wrap justify-between gap-2">

@@ -1,6 +1,6 @@
 import { api, getUserProfile } from '@/lib/api';
 import { buildCertTest } from '@/lib/it-certs';
-import { fetchPracticeOverrides } from '@/lib/practice-overrides';
+import { fetchPracticeLibrary } from '@/lib/practice-overrides';
 
 export interface MockSummary {
   id: string;
@@ -50,8 +50,8 @@ export async function fetchMock(id: string, mode: 'test' | 'practice' = 'test'):
   const cert = buildCertTest(id);
   if (cert && mode === 'practice') {
     try {
-      const overrides = await fetchPracticeOverrides();
-      return { status: 'ok', test: buildCertTest(id, overrides) || cert };
+      const library = await fetchPracticeLibrary();
+      return { status: 'ok', test: buildCertTest(id, library.overrides, library.additions) || cert };
     } catch {
       // Bundled questions remain available when Render/Neon is offline.
       return { status: 'ok', test: cert };
