@@ -1,0 +1,9 @@
+import { LegalPage,LegalSection } from '@/components/legal/legal-page';
+export const metadata={title:'Terms of Service',description:'Terms of use for ExamPro quizzes, free mocks and paid plans.'};
+export default function Page(){return <LegalPage title="Terms of Service">
+ <LegalSection title="Independent exam practice"><p>ExamPro provides independent educational mock tests and preparation tools. We are not an official recruitment agency, exam board or government website, and are not endorsed by SSC, IBPS, RRB or other exam authorities. Always confirm official exam rules, dates and syllabus with the responsible authority.</p></LegalSection>
+ <LegalSection title="Acceptable use"><p>Use ExamPro lawfully and respect other learners. Do not bypass paywalls or admin access checks, impersonate others, scrape protected content, or interfere with systems. Keep your own sign-in credentials secure.</p></LegalSection>
+ <LegalSection title="Question accuracy"><p>We work to improve questions and explanations but do not guarantee that every item is free from errors or that mock-test scores predict actual examination results. Please report questionable content through support.</p></LegalSection>
+ <LegalSection title="Paid access"><p>Plan pricing, duration and features are described on the pricing page. Paid access is attached to a verified user account. Merely contacting us through WhatsApp does not activate a plan or confirm payment. The Refund and Cancellation Policy governs billing concerns subject to applicable law.</p></LegalSection>
+ <LegalSection title="Availability"><p>We may correct content, retire outdated tests and perform maintenance. Infrastructure or third-party interruptions may affect availability. Nothing here excludes consumer rights that cannot lawfully be waived.</p></LegalSection>
+ </LegalPage>}
