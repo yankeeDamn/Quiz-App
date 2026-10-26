@@ -12,27 +12,34 @@ import { copyUrl } from '@/lib/mobile-share';
 type Brand = {name:string;tagline:string;color:string;batches:string};
 const fallback:Brand={name:'ExamPro Learning Portal',tagline:'Practice smarter. Score higher.',color:'#1949C7',batches:''};
 
-function decodeBrand(input:string|null):Brand {
-  if (!input || input.length>800) return fallback;
+function fallbackForSlug(slug:string|null):Brand {
+  // Slugs identify public branding, not authenticated institute tenants.
+  if (!slug || !/^[a-z0-9][a-z0-9-]{0,47}$/.test(slug)) return fallback;
+  const name = slug.split('-').filter(Boolean).map(s=>s[0].toUpperCase()+s.slice(1)).join(' ').slice(0,40);
+  return {...fallback,name:name||fallback.name};
+}
+function decodeBrand(input:string|null, slug:string|null):Brand {
+  const base = fallbackForSlug(slug);
+  if (!input || input.length>800) return base;
   try {
     const parsed:unknown=JSON.parse(input);
-    if(!parsed||typeof parsed!=='object')return fallback;
+    if(!parsed||typeof parsed!=='object')return base;
     const item=parsed as Record<string,unknown>;
     const value=(field:keyof Brand,max:number,defaultValue:string)=>
       typeof item[field]==='string' ? (item[field] as string).slice(0,max).trim()||defaultValue : defaultValue;
-    const color=typeof item.color==='string' && /^#[0-9a-fA-F]{6}$/.test(item.color) ? item.color : fallback.color;
+    const color=typeof item.color==='string' && /^#[0-9a-fA-F]{6}$/.test(item.color) ? item.color : base.color;
     return {
-      name:value('name',40,fallback.name),
-      tagline:value('tagline',60,fallback.tagline),
+      name:value('name',40,base.name),
+      tagline:value('tagline',60,base.tagline),
       color,
       batches:value('batches',160,''),
     };
-  } catch { return fallback; }
+  } catch { return base; }
 }
 
 function PortalContent(){
   const params=useSearchParams();
-  const brand=decodeBrand(params.get('brand'));
+  const brand=decodeBrand(params.get('brand'),params.get('institute'));
   const [tests,setTests]=useState<MockSummary[]>([]);
   const [state,setState]=useState<'loading'|'ready'|'error'>('loading');
   const [copyState,setCopyState]=useState<'idle'|'copied'|'manual'>('idle');
