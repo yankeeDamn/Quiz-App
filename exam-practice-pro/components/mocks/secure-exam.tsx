@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
+import { LanguageSwitcher, useExamLanguage, useTranslatedTexts } from '@/components/exampro/exam-language';
+import { ShareTestButtons } from '@/components/exampro/share-test-buttons';
 
 type Question = {id:string;topic:string;section:number;question:string;options:string[]};
 type Review = {id:string;question:string;options:string[];selected:number;correctAnswer:number;explanation:string;correct:boolean};
@@ -14,6 +16,26 @@ type Attempt = {
  test:{id:string;name:string;minutes:number;marksPerCorrect:number;negativeMarks:number;passPercent:number;questions:Question[];sections:{name:string;from:number;to:number}[]};
  result:null|{score:number;total:number;percentage:number;passed:boolean;correct:number;incorrect:number;skipped:number;review:Review[]}
 };
+
+function TranslatedReview({q,index}:{q:Review;index:number}) {
+  const [expanded,setExpanded]=useState(false);
+  const {language}=useExamLanguage();
+  const source=expanded?[q.question,...q.options,q.explanation]:[];
+  const translated=useTranslatedTexts(source);
+  const question=expanded&&translated.texts.length?translated.texts[0]:q.question;
+  const options=expanded&&translated.texts.length?translated.texts.slice(1,1+q.options.length):q.options;
+  const explanation=expanded&&translated.texts.length?translated.texts[1+q.options.length]:q.explanation;
+  return <article className="rounded-lg border p-4">
+    <h3 className="font-semibold">{index+1}. {question}</h3>
+    <p className="mt-2 text-sm">Your choice: {q.selected===-1?'Skipped':options[q.selected]} · Correct: {options[q.correctAnswer]}</p>
+    <p className="mt-2 text-sm text-muted-foreground">{explanation}</p>
+    {language!=='en'&&<button type="button" onClick={()=>setExpanded(v=>!v)}
+      className="mt-3 text-sm font-semibold text-indigo-700 underline dark:text-indigo-300">
+      {expanded?'Show original English':'Translate this review'}
+    </button>}
+    {expanded&&translated.warning&&<p className="mt-1 text-xs text-amber-700" role="status">{translated.warning}</p>}
+  </article>;
+}
 
 export function SecureExam({testId}:{testId:string}) {
  const {data:session,status} = useSession();
@@ -26,6 +48,9 @@ export function SecureExam({testId}:{testId:string}) {
  const [saved,setSaved] = useState(true);
  // Review flags are UI-only; answer submissions and deadlines remain server-authoritative.
  const [marked,setMarked] = useState<Record<string,boolean>>({});
+ const {t} = useExamLanguage();
+ const displayed = attempt?.test.questions[current];
+ const translated = useTranslatedTexts(displayed?[displayed.question,...displayed.options]:[]);
  const submitLock=useRef(false);
  const latest=useRef<Record<string,number>>({});
 
@@ -94,8 +119,10 @@ export function SecureExam({testId}:{testId:string}) {
  if(!attempt)return <p className="p-6" aria-busy="true">Starting or recovering your saved exam…</p>;
  if(attempt.submittedAt&&attempt.result)return <section className="space-y-6">
    <div className="rounded-xl border bg-card p-6"><h1 className="text-2xl font-bold">{attempt.title} — Result</h1><p className="mt-2 text-xl font-semibold">{attempt.result.score} / {attempt.result.total} marks ({attempt.result.percentage}%)</p><p>{attempt.result.passed?'Passed':'Not passed'} · {attempt.result.correct} correct · {attempt.result.incorrect} incorrect · {attempt.result.skipped} skipped</p><Button className="mt-4" asChild><Link href="/dashboard">View dashboard</Link></Button></div>
-   <h2 className="text-xl font-bold">Answer review</h2>
-   {attempt.result.review.map((q,i)=><article key={q.id} className="rounded-lg border p-4"><h3 className="font-semibold">{i+1}. {q.question}</h3><p className="mt-2 text-sm">Your choice: {q.selected===-1?'Skipped':q.options[q.selected]} · Correct: {q.options[q.correctAnswer]}</p><p className="mt-2 text-sm text-muted-foreground">{q.explanation}</p></article>)}
+   <div className="flex flex-wrap items-center justify-between gap-3">
+      <h2 className="text-xl font-bold">Answer review</h2><ShareTestButtons testId={testId} title={attempt.title} compact/>
+    </div>
+   {attempt.result.review.map((q,i)=><TranslatedReview key={q.id} q={q} index={i}/> )}
  </section>;
  const questions=attempt.test.questions;
  const question=questions[current];
@@ -103,8 +130,11 @@ export function SecureExam({testId}:{testId:string}) {
  const mm=Math.floor(seconds/60),ss=String(seconds%60).padStart(2,'0');
  return <section className="space-y-5">
    <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border bg-card p-4">
-     <div><h1 className="text-xl font-bold">{attempt.title}</h1><p className="text-sm text-muted-foreground">{Object.keys(responses).length}/{questions.length} answered · {saved?'Progress saved':'Saving…'}</p></div>
-     <div role="timer" className="font-mono text-xl font-bold">{mm}:{ss}</div>
+     <div><h1 className="text-xl font-bold">{attempt.title}</h1><p className="text-sm text-muted-foreground">{Object.keys(responses).length}/{questions.length} answered · {saved?t('save'):t('saving')}</p></div>
+     <div className="flex flex-wrap items-center gap-2">
+      <LanguageSwitcher small/><ShareTestButtons testId={testId} title={attempt.title} compact/>
+      <div role="timer" className="font-mono text-xl font-bold">{mm}:{ss}</div>
+     </div>
    </div>
    {error&&<p className="rounded-lg border border-red-500 p-3 text-sm" role="alert">{error}</p>}
    <div className="flex flex-wrap gap-2" role="group" aria-label="Exam sections">
@@ -116,13 +146,14 @@ export function SecureExam({testId}:{testId:string}) {
      </button>)}
    </div>
    <article className="rounded-xl border bg-card p-5">
-     <p className="text-sm text-muted-foreground">Question {current+1} of {questions.length}</p>
-     <h2 className="mt-3 text-lg font-semibold">{question.question}</h2>
+     <p className="text-sm text-muted-foreground">{t('question')} {current+1} of {questions.length}</p>
+     <h2 className="mt-3 text-lg font-semibold">{translated.texts[0]||question.question}</h2>
+     {translated.warning&&<p className="mt-2 text-xs text-amber-700 dark:text-amber-300" role="status">{translated.warning}</p>}
      <fieldset className="mt-4 space-y-2">
-       <legend className="sr-only">Select your answer</legend>
-       {question.options.map((choice,i)=><label key={i} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border p-3 hover:bg-muted"><input type="radio" name={question.id} checked={selected===i} onChange={()=>update(question.id,i)}/><span>{String.fromCharCode(65+i)}. {choice}</span></label>)}
+       <legend className="sr-only">{t('answer')}</legend>
+       {question.options.map((choice,i)=><label key={i} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border p-3 hover:bg-muted"><input type="radio" name={question.id} checked={selected===i} onChange={()=>update(question.id,i)}/><span>{String.fromCharCode(65+i)}. {translated.texts[i+1]||choice}</span></label>)}
      </fieldset>
-     <div className="mt-4 flex flex-wrap gap-2"><Button variant="outline" onClick={()=>update(question.id,-1)}>Clear answer</Button><Button variant="outline" aria-pressed={Boolean(marked[question.id])} onClick={()=>setMarked(old=>({...old,[question.id]:!old[question.id]}))}>{marked[question.id]?'Unmark review':'Mark for review'}</Button><Button variant="outline" disabled={current===0} onClick={()=>setCurrent(x=>x-1)}>Previous</Button><Button disabled={current===questions.length-1} onClick={()=>setCurrent(x=>x+1)}>Next</Button></div>
+     <div className="mt-4 flex flex-wrap gap-2"><Button variant="outline" onClick={()=>update(question.id,-1)}>Clear answer</Button><Button variant="outline" aria-pressed={Boolean(marked[question.id])} onClick={()=>setMarked(old=>({...old,[question.id]:!old[question.id]}))}>{marked[question.id]?'Unmark review':'Mark for review'}</Button><Button variant="outline" disabled={current===0} onClick={()=>setCurrent(x=>x-1)}>{t('previous')}</Button><Button disabled={current===questions.length-1} onClick={()=>setCurrent(x=>x+1)}>{t('next')}</Button></div>
    </article>
    <div aria-label="Question status legend" className="flex flex-wrap gap-3 text-xs text-muted-foreground">
      <span className="flex items-center gap-1"><i className="h-3 w-3 rounded-sm bg-slate-200 dark:bg-slate-700"/> Unanswered</span>
@@ -144,7 +175,7 @@ export function SecureExam({testId}:{testId:string}) {
      </button>;
    })}</div>
    <p className="text-xs text-muted-foreground">Marks for review are visual reminders in this browser tab; only your selected answers are saved to the server.</p>
-   <Button disabled={busy} onClick={()=>void submit()}>{busy?'Submitting…':'Submit exam'}</Button>
+   <Button disabled={busy} onClick={()=>void submit()}>{busy?t('saving'):t('submit')}</Button>
    <p className="text-xs text-muted-foreground">This is a server-timed exam. Refreshing the page recovers saved answers and the original deadline. Answers and explanations appear only after submission.</p>
  </section>;
 }
