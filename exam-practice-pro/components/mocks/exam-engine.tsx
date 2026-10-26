@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Bookmark, Clock, Flag, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ExamLanguageSwitcher, useExamLanguage, useExamTranslation } from '@/lib/exampro-language';
+import { ShareTest } from '@/components/mocks/share-test';
 import { WhatsAppButton } from '@/components/mocks/whatsapp-button';
 import {
   type MockTest,
@@ -39,6 +41,7 @@ type PaletteState = 'unseen' | 'unanswered' | 'answered' | 'marked' | 'answered-
 
 export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
   const practice = mode === 'practice';
+  const {lang,setLang,labels}=useExamLanguage();
   const [items, setItems] = useState<Shuffled[]>(() => shuffleTest(test, !practice));
   const [answers, setAnswers] = useState<number[]>(() => test.questions.map(() => -1));
   const [marked, setMarked] = useState<boolean[]>(() => test.questions.map(() => false));
@@ -157,6 +160,9 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
     setFinished(false);
   };
 
+  const visible = items[current]?.question;
+  const content = visible ? [visible.question,...visible.options,...(practice && checked[current] ? [visible.explanation] : [])] : [];
+  const translated = useExamTranslation(lang,content);
   if (finished && result) {
     return (
       <ResultView
@@ -194,7 +200,9 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
             {practice ? 'Practice mode · answers show after each question' : `+${test.marksPerCorrect} per correct · ${negativeLabel(test.negativeMarks)}`}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <ExamLanguageSwitcher lang={lang} onChange={setLang}/>
+          {!test.id.startsWith('custom-') && <ShareTest id={test.id} title={test.name} lang={lang} compact/>}
           <span
             className={`inline-flex min-w-24 items-center justify-center gap-2 rounded-lg px-3 py-2 font-mono text-lg font-semibold tabular-nums ${
               lowTime ? 'bg-red-600 text-white' : 'bg-muted'
@@ -236,7 +244,7 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
         <section className="min-w-0 rounded-xl border bg-card p-5" aria-live="polite">
           <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
             <span className="font-mono">
-              Question {current + 1} of {test.questions.length}
+              {labels.question} {current + 1} {labels.of} {test.questions.length}
             </span>
             <span aria-hidden="true">·</span>
             <span>{section.name}</span>
@@ -252,7 +260,8 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
             </button>
           </div>
 
-          <h2 className="mt-4 text-xl font-semibold leading-snug">{q.question}</h2>
+          {lang!=='en' && translated.state==='unavailable' && <p role="status" className="mt-2 text-xs text-amber-700">{labels.translateError}</p>}
+          <h2 className="mt-4 text-xl font-semibold leading-snug">{translated.texts[0]||q.question}</h2>
 
           <div className="mt-5 grid gap-3" role="group" aria-label="Options">
             {item.order.map((original, position) => {
@@ -282,7 +291,7 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
                   >
                     {LETTERS[position]}
                   </span>
-                  <span className="min-w-0 break-words">{q.options[original]}</span>
+                  <span className="min-w-0 break-words">{translated.texts[original+1]||q.options[original]}</span>
                 </button>
               );
             })}
@@ -297,7 +306,7 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
               <p className="font-semibold">
                 {item.order[picked] === q.answer ? 'Correct.' : `Not quite. The answer is ${LETTERS[item.order.indexOf(q.answer)]}.`}
               </p>
-              <p className="mt-1 text-sm">{q.explanation}</p>
+              <p className="mt-1 text-sm">{translated.texts[5]||q.explanation}</p>
               <DoubtButton test={test} item={item} index={current} picked={picked} />
             </div>
           )}
@@ -501,6 +510,7 @@ function ResultView({
   onRetake: () => void;
 }) {
   const [filter, setFilter] = useState<'all' | 'wrong' | 'skipped' | 'saved'>('all');
+  const {lang,setLang}=useExamLanguage();
   const share = `I scored ${result.score} out of ${result.total} (${result.percent}%) in "${test.name}" on Exam Practice Pro. Try it too!`;
   const headline = practice ? `${result.correct} / ${test.questions.length}` : `${result.score} / ${result.total}`;
 
@@ -516,7 +526,11 @@ function ResultView({
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8">
-      <p className="text-sm font-semibold text-blue-700 dark:text-blue-400">{practice ? 'Practice summary' : 'Result'}</p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm font-semibold text-blue-700 dark:text-blue-400">{practice ? 'Practice summary' : 'Result'}</p>
+        <ExamLanguageSwitcher lang={lang} onChange={setLang}/>
+        {!test.id.startsWith('custom-') && <ShareTest id={test.id} title={test.name} lang={lang} compact/>}
+      </div>
       <h1 className="mt-1 text-2xl font-bold">{test.name}</h1>
 
       <div className="mt-5 grid gap-4 rounded-xl border bg-card p-6 sm:grid-cols-[auto_1fr] sm:items-center">
