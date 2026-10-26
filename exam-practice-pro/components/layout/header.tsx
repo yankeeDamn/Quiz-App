@@ -54,7 +54,7 @@ export function Header() {
           >
             India Mocks
           </Link>
-          <Link href="/exampro" className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300">ExamPro Studio</Link>
+          <Link href="/exampro" className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300">Exam Hall</Link>
           <Link
             href="/dashboard"
             className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300"
@@ -69,7 +69,7 @@ export function Header() {
           >
             Bookmarks
           </Link>
-          <Link href="/admin" className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300">Owner admin</Link>
+
           <Link
             href="/pricing"
             className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300"
@@ -178,7 +178,7 @@ export function Header() {
                 >
                   Quizzes
                 </Link>
-                <Link href="/exampro" className="text-lg font-medium transition-colors hover:text-indigo-600" onClick={() => setMobileMenuOpen(false)}>ExamPro Studio</Link>
+                <Link href="/exampro" className="text-lg font-medium transition-colors hover:text-indigo-600" onClick={() => setMobileMenuOpen(false)}>Exam Hall</Link>
                 <Link href="/certifications" className="text-lg font-medium transition-colors hover:text-indigo-600" onClick={() => setMobileMenuOpen(false)}>Certifications</Link>
                 <Link
                   href="/india-mocks"
