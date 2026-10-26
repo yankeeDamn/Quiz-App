@@ -89,7 +89,8 @@ function topicDefinitions(bank) {
       name: `${t.name} Test`,
       exam: t.category,
       kind: 'topic',
-      minutes: 12,
+      // Keep 12-minute starter-topic tests; larger imported topic banks need adequate time.
+      minutes: Math.max(12, Math.min(180, t.questions.length)),
       marksPerCorrect: 1,
       negativeMarks: 0.25,
       passPercent: 50,
