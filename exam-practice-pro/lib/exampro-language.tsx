@@ -53,7 +53,7 @@ export function useExamTranslation(lang:ExamLanguage,source:string[]):Translatio
  const key=JSON.stringify(source);
  const [current,setCurrent]=useState<{key:string;lang:ExamLanguage;texts:string[];state:Translation['state']}|null>(null);
  useEffect(()=>{
-  if(lang==='en')return;
+  if(lang==='en'||source.length===0)return;
   let active=true;
   const clean=source.map(s=>s.slice(0,1000));
   const storeKey=cacheKey(lang,clean);
