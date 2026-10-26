@@ -7,9 +7,9 @@ export type ExamLanguage='en'|'hi'|'bn';
 const KEY='exampro:language:v1';
 export const LANGUAGE_LABELS:Record<ExamLanguage,string>={en:'EN',hi:'हिं',bn:'বাং'};
 export const LABELS={
- en:{question:'Question',of:'of',submit:'Submit exam',next:'Next',previous:'Previous',clear:'Clear answer',saved:'Progress saved',saving:'Saving…',answered:'answered',explanation:'Explanation',translateError:'Translation unavailable; showing English.'},
- hi:{question:'प्रश्न',of:'में से',submit:'परीक्षा जमा करें',next:'अगला',previous:'पिछला',clear:'उत्तर हटाएं',saved:'प्रगति सहेजी गई',saving:'सहेज रहे हैं…',answered:'उत्तर दिए',explanation:'व्याख्या',translateError:'अनुवाद उपलब्ध नहीं; अंग्रेज़ी दिखाई जा रही है।'},
- bn:{question:'প্রশ্ন',of:'এর মধ্যে',submit:'জমা দিন',next:'পরবর্তী',previous:'পূর্ববর্তী',clear:'উত্তর মুছুন',saved:'সংরক্ষিত',saving:'সংরক্ষণ চলছে…',answered:'উত্তর দেওয়া',explanation:'ব্যাখ্যা',translateError:'অনুবাদ পাওয়া যায়নি; ইংরেজি দেখানো হচ্ছে।'},
+ en:{question:'Question',of:'of',submit:'Submit exam',next:'Next',previous:'Previous',clear:'Clear answer',saved:'Progress saved',saving:'Saving…',answered:'answered',explanation:'Explanation',correct:'Correct answer!',wrong:'Not quite. Correct answer:',finish:'Finish practice',mark:'Mark for review',unmark:'Unmark review',translateError:'Translation unavailable; showing English.'},
+ hi:{question:'प्रश्न',of:'में से',submit:'परीक्षा जमा करें',next:'अगला',previous:'पिछला',clear:'उत्तर हटाएं',saved:'प्रगति सहेजी गई',saving:'सहेज रहे हैं…',answered:'उत्तर दिए',explanation:'व्याख्या',correct:'सही उत्तर!',wrong:'गलत उत्तर। सही उत्तर:',finish:'अभ्यास समाप्त करें',mark:'समीक्षा के लिए चिह्नित करें',unmark:'समीक्षा चिह्न हटाएं',translateError:'अनुवाद उपलब्ध नहीं; अंग्रेज़ी दिखाई जा रही है।'},
+ bn:{question:'প্রশ্ন',of:'এর মধ্যে',submit:'জমা দিন',next:'পরবর্তী',previous:'পূর্ববর্তী',clear:'উত্তর মুছুন',saved:'সংরক্ষিত',saving:'সংরক্ষণ চলছে…',answered:'উত্তর দেওয়া',explanation:'ব্যাখ্যা',correct:'সঠিক উত্তর!',wrong:'ভুল হয়েছে। সঠিক উত্তর:',finish:'অনুশীলন শেষ করুন',mark:'পরে দেখব',unmark:'চিহ্ন সরান',translateError:'অনুবাদ পাওয়া যায়নি; ইংরেজি দেখানো হচ্ছে।'},
 };
 
 export function isExamLanguage(v:string|null):v is ExamLanguage {return v==='en'||v==='hi'||v==='bn';}
