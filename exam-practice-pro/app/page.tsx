@@ -150,7 +150,7 @@ export default function HomePage() {
             <span className="font-medium text-slate-600 dark:text-slate-300">Practice quizzes · Mock tests · Skill-building</span>
             <div className="flex flex-wrap gap-x-5 gap-y-2 font-semibold text-indigo-700 dark:text-indigo-300">
               <Link href="/certifications" className="hover:underline">IT certifications</Link>
-              <Link href="/institute-admin" className="hover:underline">Institute tools</Link>
+              <Link href="/india-mocks" className="hover:underline">Timed mocks</Link>
             </div>
           </div>
         </div>
@@ -191,13 +191,13 @@ export default function HomePage() {
                   <div className="grid grid-cols-2 gap-3 sm:gap-4">
                     {[
                       {
-                        label: 'Question bank',
+                        label: 'Questions in bank',
                         value: homeStats?.bankQuestions.toLocaleString('en-IN') ?? '—',
                         note: homeStats ? `${homeStats.notYetAvailable.toLocaleString('en-IN')} not yet available` : 'Live database total',
                         icon: FileQuestion,
                       },
                       {
-                        label: 'Live tests',
+                        label: 'Published tests',
                         value: homeStats?.liveTests.toLocaleString('en-IN') ?? '—',
                         note: homeStats ? `${homeStats.publishedMocks} mocks · ${homeStats.topicTests} topic tests` : 'Published catalogue',
                         icon: ClipboardCheck,
@@ -227,7 +227,7 @@ export default function HomePage() {
                     {statsUnavailable
                       ? 'Live database counts temporarily unavailable. The practice library still works.'
                       : homeStats
-                        ? 'Question bank includes unpublished content; only live tests are available to students.'
+                        ? 'Bank totals include drafts; short topic tests are not full-length mocks.'
                         : 'Checking the live exam catalogue…'}
                   </p>
                 </div>
