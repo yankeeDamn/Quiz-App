@@ -85,3 +85,14 @@ test('owner key works but invalid admin access fails',async()=>{
 test('old payment routes are gone', async () => {
   assert.equal((await get('/api/v1/payments/config')).status, 404);
 });
+
+test('admin endpoints never cache data and refuse anonymous writes', async () => {
+  for (const path of ['/api/v1/admin/me','/api/v1/admin/topics','/api/v1/admin/tests','/api/v1/admin/users','/api/v1/admin/grants']) {
+    const response = await fetch(base + path);
+    assert.equal(response.status, 401, path);
+    assert.match(response.headers.get('cache-control') || '', /no-store/);
+    assert.equal(response.headers.get('x-robots-tag'), 'noindex, nofollow');
+  }
+  const response = await fetch(base + '/api/v1/admin/topics', {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:'unauthorized',name:'Not allowed'})});
+  assert.equal(response.status,401);
+});
