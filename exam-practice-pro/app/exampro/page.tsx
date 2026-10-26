@@ -7,10 +7,14 @@ import { BookOpen, Building2, ChevronRight, Clock3, LayoutDashboard, MessageCirc
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { fetchCatalog, type MockSummary } from '@/lib/mocks';
+import { api } from '@/lib/api';
+import { LanguageSwitcher, useExamLanguage } from '@/components/exampro/exam-language';
+import { ShareTestButtons, validShareTestId } from '@/components/exampro/share-test-buttons';
 import { whatsappLink, WHATSAPP_NUMBER } from '@/lib/plans';
 
 type Portal = { name: string; tagline: string; color: string; batches: string; whatsapp: string; group: string; logo: string };
 type Role = 'student' | 'teacher' | 'institute';
+type CompetitiveTopic = {id:string;name:string;category:string;active:boolean;questionCount:number;practiceTestId:string|null};
 const STORAGE = 'exampro:portal-preview:v1';
 const INITIAL: Portal = { name: '', tagline: 'Mock tests for every batch', color: '#1949C7', batches: 'Foundation, Advanced', whatsapp: '', group: '', logo: '' };
 const COLORS = ['#D9480F', '#1949C7', '#0F766E', '#AD2164', '#6D28D9', '#B45309', '#15803D', '#101A33'];
@@ -72,6 +76,11 @@ export default function ExamProStudioPage() {
   const [tests, setTests] = useState<MockSummary[]>([]);
   const [catalogStatus, setCatalogStatus] = useState('Loading live tests…');
   const [filter, setFilter] = useState('All');
+  const [competitive, setCompetitive] = useState<CompetitiveTopic[]>([]);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [sharedError, setSharedError] = useState('');
+  const [portalCopied,setPortalCopied] = useState(false);
+  const {language,t} = useExamLanguage();
 
   useEffect(() => {
     try { const saved = localStorage.getItem(STORAGE); if (saved) setPortal(restore(JSON.parse(saved))); }
@@ -85,13 +94,30 @@ export default function ExamProStudioPage() {
   }, [portal, loaded]);
   useEffect(() => {
     let mounted = true;
+    api<{topics:CompetitiveTopic[]}>('/api/v1/exampro/competitive-topics',{public:true})
+      .then(result=>{ if(mounted && result.success && result.data)setCompetitive(result.data.topics); })
+      .catch(()=>{ /* Older APIs do not have the metadata route. */ });
     fetchCatalog().then(data => { if (mounted) { setTests(data); setCatalogStatus(''); } })
       .catch(() => { if (mounted) setCatalogStatus('Could not load published mocks. The catalogue link is still available.'); });
     return () => { mounted = false; };
   }, []);
 
+  // A legacy ?test= link is only resolved after the public catalog confirms publication.
+  // The actual server-timed exam is started by the student on /india-mocks/:id.
+  useEffect(() => {
+    if(catalogStatus)return;
+    const testId = new URLSearchParams(window.location.search).get('test');
+    if(!testId)return;
+    if(!validShareTestId(testId)||!tests.some(test=>test.id===testId)) {
+      setSharedError('This shared test is not published or its link is invalid.');
+      return;
+    }
+    window.location.replace('/india-mocks/'+encodeURIComponent(testId)+
+      (language!=='en'?'?lang='+language:''));
+  },[catalogStatus,tests,language]);
+
   const categories = useMemo(() => ['All',...Array.from(new Set(tests.map(t => t.exam)))], [tests]);
-  const shown = useMemo(() => tests.filter(t => filter === 'All' || t.exam === filter).slice(0,6), [tests,filter]);
+  const shown = useMemo(() => tests.filter(t => filter === 'All' || t.exam === filter), [tests,filter]);
   const name = portal.name.trim() || 'Your Institute';
   const batches = portal.batches.split(',').map(s=>s.trim()).filter(Boolean).slice(0,6);
   const initials = name.split(/\s+/).slice(0,2).map(s=>s[0]).join('').toUpperCase();
@@ -117,7 +143,7 @@ export default function ExamProStudioPage() {
     <main className="flex-1 bg-[#f4f6fb] text-[#101a33] dark:bg-slate-950 dark:text-white">
       <div className="border-b border-slate-200 bg-white py-3 dark:border-slate-800 dark:bg-slate-900">
         <nav aria-label="ExamPro feature sections" className="mx-auto flex max-w-6xl flex-wrap gap-x-6 gap-y-2 px-4 text-sm font-semibold">
-          <a href="#how">How to use it</a><a href="#practice">Mock tests</a><a href="#progress">My progress</a><a href="#portal">Portal builder</a><a href="#contact">WhatsApp</a>
+          <a href="#how">How to use it</a><a href="#practice">Mock tests</a><a href="#builder">Competitive builder</a><a href="#progress">My progress</a><a href="#portal">Portal builder</a><a href="#contact">WhatsApp</a>
         </nav>
       </div>
       <section className="ep-hero relative mx-auto grid max-w-6xl gap-10 overflow-hidden rounded-b-3xl px-4 py-16 lg:grid-cols-2 lg:items-center lg:py-24">
@@ -168,7 +194,8 @@ export default function ExamProStudioPage() {
       <section id="practice" className="mx-auto max-w-6xl px-4 py-16">
         <p className="font-mono text-xs font-bold uppercase text-orange-700 dark:text-orange-400">Practice library</p>
         <h2 className="mt-3 text-3xl font-extrabold">Take a real mock test.</h2>
-        <p className="mt-3 text-slate-600 dark:text-slate-300">These tests come from the live ExamPro API. They are not duplicated into a standalone HTML exam engine.</p>
+        <p className="mt-3 text-slate-600 dark:text-slate-300">Tests come from the live Render/Neon catalogue. Use the language toggle for supported exam UI labels; automatic question translation needs Azure Translator configured on Render.</p>
+        {sharedError && <p className="mt-4 rounded-lg border border-amber-400 bg-amber-50 p-3 text-sm text-amber-950" role="alert">{sharedError}</p>}
         {catalogStatus ? <p className="mt-6" role="status">{catalogStatus}</p> : <>
           <div className="mt-6 flex flex-wrap gap-2" role="group" aria-label="Filter exams">{categories.map(c=>
             <button key={c} type="button" aria-pressed={filter===c} onClick={()=>setFilter(c)}
@@ -180,11 +207,49 @@ export default function ExamProStudioPage() {
               <p className="text-sm text-slate-500 dark:text-slate-300">{t.exam} · {t.questionCount} questions · {t.minutes} min</p>
               <p className="text-xs text-slate-500 dark:text-slate-300">{t.sections.join(' · ')}</p>
               <Link href={'/india-mocks/'+encodeURIComponent(t.id)} className="mt-auto inline-flex min-h-10 items-center justify-center rounded-lg bg-slate-900 px-4 py-2 font-bold text-white dark:bg-white dark:text-slate-900">Open test</Link>
+              <ShareTestButtons testId={t.id} title={t.name} compact/>
             </article>)}
           </div>
           {!shown.length && <p className="mt-6">No active mocks in this category.</p>}
         </>}
         <div className="mt-7 flex flex-wrap gap-3"><Link className="rounded-lg border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-900" href="/india-mocks">All mock tests</Link><Link className="rounded-lg border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-900" href="/certifications">IT certifications</Link><Link className="rounded-lg border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-900" href="/bookmarks">Saved questions</Link></div>
+      </section>
+
+      <section id="builder" className="mx-auto max-w-6xl px-4 pb-16">
+        <p className="font-mono text-xs font-bold uppercase text-indigo-700 dark:text-indigo-300">Live competitive question bank</p>
+        <h2 className="mt-3 text-3xl font-extrabold">Build a topic practice session</h2>
+        <p className="mt-3 max-w-3xl text-sm text-slate-600 dark:text-slate-300">
+          All four 125-question topics are synced from Neon. Only active topics can be selected.
+          Unpublished topics remain visible as coming soon, not as playable tests.
+          Multi-topic sessions are unscored practice; topic accuracy appears in the results.
+        </p>
+        <div id="bTopics" className="mt-6 grid gap-3 sm:grid-cols-2" role="group" aria-label="Competitive topics">
+          {competitive.map(topic=><label key={topic.id} className="ep-card flex items-start gap-3 rounded-xl p-4">
+            <input type="checkbox" className="mt-1 h-4 w-4" disabled={!topic.practiceTestId}
+              checked={Boolean(topic.practiceTestId&&selected.includes(topic.practiceTestId))}
+              onChange={event=>{
+                const id=topic.practiceTestId;
+                if(!id)return;
+                setSelected(before=>event.target.checked?[...before,id]:before.filter(value=>value!==id));
+              }}/>
+            <span className="flex-1">
+              <span className="block font-semibold">{topic.name}</span>
+              <span className="mt-1 block text-xs text-muted-foreground">{topic.questionCount} questions · {topic.practiceTestId?t('available'):t('upcoming')}</span>
+            </span>
+            {topic.practiceTestId && <Link href={'/india-mocks/'+encodeURIComponent(topic.practiceTestId)+'?mode=practice'}
+              className="text-sm font-semibold text-indigo-700 underline dark:text-indigo-300">Practice</Link>}
+          </label>)}
+        </div>
+        {!competitive.length && <p className="mt-4 text-sm text-muted-foreground">Competitive topics are temporarily unavailable. Existing published mocks remain accessible above.</p>}
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          {selected.length>0
+            ? <Link href={'/exampro/custom-practice?topics='+encodeURIComponent(selected.join(','))}
+                className="inline-flex min-h-11 items-center rounded-lg bg-indigo-700 px-5 py-3 font-semibold text-white">
+                Start practice with {selected.length} topic{selected.length===1?'':'s'}
+              </Link>
+            : <span className="rounded-lg border bg-muted/40 px-5 py-3 text-sm text-muted-foreground">Choose an available topic to start</span>}
+          <Link href="/admin" className="text-sm font-semibold text-indigo-700 underline dark:text-indigo-300">Owner: review and publish topics</Link>
+        </div>
       </section>
 
       <section id="progress" className="border-y border-slate-200 bg-white py-14 text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-white">
