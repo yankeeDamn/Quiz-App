@@ -256,3 +256,6 @@
     border-color: rgb(148 163 184 / 24%);
   }
 }
+
+/* Bengali script uses the bundled Hind Siliguri font; English stays Inter. */
+[lang="bn"] { font-family: var(--font-hind-siliguri), var(--font-inter), sans-serif; }
