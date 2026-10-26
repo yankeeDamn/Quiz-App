@@ -15,6 +15,7 @@ import { whatsappLink, WHATSAPP_NUMBER } from '@/lib/plans';
 type Portal = { name: string; tagline: string; color: string; batches: string; whatsapp: string; group: string; logo: string };
 type Role = 'student' | 'teacher' | 'institute';
 type CompetitiveTopic = {id:string;name:string;category:string;active:boolean;questionCount:number;practiceTestId:string|null};
+type TopicAccuracy = {topicId:string;attempted:number;correct:number;percent:number};
 const STORAGE = 'exampro:portal-preview:v1';
 const INITIAL: Portal = { name: '', tagline: 'Mock tests for every batch', color: '#1949C7', batches: 'Foundation, Advanced', whatsapp: '', group: '', logo: '' };
 const COLORS = ['#D9480F', '#1949C7', '#0F766E', '#AD2164', '#6D28D9', '#B45309', '#15803D', '#101A33'];
@@ -77,6 +78,7 @@ export default function ExamProStudioPage() {
   const [catalogStatus, setCatalogStatus] = useState('Loading live tests…');
   const [filter, setFilter] = useState('All');
   const [competitive, setCompetitive] = useState<CompetitiveTopic[]>([]);
+  const [accuracy, setAccuracy] = useState<Record<string,TopicAccuracy>>({});
   const [selected, setSelected] = useState<string[]>([]);
   const [sharedError, setSharedError] = useState('');
   const [portalCopied,setPortalCopied] = useState(false);
@@ -100,6 +102,10 @@ export default function ExamProStudioPage() {
     api<{topics:CompetitiveTopic[]}>('/api/v1/exampro/competitive-topics',{public:true})
       .then(result=>{ if(mounted && result.success && result.data)setCompetitive(result.data.topics); })
       .catch(()=>{ /* Older APIs do not have the metadata route. */ });
+    api<{topics:TopicAccuracy[]}>('/api/v1/exampro/topic-accuracy',{optionalAuth:true})
+      .then(result=>{if(mounted&&result.success&&result.data){
+        setAccuracy(Object.fromEntries(result.data.topics.map(topic=>[topic.topicId,topic])));
+      }}).catch(()=>{ /* Guests do not have personal scored accuracy. */ });
     fetchCatalog().then(data => { if (mounted) { setTests(data); setCatalogStatus(''); } })
       .catch(() => { if (mounted) setCatalogStatus('Could not load published mocks. The catalogue link is still available.'); });
     return () => { mounted = false; };
@@ -214,7 +220,7 @@ export default function ExamProStudioPage() {
             <button key={c} type="button" aria-pressed={filter===c} onClick={()=>setFilter(c)}
               className={'rounded-full border px-4 py-2 text-sm font-semibold ' + (filter===c?'border-slate-900 bg-slate-900 text-white dark:bg-white dark:text-slate-900':'border-slate-300 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white')}>{c}</button>)}
           </div>
-          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">{shown.map(t=>
+          <div id="tgrid" className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">{shown.filter(t=>!competitive.some(c=>c.practiceTestId===t.id)).map(t=>
             <article key={t.id} className="ep-card flex h-full flex-col gap-3 rounded-2xl p-6 text-slate-900 dark:text-white">
               <div className="flex justify-between gap-2"><h3 className="font-bold">{t.name}</h3><span className={'h-fit rounded px-2 py-1 text-xs font-semibold ' + (t.tier==='free'?'bg-emerald-100 text-emerald-900':'bg-amber-100 text-amber-900')}>{t.tier==='free'?'Free':'Pro'}</span></div>
               <p className="text-sm text-slate-500 dark:text-slate-300">{t.exam} · {t.questionCount} questions · {t.minutes} min</p>
@@ -222,6 +228,22 @@ export default function ExamProStudioPage() {
               <Link href={'/india-mocks/'+encodeURIComponent(t.id)} className="mt-auto inline-flex min-h-10 items-center justify-center rounded-lg bg-slate-900 px-4 py-2 font-bold text-white dark:bg-white dark:text-slate-900">Open test</Link>
               <ShareTestButtons testId={t.id} title={t.name} compact/>
             </article>)}
+            {competitive.filter(topic=>filter==='All'||topic.category===filter).map(topic=>
+              <article key={topic.id} className="ep-card flex h-full flex-col gap-3 rounded-2xl p-6">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="font-bold">{topic.name}</h3>
+                  <span className={'rounded px-2 py-1 text-xs font-semibold '+(topic.practiceTestId?'bg-emerald-100 text-emerald-900':'bg-amber-100 text-amber-950')}>
+                    {topic.practiceTestId?t('available'):t('upcoming')}
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground">{topic.category} · {topic.questionCount} questions in the question bank</p>
+                <p className="text-xs text-muted-foreground">{topic.practiceTestId?'Published practice topic':'Not yet published for students'}</p>
+                {topic.practiceTestId
+                  ? <Link href={'/india-mocks/'+encodeURIComponent(topic.practiceTestId)+'?mode=practice'}
+                      className="mt-auto inline-flex min-h-10 items-center justify-center rounded-lg bg-indigo-700 px-4 py-2 font-semibold text-white">Open practice</Link>
+                  : <span className="mt-auto inline-flex min-h-10 items-center justify-center rounded-lg border px-4 py-2 text-sm text-muted-foreground" aria-disabled="true">Awaiting admin review</span>}
+                {topic.practiceTestId && <ShareTestButtons testId={topic.practiceTestId} title={topic.name} compact/>}
+              </article>)}
           </div>
           {!shown.length && <p className="mt-6">No active mocks in this category.</p>}
         </>}
@@ -248,6 +270,14 @@ export default function ExamProStudioPage() {
             <span className="flex-1">
               <span className="block font-semibold">{topic.name}</span>
               <span className="mt-1 block text-xs text-muted-foreground">{topic.questionCount} questions · {topic.practiceTestId?t('available'):t('upcoming')}</span>
+              {accuracy[topic.id]?.attempted
+                ? <span className="mt-3 block">
+                    <span className="text-xs text-muted-foreground">Scored accuracy: {accuracy[topic.id].percent}% from {accuracy[topic.id].attempted} answers</span>
+                    <span className="mt-1 block h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                      <span className="block h-full rounded-full bg-indigo-600" style={{width:accuracy[topic.id].percent+'%'}} />
+                    </span>
+                  </span>
+                : <span className="mt-2 block text-xs text-muted-foreground">No scored attempts yet</span>}
             </span>
             {topic.practiceTestId && <Link href={'/india-mocks/'+encodeURIComponent(topic.practiceTestId)+'?mode=practice'}
               className="text-sm font-semibold text-indigo-700 underline dark:text-indigo-300">Practice</Link>}
