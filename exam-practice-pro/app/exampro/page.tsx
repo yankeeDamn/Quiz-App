@@ -6,6 +6,9 @@ import { Reveal } from '@/components/motion/reveal';
 import { BookOpen, Building2, ChevronRight, Clock3, LayoutDashboard, MessageCircle, Palette, RotateCcw, ShieldCheck } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
+import { ExamLanguageSwitcher, useExamLanguage } from '@/lib/exampro-language';
+import { ShareTest } from '@/components/mocks/share-test';
+import { CompetitiveTopicBuilder } from '@/components/mocks/competitive-topic-builder';
 import { fetchCatalog, type MockSummary } from '@/lib/mocks';
 import { whatsappLink, WHATSAPP_NUMBER } from '@/lib/plans';
 
@@ -63,6 +66,7 @@ function foreground(hex: string): string {
 }
 
 export default function ExamProStudioPage() {
+  const { lang, setLang } = useExamLanguage();
   const [role, setRole] = useState<Role>('student');
   const [picked, setPicked] = useState<number | null>(null);
   const [portal, setPortal] = useState<Portal>(INITIAL);
@@ -85,13 +89,24 @@ export default function ExamProStudioPage() {
   }, [portal, loaded]);
   useEffect(() => {
     let mounted = true;
-    fetchCatalog().then(data => { if (mounted) { setTests(data); setCatalogStatus(''); } })
+    fetchCatalog().then(data => {
+      if (!mounted) return;
+      setTests(data);setCatalogStatus('');
+      // Historical /exampro?test=<id> links point to this unified exam app.
+      // Only redirect a verified, published ID. Premium access stays gated in /india-mocks.
+      const params=new URLSearchParams(window.location.search);
+      const id=params.get('test');
+      if(id && data.some(t=>t.id===id)){
+        const lang=params.get('lang');
+        window.location.replace('/india-mocks/'+encodeURIComponent(id)+(lang==='hi'||lang==='bn'?'?lang='+lang:''));
+      }
+    })
       .catch(() => { if (mounted) setCatalogStatus('Could not load published mocks. The catalogue link is still available.'); });
     return () => { mounted = false; };
   }, []);
 
   const categories = useMemo(() => ['All',...Array.from(new Set(tests.map(t => t.exam)))], [tests]);
-  const shown = useMemo(() => tests.filter(t => filter === 'All' || t.exam === filter).slice(0,6), [tests,filter]);
+  const shown = useMemo(() => tests.filter(t => filter === 'All' || t.exam === filter).slice(0,18), [tests,filter]);
   const name = portal.name.trim() || 'Your Institute';
   const batches = portal.batches.split(',').map(s=>s.trim()).filter(Boolean).slice(0,6);
   const initials = name.split(/\s+/).slice(0,2).map(s=>s[0]).join('').toUpperCase();
@@ -117,7 +132,7 @@ export default function ExamProStudioPage() {
     <main className="flex-1 bg-[#f4f6fb] text-[#101a33] dark:bg-slate-950 dark:text-white">
       <div className="border-b border-slate-200 bg-white py-3 dark:border-slate-800 dark:bg-slate-900">
         <nav aria-label="ExamPro feature sections" className="mx-auto flex max-w-6xl flex-wrap gap-x-6 gap-y-2 px-4 text-sm font-semibold">
-          <a href="#how">How to use it</a><a href="#practice">Mock tests</a><a href="#progress">My progress</a><a href="#portal">Portal builder</a><a href="#contact">WhatsApp</a>
+          <a href="#how">How to use it</a><a href="#build-topics">Custom topic builder</a><a href="#practice">Mock tests</a><a href="#progress">My progress</a><a href="#portal">Portal builder</a><a href="#contact">WhatsApp</a><span className="ml-auto"><ExamLanguageSwitcher lang={lang} onChange={setLang}/></span>
         </nav>
       </div>
       <section className="ep-hero relative mx-auto grid max-w-6xl gap-10 overflow-hidden rounded-b-3xl px-4 py-16 lg:grid-cols-2 lg:items-center lg:py-24">
@@ -165,9 +180,10 @@ export default function ExamProStudioPage() {
         </div>
       </section>
 
+      <CompetitiveTopicBuilder />
       <section id="practice" className="mx-auto max-w-6xl px-4 py-16">
         <p className="font-mono text-xs font-bold uppercase text-orange-700 dark:text-orange-400">Practice library</p>
-        <h2 className="mt-3 text-3xl font-extrabold">Take a real mock test.</h2>
+        <h2 className="mt-3 text-3xl font-extrabold">{lang==='bn'?'লাইভ মক টেস্ট দিন।':lang==='hi'?'लाइव मॉक टेस्ट दें।':'Take a real mock test.'}</h2>
         <p className="mt-3 text-slate-600 dark:text-slate-300">These tests come from the live ExamPro API. They are not duplicated into a standalone HTML exam engine.</p>
         {catalogStatus ? <p className="mt-6" role="status">{catalogStatus}</p> : <>
           <div className="mt-6 flex flex-wrap gap-2" role="group" aria-label="Filter exams">{categories.map(c=>
@@ -179,7 +195,8 @@ export default function ExamProStudioPage() {
               <div className="flex justify-between gap-2"><h3 className="font-bold">{t.name}</h3><span className={'h-fit rounded px-2 py-1 text-xs font-semibold ' + (t.tier==='free'?'bg-emerald-100 text-emerald-900':'bg-amber-100 text-amber-900')}>{t.tier==='free'?'Free':'Pro'}</span></div>
               <p className="text-sm text-slate-500 dark:text-slate-300">{t.exam} · {t.questionCount} questions · {t.minutes} min</p>
               <p className="text-xs text-slate-500 dark:text-slate-300">{t.sections.join(' · ')}</p>
-              <Link href={'/india-mocks/'+encodeURIComponent(t.id)} className="mt-auto inline-flex min-h-10 items-center justify-center rounded-lg bg-slate-900 px-4 py-2 font-bold text-white dark:bg-white dark:text-slate-900">Open test</Link>
+              <Link href={'/india-mocks/'+encodeURIComponent(t.id)+(lang==='en'?'':'?lang='+lang)} className="mt-auto inline-flex min-h-10 items-center justify-center rounded-lg bg-slate-900 px-4 py-2 font-bold text-white dark:bg-white dark:text-slate-900">Open test</Link>
+              <ShareTest id={t.id} title={t.name} lang={lang} compact/>
             </article>)}
           </div>
           {!shown.length && <p className="mt-6">No active mocks in this category.</p>}
