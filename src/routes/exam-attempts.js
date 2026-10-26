@@ -7,6 +7,7 @@ const wrap = fn => (req,res,next) => Promise.resolve(fn(req,res)).catch(next);
 const ok = (res,data) => res.json({ success:true, data });
 router.use(authenticateNextAuth);
 router.get('/', wrap(async (req,res) => ok(res, { attempts: await service.history(req.user.id) })));
+router.get('/topic-accuracy', wrap(async (req,res)=>ok(res,{topics:await service.competitiveAccuracy(req.user.id)})));
 router.post('/start', wrap(async (req,res) => {
   const attempt = await service.start(req.user, String(req.body?.testId || ''));
   return ok(res,{ attempt });
