@@ -7,7 +7,7 @@ const router = Router();
 router.get('/overrides', async (_req, res, next) => {
   try {
     res.set('Cache-Control', 'no-store');
-    return res.json({ success: true, data: { overrides: await practice.listOverrides() } });
+    return res.json({ success: true, data: { overrides: await practice.listOverrides(), additions: await practice.listAdditions() } });
   } catch (error) { return next(error); }
 });
 
