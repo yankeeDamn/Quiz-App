@@ -88,7 +88,8 @@ export default function ExamProStudioPage() {
 
   useEffect(() => {
     try {
-      const shared = new URLSearchParams(window.location.search).get('brand');
+      const params = new URLSearchParams(window.location.search);
+      const shared = params.has('institute') ? null : params.get('brand');
       const saved = shared ? shared.slice(0,800) : localStorage.getItem(STORAGE);
       if(saved) setPortal(restore(JSON.parse(saved)));
     } catch { /* Invalid shared previews or blocked storage fall back safely. */ }
@@ -96,8 +97,8 @@ export default function ExamProStudioPage() {
   }, []);
   useEffect(() => {
     if (!loaded) return;
-    try { localStorage.setItem(STORAGE,JSON.stringify(portal)); setNotice('Saved in this browser only.'); }
-    catch { setNotice('Browser storage unavailable. Your preview may not persist.'); }
+    try { localStorage.setItem(STORAGE,JSON.stringify(portal)); setNotice('Branding updated. Open or share the public portal using the buttons below.'); }
+    catch { setNotice('Your device blocked saving editor preferences. Open or share the public portal before leaving.'); }
   }, [portal, loaded]);
   useEffect(() => {
     let mounted = true;
@@ -111,6 +112,23 @@ export default function ExamProStudioPage() {
     fetchCatalog().then(data => { if (mounted) { setTests(data); setCatalogStatus(''); } })
       .catch(() => { if (mounted) setCatalogStatus('Could not load published mocks. The catalogue link is still available.'); });
     return () => { mounted = false; };
+  }, []);
+
+  // Historic and shareable /exampro?institute=<slug> links open the real
+  // public practice portal. This is not a private institute login.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('institute');
+    if (!slug) return;
+    if (!/^[a-z0-9][a-z0-9-]{0,47}$/.test(slug)) {
+      setSharedError('Invalid institute link. Please open a published ExamPro mock instead.');
+      return;
+    }
+    const next = new URL('/exampro/portal', window.location.origin);
+    next.searchParams.set('institute', slug);
+    const brand = params.get('brand');
+    if (brand && brand.length <= 800) next.searchParams.set('brand', brand);
+    window.location.replace(next.pathname + next.search);
   }, []);
 
   // A legacy ?test= link is only resolved after the public catalog confirms publication.
@@ -140,7 +158,11 @@ export default function ExamProStudioPage() {
   const publicBrand = JSON.stringify({
     name:portal.name,tagline:portal.tagline,color:portal.color,batches:portal.batches,
   });
-  const publicPortalPath = '/exampro/portal?brand='+encodeURIComponent(publicBrand);
+  const portalSlug=(portal.name.trim()||'institute').toLowerCase().normalize('NFKD')
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,48)||'institute';
+  // /exampro?institute=... links resolve to /exampro/portal and include only
+  // explicitly public branding; a slug does not create a database tenant.
+  const publicPortalPath = '/exampro?institute='+encodeURIComponent(portalSlug)+'&brand='+encodeURIComponent(publicBrand);
   async function copyBrandedPortal(){
     const url = new URL(publicPortalPath,window.location.origin).href;
     setPortalShareLink(url);
@@ -346,7 +368,7 @@ export default function ExamProStudioPage() {
               <p className="text-xs text-slate-300">The shared page is a real public landing page with published mock links, not a private institute workspace. Logos, contact links, student records, and billing are never included.</p>
             </form>
             <div className="ep-preview-surface overflow-hidden rounded-3xl border border-slate-200 bg-white text-slate-900 shadow-xl lg:sticky lg:top-24 lg:self-start">
-              <div className="flex gap-1 border-b border-slate-200 bg-slate-100 px-4 py-3"><span className="h-2 w-2 rounded-full bg-slate-400"/><span className="h-2 w-2 rounded-full bg-slate-400"/><span className="h-2 w-2 rounded-full bg-slate-400"/><span className="ml-3 truncate font-mono text-xs text-slate-500">exampro/portal</span></div>
+              <div className="flex gap-1 border-b border-slate-200 bg-slate-100 px-4 py-3"><span className="h-2 w-2 rounded-full bg-slate-400"/><span className="h-2 w-2 rounded-full bg-slate-400"/><span className="h-2 w-2 rounded-full bg-slate-400"/><Link href={publicPortalPath} className="ml-3 min-w-0 truncate font-mono text-xs text-slate-500 underline" title="Open shareable ExamPro public portal">quiz-app-virid-zeta-41.vercel.app/exampro?institute={portalSlug}</Link></div>
               <div className="flex items-center gap-4 p-5" style={{background:portal.color,color:ink}}>
                 {portal.logo ? <img src={portal.logo} alt="Preview of institute logo" className="h-14 w-14 rounded-xl bg-white object-contain"/> : <span className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-white text-xl font-black" style={{color:portal.color}}>{initials}</span>}
                 <div className="min-w-0"><h3 className="break-words text-xl font-extrabold">{name}</h3><p className="mt-1 text-sm">{portal.tagline}</p></div>
@@ -364,7 +386,7 @@ export default function ExamProStudioPage() {
                   <a href={whatsappLink('Hi, I want to know about batches at '+name,waNumber(portal.whatsapp))} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-emerald-700 px-4 py-2 text-sm font-bold text-white"><MessageCircle size={16}/> Talk to counsellor</a>
                   {group && <a href={group} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-10 items-center rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold">Join group</a>}
                 </div>
-                <p className="border-t border-slate-200 pt-3 text-xs text-slate-500">Design preview only. No institute account, student access or branded exam is created.</p>
+                <p className="border-t border-slate-200 pt-3 text-xs text-slate-500">Open the live public portal above to share published tests. Institute-only student management and private branding are not enabled yet.</p>
               </div>
             </div>
           </div>
