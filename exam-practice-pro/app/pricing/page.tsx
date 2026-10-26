@@ -23,7 +23,7 @@ const FAQ: [string, string][] = [
   ['Which email should I use?', 'Sign in with Google or GitHub first, so the chat shows your account email. Guest accounts have no email, so we cannot attach a plan to them.'],
   ['How long until my plan starts?', 'We unlock it by hand after the payment arrives, usually within a few hours during the day. You will get a WhatsApp message.'],
   ['What if I renew early?', 'Renewals add to your current end date. You never lose paid days.'],
-  ['Can I get a refund?', 'Message us on WhatsApp within 7 days of paying and we will talk it through.'],
+  ['Can I get a refund?', 'Review our refund policy and contact us promptly with the payment reference.'],
   ['We are an institute. What do we get?', 'Your students get Pro, and we can put your institute name and logo on the exam window. Message us with your student count and we will set it up.'],
 ];
 
@@ -124,8 +124,8 @@ export default function PricingPage() {
             <p className="mt-2 text-sm text-muted-foreground">Not sure which plan fits? Ask on WhatsApp. A real person replies.</p>
             <p className="mt-3 font-mono text-sm">{formatWhatsappNumber()}</p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <WhatsAppButton text="Hi, I have a question about the plans on Exam Practice Pro." label="Ask about plans" />
-              <WhatsAppButton text="Hi, I run a coaching institute and want Exam Practice Pro for my students." label="I run an institute" variant="outline" />
+              <WhatsAppButton text="Hi, I have a question about the plans on ExamPro." label="Ask about plans" />
+              <WhatsAppButton text="Hi, I run a coaching institute and want ExamPro for my students." label="I run an institute" variant="outline" />
             </div>
           </div>
         </section>

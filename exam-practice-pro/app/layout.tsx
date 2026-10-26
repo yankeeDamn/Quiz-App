@@ -24,9 +24,13 @@ const hindi = Noto_Sans_Devanagari({
 });
 
 export const metadata: Metadata = {
-  title: 'ExamPro',
-  description: 'Mock tests for SSC, Banking, Railways, UPSC and campus placements, plus certification practice. Doubts answered on WhatsApp.',
-  keywords: ['exam', 'practice', 'quiz', 'study', 'test', 'certification'],
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://quiz-app-virid-zeta-41.vercel.app'),
+  title: { default: 'ExamPro | Free Mock Tests and Exam Practice', template: '%s | ExamPro' },
+  description: 'Timed SSC, Banking and Railways tests, IT certification practice, explanations and progress tracking.',
+  keywords: ['mock tests', 'SSC CGL', 'banking exams', 'railway exams', 'IT certification questions'],
+  alternates: { canonical: '/' },
+  openGraph: { type: 'website', siteName: 'ExamPro', title: 'ExamPro | Mock Tests', description: 'Timed mock tests and topic quizzes.', url: '/' },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({

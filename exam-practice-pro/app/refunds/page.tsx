@@ -1,0 +1,8 @@
+import { LegalPage,LegalSection } from '@/components/legal/legal-page';
+export const metadata={title:'Refund and Cancellation Policy',description:'Information about ExamPro payment enquiries, refunds and cancellations.'};
+export default function Page(){return <LegalPage title="Refund and Cancellation Policy">
+ <p>Review the plan, term, features and amount on the pricing page before paying. Our current payment process is assisted through WhatsApp and uses manual Pro activation; online checkout may be added later.</p>
+ <LegalSection title="Billing concerns"><p>If you paid but Pro was not activated, believe you were charged twice or purchased by mistake, contact support as soon as possible, preferably within seven calendar days. Share your verified account email, payment date, transaction reference, amount and explanation. Never send your password, OTP or complete card number.</p></LegalSection>
+ <LegalSection title="Refund assessment"><p>We review requests in light of the transaction, whether the service was delivered or used, and applicable Indian consumer-protection law. Contacting us does not automatically guarantee a refund. Any approved reversal is processed through the original payment method where supported; your bank or payment provider controls settlement timing.</p></LegalSection>
+ <LegalSection title="Cancellation and expiry"><p>Current plans expire at the end of their paid term rather than renewing automatically. To request deactivation or clarify future billing terms, contact support. Cancellation does not automatically refund the used portion of a plan; statutory rights remain unaffected.</p></LegalSection>
+ </LegalPage>}
