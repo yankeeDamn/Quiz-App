@@ -8,8 +8,6 @@ const { isPlanActive } = require('../services/plan.service');
 const mocks = require('../services/mocks.service');
 const db = require('../config/database');
 const config = require('../config');
-const db = require('../config/database');
-const config = require('../config');
 
 const router = Router();
 const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
