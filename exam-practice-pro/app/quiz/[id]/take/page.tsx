@@ -321,7 +321,7 @@ export default function QuizTakePage({ params }: PageProps) {
 
             <Button
               size="sm"
-              className="bg-indigo-600 hover:bg-indigo-700 hidden sm:flex"
+              className="bg-indigo-600 text-white hover:bg-indigo-700 hidden sm:flex"
               onClick={openSubmitDialog}
             >
               <Send className="mr-2 h-4 w-4" />
@@ -353,7 +353,7 @@ export default function QuizTakePage({ params }: PageProps) {
                 </div>
                 <div className="mt-6">
                   <Button
-                    className="w-full bg-indigo-600 hover:bg-indigo-700"
+                    className="w-full bg-indigo-600 text-white hover:bg-indigo-700"
                     onClick={() => {
                       setMobileNavOpen(false);
                       openSubmitDialog();
@@ -470,7 +470,7 @@ export default function QuizTakePage({ params }: PageProps) {
                           session.currentQuestionIndex ===
                           session.questionOrder.length - 1
                         }
-                        className="bg-indigo-600 hover:bg-indigo-700"
+                        className="bg-indigo-600 text-white hover:bg-indigo-700"
                       >
                         Next
                         <ChevronRight className="ml-2 h-4 w-4" />
@@ -539,7 +539,7 @@ export default function QuizTakePage({ params }: PageProps) {
               Continue Quiz
             </Button>
             <Button
-              className="bg-indigo-600 hover:bg-indigo-700"
+              className="bg-indigo-600 text-white hover:bg-indigo-700"
               onClick={handleSubmit}
             >
               Submit Quiz

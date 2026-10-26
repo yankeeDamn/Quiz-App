@@ -103,7 +103,7 @@ export default function DashboardPage() {
               <Button
                 asChild
                 size="lg"
-                className="mt-6 bg-indigo-600 hover:bg-indigo-700"
+                className="mt-6 bg-indigo-600 text-white hover:bg-indigo-700"
               >
                 <Link href="/">
                   Start Your First Quiz

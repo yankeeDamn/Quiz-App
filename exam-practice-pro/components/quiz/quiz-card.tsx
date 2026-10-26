@@ -87,7 +87,7 @@ export function QuizCard({ quiz }: QuizCardProps) {
         </CardContent>
 
         <CardFooter className="relative gap-2 pt-0">
-          <Button asChild className="flex-1 bg-indigo-600 hover:bg-indigo-700">
+          <Button asChild className="flex-1 bg-indigo-600 text-white hover:bg-indigo-700">
             <Link href={`/quiz/${quiz.id}/setup`}>
               <PlayCircle className="mr-2 h-4 w-4" />
               Start Practice

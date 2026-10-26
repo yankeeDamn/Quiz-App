@@ -320,7 +320,7 @@ export default function QuizReviewPage({ params }: PageProps) {
                           )
                         }
                         disabled={currentIndex === filteredQuestions.length - 1}
-                        className="bg-indigo-600 hover:bg-indigo-700"
+                        className="bg-indigo-600 text-white hover:bg-indigo-700"
                       >
                         Next
                         <ChevronRight className="ml-2 h-4 w-4" />
@@ -345,7 +345,7 @@ export default function QuizReviewPage({ params }: PageProps) {
                       size="sm"
                       className={`w-10 h-10 p-0 ${
                         index === currentIndex
-                          ? 'bg-indigo-600 hover:bg-indigo-700'
+                          ? 'bg-indigo-600 text-white hover:bg-indigo-700'
                           : item.isSkipped
                           ? 'border-yellow-300'
                           : item.isCorrect

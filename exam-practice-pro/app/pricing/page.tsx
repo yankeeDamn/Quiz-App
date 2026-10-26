@@ -175,7 +175,7 @@ function PlanCard({ plan, yearly, email, name, current }: { plan: Plan; yearly: 
           href={whatsappLink(planMessage(plan, yearly, email, name))}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex min-h-11 items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+          className="inline-flex min-h-11 items-center justify-center rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
         >
           Choose {plan.name} on WhatsApp
         </a>

@@ -153,7 +153,7 @@ export default function HomePage() {
             </div>
             <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto">
               <Link href="/institute-admin" className={cn('inline-flex min-h-11 flex-1 items-center justify-center rounded-lg border border-dashed border-slate-400 bg-white px-5 py-2.5 text-center text-sm font-semibold text-slate-900 hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500 sm:flex-none', buttonMotion)}>Institute Dashboard (Preview) →</Link>
-              <Link href="/certifications" className={cn('inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-orange-600 px-5 py-2.5 text-center text-sm font-bold text-white shadow-sm hover:bg-orange-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600 sm:flex-none', buttonMotion)}>IT Certifications →</Link>
+              <Link href="/certifications" className={cn('inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-orange-700 px-5 py-2.5 text-center text-sm font-bold text-white shadow-sm hover:bg-orange-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-600 sm:flex-none', buttonMotion)}>IT Certifications →</Link>
               <Link href="/india-mocks" className={cn('inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 sm:flex-none', buttonMotion)}>Explore Indian Mock Tests →</Link>
             </div>
           </div>
@@ -220,7 +220,7 @@ export default function HomePage() {
                 <div className="flex flex-wrap items-center justify-center gap-4">
                   <Button
                     size="lg"
-                    className={cn('bg-indigo-600 shadow-lg shadow-indigo-600/25 hover:bg-indigo-700', buttonMotion)}
+                    className={cn('bg-indigo-600 text-white shadow-lg shadow-indigo-600/25 hover:bg-indigo-700', buttonMotion)}
                     asChild
                   >
                     <Link href="#quizzes">

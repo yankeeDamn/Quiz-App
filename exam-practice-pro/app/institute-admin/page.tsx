@@ -121,7 +121,7 @@ export default function InstituteAdminPreview() {
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             {counts.map(track => (
               <Link key={track.code} href={`/india-mocks/${track.slug}`} className="rounded-lg border border-slate-200 p-4 hover:border-blue-500 dark:border-zinc-700">
-                <p className="font-semibold">{track.title}</p><p className="mt-1 text-sm text-slate-500">{track.count} practice questions · View practice →</p>
+                <p className="font-semibold">{track.title}</p><p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{track.count} practice questions · View practice →</p>
               </Link>
             ))}
           </div>

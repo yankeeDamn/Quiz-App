@@ -178,7 +178,7 @@ export default function QuizResultPage({ params }: PageProps) {
 
                 <Button
                   size="lg"
-                  className="h-auto py-4 bg-indigo-600 hover:bg-indigo-700"
+                  className="h-auto py-4 bg-indigo-600 text-white hover:bg-indigo-700"
                   asChild
                 >
                   <Link href="/">
