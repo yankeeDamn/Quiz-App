@@ -182,38 +182,57 @@ async function allowNextAuthGuest(req, _res, next) {
  * @returns {Promise<Object>} the database row
  */
 async function upsertUser(user) {
-  // Try to find by provider + provider_id first
+  // OAuth identities have already been verified before this helper is called.
+  // Normalise on insert so mixed-case logins share the users.email unique key.
+  const email = String(user.email || '').trim().toLowerCase();
+  if (!email || !email.includes('@')) {
+    throw new Error('Verified email is required to store an ExamPro account');
+  }
+
+  // Preserve existing provider associations and provider-to-email linking.
+  // The read is an optimisation, not the concurrency protection: two requests
+  // may both observe an absent row during first sign-in.
   const findResult = await db.query(
     `SELECT * FROM users
      WHERE (provider = $1 AND provider_id = $2)
-        OR (LOWER(email) = LOWER($3) AND email IS NOT NULL)
+        OR (LOWER(email) = $3 AND email IS NOT NULL)
      ORDER BY
        CASE WHEN provider = $1 AND provider_id = $2 THEN 0 ELSE 1 END
      LIMIT 1`,
-    [user.provider, user.id, user.email]
+    [user.provider, user.id, email]
   );
 
   if (findResult.rows.length > 0) {
-    // Update name/image if changed
     const existing = findResult.rows[0];
     if (existing.name !== user.name || existing.image !== user.image) {
-      await db.query(
-        `UPDATE users SET name = $1, image = $2, updated_at = NOW() WHERE id = $3`,
+      const updated = await db.query(
+        `UPDATE users
+            SET name = $1, image = $2, updated_at = NOW()
+          WHERE id = $3
+          RETURNING *`,
         [user.name, user.image, existing.id]
       );
+      return updated.rows[0];
     }
     return existing;
   }
 
-  // Insert new user
-  const insertResult = await db.query(
+  // The email unique constraint serialises concurrent first-time sign-ins.
+  // Never update id, provider, provider_id, role, plan, or payment fields on
+  // conflict: those are canonical identity/authorization/billing properties.
+  // A conflicting email belongs to a previously verified OAuth identity.
+  const inserted = await db.query(
     `INSERT INTO users (email, name, image, provider, provider_id, role)
      VALUES ($1, $2, $3, $4, $5, 'user')
+     ON CONFLICT (email) DO UPDATE
+       SET name = EXCLUDED.name,
+           image = EXCLUDED.image,
+           updated_at = NOW()
      RETURNING *`,
-    [user.email, user.name, user.image, user.provider, user.id]
+    [email, user.name, user.image, user.provider, user.id]
   );
 
-  return insertResult.rows[0];
+  return inserted.rows[0];
 }
 
-module.exports = { authenticateNextAuth, allowNextAuthGuest };
+module.exports = { authenticateNextAuth, allowNextAuthGuest, upsertUser };
