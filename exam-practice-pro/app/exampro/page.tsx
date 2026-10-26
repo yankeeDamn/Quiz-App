@@ -10,6 +10,7 @@ import { fetchCatalog, type MockSummary } from '@/lib/mocks';
 import { api } from '@/lib/api';
 import { useExamLanguage } from '@/components/exampro/exam-language';
 import { ShareTestButtons, validShareTestId } from '@/components/exampro/share-test-buttons';
+import { copyUrl } from '@/lib/mobile-share';
 import { whatsappLink, WHATSAPP_NUMBER } from '@/lib/plans';
 
 type Portal = { name: string; tagline: string; color: string; batches: string; whatsapp: string; group: string; logo: string };
@@ -82,6 +83,7 @@ export default function ExamProStudioPage() {
   const [selected, setSelected] = useState<string[]>([]);
   const [sharedError, setSharedError] = useState('');
   const [portalCopied,setPortalCopied] = useState(false);
+  const [portalShareLink,setPortalShareLink] = useState('');
   const {language,t} = useExamLanguage();
 
   useEffect(() => {
@@ -133,15 +135,20 @@ export default function ExamProStudioPage() {
   const group = groupUrl(portal.group);
   const ink = foreground(portal.color);
   const change = (value: Partial<Portal>) => setPortal(current => ({...current,...value}));
+  // Share only public colour/name/tagline/batch labels. No uploaded logo,
+  // counsellor phone, invite links, or private institute data go in the URL.
+  const publicBrand = JSON.stringify({
+    name:portal.name,tagline:portal.tagline,color:portal.color,batches:portal.batches,
+  });
+  const publicPortalPath = '/exampro/portal?brand='+encodeURIComponent(publicBrand);
   async function copyBrandedPortal(){
-    // The preview link contains only public visual branding, never private contact or logo data.
-    const share = new URL('/exampro#portal',window.location.origin);
-    share.hash='portal';
-    share.searchParams.set('brand',JSON.stringify({
-      name:portal.name,tagline:portal.tagline,color:portal.color,batches:portal.batches,
-    }));
-    try {await navigator.clipboard.writeText(share.href);setPortalCopied(true);}
-    catch {setNotice('Could not copy. Your browser may block clipboard access.');}
+    const url = new URL(publicPortalPath,window.location.origin).href;
+    setPortalShareLink(url);
+    const copied = await copyUrl(url);
+    setPortalCopied(copied);
+    setNotice(copied
+      ? 'Public practice portal link copied. The recipient can open the live test catalogue.'
+      : 'Copy is restricted by your browser. Long-press and copy the link below.');
   }
   function logo(file?: File) {
     if (!file) return;
@@ -310,8 +317,8 @@ export default function ExamProStudioPage() {
       <section id="portal" className="ep-studio-panel py-16 text-white">
         <div className="mx-auto max-w-6xl px-4">
           <p className="flex items-center gap-2 font-mono text-xs font-bold uppercase text-orange-400"><Palette size={15}/> Portal builder</p>
-          <h2 className="mt-3 text-3xl font-extrabold">Make it yours in a minute.</h2>
-          <p className="mt-3 max-w-3xl text-slate-300">Preview your institute&apos;s name, logo, colours and batches. Like your original HTML, this is local browser personalization—not a published institute account.</p>
+          <h2 className="mt-3 text-3xl font-extrabold">Create a public practice portal to share.</h2>
+          <p className="mt-3 max-w-3xl text-slate-300">Preview your institute branding, then open and share a real public practice page with live ExamPro tests. Private institute accounts, student batches and attendance are not yet enabled.</p>
           <div className="mt-10 grid gap-8 lg:grid-cols-[.9fr_1.1fr]">
             <form className="grid content-start gap-4" onSubmit={e=>e.preventDefault()}>
               <div><p className="text-sm font-semibold">Start from a sample</p><div className="mt-2 flex flex-wrap gap-2">{PRESETS.map(p=>
@@ -332,11 +339,14 @@ export default function ExamProStudioPage() {
               {portal.group && !group && <p className="text-sm text-amber-300">Enter a valid https://chat.whatsapp.com invite URL.</p>}
               <p className="text-sm text-slate-300" role="status">{notice || 'Changes stay in this browser and are not uploaded.'}</p>
               <button type="button" onClick={()=>{setPortal(INITIAL);setLogoError('');}} className="inline-flex w-fit items-center gap-2 rounded-lg border border-slate-500 px-4 py-2 text-sm font-semibold"><RotateCcw size={16}/> Reset preview</button>
-              <button type="button" onClick={()=>void copyBrandedPortal()} className="inline-flex w-fit items-center gap-2 rounded-lg border border-slate-500 px-4 py-2 text-sm font-semibold">{portalCopied?'Branded preview link copied':'Copy branded portal link'}</button>
-              <p className="text-xs text-slate-300">Shares name, tagline, colours and batches as a preview only; logos and contact details are not included. Does not publish an institute portal.</p>
+              <button type="button" onClick={()=>void copyBrandedPortal()} className="inline-flex w-fit items-center gap-2 rounded-lg border border-slate-500 px-4 py-2 text-sm font-semibold">{portalCopied?'Portal link copied':'Copy public portal link'}</button>
+               <Link href={publicPortalPath} className="inline-flex w-fit items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-bold text-slate-900">Open public portal</Link>
+               <a href={'https://wa.me/?text='+encodeURIComponent('Practice mock tests with '+name+': '+(typeof window!=='undefined'?window.location.origin:'' )+publicPortalPath)} target="_blank" rel="noopener noreferrer" className="inline-flex w-fit items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white">Share portal on WhatsApp</a>
+               {portalShareLink && <label className="text-xs text-slate-100">Share link (long-press to copy on mobile)<input readOnly value={portalShareLink} onFocus={event=>event.target.select()} className="mt-1 block w-full rounded-lg border border-slate-500 bg-[#172548] px-3 py-2 text-xs"/></label>}
+              <p className="text-xs text-slate-300">The shared page is a real public landing page with published mock links, not a private institute workspace. Logos, contact links, student records, and billing are never included.</p>
             </form>
             <div className="ep-preview-surface overflow-hidden rounded-3xl border border-slate-200 bg-white text-slate-900 shadow-xl lg:sticky lg:top-24 lg:self-start">
-              <div className="flex gap-1 border-b border-slate-200 bg-slate-100 px-4 py-3"><span className="h-2 w-2 rounded-full bg-slate-400"/><span className="h-2 w-2 rounded-full bg-slate-400"/><span className="h-2 w-2 rounded-full bg-slate-400"/><span className="ml-3 truncate font-mono text-xs text-slate-500">institute-preview.exampro.example</span></div>
+              <div className="flex gap-1 border-b border-slate-200 bg-slate-100 px-4 py-3"><span className="h-2 w-2 rounded-full bg-slate-400"/><span className="h-2 w-2 rounded-full bg-slate-400"/><span className="h-2 w-2 rounded-full bg-slate-400"/><span className="ml-3 truncate font-mono text-xs text-slate-500">exampro/portal</span></div>
               <div className="flex items-center gap-4 p-5" style={{background:portal.color,color:ink}}>
                 {portal.logo ? <img src={portal.logo} alt="Preview of institute logo" className="h-14 w-14 rounded-xl bg-white object-contain"/> : <span className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-white text-xl font-black" style={{color:portal.color}}>{initials}</span>}
                 <div className="min-w-0"><h3 className="break-words text-xl font-extrabold">{name}</h3><p className="mt-1 text-sm">{portal.tagline}</p></div>
