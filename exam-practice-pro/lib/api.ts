@@ -5,7 +5,19 @@
  * Authentication uses a short-lived JWT minted by `/api/auth/backend-token`.
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+// A production Vercel build must never call the visitor's localhost when the
+// public API environment variable is missing or accidentally left at localhost.
+// The deployed Render service is the stable default for this ExamPro project.
+const configuredApi = (process.env.NEXT_PUBLIC_API_URL || '').trim();
+const productionFallback = 'https://quiz-app-regd.onrender.com';
+const developmentFallback = 'http://localhost:3001';
+export const API_BASE_URL = (
+  process.env.NODE_ENV === 'production' &&
+  (!configuredApi || /^https?:\\/\\/(?:localhost|127\\.0\\.0\\.1)(?::|\\/|$)/i.test(configuredApi))
+    ? productionFallback
+    : configuredApi || (process.env.NODE_ENV === 'production' ? productionFallback : developmentFallback)
+).replace(/\\/$/, '');
+
 
 // Do not cache bearer tokens across account switches in a browser tab.
 
