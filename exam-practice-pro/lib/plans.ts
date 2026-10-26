@@ -100,7 +100,7 @@ export function inr(n: number): string {
 export function planMessage(plan: Plan, yearly: boolean, email?: string | null, name?: string | null): string {
   const price = planPrice(plan, yearly);
   return [
-    `Hi, I want the ${plan.name} plan (${yearly ? 'yearly' : 'monthly'}, ${inr(price.amount)}) on Exam Practice Pro.`,
+    `Hi, I want the ${plan.name} plan (${yearly ? 'yearly' : 'monthly'}, ${inr(price.amount)}) on ExamPro.`,
     email ? `Account email: ${email}` : 'I have not signed in yet.',
     name ? `Name: ${name}` : '',
     'Please share the payment details.',
