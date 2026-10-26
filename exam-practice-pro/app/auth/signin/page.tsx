@@ -36,13 +36,13 @@ function SignInForm() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-indigo-50 via-white to-white px-4 dark:from-indigo-950/30 dark:via-background dark:to-background">
+    <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-indigo-50 via-white to-white px-4 dark:from-indigo-950/30 dark:via-background dark:to-background">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
             <GraduationCap className="h-7 w-7" />
           </div>
-          <CardTitle className="text-2xl">Welcome to ExamPro</CardTitle>
+          <CardTitle role="heading" aria-level={1} className="text-2xl">Welcome to ExamPro</CardTitle>
           <CardDescription>
             Sign in to save your progress across devices
           </CardDescription>
@@ -129,7 +129,7 @@ function SignInForm() {
             </div>
             <Button
               type="submit"
-              className="w-full h-11 bg-indigo-600 hover:bg-indigo-700"
+              className="w-full h-11 bg-indigo-600 text-white hover:bg-indigo-700"
               disabled={isLoading !== null}
             >
               {isLoading === 'guest' ? (
@@ -147,7 +147,7 @@ function SignInForm() {
           </p>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }
 

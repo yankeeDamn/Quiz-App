@@ -82,7 +82,7 @@ export function SettingsPanel({ settings, onUpdateSettings }: SettingsPanelProps
                 }
               }}
             >
-              <SelectTrigger>
+              <SelectTrigger aria-label="Font size">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -107,6 +107,7 @@ export function SettingsPanel({ settings, onUpdateSettings }: SettingsPanelProps
               </p>
             </div>
             <Switch
+              aria-label="Show timer"
               checked={settings.timerVisible}
               onCheckedChange={(checked) =>
                 onUpdateSettings({ timerVisible: checked })
@@ -126,6 +127,7 @@ export function SettingsPanel({ settings, onUpdateSettings }: SettingsPanelProps
               </p>
             </div>
             <Switch
+              aria-label="Sound effects"
               checked={settings.soundEnabled}
               onCheckedChange={(checked) =>
                 onUpdateSettings({ soundEnabled: checked })
@@ -142,6 +144,7 @@ export function SettingsPanel({ settings, onUpdateSettings }: SettingsPanelProps
               </p>
             </div>
             <Switch
+              aria-label="Confirm before submit"
               checked={settings.confirmBeforeSubmit}
               onCheckedChange={(checked) =>
                 onUpdateSettings({ confirmBeforeSubmit: checked })
@@ -158,6 +161,7 @@ export function SettingsPanel({ settings, onUpdateSettings }: SettingsPanelProps
               </p>
             </div>
             <Switch
+              aria-label="Compact mode"
               checked={settings.compactMode}
               onCheckedChange={(checked) =>
                 onUpdateSettings({ compactMode: checked })

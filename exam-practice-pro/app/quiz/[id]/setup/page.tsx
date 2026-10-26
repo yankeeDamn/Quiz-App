@@ -121,7 +121,7 @@ export default function QuizSetupPage({ params }: PageProps) {
                       <GraduationCap className="h-6 w-6" />
                     </div>
                     <div>
-                      <CardTitle className="text-xl">{quiz.title}</CardTitle>
+                      <CardTitle role="heading" aria-level={1} className="text-xl">{quiz.title}</CardTitle>
                       <p className="text-sm text-muted-foreground">
                         {quiz.subject}
                       </p>
@@ -257,6 +257,7 @@ export default function QuizSetupPage({ params }: PageProps) {
                       </span>
                     </div>
                     <Slider
+                      aria-label="Number of questions"
                       value={[settings.questionCount]}
                       onValueChange={(value) => {
                         const val = Array.isArray(value) ? value[0] : value;
@@ -285,7 +286,7 @@ export default function QuizSetupPage({ params }: PageProps) {
                         }
                       }}
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger aria-label="Difficulty filter" className="w-full">
                         <SelectValue placeholder="Select difficulty" />
                       </SelectTrigger>
                       <SelectContent>
@@ -311,6 +312,7 @@ export default function QuizSetupPage({ params }: PageProps) {
                         </p>
                       </div>
                       <Switch
+                        aria-label="Timed mode"
                         checked={settings.timed}
                         onCheckedChange={(checked) =>
                           setSettings({ ...settings, timed: checked })
@@ -326,6 +328,7 @@ export default function QuizSetupPage({ params }: PageProps) {
                           </span>
                         </div>
                         <Slider
+                          aria-label="Time limit"
                           value={[settings.timeLimit]}
                           onValueChange={(value) => {
                             const val = Array.isArray(value) ? value[0] : value;
@@ -356,6 +359,7 @@ export default function QuizSetupPage({ params }: PageProps) {
                           </p>
                         </div>
                         <Switch
+                          aria-label="Shuffle questions"
                           checked={settings.shuffleQuestions}
                           onCheckedChange={(checked) =>
                             setSettings({ ...settings, shuffleQuestions: checked })
@@ -370,6 +374,7 @@ export default function QuizSetupPage({ params }: PageProps) {
                           </p>
                         </div>
                         <Switch
+                          aria-label="Shuffle answer options"
                           checked={settings.shuffleAnswers}
                           onCheckedChange={(checked) =>
                             setSettings({ ...settings, shuffleAnswers: checked })
@@ -385,7 +390,7 @@ export default function QuizSetupPage({ params }: PageProps) {
                   <div className="pt-4 space-y-3">
                     <Button
                       size="lg"
-                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-lg h-14"
+                      className="w-full bg-indigo-600 text-white hover:bg-indigo-700 text-lg h-14"
                       onClick={handleStartQuiz}
                     >
                       <Play className="mr-2 h-5 w-5" />

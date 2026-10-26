@@ -112,11 +112,11 @@ export default function BookmarksPage() {
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-16">
                 <Bookmark className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-1">
+                <h2 className="text-lg font-semibold mb-1">
                   {bookmarks.length === 0
                     ? 'No bookmarks yet'
                     : 'No matches found'}
-                </h3>
+                </h2>
                 <p className="text-sm text-muted-foreground text-center max-w-sm">
                   {bookmarks.length === 0
                     ? 'Bookmark questions during quizzes or review to save them here for later study.'
