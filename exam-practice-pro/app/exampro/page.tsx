@@ -169,7 +169,7 @@ export default function ExamProStudioPage() {
     <main className="flex-1 bg-[#f4f6fb] text-[#101a33] dark:bg-slate-950 dark:text-white">
       <div className="border-b border-slate-200 bg-white py-3 dark:border-slate-800 dark:bg-slate-900">
         <nav aria-label="ExamPro feature sections" className="mx-auto flex max-w-6xl flex-wrap gap-x-6 gap-y-2 px-4 text-sm font-semibold">
-          <a href="#how">How to use it</a><a href="#practice">Mock tests</a><a href="#builder">Competitive builder</a><a href="#progress">My progress</a><a href="#portal">Portal builder</a><a href="#contact">WhatsApp</a>
+          <a href="#how">How to use it</a><a href="#practice">Mock tests</a><a href="#builder">Competitive builder</a><a href="#progress">My progress</a><a href="#portal">Portal builder</a><a href="#contact">WhatsApp</a><Link href="/status" className="text-indigo-700 underline dark:text-indigo-300">Check API status</Link>
         </nav>
       </div>
       <section className="ep-hero relative mx-auto grid max-w-6xl gap-10 overflow-hidden rounded-b-3xl px-4 py-16 lg:grid-cols-2 lg:items-center lg:py-24">
