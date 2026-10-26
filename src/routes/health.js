@@ -26,20 +26,25 @@ router.get('/', async (_req, res) => {
   });
 });
 
-/** Readiness is separate from liveness: do not route traffic to an API without its database. */
+/** Readiness is separate from liveness.
+ * The API is not ready to serve authenticated exams if either the database
+ * or the AUTH_SECRET shared with NextAuth is unavailable.
+ */
 router.get('/ready', async (_req, res) => {
-  const connected = await db.isHealthy();
-  res.status(connected ? 200 : 503).json({
-    success: connected,
-    data: { status: connected ? 'ready' : 'not_ready', database: connected ? 'connected' : 'unavailable' },
+  const databaseConfigured = Boolean(process.env.DATABASE_URL);
+  const authenticationConfigured = Boolean(process.env.AUTH_SECRET);
+  const connected = databaseConfigured && await db.isHealthy();
+  const ready = connected && authenticationConfigured;
+
+  res.set('Cache-Control', 'no-store');
+  res.status(ready ? 200 : 503).json({
+    success: ready,
+    data: {
+      status: ready ? 'ready' : 'not_ready',
+      database: connected ? 'connected' : databaseConfigured ? 'unavailable' : 'not_configured',
+      authentication: authenticationConfigured ? 'configured' : 'not_configured',
+    },
   });
 });
 
-router.get('/ready', async (_req,res) => {
-  const authConfigured = Boolean(process.env.AUTH_SECRET);
-  const dbConfigured = Boolean(process.env.DATABASE_URL);
-  const dbReady = dbConfigured && await db.isHealthy();
-  const ready = authConfigured && dbReady;
-  return res.status(ready?200:503).json({success:ready,data:{api:'available',database:dbReady?'connected':dbConfigured?'unavailable':'not_configured',authentication:authConfigured?'configured':'not_configured'}});
-});
 module.exports = router;
