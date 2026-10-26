@@ -8,9 +8,14 @@ export const metadata = {title:'Deployment & API status | ExamPro',robots:{index
 export default async function ExamProStatusPage(){
   const configured=(process.env.NEXT_PUBLIC_API_URL||'').trim();
   const fallback='https://quiz-app-regd.onrender.com';
-  const backend=(process.env.NODE_ENV==='production' &&
-    (!configured||/^https?:\\/\\/(?:localhost|127\\.0\\.0\\.1)(?::|\\/|$)/i.test(configured))
-    ?fallback:configured|| (process.env.NODE_ENV==='production'?fallback:'http://localhost:3001')).replace(/\\/$/,'');
+  let localUrl=false;
+  try {
+    const host=new URL(configured).hostname.toLowerCase();
+    localUrl=host==='localhost'||host==='127.0.0.1';
+  } catch { /* Empty or non-URL config is handled below. */ }
+  const candidate=process.env.NODE_ENV==='production' && (!configured||localUrl)
+    ?fallback:configured|| (process.env.NODE_ENV==='production'?fallback:'http://localhost:3001');
+  const backend=candidate.endsWith('/')?candidate.slice(0,-1):candidate;
   const commit=process.env.VERCEL_GIT_COMMIT_SHA||process.env.GITHUB_SHA||'not provided by this deployment';
   let apiReady=false;
   let details='API unavailable or asleep';
