@@ -151,6 +151,13 @@
 }
 .dark .hero-glow { opacity: 0.4; }
 
+/* Studio: keyboard focus ring that follows the element's own text colour, so it
+   is visible on both the light and the dark navy sections. */
+.studio-scope :is(a, button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
 /* Safety net: visitors who prefer reduced motion get all revealed content
    immediately, regardless of what the JS animation state is. */
 @media (prefers-reduced-motion: reduce) {
