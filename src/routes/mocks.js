@@ -8,6 +8,8 @@ const { isPlanActive } = require('../services/plan.service');
 const mocks = require('../services/mocks.service');
 const db = require('../config/database');
 const config = require('../config');
+const db = require('../config/database');
+const config = require('../config');
 
 const router = Router();
 const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -51,6 +53,32 @@ router.get('/stats', wrap(async (_req, res) => {
     publishedMocks: tests.filter(t => t.kind === 'mock').length,
     topicTests: tests.filter(t => t.kind === 'topic').length,
   } });
+}));
+
+/**
+ * Public topic discovery for the four competitive bank groups.
+ * Draft question TEXT and answers are never exposed. Disabled groups cannot be taken.
+ * Includes review status rather than quietly publishing unreviewed content.
+ */
+router.get('/competitive-topics', wrap(async (_req, res) => {
+  res.set('Cache-Control', 'public, max-age=30');
+  if (!config.databaseUrl) {
+    return res.json({success:true,data:{topics:[]}});
+  }
+  const { rows } = await db.query(`
+    SELECT t.id, t.name, t.category, t.active,
+           COUNT(q.*)::int AS "questionCount",
+           COUNT(q.*) FILTER (WHERE q.active)::int AS "activeQuestionCount"
+      FROM mock_topics t
+      LEFT JOIN mock_questions q ON q.topic_id = t.id
+     WHERE t.id LIKE 'comp-%'
+     GROUP BY t.id
+     ORDER BY t.id
+  `);
+  return res.json({success:true,data:{topics:rows.map(t=>({
+    ...t, available: t.active && t.activeQuestionCount > 0,
+    practiceTestId: 'topic-' + t.id,
+  }))}});
 }));
 
 /**
