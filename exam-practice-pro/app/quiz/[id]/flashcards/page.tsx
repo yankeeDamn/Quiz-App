@@ -120,6 +120,8 @@ export default function FlashcardsPage({ params }: PageProps) {
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      // Enter/Space on a focused button or link must activate that control, not flip the card.
+      if ((e.key === ' ' || e.key === 'Enter') && e.target instanceof Element && e.target.closest('button, a, [role="button"]')) return;
       switch (e.key) {
         case ' ':
         case 'Enter':
@@ -195,12 +197,12 @@ export default function FlashcardsPage({ params }: PageProps) {
                 Card {currentIndex + 1} of {totalCards}
               </span>
               <span className="text-muted-foreground">
-                <span className="text-green-600 font-medium">{knownIds.size} known</span>
+                <span className="text-green-700 dark:text-green-400 font-medium">{knownIds.size} known</span>
                 {' · '}
-                <span className="text-red-600 font-medium">{unknownIds.size} learning</span>
+                <span className="text-red-700 dark:text-red-400 font-medium">{unknownIds.size} learning</span>
               </span>
             </div>
-            <Progress value={progressPercent} className="h-2" />
+            <Progress value={progressPercent} aria-label="Flashcards reviewed" className="h-2" />
           </div>
 
           {/* Flashcard */}
@@ -249,7 +251,7 @@ export default function FlashcardsPage({ params }: PageProps) {
                           >
                             <div className="border-t pt-4 space-y-3">
                               <div className="space-y-2">
-                                <p className="text-sm font-semibold text-green-600">
+                                <p className="text-sm font-semibold text-green-700 dark:text-green-400">
                                   Correct Answer{currentCard.correctAnswers.length > 1 ? 's' : ''}:
                                 </p>
                                 {currentCard.options
@@ -308,7 +310,7 @@ export default function FlashcardsPage({ params }: PageProps) {
                       variant="outline"
                       size="lg"
                       onClick={markUnknown}
-                      className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-900/20"
+                      className="border-red-200 text-red-700 dark:text-red-400 hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-900/20"
                     >
                       <ThumbsDown className="mr-2 h-4 w-4" />
                       Still Learning
@@ -316,7 +318,7 @@ export default function FlashcardsPage({ params }: PageProps) {
                     <Button
                       size="lg"
                       onClick={markKnown}
-                      className="bg-green-600 hover:bg-green-700"
+                      className="bg-green-700 text-white hover:bg-green-800"
                     >
                       <ThumbsUp className="mr-2 h-4 w-4" />
                       Got It
@@ -360,13 +362,13 @@ export default function FlashcardsPage({ params }: PageProps) {
 
                   <div className="grid grid-cols-2 gap-4 max-w-xs mx-auto">
                     <div className="rounded-lg bg-green-50 dark:bg-green-900/20 p-4">
-                      <p className="text-3xl font-bold text-green-600">
+                      <p className="text-3xl font-bold text-green-700 dark:text-green-400">
                         {knownIds.size}
                       </p>
                       <p className="text-sm text-muted-foreground">Known</p>
                     </div>
                     <div className="rounded-lg bg-red-50 dark:bg-red-900/20 p-4">
-                      <p className="text-3xl font-bold text-red-600">
+                      <p className="text-3xl font-bold text-red-700 dark:text-red-400">
                         {unknownIds.size}
                       </p>
                       <p className="text-sm text-muted-foreground">Learning</p>
@@ -378,7 +380,7 @@ export default function FlashcardsPage({ params }: PageProps) {
                       <Button
                         size="lg"
                         onClick={handleStudyUnknown}
-                        className="bg-indigo-600 hover:bg-indigo-700"
+                        className="bg-indigo-600 text-white hover:bg-indigo-700"
                       >
                         <RotateCcw className="mr-2 h-4 w-4" />
                         Study Unknown ({unknownIds.size})

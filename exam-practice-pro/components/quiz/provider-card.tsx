@@ -33,8 +33,22 @@ export function ProviderCard({
     >
       <Card
         onClick={onClick}
+        // Make the card operable by keyboard and assistive tech when it acts as a filter button.
+        {...(onClick
+          ? {
+              role: 'button' as const,
+              tabIndex: 0,
+              'aria-label': `Show ${provider.name} exams`,
+              onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => {
+                if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault();
+                  onClick();
+                }
+              },
+            }
+          : {})}
         className={cn(
-          'group cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1',
+          'group cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600',
           className
         )}
       >
