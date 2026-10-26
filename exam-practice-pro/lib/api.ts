@@ -11,13 +11,17 @@
 const configuredApi = (process.env.NEXT_PUBLIC_API_URL || '').trim();
 const productionFallback = 'https://quiz-app-regd.onrender.com';
 const developmentFallback = 'http://localhost:3001';
-export const API_BASE_URL = (
-  process.env.NODE_ENV === 'production' &&
-  (!configuredApi || /^https?:\\/\\/(?:localhost|127\\.0\\.0\\.1)(?::|\\/|$)/i.test(configuredApi))
-    ? productionFallback
-    : configuredApi || (process.env.NODE_ENV === 'production' ? productionFallback : developmentFallback)
-).replace(/\\/$/, '');
-
+function pointsToLocalHost(value: string): boolean {
+  try {
+    const host = new URL(value).hostname.toLowerCase();
+    return host === 'localhost' || host === '127.0.0.1';
+  } catch { return false; }
+}
+const candidateApi = process.env.NODE_ENV === 'production' &&
+    (!configuredApi || pointsToLocalHost(configuredApi))
+  ? productionFallback
+  : configuredApi || (process.env.NODE_ENV === 'production' ? productionFallback : developmentFallback);
+export const API_BASE_URL = candidateApi.endsWith('/') ? candidateApi.slice(0, -1) : candidateApi;
 
 // Do not cache bearer tokens across account switches in a browser tab.
 
