@@ -8,7 +8,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { fetchCatalog, type MockSummary } from '@/lib/mocks';
 import { api } from '@/lib/api';
-import { LanguageSwitcher, useExamLanguage } from '@/components/exampro/exam-language';
+import { useExamLanguage } from '@/components/exampro/exam-language';
 import { ShareTestButtons, validShareTestId } from '@/components/exampro/share-test-buttons';
 import { whatsappLink, WHATSAPP_NUMBER } from '@/lib/plans';
 
