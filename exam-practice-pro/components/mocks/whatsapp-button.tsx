@@ -18,7 +18,7 @@ export function WhatsAppButton({ text, label = 'Chat on WhatsApp', variant = 'so
     'inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600';
   const look =
     variant === 'solid'
-      ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+      ? 'bg-emerald-700 text-white hover:bg-emerald-800'
       : 'border border-emerald-600 text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/40';
   return (
     <a
@@ -41,7 +41,7 @@ export function FloatingWhatsApp() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat on WhatsApp"
-      className="fixed bottom-4 right-4 z-40 inline-flex min-h-12 items-center gap-2 rounded-full bg-emerald-600 px-4 text-sm font-semibold text-white shadow-lg transition-colors hover:bg-emerald-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+      className="fixed bottom-4 right-4 z-40 inline-flex min-h-12 items-center gap-2 rounded-full bg-emerald-700 px-4 text-sm font-semibold text-white shadow-lg transition-colors hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
     >
       <MessageCircle className="h-5 w-5" aria-hidden="true" />
       <span className="hidden sm:inline">WhatsApp</span>

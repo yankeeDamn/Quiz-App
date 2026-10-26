@@ -21,7 +21,7 @@ export function Footer() {
           </div>
 
           {/* Links */}
-          <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+          <nav aria-label="Footer" className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
             <Link
               href="/"
               className="transition-colors hover:text-foreground"

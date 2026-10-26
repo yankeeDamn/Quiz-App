@@ -42,7 +42,9 @@ export default function RootLayout({
               <TooltipProvider delay={300}>
                 <div className="relative flex min-h-screen flex-col bg-background">
                   <MotionProvider>{children}</MotionProvider>
-                  <FloatingWhatsApp />
+                  <aside aria-label="WhatsApp support">
+                    <FloatingWhatsApp />
+                  </aside>
                 </div>
               </TooltipProvider>
             </UserStorageProvider>

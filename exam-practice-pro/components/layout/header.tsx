@@ -39,7 +39,7 @@ export function Header() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden xl:flex items-center gap-6">
+        <nav aria-label="Primary" className="hidden xl:flex items-center gap-6">
           <Link
             href="/"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
@@ -166,7 +166,7 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[280px] sm:w-[350px]">
-              <nav className="flex flex-col gap-4 mt-8">
+              <nav aria-label="Mobile" className="flex flex-col gap-4 mt-8">
                 <Link
                   href="/"
                   className="text-lg font-medium transition-colors hover:text-indigo-600"
