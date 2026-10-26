@@ -29,7 +29,7 @@ export function Footer() {
               Quizzes
             </Link>
             <Link href="/certifications" className="transition-colors hover:text-foreground">Certifications</Link>
-            <Link href="/institutes" className="transition-colors hover:text-foreground">Institutes</Link>
+            
             <Link
               href="/dashboard"
               className="transition-colors hover:text-foreground"
@@ -42,6 +42,10 @@ export function Footer() {
             >
               India Mocks
             </Link>
+            <Link href="/privacy" className="transition-colors hover:text-foreground">Privacy</Link>
+            <Link href="/terms" className="transition-colors hover:text-foreground">Terms</Link>
+            <Link href="/refunds" className="transition-colors hover:text-foreground">Refunds</Link>
+            <Link href="/contact" className="transition-colors hover:text-foreground">Contact</Link>
             <Link
               href="/pricing"
               className="transition-colors hover:text-foreground"
