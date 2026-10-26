@@ -21,9 +21,16 @@ export function useExamLanguage(){
    const value=isExamLanguage(query)?query:localStorage.getItem(KEY);
    if(isExamLanguage(value))setLang(value);
   }catch{/* browser storage may be blocked */}
+  const sync=(e:Event)=>{
+   const incoming=(e as CustomEvent<ExamLanguage>).detail;
+   if(isExamLanguage(incoming))setLang(incoming);
+  };
+  window.addEventListener('exampro:language',sync);
+  return()=>window.removeEventListener('exampro:language',sync);
  },[]);
  function select(next:ExamLanguage){
   setLang(next);
+  window.dispatchEvent(new CustomEvent('exampro:language',{detail:next}));
   try{
    localStorage.setItem(KEY,next);
    const url=new URL(window.location.href);
