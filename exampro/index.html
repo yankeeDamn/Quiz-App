@@ -488,7 +488,7 @@ footer.foot{padding-block:36px 96px;border-top:1px solid var(--line);color:var(-
     <div class="sec-head">
       <p class="eyebrow">Portal builder</p>
       <h2 id="pb-h">Make it yours in a minute.</h2>
-      <p class="sub">Every institute gets a separate portal with its own logo, colours, students and results. Change the fields and the preview updates. Your branding also shows inside the exam window and on certificates when you take a test here.</p>
+      <p class="sub">Choose your institute name, colours and public batch labels, then open a shareable ExamPro practice page with published mock links. Private institute accounts, student records and branded certificates require the upcoming secure institute dashboard.</p>
     </div>
     <div class="pbuild">
       <form class="pform" id="pform" autocomplete="off" onsubmit="return false">
@@ -502,7 +502,7 @@ footer.foot{padding-block:36px 96px;border-top:1px solid var(--line);color:var(-
         <div class="field"><label for="pBatches">Batches (comma separated)</label><input type="text" id="pBatches" maxlength="160"></div>
         <div class="field"><label for="pWa">Counsellor WhatsApp number</label><input type="tel" id="pWa" inputmode="tel" placeholder="98765 43210"><span class="hint" id="waHint">Students tap WhatsApp on any question to reach this number. 10-digit Indian numbers get +91 added.</span></div>
         <div class="field"><label for="pGroup">Discussion group invite link</label><input type="url" id="pGroup" placeholder="https://chat.whatsapp.com/..."><span class="hint" id="grpHint">Optional. Shows a “Join discussion group” button.</span></div>
-        <p class="note" style="color:var(--band-muted)">Saved only in this browser. Nothing is uploaded.</p>
+        <p class="note" style="color:var(--band-muted)">Share your public practice link below. Unshared editor settings and uploaded logos remain on this device.</p><a class="btn brand sm" id="livePortalLink" href="https://quiz-app-virid-zeta-41.vercel.app/exampro" target="_blank" rel="noopener noreferrer">Open public practice portal</a>
       </form>
       <div class="pv tenant" id="pv" aria-label="Portal preview"></div>
     </div>
@@ -513,7 +513,7 @@ footer.foot{padding-block:36px 96px;border-top:1px solid var(--line);color:var(-
   <div class="sec-head">
     <p class="eyebrow">Pricing</p>
     <h2 id="pr-h">Pay for the students you teach.</h2>
-    <p class="sub">Institutes pick a monthly plan by number of students. Learners practise free and upgrade for the full mock library. This demo has everything unlocked so you can try it.</p>
+    <p class="sub">Explore proposed institute plans and the public mock library. Payment checkout is not active here; paid access requires verified account activation on the current ExamPro site.</p>
   </div>
   <div class="ptoggles">
     <div class="seg" role="group" aria-label="Plan type"><button type="button" data-ptype="inst" aria-pressed="true">For institutes</button><button type="button" data-ptype="stu" aria-pressed="false">For learners</button></div>
@@ -566,19 +566,19 @@ footer.foot{padding-block:36px 96px;border-top:1px solid var(--line);color:var(-
 <section class="sec wrap" id="faq" aria-labelledby="q-h" style="padding-top:24px">
   <div class="sec-head"><p class="eyebrow">Questions</p><h2 id="q-h">Before you start</h2></div>
   <div class="faq">
-    <details><summary>Do students need to install an app?</summary><p>No. Tests run in the phone browser. Students open your institute’s link, log in with their mobile number and start.</p></details>
-    <details><summary>Can I use my own logo and colours?</summary><p>Yes. Each institute has its own portal with its name, logo and colour on every page, in the exam window and on certificates. Try it in the portal builder above.</p></details>
+    <details><summary>Do students need to install an app?</summary><p>No. Tests run in the phone browser. Public practice links open published ExamPro mocks. Signed-in scored attempts use verified Google or GitHub accounts rather than an unverified mobile-number form.</p></details>
+    <details><summary>Can I use my own logo and colours?</summary><p>You can customize the design locally. The public practice link includes only your institute name, tagline, colour and public batch labels. Uploaded logos and private student data are not sent with the link.</p></details>
     <details><summary>How do students ask doubts?</summary><p>Each question in the review has a WhatsApp button. It opens a chat with your counsellor or teacher with the question, the student’s answer and the correct answer already filled in. You can also add a batch discussion group link.</p></details>
     <details><summary>Can I upload my own questions?</summary><p>Yes. Teachers add questions one by one or upload a CSV with options, the right answer, an explanation and a topic tag. This page ships with a ready library so you can see how tests feel.</p></details>
-    <details><summary>Is my institute’s data separate from other institutes?</summary><p>Yes. Every institute is its own tenant with its own students, batches and results. Another institute cannot see yours.</p></details>
-    <details><summary>How do I pay for a plan?</summary><p>Choose a plan and Exampro opens WhatsApp with your choice written out. We confirm the plan there and share payment details. Yearly billing costs ten months’ price.</p></details>
-    <details><summary>Does this demo save my data?</summary><p>Attempts, bookmarks, your streak and the sign-in stay in this browser only. Nothing is uploaded, and clearing site data removes them. Mobile-OTP login arrives with your institute portal.</p></details>
+    <details><summary>Are institute students and batches private?</summary><p>Private institute accounts and tenant-specific student management are not enabled on this public practice page. Do not enter student records here; those features require the separate secure institute dashboard.</p></details>
+    <details><summary>How do I pay for a plan?</summary><p>Payment checkout is not enabled here. Cashfree integration is planned after merchant approval. For questions about access, use the contact options on the current ExamPro website.</p></details>
+    <details><summary>How can I save real exam results?</summary><p>Open the current ExamPro mock-test site and sign in with verified Google or GitHub authentication. Its supported scored exam attempts are stored securely. This historic HTML practice page keeps its offline attempts on your own device.</p></details>
     <details><summary>Which exam patterns are supported?</summary><p>You set marks per question, negative marking, sections and time. The library includes SSC, banking, railway, UPSC and state PSC, and campus placement patterns as starting points.</p></details>
   </div>
 </section>
 </main>
 
-<footer class="foot"><div class="wrap foot-in"><span>Exampro · mock tests under your institute’s brand</span><span id="footWa">Demo data runs in your browser.</span></div></footer>
+<footer class="foot"><div class="wrap foot-in"><span>Exampro · mock tests under your institute’s brand</span><span id="footWa"><a href="https://quiz-app-virid-zeta-41.vercel.app/exampro">Open the current ExamPro practice site</a></span></div></footer>
 
 <a class="fab wa-link" target="_blank" rel="noopener" data-wa-text="Hi, I have a question about Exampro." aria-label="Chat on WhatsApp">
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.7-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>
@@ -1105,10 +1105,12 @@ function paintSwatches(){$('#swatches').innerHTML=COLORS.map(function(c){return 
 $('#presets').innerHTML=PRESETS.map(function(p,i){return '<button type="button" class="chip" data-preset="'+i+'">'+esc(p.label)+'</button>'}).join('');
 function renderPreview(){
   var el=$('#pv');applyBrand(el);
-  var slug=(T.name||'institute').toLowerCase().replace(/[^a-z0-9]+/g,'').slice(0,24)||'institute';
+  var slug=(T.name||'institute').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,24)||'institute';
   var bt=T.batches.split(',').map(function(s){return s.trim()}).filter(Boolean).slice(0,6);
   var tests=FULL.slice(0,3);
-  el.innerHTML='<div class="pv-bar"><i></i><i></i><i></i><span class="url">'+esc(slug)+'.exampro.example</span></div>'+
+  var publicPortalURL='https://quiz-app-virid-zeta-41.vercel.app/exampro?institute='+encodeURIComponent(slug)+'&brand='+encodeURIComponent(JSON.stringify({name:T.name,tagline:T.tag,color:T.color,batches:T.batches}));
+  var livePortalLink=$('#livePortalLink');if(livePortalLink)livePortalLink.href=publicPortalURL;
+  el.innerHTML='<div class="pv-bar"><i></i><i></i><i></i><a class="url" target="_blank" rel="noopener noreferrer" href="'+esc(publicPortalURL)+'">quiz-app-virid-zeta-41.vercel.app/exampro?institute='+esc(slug)+'</a></div>'+
   '<div class="pv-head">'+logoHTML()+'<div style="min-width:0"><b>'+esc(T.name||'Your Institute')+'</b><span class="t">'+esc(T.tag)+'</span></div></div>'+
   '<div class="pv-body"><div><h4>Your batches</h4><div class="pchips">'+(bt.length?bt.map(function(b){return '<span>'+esc(b)+'</span>'}).join(''):'<span>Add a batch</span>')+'</div></div>'+
   '<div><h4>Live tests</h4>'+tests.map(function(d){return '<div class="prow"><div><b>'+esc(d.name)+'</b><small>'+cnt(d)+' questions · '+d.mins+' min</small></div><button class="btn brand sm" type="button" data-start="'+d.id+'">Start</button></div>'}).join('')+'</div>'+
@@ -1142,9 +1144,9 @@ function renderUser(){$('#signBtn').textContent=U?'Hi, '+U.name.split(' ')[0]:'S
 function openSign(){
   var body=$('#signBody');
   if(U){
-    body.innerHTML='<div class="sform"><h3 id="signH">You are signed in</h3><p><b>'+esc(U.name)+'</b><br><span class="muted">'+esc(ROLE_LABEL[U.role]||'')+' · '+esc(fmtPhone(U.phone))+'</span></p><p class="note">Your name appears on certificates and in WhatsApp messages. These details stay in this browser.</p><div class="row"><button class="btn" type="button" data-sclose>Close</button><button class="btn" type="button" id="uOut">Sign out</button></div></div>';
+    body.innerHTML='<div class="sform"><h3 id="signH">You are signed in</h3><p><b>'+esc(U.name)+'</b><br><span class="muted">'+esc(ROLE_LABEL[U.role]||'')+' · '+esc(fmtPhone(U.phone))+'</span></p><p class="note">This is an offline profile, not a verified ExamPro login. Open the live site for saved scored attempts.</p><div class="row"><button class="btn" type="button" data-sclose>Close</button><button class="btn" type="button" id="uOut">Sign out</button></div></div>';
   }else{
-    body.innerHTML='<form class="sform" id="signForm" autocomplete="on"><h3 id="signH">Sign in to Exampro</h3><p class="muted">Use your name and mobile number. This demo keeps them in this browser only.</p>'+
+    body.innerHTML='<form class="sform" id="signForm" autocomplete="on"><h3 id="signH">Sign in to Exampro</h3><p class="muted">Use your name and mobile number. This historical page does not verify mobile numbers. Use Google or GitHub sign-in on the live ExamPro site to save official scored attempts.</p>'+
       '<div class="field"><label for="uName">Your name</label><input type="text" id="uName" maxlength="40" autocomplete="name"></div>'+
       '<div class="field"><label for="uPhone">Mobile number</label><input type="tel" id="uPhone" inputmode="numeric" maxlength="14" autocomplete="tel-national" placeholder="98765 43210"></div>'+
       '<div class="field"><label for="uRole">I am a</label><select id="uRole"><option value="student">Student</option><option value="owner">Institute owner</option><option value="teacher">Teacher</option><option value="parent">Parent</option></select></div>'+
