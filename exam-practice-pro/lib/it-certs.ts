@@ -1,5 +1,6 @@
 import starter from '@/data/it-certification-questions.json';
 import type { MockQuestion, MockTest } from '@/lib/mocks';
+import type { PracticeOverride } from '@/lib/practice-overrides';
 
 /**
  * Free starter practice for three IT certifications.
@@ -15,12 +16,17 @@ export const IT_CERTS = [
 const LETTERS = ['A', 'B', 'C', 'D'];
 
 /** Build a test the exam engine can run, or null when the id is not a certification. */
-export function buildCertTest(id: string): MockTest | null {
+export function buildCertTest(id: string, overrides: PracticeOverride[] = []): MockTest | null {
   const cert = IT_CERTS.find((c) => c.id === id);
   if (!cert) return null;
 
   const questions: MockQuestion[] = starter
     .filter((q) => q.exam_code === cert.code)
+    .map((original) => {
+      const saved = overrides.find(o => o.source === 'certification' && o.id === original.id);
+      const candidate = saved?.question as typeof original | undefined;
+      return candidate?.id === original.id && candidate.exam_code === original.exam_code ? candidate : original;
+    })
     .map((q) => ({
       id: q.id,
       topic: `${cert.id}:${q.subject}`,
