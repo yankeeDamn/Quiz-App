@@ -20,7 +20,7 @@ test('server-grade analytics do not infer unseen student behavior',()=>{
  assert.equal(a.weakTopics.length,2);
  assert.equal(a.topics.find(x=>x.topicId==='quant').incorrect,1);
  assert.equal(JSON.stringify(a).includes('correctAnswer'),false);
- assert.equal(JSON.stringify(a).includes('explanation'),false);
+ assert.equal(Object.prototype.hasOwnProperty.call(a, 'review'), false);
 });
 test('rejects unsubmitted or incomplete grades',()=>{
  assert.throws(()=>buildAnalytics({},null,new Date(),new Date()),{statusCode:409});
