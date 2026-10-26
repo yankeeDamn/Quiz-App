@@ -17,6 +17,19 @@ type Attempt = {
  result:null|{score:number;total:number;percentage:number;passed:boolean;correct:number;incorrect:number;skipped:number;review:Review[]}
 };
 
+function ReviewQuestion({item,index,lang}:{item:Review;index:number;lang:'en'|'hi'|'bn'}) {
+ const [requested,setRequested]=useState(false);
+ const translated=useExamTranslation(requested?lang:'en',requested?[item.question,...item.options,item.explanation]:[]);
+ return <article className="rounded-lg border p-4">
+  <h3 className="font-semibold">{index+1}. {translated.texts[0]||item.question}</h3>
+  <p className="mt-2 text-sm">Your choice: {item.selected===-1?'Skipped':(translated.texts[item.selected+1]||item.options[item.selected])} · Correct: {translated.texts[item.correctAnswer+1]||item.options[item.correctAnswer]}</p>
+  <p className="mt-2 text-sm text-muted-foreground">{translated.texts[5]||item.explanation}</p>
+  {lang!=='en'&&!requested&&<button type="button" onClick={()=>setRequested(true)}
+    className="mt-2 rounded-lg border px-3 py-2 text-xs font-semibold">Translate this review</button>}
+  {requested&&translated.state==='unavailable'&&<p className="mt-2 text-xs text-amber-700">Translation unavailable; showing English.</p>}
+ </article>;
+}
+
 export function SecureExam({testId}:{testId:string}) {
  const {data:session,status} = useSession();
  const {lang,setLang,labels}=useExamLanguage();
@@ -100,7 +113,7 @@ export function SecureExam({testId}:{testId:string}) {
  if(attempt.submittedAt&&attempt.result)return <section className="space-y-6">
    <div className="rounded-xl border bg-card p-6"><h1 className="text-2xl font-bold">{attempt.title} — Result</h1><div className="mt-3 flex flex-wrap gap-3"><ExamLanguageSwitcher lang={lang} onChange={setLang}/><ShareTest id={testId} title={attempt.title} lang={lang}/></div><p className="mt-2 text-xl font-semibold">{attempt.result.score} / {attempt.result.total} marks ({attempt.result.percentage}%)</p><p>{attempt.result.passed?'Passed':'Not passed'} · {attempt.result.correct} correct · {attempt.result.incorrect} incorrect · {attempt.result.skipped} skipped</p><Button className="mt-4" asChild><Link href="/dashboard">View dashboard</Link></Button></div>
    <h2 className="text-xl font-bold">Answer review</h2>
-   {attempt.result.review.map((q,i)=><article key={q.id} className="rounded-lg border p-4"><h3 className="font-semibold">{i+1}. {q.question}</h3><p className="mt-2 text-sm">Your choice: {q.selected===-1?'Skipped':q.options[q.selected]} · Correct: {q.options[q.correctAnswer]}</p><p className="mt-2 text-sm text-muted-foreground">{q.explanation}</p></article>)}
+   {attempt.result.review.map((q,i)=><ReviewQuestion key={q.id} item={q} index={i} lang={lang}/>)}
  </section>;
  const questions=attempt.test.questions;
  const question=questions[current];
