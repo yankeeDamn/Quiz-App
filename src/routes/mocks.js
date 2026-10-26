@@ -6,6 +6,8 @@ const { validate } = require('../middleware/validate');
 const { allowNextAuthGuest } = require('../middleware/nextauth');
 const { isPlanActive } = require('../services/plan.service');
 const mocks = require('../services/mocks.service');
+const db = require('../config/database');
+const config = require('../config');
 
 const router = Router();
 const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -16,6 +18,39 @@ const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).cat
  */
 router.get('/', wrap(async (_req, res) => {
   res.json({ success: true, data: { tests: await mocks.listMocks() } });
+}));
+
+/**
+ * GET /api/v1/mocks/stats
+ * Read-only aggregates for public homepage; no drafts, answers, or user details exposed.
+ * Bank totals include inactive questions but are explicitly labelled as such.
+ */
+router.get('/stats', wrap(async (_req, res) => {
+  res.set('Cache-Control', 'public, max-age=30');
+  const tests = await mocks.listMocks();
+  let bankQuestions = 0;
+  let availableQuestions = 0;
+  if (config.databaseUrl) {
+    const { rows } = await db.query(`
+      SELECT COUNT(*)::int AS total,
+        COUNT(*) FILTER (WHERE q.active AND t.active)::int AS available
+      FROM mock_questions q
+      JOIN mock_topics t ON t.id = q.topic_id
+    `);
+    bankQuestions = rows[0].total;
+    availableQuestions = rows[0].available;
+  } else {
+    const bank = await mocks.loadBank();
+    bankQuestions = bank.topics.reduce((n, t) => n + t.questions.length, 0);
+    availableQuestions = bankQuestions;
+  }
+  return res.json({ success: true, data: {
+    bankQuestions, availableQuestions,
+    notYetAvailable: bankQuestions - availableQuestions,
+    liveTests: tests.length,
+    publishedMocks: tests.filter(t => t.kind === 'mock').length,
+    topicTests: tests.filter(t => t.kind === 'topic').length,
+  } });
 }));
 
 /**

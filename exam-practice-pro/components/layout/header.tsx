@@ -33,7 +33,7 @@ export function Header() {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 via-violet-600 to-teal-500 text-white shadow-md shadow-indigo-500/20">
             <GraduationCap className="h-5 w-5" />
           </div>
-          <span className="hidden text-xl font-extrabold tracking-tight sm:inline-block">
+          <span className="inline-block text-lg font-extrabold tracking-tight sm:text-xl">
             ExamPro
           </span>
         </Link>
