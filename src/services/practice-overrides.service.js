@@ -3,7 +3,7 @@
 const db = require('../config/database');
 
 const VALID_SOURCE = new Set(['homepage', 'certification']);
-const ID = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,100}$/;
+const ID = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,100}$/;
 const DIFFICULTIES = new Set(['Easy', 'Medium', 'Hard']);
 const TYPES = new Set(['single', 'multiple', 'true-false']);
 
