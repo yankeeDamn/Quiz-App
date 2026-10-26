@@ -73,6 +73,12 @@ const ok = (res, data) => res.json({ success: true, data });
 const bad = (res, message, status = 400) => res.status(status).json({ success: false, error: { message } });
 const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
+router.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store, private');
+  res.set('Vary', 'Authorization, X-Admin-Key');
+  res.set('X-Robots-Tag', 'noindex, nofollow');
+  next();
+});
 router.use(adminLimiter, requireAdmin);
 
 router.get('/me', (req, res) => ok(res, { via: req.admin.via, email: req.admin.email }));
