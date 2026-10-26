@@ -19,11 +19,13 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { useState } from 'react';
 import { clearTokenCache } from '@/lib/api';
+import { useExamLanguage } from '@/lib/exampro-language';
 
 export function Header() {
   const { setTheme, theme } = useTheme();
   const { data: session, status } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const {lang,setLang}=useExamLanguage();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200/70 bg-background/90 shadow-sm shadow-slate-900/[0.025] backdrop-blur-xl supports-[backdrop-filter]:bg-background/75 dark:border-slate-800/70">
@@ -79,6 +81,12 @@ export function Header() {
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-2">
+          <label className="sr-only" htmlFor="global-exam-language">Exam language</label>
+          <select id="global-exam-language" aria-label="Exam language" value={lang}
+            onChange={e=>setLang(e.target.value as 'en'|'hi'|'bn')}
+            className="h-9 min-w-14 max-w-[72px] rounded-lg border border-border bg-background px-1 text-xs font-semibold">
+            <option value="en">EN</option><option value="hi">हिं</option><option value="bn">বাং</option>
+          </select>
           {/* Dashboard Button (Desktop) */}
           <Button
             variant="ghost"
