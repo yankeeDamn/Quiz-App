@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Reveal } from '@/components/motion/reveal';
-import { GraduationCap, Sparkles, Target, TrendingUp, Building2, Award, BookOpen, FileQuestion2, ClipboardCheck, Layers3, ArrowUpRight } from 'lucide-react';
+import { GraduationCap, Sparkles, Target, TrendingUp, Building2, Award, BookOpen, FileQuestion, ClipboardCheck, Layers3, ArrowUpRight } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { SearchBar } from '@/components/shared/search-bar';
@@ -194,7 +194,7 @@ export default function HomePage() {
                         label: 'Question bank',
                         value: homeStats?.bankQuestions.toLocaleString('en-IN') ?? '—',
                         note: homeStats ? `${homeStats.notYetAvailable.toLocaleString('en-IN')} not yet available` : 'Live database total',
-                        icon: FileQuestion2,
+                        icon: FileQuestion,
                       },
                       {
                         label: 'Live tests',
