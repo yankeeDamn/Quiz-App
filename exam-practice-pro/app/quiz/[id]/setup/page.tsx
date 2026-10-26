@@ -34,6 +34,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { getAnyQuizById } from '@/data/quizzes';
+import { fetchPracticeOverrides, applyHomepageOverrides, type PracticeOverride } from '@/lib/practice-overrides';
 import { useQuizStore } from '@/store/quiz-store';
 import { QuizSettings, DEFAULT_QUIZ_SETTINGS, Difficulty } from '@/lib/types';
 import { formatDuration, getDifficultyColor } from '@/lib/quiz-utils';
@@ -45,7 +46,9 @@ interface PageProps {
 export default function QuizSetupPage({ params }: PageProps) {
   const { id } = use(params);
   const router = useRouter();
-  const quiz = getAnyQuizById(id);
+  const [practiceOverrides, setPracticeOverrides] = useState<PracticeOverride[]>([]);
+  const baseQuiz = getAnyQuizById(id);
+  const quiz = baseQuiz ? applyHomepageOverrides(baseQuiz, practiceOverrides) : undefined;
   const { startQuiz, session, restoreSession } = useQuizStore();
 
   const [settings, setSettings] = useState<QuizSettings>({
@@ -54,6 +57,11 @@ export default function QuizSetupPage({ params }: PageProps) {
     timeLimit: quiz?.duration || 30,
   });
   const [hasExistingSession, setHasExistingSession] = useState(false);
+  useEffect(() => {
+    let mounted = true;
+    fetchPracticeOverrides().then(rows => { if (mounted) setPracticeOverrides(rows); }).catch(() => {});
+    return () => { mounted = false; };
+  }, []);
 
   useEffect(() => {
     if (quiz && session?.quizId === quiz.id && !session.endTime) {
@@ -63,7 +71,7 @@ export default function QuizSetupPage({ params }: PageProps) {
 
   const handleStartQuiz = () => {
     if (!quiz) return;
-    startQuiz(quiz.id, settings);
+    startQuiz(quiz.id, settings, quiz);
     router.push(`/quiz/${quiz.id}/take`);
   };
 

@@ -1,5 +1,6 @@
 import { api, getUserProfile } from '@/lib/api';
 import { buildCertTest } from '@/lib/it-certs';
+import { fetchPracticeOverrides } from '@/lib/practice-overrides';
 
 export interface MockSummary {
   id: string;
@@ -47,7 +48,15 @@ export async function fetchCatalog(): Promise<MockSummary[]> {
 export async function fetchMock(id: string, mode: 'test' | 'practice' = 'test'): Promise<MockLoad> {
   // Free IT certification starters ship with the site and do not need the API.
   const cert = buildCertTest(id);
-  if (cert && mode === 'practice') return { status: 'ok', test: cert };
+  if (cert && mode === 'practice') {
+    try {
+      const overrides = await fetchPracticeOverrides();
+      return { status: 'ok', test: buildCertTest(id, overrides) || cert };
+    } catch {
+      // Bundled questions remain available when Render/Neon is offline.
+      return { status: 'ok', test: cert };
+    }
+  }
   if (cert) return { status: 'error', message: 'These introductory certification questions are practice-only. Choose Practice to view explanations.' };
   try {
     const endpoint = `/api/v1/mocks/${encodeURIComponent(id)}${mode === 'practice' ? '/practice' : ''}`;

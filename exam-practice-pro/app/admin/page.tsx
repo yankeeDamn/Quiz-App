@@ -10,12 +10,14 @@ import { Button } from '@/components/ui/button';
 import { PlansTab } from '@/components/admin/plans-tab';
 import { QuestionsTab } from '@/components/admin/questions-tab';
 import { TestsTab } from '@/components/admin/tests-tab';
+import { PracticeLibraryTab } from '@/components/admin/practice-library-tab';
 import { admin } from '@/lib/admin';
 
-type Tab = 'questions' | 'tests' | 'plans';
+type Tab = 'questions' | 'tests' | 'practice' | 'plans';
 const TABS: { id: Tab; label: string }[] = [
   { id: 'questions', label: 'Questions' },
   { id: 'tests', label: 'Mock tests' },
+  { id: 'practice', label: 'Practice Library' },
   { id: 'plans', label: 'Plans and payments' },
 ];
 
@@ -97,6 +99,7 @@ export default function AdminPage() {
             <div className="mt-6">
               {tab === 'questions' && <QuestionsTab />}
               {tab === 'tests' && <TestsTab />}
+              {tab === 'practice' && <PracticeLibraryTab />}
               {tab === 'plans' && <PlansTab />}
             </div>
           </>

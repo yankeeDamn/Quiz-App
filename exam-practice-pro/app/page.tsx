@@ -11,6 +11,8 @@ import { FilterChips } from '@/components/shared/filter-chips';
 import { QuizCard } from '@/components/quiz/quiz-card';
 import { ProviderCard } from '@/components/quiz/provider-card';
 import { quizzes, getUniqueSubjects, examProviders, exams, getAllQuizzes } from '@/data/quizzes';
+import { fetchPracticeOverrides, applyHomepageOverrides, type PracticeOverride } from '@/lib/practice-overrides';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
@@ -35,7 +37,16 @@ export default function HomePage() {
   const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>([]);
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
 
-  const allQuizzes = useMemo(() => getAllQuizzes(), []);
+  const [practiceOverrides, setPracticeOverrides] = useState<PracticeOverride[]>([]);
+  useEffect(() => {
+    let mounted = true;
+    fetchPracticeOverrides().then(rows => { if (mounted) setPracticeOverrides(rows); }).catch(() => {});
+    return () => { mounted = false; };
+  }, []);
+  const allQuizzes = useMemo(
+    () => getAllQuizzes().map(quiz => applyHomepageOverrides(quiz, practiceOverrides)),
+    [practiceOverrides]
+  );
 
   const subjectFilters = useMemo(() => {
     const subjects = getUniqueSubjects();

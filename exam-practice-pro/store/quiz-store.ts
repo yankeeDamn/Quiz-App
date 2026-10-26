@@ -27,7 +27,7 @@ interface QuizState {
   appSettings: AppSettings;
 
   // Actions
-  startQuiz: (quizId: string, settings: QuizSettings) => void;
+  startQuiz: (quizId: string, settings: QuizSettings, updatedQuiz?: QuizMeta) => void;
   answerQuestion: (questionId: string, answers: string[]) => void;
   toggleMarkForReview: (questionId: string) => void;
   clearAnswer: (questionId: string) => void;
@@ -50,8 +50,8 @@ export const useQuizStore = create<QuizState>()(
       lastResult: null,
       appSettings: DEFAULT_APP_SETTINGS,
 
-      startQuiz: (quizId, settings) => {
-        const quiz = getAnyQuizById(quizId);
+      startQuiz: (quizId, settings, updatedQuiz) => {
+        const quiz = updatedQuiz || getAnyQuizById(quizId);
         if (!quiz) return;
 
         // Filter questions by difficulty if specified

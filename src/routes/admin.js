@@ -18,6 +18,7 @@ const UUID = /^[0-9a-f-]{36}$/i;
 const SLUG = /^[a-z0-9-]{1,60}$/;
 
 const router = Router();
+const practiceOverrides = require('../services/practice-overrides.service');
 
 function keyMatches(given) {
   const a = Buffer.from(String(given || ''));
@@ -75,6 +76,21 @@ const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).cat
 router.use(adminLimiter, requireAdmin);
 
 router.get('/me', (req, res) => ok(res, { via: req.admin.via, email: req.admin.email }));
+
+// Edits to the existing frontend-bundled free practice library.
+// Answers are already part of those client-side practice-only quizzes;
+// never use this endpoint for the server-scored mock-test bank.
+router.put('/practice/questions/:source/:id', wrap(async (req, res) => {
+  try {
+    const question = await practiceOverrides.saveOverride(req.params.source, req.params.id, req.body?.question);
+    return ok(res, { question });
+  } catch (error) {
+    if (/^(Unknown practice|Question ID|Provide a question|Certification questions|Homepage question|Options must|Correct answers)/.test(error.message)) {
+      return bad(res, error.message, 400);
+    }
+    throw error;
+  }
+}));
 
 // ── Plans ──────────────────────────────────────────────
 
