@@ -3,15 +3,19 @@
 import {useEffect,useMemo,useState} from 'react';
 import Link from 'next/link';
 import {api} from '@/lib/api';
+import {useSession} from 'next-auth/react';
 import {fetchMock,type MockQuestion,type MockTest} from '@/lib/mocks';
 import {ExamEngine} from '@/components/mocks/exam-engine';
 
+type TopicAccuracy={topicId:string;attempted:number;correct:number;accuracy:number};
 type Topic={
  id:string;name:string;category:string;active:boolean;
  questionCount:number;activeQuestionCount:number;available:boolean;practiceTestId:string;
 };
 
 export function CompetitiveTopicBuilder(){
+ const {status}=useSession();
+ const [accuracy,setAccuracy]=useState<TopicAccuracy[]>([]);
  const [topics,setTopics]=useState<Topic[]>([]);
  const [selection,setSelection]=useState<string[]>([]);
  const [error,setError]=useState('');
@@ -30,6 +34,14 @@ export function CompetitiveTopicBuilder(){
    .finally(()=>{if(ok)setLoading(false);});
   return()=>{ok=false;};
  },[]);
+ useEffect(()=>{
+  if(status!=='authenticated')return;
+  let active=true;
+  api<{topics:TopicAccuracy[]}>('/api/v1/exam-attempts/topic-accuracy')
+   .then(r=>{if(active&&r.success&&r.data)setAccuracy(r.data.topics);})
+   .catch(()=>{});
+  return()=>{active=false;};
+ },[status]);
  const selected=useMemo(()=>topics.filter(t=>selection.includes(t.id)&&t.available),[selection,topics]);
  const total=topics.reduce((sum,t)=>sum+t.questionCount,0);
 
@@ -67,7 +79,7 @@ export function CompetitiveTopicBuilder(){
     <h2 className="mt-2 text-2xl font-extrabold sm:text-3xl">Build a competitive practice set</h2>
     <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
      Four SSC, Banking and Railway groups · {loading?'checking totals…':total+' questions staged'}.
-     Only reviewed, active topics can be used. Custom sets are unscored practice sessions, not official exams.
+     Only reviewed, active topics can be used. Custom sets are unscored practice sessions, not official exams. Accuracy bars use your signed-in, server-scored attempts.
     </p>
    </div>
    <Link href="/admin" className="text-sm font-semibold text-indigo-700 underline dark:text-indigo-300">Owner review dashboard</Link>
@@ -85,6 +97,17 @@ export function CompetitiveTopicBuilder(){
       {topic.available?'Available for practice':'Awaiting owner review'}
      </span>
      {topic.available&&<Link href={'/india-mocks/'+encodeURIComponent(topic.practiceTestId)+'?mode=practice'} className="mt-2 block text-xs font-semibold text-indigo-700 underline dark:text-indigo-300">Open full topic practice</Link>}
+     {status==='authenticated'&&(()=>{
+       const score=accuracy.find(a=>a.topicId===topic.id);
+       return <span className="mt-3 block text-xs">
+         <span className="block text-muted-foreground">{score? `Scored-exam accuracy: ${score.accuracy}% (${score.correct}/${score.attempted})`:'Scored-exam accuracy: no attempts yet'}</span>
+         <span className="mt-1 block h-2 overflow-hidden rounded-full bg-muted" role="progressbar"
+           aria-label={topic.name+' accuracy'} aria-valuemin={0} aria-valuemax={100}
+           aria-valuenow={score?.accuracy??0}>
+           <span className="block h-full rounded-full bg-indigo-600" style={{width:(score?.accuracy??0)+'%'}}/>
+         </span>
+       </span>;
+     })()}
     </span>
    </label>)}
   </div>
