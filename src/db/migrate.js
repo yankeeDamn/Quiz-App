@@ -206,6 +206,7 @@ CREATE TABLE IF NOT EXISTS user_stats (
 `;
 
 const { seedStarterContent } = require('./seed-content');
+const { seedCompetitiveContent } = require('./seed-competitive');
 
 async function migrate() {
   const client = await pool.connect();
@@ -217,6 +218,8 @@ async function migrate() {
     console.log(`🌱 Starter content checked: ${seeded.topics} topics, ${seeded.questions} questions, ${seeded.mocks} mocks.`);
     await client.query(fs.readFileSync(path.join(__dirname, 'pilot-schema.sql'), 'utf8'));
     await client.query(fs.readFileSync(path.join(__dirname, 'exampro-v2.sql'), 'utf8'));
+    const competitive = await seedCompetitiveContent(client);
+    console.log(`📚 Competitive bank staged: ${competitive.questions} questions, ${competitive.mocks} draft quizzes. Review and publish in /admin.`);
     await client.query('COMMIT');
     console.log('✅ Migrations complete.');
   } catch (err) {
