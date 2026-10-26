@@ -78,8 +78,17 @@ export default function ExamProStudioPage() {
   const [filter, setFilter] = useState('All');
 
   useEffect(() => {
-    try { const saved = localStorage.getItem(STORAGE); if (saved) setPortal(restore(JSON.parse(saved))); }
-    catch { /* Private browsing may disable storage. */ }
+    try {
+      const shared = new URLSearchParams(window.location.search).get('brand');
+      if (shared && shared.length < 850) {
+        // This public preview link deliberately contains no private logo, phone or group URL.
+        const fields=JSON.parse(shared) as Record<string,unknown>;
+        setPortal(restore({name:fields.name,tagline:fields.tagline,color:fields.color,batches:fields.batches}));
+      } else {
+        const saved = localStorage.getItem(STORAGE);
+        if (saved) setPortal(restore(JSON.parse(saved)));
+      }
+    } catch { /* Private browsing and malformed preview links must never block the page. */ }
     setLoaded(true);
   }, []);
   useEffect(() => {
@@ -113,6 +122,17 @@ export default function ExamProStudioPage() {
   const group = groupUrl(portal.group);
   const ink = foreground(portal.color);
   const change = (value: Partial<Portal>) => setPortal(current => ({...current,...value}));
+  async function copyBrandedPreview(){
+    try {
+      const url=new URL(window.location.origin+'/exampro');
+      url.searchParams.set('brand',JSON.stringify({
+        name:portal.name.slice(0,40),tagline:portal.tagline.slice(0,60),
+        color:portal.color,batches:portal.batches.slice(0,160),
+      }));
+      await navigator.clipboard.writeText(url.toString());
+      setNotice('Branded preview link copied. Logo, WhatsApp numbers and group URLs are not included.');
+    }catch{setNotice('Could not copy automatically. Browser clipboard permission may be blocked.');}
+  }
   function logo(file?: File) {
     if (!file) return;
     if (!['image/jpeg','image/png','image/webp'].includes(file.type)) { setLogoError('Use PNG, JPG or WebP.'); return; }
@@ -221,6 +241,9 @@ export default function ExamProStudioPage() {
           <p className="flex items-center gap-2 font-mono text-xs font-bold uppercase text-orange-400"><Palette size={15}/> Portal builder</p>
           <h2 className="mt-3 text-3xl font-extrabold">Make it yours in a minute.</h2>
           <p className="mt-3 max-w-3xl text-slate-300">Preview your institute&apos;s name, logo, colours and batches. Like your original HTML, this is local browser personalization—not a published institute account.</p>
+          <button type="button" onClick={()=>void copyBrandedPreview()} className="mt-4 min-h-11 rounded-lg border border-slate-400 px-4 py-2 text-sm font-bold hover:bg-white/10">
+            Copy branded preview link
+          </button>
           <div className="mt-10 grid gap-8 lg:grid-cols-[.9fr_1.1fr]">
             <form className="grid content-start gap-4" onSubmit={e=>e.preventDefault()}>
               <div><p className="text-sm font-semibold">Start from a sample</p><div className="mt-2 flex flex-wrap gap-2">{PRESETS.map(p=>
