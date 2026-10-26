@@ -7,6 +7,8 @@ import { Clock, FileText, Lock } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
+import { ExamLanguageSwitcher,useExamLanguage } from '@/lib/exampro-language';
+import { ShareTest } from '@/components/mocks/share-test';
 import { WhatsAppButton } from '@/components/mocks/whatsapp-button';
 import { usePlan } from '@/hooks/use-plan';
 import { IT_CERTS, buildCertTest } from '@/lib/it-certs';
@@ -27,6 +29,7 @@ function Catalogue() {
   const params = useSearchParams();
   const filter = params.get('exam') || 'all';
   const plan = usePlan();
+  const {lang,setLang}=useExamLanguage();
   const [tests, setTests] = useState<MockSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -63,6 +66,7 @@ function Catalogue() {
       </p>
 
       <div className="mt-7 flex flex-wrap items-center gap-3">
+        <ExamLanguageSwitcher lang={lang} onChange={setLang}/>
         <WhatsAppButton text="Hi, I want coaching guidance for my exam preparation." label="Get coaching on WhatsApp" />
         {plan.loaded && !plan.active && premiumCount > 0 && (
           <Button variant="outline" asChild>
@@ -159,6 +163,7 @@ function Catalogue() {
                       )}
                     </>
                   )}
+                  <ShareTest id={t.id} title={t.name} lang={lang} compact/>
                 </div>
               </article>
             );
