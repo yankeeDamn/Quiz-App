@@ -166,7 +166,7 @@ function Catalogue() {
         </div>
       )}
 
-      <p className="mt-10 text-sm text-muted-foreground">These are original practice questions written for this site. They are not official previous-year papers.</p>
+      <p className="mt-10 text-sm text-muted-foreground">This catalogue contains original practice questions and, when published, source-labelled adaptations. These are not official previous-year exam papers; independently verify answers before relying on them.</p>
     </main>
   );
 }
