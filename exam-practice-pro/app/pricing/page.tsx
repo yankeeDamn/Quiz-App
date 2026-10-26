@@ -9,6 +9,7 @@ import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
 import { WhatsAppButton } from '@/components/mocks/whatsapp-button';
 import { usePlan } from '@/hooks/use-plan';
+import { RazorpayCheckout } from '@/components/payments/razorpay-checkout';
 import { PLANS, formatWhatsappNumber, inr, planMessage, planPrice, whatsappLink, type Plan } from '@/lib/plans';
 
 const STEPS: [string, string][] = [
@@ -45,6 +46,7 @@ export default function PricingPage() {
           Free covers daily practice. Pro opens every full mock. Pay through WhatsApp and we unlock your plan by hand.
         </p>
 
+        {segment === 'learner' && !plan.active && <RazorpayCheckout yearly={yearly} email={email} />}
         {plan.active && (
           <div className="mt-6 rounded-xl border border-emerald-600 bg-emerald-50 p-4 dark:bg-emerald-950/40" role="status">
             <p className="font-semibold">Your {plan.plan === 'institute' ? 'Institute' : 'Pro'} plan is active.</p>
