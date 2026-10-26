@@ -12,6 +12,7 @@ const BULK_HINT = 'question | option A | option B | option C | option D | right 
 
 export function QuestionsTab() {
   const [topics, setTopics] = useState<AdminTopic[]>([]);
+  const [topicsLoaded, setTopicsLoaded] = useState(false);
   const [topic, setTopic] = useState('');
   const [questions, setQuestions] = useState<AdminQuestion[]>([]);
   const [msg, setMsg] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
@@ -26,6 +27,7 @@ export function QuestionsTab() {
     const r = await admin<{ topics: AdminTopic[] }>('/topics');
     if (r.ok) {
       setTopics(r.data.topics);
+      setTopicsLoaded(true);
       setTopic((t) => t || r.data.topics[0]?.id || '');
     } else setMsg({ kind: 'error', text: r.message });
   }, []);
@@ -47,6 +49,19 @@ export function QuestionsTab() {
     else setMsg({kind:'error',text:r.message});
   };
   const refresh = async () => { await Promise.all([loadTopics(), loadQuestions(topic)]); };
+
+  const toggleTopic = async () => {
+    if (!current) return;
+    if (current.active && !window.confirm('Deactivate this topic? Its practice questions and mock test questions will disappear from the student catalogue until reactivated.')) return;
+    const nextActive = !current.active;
+    const r = await admin(`/topics/${current.id}/active`, 'POST', { active: nextActive });
+    if (r.ok) {
+      setMsg({kind:'ok', text: nextActive
+        ? 'Topic activated. Review and publish its 25-question mock tests separately under Mock tests.'
+        : 'Topic deactivated; all its public questions are hidden.'});
+      void loadTopics();
+    } else setMsg({kind:'error',text:r.message});
+  };
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,6 +111,14 @@ export function QuestionsTab() {
   return (
     <div className="grid gap-6">
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
+      {topicsLoaded && !topics.some((t) => t.id.startsWith('comp-')) && (
+        <Notice kind="error">
+          The 500-question competitive bank has not been imported into this API database yet.
+          The GitHub merge only added the source file. Check the existing Render backend build/deploy
+          logs and run <code>npm run db:migrate</code> against your existing Neon database;
+          then refresh this page. Do not create another database or import questions manually.
+        </Notice>
+      )}
 
       <section className={`${card} grid gap-3`}>
         <div className="flex flex-wrap items-end gap-3">
@@ -104,7 +127,19 @@ export function QuestionsTab() {
               {topics.map((t) => <option key={t.id} value={t.id}>{t.name} ({t.live} live)</option>)}
             </select>
           </Field>
-          {current && <p className="pb-2 text-sm text-muted-foreground">{current.category} · {current.live} live, {current.total - current.live} retired · topic id <code>{current.id}</code></p>}
+          {current && (
+            <div className="grid gap-2 pb-2 text-sm">
+              <p className="text-muted-foreground">{current.category} · {current.live} live, {current.total - current.live} retired · topic id <code>{current.id}</code></p>
+              <div className="flex flex-wrap items-center gap-3">
+                <span className={current.active ? 'font-semibold text-emerald-700 dark:text-emerald-400' : 'font-semibold text-amber-700 dark:text-amber-400'}>
+                  {current.active ? 'Topic active' : 'Topic inactive — hidden from student catalogue'}
+                </span>
+                <Button type="button" size="sm" variant="outline" onClick={() => void toggleTopic()}>
+                  {current.active ? 'Deactivate topic' : 'Activate reviewed topic'}
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
         <details><summary className="cursor-pointer text-sm font-semibold">Edit this topic</summary><form onSubmit={saveTopic} className="mt-3 flex flex-wrap items-end gap-3"><Field label="Name"><input className={input} required value={topicDetails.name} onChange={e=>setTopicDetails({...topicDetails,name:e.target.value})}/></Field><Field label="Category"><input className={input} required value={topicDetails.category} onChange={e=>setTopicDetails({...topicDetails,category:e.target.value})}/></Field><Button type="submit" disabled={!topic}>Save topic</Button></form></details>
         <details>
