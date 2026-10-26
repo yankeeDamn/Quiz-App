@@ -261,7 +261,7 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
           </div>
 
           {lang!=='en' && translated.state==='unavailable' && <p role="status" className="mt-2 text-xs text-amber-700">{labels.translateError}</p>}
-          <h2 className="mt-4 text-xl font-semibold leading-snug">{translated.texts[0]||q.question}</h2>
+          <h2 lang={lang} className="mt-4 text-xl font-semibold leading-snug">{translated.texts[0]||q.question}</h2>
 
           <div className="mt-5 grid gap-3" role="group" aria-label="Options">
             {item.order.map((original, position) => {
@@ -291,7 +291,7 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
                   >
                     {LETTERS[position]}
                   </span>
-                  <span className="min-w-0 break-words">{translated.texts[original+1]||q.options[original]}</span>
+                  <span lang={lang} className="min-w-0 break-words">{translated.texts[original+1]||q.options[original]}</span>
                 </button>
               );
             })}
@@ -306,7 +306,7 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
               <p className="font-semibold">
                 {item.order[picked] === q.answer ? 'Correct.' : `Not quite. The answer is ${LETTERS[item.order.indexOf(q.answer)]}.`}
               </p>
-              <p className="mt-1 text-sm">{translated.texts[5]||q.explanation}</p>
+              <p lang={lang} className="mt-1 text-sm">{translated.texts[5]||q.explanation}</p>
               <DoubtButton test={test} item={item} index={current} picked={picked} />
             </div>
           )}
