@@ -55,7 +55,7 @@ function auditBank(bank) {
   const ready=results.filter(r=>r.active&&r.issues.length===0);
   return {target:10,ready:ready.length,totalCglCandidates:results.length,results,passes:ready.length>=10};
 }
-(async()=>{
+if (require.main === module) (async()=>{
  const bank=await mocks.loadBank();
  const report=auditBank(bank);
  console.log(JSON.stringify(report,null,2));
