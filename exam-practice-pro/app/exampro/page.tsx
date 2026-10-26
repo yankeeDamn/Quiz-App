@@ -83,8 +83,11 @@ export default function ExamProStudioPage() {
   const {language,t} = useExamLanguage();
 
   useEffect(() => {
-    try { const saved = localStorage.getItem(STORAGE); if (saved) setPortal(restore(JSON.parse(saved))); }
-    catch { /* Private browsing may disable storage. */ }
+    try {
+      const shared = new URLSearchParams(window.location.search).get('brand');
+      const saved = shared ? shared.slice(0,800) : localStorage.getItem(STORAGE);
+      if(saved) setPortal(restore(JSON.parse(saved)));
+    } catch { /* Invalid shared previews or blocked storage fall back safely. */ }
     setLoaded(true);
   }, []);
   useEffect(() => {
@@ -124,6 +127,16 @@ export default function ExamProStudioPage() {
   const group = groupUrl(portal.group);
   const ink = foreground(portal.color);
   const change = (value: Partial<Portal>) => setPortal(current => ({...current,...value}));
+  async function copyBrandedPortal(){
+    // The preview link contains only public visual branding, never private contact or logo data.
+    const share = new URL('/exampro#portal',window.location.origin);
+    share.hash='portal';
+    share.searchParams.set('brand',JSON.stringify({
+      name:portal.name,tagline:portal.tagline,color:portal.color,batches:portal.batches,
+    }));
+    try {await navigator.clipboard.writeText(share.href);setPortalCopied(true);}
+    catch {setNotice('Could not copy. Your browser may block clipboard access.');}
+  }
   function logo(file?: File) {
     if (!file) return;
     if (!['image/jpeg','image/png','image/webp'].includes(file.type)) { setLogoError('Use PNG, JPG or WebP.'); return; }
@@ -289,6 +302,8 @@ export default function ExamProStudioPage() {
               {portal.group && !group && <p className="text-sm text-amber-300">Enter a valid https://chat.whatsapp.com invite URL.</p>}
               <p className="text-sm text-slate-300" role="status">{notice || 'Changes stay in this browser and are not uploaded.'}</p>
               <button type="button" onClick={()=>{setPortal(INITIAL);setLogoError('');}} className="inline-flex w-fit items-center gap-2 rounded-lg border border-slate-500 px-4 py-2 text-sm font-semibold"><RotateCcw size={16}/> Reset preview</button>
+              <button type="button" onClick={()=>void copyBrandedPortal()} className="inline-flex w-fit items-center gap-2 rounded-lg border border-slate-500 px-4 py-2 text-sm font-semibold">{portalCopied?'Branded preview link copied':'Copy branded portal link'}</button>
+              <p className="text-xs text-slate-300">Shares name, tagline, colours and batches as a preview only; logos and contact details are not included. Does not publish an institute portal.</p>
             </form>
             <div className="ep-preview-surface overflow-hidden rounded-3xl border border-slate-200 bg-white text-slate-900 shadow-xl lg:sticky lg:top-24 lg:self-start">
               <div className="flex gap-1 border-b border-slate-200 bg-slate-100 px-4 py-3"><span className="h-2 w-2 rounded-full bg-slate-400"/><span className="h-2 w-2 rounded-full bg-slate-400"/><span className="h-2 w-2 rounded-full bg-slate-400"/><span className="ml-3 truncate font-mono text-xs text-slate-500">institute-preview.exampro.example</span></div>
