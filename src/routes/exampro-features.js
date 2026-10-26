@@ -4,6 +4,7 @@ const { Router } = require('express');
 const rateLimit = require('express-rate-limit');
 const db = require('../config/database');
 const config = require('../config');
+const { authenticateNextAuth } = require('../middleware/nextauth');
 const mocks = require('../services/mocks.service');
 
 const router = Router();
@@ -39,6 +40,27 @@ router.get('/competitive-topics', wrap(async (_req, res) => {
     };
   });
   res.json({ success: true, data: { topics } });
+}));
+
+/**
+ * Signed-in student's own accuracy from *submitted scored attempts only*.
+ * No review content, question answer keys, or other users' records leave the API.
+ */
+router.get('/topic-accuracy', authenticateNextAuth, wrap(async (req, res) => {
+  const {rows}=await db.query(`
+    SELECT split_part(item->>'id', ':', 1) AS "topicId",
+      COUNT(*) FILTER (WHERE (item->>'selected')::int >= 0)::int AS attempted,
+      COUNT(*) FILTER (WHERE (item->>'correct')::boolean)::int AS correct
+    FROM exam_attempts_v2 a
+    CROSS JOIN LATERAL jsonb_array_elements(a.result->'review') item
+    WHERE a.user_id=$1 AND a.submitted_at IS NOT NULL AND
+      split_part(item->>'id', ':', 1) = ANY($2::text[])
+    GROUP BY split_part(item->>'id', ':', 1)
+  `,[req.user.id,Array.from(topicIds)]);
+  return res.json({success:true,data:{topics:rows.map(row=>({
+    topicId:row.topicId,attempted:row.attempted,correct:row.correct,
+    percent:row.attempted?Math.round(row.correct/row.attempted*100):0,
+  }))}});
 }));
 
 const translateLimiter = rateLimit({
