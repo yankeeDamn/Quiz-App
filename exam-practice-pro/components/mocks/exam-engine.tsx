@@ -215,7 +215,7 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
             Palette
           </Button>
           <LanguageSwitcher small />
-          <ShareTestButtons testId={test.id} title={test.name} compact/>
+          {test.id!=='custom-comp-practice' && <ShareTestButtons testId={test.id} title={test.name} compact/>}
           <Button onClick={() => setConfirming(true)}>{practice ? 'Finish' : t('submit')}</Button>
         </div>
       </div>
@@ -526,7 +526,7 @@ function ResultView({
     <div className="mx-auto w-full max-w-4xl px-4 py-8">
       <p className="text-sm font-semibold text-blue-700 dark:text-blue-400">{practice ? 'Practice summary' : 'Result'}</p>
       <h1 className="mt-1 text-2xl font-bold">{test.name}</h1>
-      <div className="mt-3"><ShareTestButtons testId={test.id} title={test.name} compact/></div>
+      {test.id!=='custom-comp-practice' && <div className="mt-3"><ShareTestButtons testId={test.id} title={test.name} compact/></div>}
 
       <div className="mt-5 grid gap-4 rounded-xl border bg-card p-6 sm:grid-cols-[auto_1fr] sm:items-center">
         <p className="text-5xl font-extrabold tabular-nums">{headline}</p>
