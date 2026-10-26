@@ -82,6 +82,8 @@ test('owner key works but invalid admin access fails',async()=>{
   assert.equal(allowed.body.data.via,'key');
 });
 
-test('old payment routes are gone', async () => {
-  assert.equal((await get('/api/v1/payments/config')).status, 404);
+test('payment status endpoint is public but checkout is disabled without configuration', async () => {
+  const result = await get('/api/v1/payments/config');
+  assert.equal(result.status, 200);
+  assert.equal(result.body.data.enabled, false);
 });
