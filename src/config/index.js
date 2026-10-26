@@ -40,7 +40,7 @@ const config = {
   cors: {
     origins: process.env.CORS_ORIGINS
       ? process.env.CORS_ORIGINS.split(',').map((o) => o.trim())
-      : ['http://localhost:3000', 'http://localhost:3001'],
+      : ['http://localhost:3000', 'http://localhost:3001', 'https://quiz-app-virid-zeta-41.vercel.app'],
   },
 
   // ── Logging ──────────────────────────────────────────
