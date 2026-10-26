@@ -217,7 +217,7 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
             <Layers className="mr-2 h-4 w-4" aria-hidden="true" />
             Palette
           </Button>
-          <Button onClick={() => setConfirming(true)}>{practice ? 'Finish' : 'Submit'}</Button>
+          <Button onClick={() => setConfirming(true)}>{practice ? labels.finish : labels.submit}</Button>
         </div>
       </div>
 
@@ -304,7 +304,7 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
               }`}
             >
               <p className="font-semibold">
-                {item.order[picked] === q.answer ? 'Correct.' : `Not quite. The answer is ${LETTERS[item.order.indexOf(q.answer)]}.`}
+                {item.order[picked] === q.answer ? labels.correct : labels.wrong+' '+LETTERS[item.order.indexOf(q.answer)]+'.'}
               </p>
               <p lang={lang} className="mt-1 text-sm">{translated.texts[5]||q.explanation}</p>
               <DoubtButton test={test} item={item} index={current} picked={picked} />
