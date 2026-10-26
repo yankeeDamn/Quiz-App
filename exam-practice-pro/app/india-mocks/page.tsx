@@ -52,14 +52,17 @@ function Catalogue() {
   const premiumCount = tests?.filter((t) => t.tier === 'premium').length ?? 0;
 
   return (
-    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10">
-      <p className="text-sm font-semibold text-blue-700 dark:text-blue-400">India exam practice</p>
-      <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">Mock tests for India&apos;s top exams</h1>
-      <p className="mt-3 max-w-2xl text-muted-foreground">
+    <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:py-12">
+      <section className="ep-hero relative overflow-hidden rounded-3xl border border-indigo-100/70 px-6 py-9 shadow-sm dark:border-indigo-900/40 sm:px-10 sm:py-12">
+        <div aria-hidden="true" className="ep-hero-grid" />
+        <div className="relative">
+          <p className="ep-eyebrow">India exam practice</p>
+      <h1 className="mt-3 text-3xl font-extrabold tracking-tight md:text-5xl">Mock tests for India&apos;s top exams</h1>
+      <p className="mt-4 max-w-2xl text-muted-foreground">
         Full mocks for SSC, Banking, Railways, UPSC and campus placements, plus short topic tests. Every question has an explanation, and any doubt can go straight to a mentor on WhatsApp.
       </p>
 
-      <div className="mt-5 flex flex-wrap items-center gap-3">
+      <div className="mt-7 flex flex-wrap items-center gap-3">
         <WhatsAppButton text="Hi, I want coaching guidance for my exam preparation." label="Get coaching on WhatsApp" />
         {plan.loaded && !plan.active && premiumCount > 0 && (
           <Button variant="outline" asChild>
@@ -67,7 +70,9 @@ function Catalogue() {
           </Button>
         )}
         {plan.active && <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300">Pro plan active</span>}
-      </div>
+        </div>
+        </div>
+      </section>
 
       <div className="mt-8 flex flex-wrap gap-2" role="group" aria-label="Filter tests">
         {FILTERS.map((f) => (
@@ -75,7 +80,7 @@ function Catalogue() {
             key={f.id}
             aria-pressed={filter === f.id}
             onClick={() => setFilter(f.id)}
-            className={`min-h-10 rounded-full border px-4 text-sm font-medium ${filter === f.id ? 'border-foreground bg-foreground text-background' : 'bg-card hover:border-foreground/50'}`}
+            className={`ep-link-motion min-h-10 rounded-full border px-4 text-sm font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 ${filter === f.id ? 'border-foreground bg-foreground text-background' : 'bg-card hover:border-foreground/50'}`}
           >
             {f.label}
           </button>
@@ -100,7 +105,7 @@ function Catalogue() {
       {!tests && !error && (
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" aria-label="Loading tests">
           {Array.from({ length: 6 }, (_, i) => (
-            <div key={i} className="h-48 animate-pulse rounded-xl border bg-muted/50" />
+            <div key={i} className="h-48 motion-safe:animate-pulse rounded-2xl border bg-muted/50" />
           ))}
         </div>
       )}
@@ -110,7 +115,7 @@ function Catalogue() {
           {shown.map((t) => {
             const locked = t.tier === 'premium' && !plan.active;
             return (
-              <article key={t.id} className="flex flex-col gap-3 rounded-xl border bg-card p-5">
+              <article key={t.id} className="ep-card flex h-full flex-col gap-3 rounded-2xl p-6">
                 <div className="flex items-start justify-between gap-2">
                   <h2 className="text-lg font-semibold leading-snug">{t.name}</h2>
                   {t.tier === 'premium' ? (
@@ -161,7 +166,7 @@ function Catalogue() {
         </div>
       )}
 
-      <p className="mt-8 text-sm text-muted-foreground">These are original practice questions written for this site. They are not official previous-year papers.</p>
+      <p className="mt-10 text-sm text-muted-foreground">These are original practice questions written for this site. They are not official previous-year papers.</p>
     </main>
   );
 }
@@ -172,7 +177,7 @@ function StarterCertifications() {
     <p className="mt-2 text-sm text-muted-foreground">Original introductory questions with explanations; pending expert review, not official exams.</p>
     <div className="mt-4 grid gap-3 sm:grid-cols-3">
       {IT_CERTS.map(cert => (
-        <Link key={cert.id} href={`/india-mocks/${cert.id}?mode=practice`} className="rounded-lg border p-4 font-semibold hover:bg-muted">
+        <Link key={cert.id} href={`/india-mocks/${cert.id}?mode=practice`} className="ep-card block rounded-2xl p-5 font-semibold">
           {cert.name} — Start practice →
           <span className="mt-1 block text-xs font-normal text-muted-foreground">{buildCertTest(cert.id)?.questionCount ?? 0} questions · free</span>
         </Link>

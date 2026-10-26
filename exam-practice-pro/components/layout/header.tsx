@@ -26,52 +26,52 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+    <header className="sticky top-0 z-50 w-full border-b border-slate-200/70 bg-background/90 shadow-sm shadow-slate-900/[0.025] backdrop-blur-xl supports-[backdrop-filter]:bg-background/75 dark:border-slate-800/70">
+      <div className="container mx-auto flex h-16 items-center justify-between gap-3 px-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
+        <Link href="/" className="ep-link-motion flex shrink-0 items-center gap-2 rounded-lg transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-indigo-500">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 via-violet-600 to-teal-500 text-white shadow-md shadow-indigo-500/20">
             <GraduationCap className="h-5 w-5" />
           </div>
-          <span className="hidden font-bold text-xl sm:inline-block">
+          <span className="hidden text-xl font-extrabold tracking-tight sm:inline-block">
             ExamPro
           </span>
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden 2xl:flex items-center gap-4">
           <Link
             href="/"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300"
           >
             Quizzes
           </Link>
-          <Link href="/certifications" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Certifications</Link>
+          <Link href="/certifications" className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300">Certifications</Link>
           <Link
             href="/india-mocks"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300"
           >
             India Mocks
           </Link>
-          <Link href="/exampro" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">ExamPro Studio</Link>
+          <Link href="/exampro" className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300">ExamPro Studio</Link>
           <Link
             href="/dashboard"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300"
           >
             Dashboard
           </Link>
           <Link
-            href="/institutes" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Institutes</Link>
+            href="/institutes" className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300">Institutes</Link>
           <Link
             href="/bookmarks"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300"
           >
             Bookmarks
           </Link>
-          <Link href="/admin" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Owner admin</Link>
+          <Link href="/admin" className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300">Owner admin</Link>
           <Link
             href="/pricing"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300"
           >
             Pricing
           </Link>
@@ -84,7 +84,7 @@ export function Header() {
             variant="ghost"
             size="sm"
             asChild
-            className="hidden md:flex"
+            className="hidden 2xl:flex"
           >
             <Link href="/dashboard">
               <LayoutDashboard className="mr-2 h-4 w-4" />
@@ -120,7 +120,7 @@ export function Header() {
               {session?.user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="hidden md:flex gap-2">
+                    <Button variant="ghost" size="sm" className="hidden 2xl:flex gap-2">
                       {session.user.image ? (
                         <img
                           src={session.user.image}
@@ -147,7 +147,7 @@ export function Header() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Button variant="ghost" size="sm" asChild className="hidden md:flex">
+                <Button variant="ghost" size="sm" asChild className="hidden 2xl:flex">
                   <Link href="/auth/signin">
                     <LogIn className="mr-2 h-4 w-4" />
                     Sign In
@@ -159,13 +159,13 @@ export function Header() {
 
           {/* Mobile Menu */}
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild className="md:hidden">
+            <SheetTrigger asChild className="2xl:hidden">
               <Button variant="ghost" size="icon" className="h-9 w-9">
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Open menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[280px] sm:w-[350px]">
+            <SheetContent side="right" className="w-[min(90vw,350px)] overflow-y-auto">
               <nav className="flex flex-col gap-4 mt-8">
                 <Link
                   href="/"
@@ -175,6 +175,7 @@ export function Header() {
                   Quizzes
                 </Link>
                 <Link href="/exampro" className="text-lg font-medium transition-colors hover:text-indigo-600" onClick={() => setMobileMenuOpen(false)}>ExamPro Studio</Link>
+                <Link href="/certifications" className="text-lg font-medium transition-colors hover:text-indigo-600" onClick={() => setMobileMenuOpen(false)}>Certifications</Link>
                 <Link
                   href="/india-mocks"
                   className="text-lg font-medium transition-colors hover:text-indigo-600"

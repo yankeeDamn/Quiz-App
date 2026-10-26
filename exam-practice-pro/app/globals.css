@@ -128,3 +128,117 @@
     @apply font-sans;
   }
 }
+
+/* ExamPro visual system — isolated from exam state and functional styles. */
+@layer components {
+  .ep-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse at 8% 15%, rgb(99 102 241 / 13%), transparent 38%),
+      radial-gradient(ellipse at 91% 10%, rgb(20 184 166 / 10%), transparent 33%),
+      linear-gradient(180deg, rgb(238 242 255 / 65%), transparent 84%);
+  }
+  .dark .ep-hero {
+    background:
+      radial-gradient(ellipse at 12% 12%, rgb(99 102 241 / 22%), transparent 38%),
+      radial-gradient(ellipse at 93% 14%, rgb(45 212 191 / 9%), transparent 35%),
+      linear-gradient(180deg, rgb(30 41 59 / 50%), transparent 86%);
+  }
+  .ep-hero-grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.35;
+    background-image: linear-gradient(to right, rgb(99 102 241 / 9%) 1px, transparent 1px), linear-gradient(to bottom, rgb(99 102 241 / 9%) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: linear-gradient(to bottom, black, transparent 85%);
+  }
+  .ep-gradient-text {
+    background: linear-gradient(105deg, #4338ca 8%, #7c3aed 48%, #0f766e 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .dark .ep-gradient-text {
+    background-image: linear-gradient(105deg, #a5b4fc, #d8b4fe 52%, #5eead4);
+  }
+  .ep-card {
+    border: 1px solid rgb(148 163 184 / 24%);
+    background: var(--card);
+    box-shadow: 0 7px 26px rgb(15 23 42 / 4%);
+    transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+  }
+  .ep-card:hover {
+    transform: translateY(-3px);
+    border-color: rgb(99 102 241 / 50%);
+    box-shadow: 0 18px 40px rgb(67 56 202 / 11%);
+  }
+  .ep-card:focus-within {
+    border-color: rgb(99 102 241 / 70%);
+  }
+  .dark .ep-card {
+    border-color: rgb(148 163 184 / 18%);
+    box-shadow: 0 10px 32px rgb(0 0 0 / 16%);
+  }
+  .dark .ep-card:hover {
+    border-color: rgb(165 180 252 / 50%);
+    box-shadow: 0 20px 44px rgb(0 0 0 / 28%);
+  }
+  .ep-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.75rem;
+    font-weight: 750;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4338ca;
+  }
+  .dark .ep-eyebrow { color: #a5b4fc; }
+  .ep-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    border-radius: 9999px;
+    border: 1px solid rgb(99 102 241 / 19%);
+    background: rgb(255 255 255 / 80%);
+    padding: 0.45rem 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #334155;
+    box-shadow: 0 4px 18px rgb(15 23 42 / 3%);
+  }
+  .dark .ep-chip {
+    background: rgb(30 41 59 / 78%);
+    border-color: rgb(165 180 252 / 20%);
+    color: #e2e8f0;
+  }
+  .ep-link-motion {
+    transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+  }
+  .ep-link-motion:hover { transform: translateY(-2px); }
+  .ep-link-motion:focus-visible,
+  .ep-card a:focus-visible,
+  .ep-card button:focus-visible {
+    outline: 3px solid #818cf8;
+    outline-offset: 3px;
+  }
+  .ep-preview-surface {
+    box-shadow: 0 26px 62px rgb(15 23 42 / 13%);
+    transition: box-shadow 220ms ease;
+  }
+  .ep-preview-surface:focus-within { box-shadow: 0 26px 62px rgb(15 23 42 / 20%); }
+  .ep-studio-panel {
+    background: linear-gradient(145deg, #101a33 4%, #1e315e 90%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ep-card, .ep-link-motion, .ep-preview-surface {
+    transition: none !important;
+    animation: none !important;
+  }
+  .ep-card:hover, .ep-link-motion:hover { transform: none !important; }
+}
