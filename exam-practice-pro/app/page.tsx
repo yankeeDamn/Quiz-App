@@ -6,6 +6,7 @@ import { Reveal } from '@/components/motion/reveal';
 import { GraduationCap, Sparkles, Target, TrendingUp, Building2, Award, BookOpen, FileQuestion, ClipboardCheck, Layers3, ArrowUpRight } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
+import { CompetitiveTopicsOverview } from '@/components/mocks/competitive-topics-overview';
 import { SearchBar } from '@/components/shared/search-bar';
 import { FilterChips } from '@/components/shared/filter-chips';
 import { QuizCard } from '@/components/quiz/quiz-card';
@@ -259,6 +260,8 @@ export default function HomePage() {
           </div>
           </Reveal>
         </section>
+
+        <CompetitiveTopicsOverview />
 
         {/* Exam Providers Section */}
         <section className="border-b bg-white/60 dark:bg-background">
