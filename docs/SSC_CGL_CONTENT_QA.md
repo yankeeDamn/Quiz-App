@@ -10,7 +10,7 @@ Produce **10 independent, fully reviewed Tier-I mocks**, each with 100 original 
 - Quantitative Aptitude
 - English Comprehension
 
-Use **+2 correct, -0.50 incorrect, 60 minutes overall**, and check the applicable 2026 SSC CGL official notification for any sectional timers or accommodations before publishing. Current exam engine only has one overall deadline; section-level timing may need a separate implementation. This document is an editorial readiness standard, not a claim that the app already matches all official rules.
+The official **SSC CGL 2026 Tier-I notification, section 13.8**, specifies **+2 per correct, -0.50 per incorrect, 60 minutes total with a 15-minute timer for EACH of the four subjects** (with extended timing rules for scribe-eligible candidates). Source: https://ssc.gov.in/api/attachment/uploads/masterData/NoticeBoards/Notice_of_adv_cgl_2025.pdf (PDF title identifies it as the 2026 notification). **The current ExamPro exam engine has only an overall deadline and does not implement locked 15-minute per-section timers. This is a launch blocker for advertising a 2026 exam-pattern-faithful full mock.** The audit checks question inventory, not timer UI compliance. This document is an editorial readiness standard, not a claim that the app already matches all official rules.
 
 ## Publication gate for each mock
 1. Named reviewer records sources, syllabus coverage, and current official pattern. Do not copy copyrighted coaching question banks.
