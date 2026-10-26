@@ -19,6 +19,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { useState } from 'react';
 import { clearTokenCache } from '@/lib/api';
+import { LanguageSwitcher } from '@/components/exampro/exam-language';
 
 export function Header() {
   const { setTheme, theme } = useTheme();
@@ -33,7 +34,7 @@ export function Header() {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 via-violet-600 to-teal-500 text-white shadow-md shadow-indigo-500/20">
             <GraduationCap className="h-5 w-5" />
           </div>
-          <span className="inline-block text-lg font-extrabold tracking-tight sm:text-xl">
+          <span className="hidden text-xl font-extrabold tracking-tight sm:inline-block">
             ExamPro
           </span>
         </Link>
@@ -91,6 +92,9 @@ export function Header() {
               Dashboard
             </Link>
           </Button>
+
+          {/* Language selection persists across ExamPro and the exam hall. */}
+          <LanguageSwitcher small />
 
           {/* Theme Toggle */}
           <DropdownMenu>
