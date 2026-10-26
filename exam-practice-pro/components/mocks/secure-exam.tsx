@@ -21,7 +21,7 @@ function ReviewQuestion({item,index,lang}:{item:Review;index:number;lang:'en'|'h
  const [requested,setRequested]=useState(false);
  const translated=useExamTranslation(requested?lang:'en',requested?[item.question,...item.options,item.explanation]:[]);
  return <article className="rounded-lg border p-4">
-  <h3 className="font-semibold">{index+1}. {translated.texts[0]||item.question}</h3>
+  <h3 lang={lang} className="font-semibold">{index+1}. {translated.texts[0]||item.question}</h3>
   <p className="mt-2 text-sm">Your choice: {item.selected===-1?'Skipped':(translated.texts[item.selected+1]||item.options[item.selected])} · Correct: {translated.texts[item.correctAnswer+1]||item.options[item.correctAnswer]}</p>
   <p className="mt-2 text-sm text-muted-foreground">{translated.texts[5]||item.explanation}</p>
   {lang!=='en'&&!requested&&<button type="button" onClick={()=>setRequested(true)}
@@ -136,10 +136,10 @@ export function SecureExam({testId}:{testId:string}) {
    </div>
    <article className="rounded-xl border bg-card p-5">
      <p className="text-sm text-muted-foreground">{labels.question} {current+1} {labels.of} {questions.length}</p>
-     <h2 className="mt-3 text-lg font-semibold">{translation.texts[0]||question.question}</h2>
+     <h2 lang={lang} className="mt-3 text-lg font-semibold">{translation.texts[0]||question.question}</h2>
      <fieldset className="mt-4 space-y-2">
        <legend className="sr-only">Select your answer</legend>
-       {question.options.map((choice,i)=><label key={i} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border p-3 hover:bg-muted"><input type="radio" name={question.id} checked={selected===i} onChange={()=>update(question.id,i)}/><span>{String.fromCharCode(65+i)}. {translation.texts[i+1]||choice}</span></label>)}
+       {question.options.map((choice,i)=><label key={i} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border p-3 hover:bg-muted"><input type="radio" name={question.id} checked={selected===i} onChange={()=>update(question.id,i)}/><span lang={lang}>{String.fromCharCode(65+i)}. {translation.texts[i+1]||choice}</span></label>)}
      </fieldset>
      <div className="mt-4 flex flex-wrap gap-2"><Button variant="outline" onClick={()=>update(question.id,-1)}>{labels.clear}</Button><Button variant="outline" aria-pressed={Boolean(marked[question.id])} onClick={()=>setMarked(old=>({...old,[question.id]:!old[question.id]}))}>{marked[question.id]?'Unmark review':'Mark for review'}</Button><Button variant="outline" disabled={current===0} onClick={()=>setCurrent(x=>x-1)}>{labels.previous}</Button><Button disabled={current===questions.length-1} onClick={()=>setCurrent(x=>x+1)}>{labels.next}</Button></div>
    </article>
