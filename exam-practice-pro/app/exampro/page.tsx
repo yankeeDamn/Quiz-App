@@ -7,10 +7,15 @@ import { BookOpen, Building2, ChevronRight, Clock3, LayoutDashboard, MessageCirc
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { fetchCatalog, type MockSummary } from '@/lib/mocks';
+import { api } from '@/lib/api';
+import { useExamLanguage } from '@/components/exampro/exam-language';
+import { ShareTestButtons, validShareTestId } from '@/components/exampro/share-test-buttons';
 import { whatsappLink, WHATSAPP_NUMBER } from '@/lib/plans';
 
 type Portal = { name: string; tagline: string; color: string; batches: string; whatsapp: string; group: string; logo: string };
 type Role = 'student' | 'teacher' | 'institute';
+type CompetitiveTopic = {id:string;name:string;category:string;active:boolean;questionCount:number;practiceTestId:string|null};
+type TopicAccuracy = {topicId:string;attempted:number;correct:number;percent:number};
 const STORAGE = 'exampro:portal-preview:v1';
 const INITIAL: Portal = { name: '', tagline: 'Mock tests for every batch', color: '#1949C7', batches: 'Foundation, Advanced', whatsapp: '', group: '', logo: '' };
 const COLORS = ['#D9480F', '#1949C7', '#0F766E', '#AD2164', '#6D28D9', '#B45309', '#15803D', '#101A33'];
@@ -72,10 +77,19 @@ export default function ExamProStudioPage() {
   const [tests, setTests] = useState<MockSummary[]>([]);
   const [catalogStatus, setCatalogStatus] = useState('Loading live tests…');
   const [filter, setFilter] = useState('All');
+  const [competitive, setCompetitive] = useState<CompetitiveTopic[]>([]);
+  const [accuracy, setAccuracy] = useState<Record<string,TopicAccuracy>>({});
+  const [selected, setSelected] = useState<string[]>([]);
+  const [sharedError, setSharedError] = useState('');
+  const [portalCopied,setPortalCopied] = useState(false);
+  const {language,t} = useExamLanguage();
 
   useEffect(() => {
-    try { const saved = localStorage.getItem(STORAGE); if (saved) setPortal(restore(JSON.parse(saved))); }
-    catch { /* Private browsing may disable storage. */ }
+    try {
+      const shared = new URLSearchParams(window.location.search).get('brand');
+      const saved = shared ? shared.slice(0,800) : localStorage.getItem(STORAGE);
+      if(saved) setPortal(restore(JSON.parse(saved)));
+    } catch { /* Invalid shared previews or blocked storage fall back safely. */ }
     setLoaded(true);
   }, []);
   useEffect(() => {
@@ -85,19 +99,50 @@ export default function ExamProStudioPage() {
   }, [portal, loaded]);
   useEffect(() => {
     let mounted = true;
+    api<{topics:CompetitiveTopic[]}>('/api/v1/exampro/competitive-topics',{public:true})
+      .then(result=>{ if(mounted && result.success && result.data)setCompetitive(result.data.topics); })
+      .catch(()=>{ /* Older APIs do not have the metadata route. */ });
+    api<{topics:TopicAccuracy[]}>('/api/v1/exampro/topic-accuracy',{optionalAuth:true})
+      .then(result=>{if(mounted&&result.success&&result.data){
+        setAccuracy(Object.fromEntries(result.data.topics.map(topic=>[topic.topicId,topic])));
+      }}).catch(()=>{ /* Guests do not have personal scored accuracy. */ });
     fetchCatalog().then(data => { if (mounted) { setTests(data); setCatalogStatus(''); } })
       .catch(() => { if (mounted) setCatalogStatus('Could not load published mocks. The catalogue link is still available.'); });
     return () => { mounted = false; };
   }, []);
 
+  // A legacy ?test= link is only resolved after the public catalog confirms publication.
+  // The actual server-timed exam is started by the student on /india-mocks/:id.
+  useEffect(() => {
+    if(catalogStatus)return;
+    const testId = new URLSearchParams(window.location.search).get('test');
+    if(!testId)return;
+    if(!validShareTestId(testId)||!tests.some(test=>test.id===testId)) {
+      setSharedError('This shared test is not published or its link is invalid.');
+      return;
+    }
+    window.location.replace('/india-mocks/'+encodeURIComponent(testId)+
+      (language!=='en'?'?lang='+language:''));
+  },[catalogStatus,tests,language]);
+
   const categories = useMemo(() => ['All',...Array.from(new Set(tests.map(t => t.exam)))], [tests]);
-  const shown = useMemo(() => tests.filter(t => filter === 'All' || t.exam === filter).slice(0,6), [tests,filter]);
+  const shown = useMemo(() => tests.filter(t => filter === 'All' || t.exam === filter), [tests,filter]);
   const name = portal.name.trim() || 'Your Institute';
   const batches = portal.batches.split(',').map(s=>s.trim()).filter(Boolean).slice(0,6);
   const initials = name.split(/\s+/).slice(0,2).map(s=>s[0]).join('').toUpperCase();
   const group = groupUrl(portal.group);
   const ink = foreground(portal.color);
   const change = (value: Partial<Portal>) => setPortal(current => ({...current,...value}));
+  async function copyBrandedPortal(){
+    // The preview link contains only public visual branding, never private contact or logo data.
+    const share = new URL('/exampro#portal',window.location.origin);
+    share.hash='portal';
+    share.searchParams.set('brand',JSON.stringify({
+      name:portal.name,tagline:portal.tagline,color:portal.color,batches:portal.batches,
+    }));
+    try {await navigator.clipboard.writeText(share.href);setPortalCopied(true);}
+    catch {setNotice('Could not copy. Your browser may block clipboard access.');}
+  }
   function logo(file?: File) {
     if (!file) return;
     if (!['image/jpeg','image/png','image/webp'].includes(file.type)) { setLogoError('Use PNG, JPG or WebP.'); return; }
@@ -117,7 +162,7 @@ export default function ExamProStudioPage() {
     <main className="flex-1 bg-[#f4f6fb] text-[#101a33] dark:bg-slate-950 dark:text-white">
       <div className="border-b border-slate-200 bg-white py-3 dark:border-slate-800 dark:bg-slate-900">
         <nav aria-label="ExamPro feature sections" className="mx-auto flex max-w-6xl flex-wrap gap-x-6 gap-y-2 px-4 text-sm font-semibold">
-          <a href="#how">How to use it</a><a href="#practice">Mock tests</a><a href="#progress">My progress</a><a href="#portal">Portal builder</a><a href="#contact">WhatsApp</a>
+          <a href="#how">How to use it</a><a href="#practice">Mock tests</a><a href="#builder">Competitive builder</a><a href="#progress">My progress</a><a href="#portal">Portal builder</a><a href="#contact">WhatsApp</a>
         </nav>
       </div>
       <section className="ep-hero relative mx-auto grid max-w-6xl gap-10 overflow-hidden rounded-b-3xl px-4 py-16 lg:grid-cols-2 lg:items-center lg:py-24">
@@ -168,23 +213,86 @@ export default function ExamProStudioPage() {
       <section id="practice" className="mx-auto max-w-6xl px-4 py-16">
         <p className="font-mono text-xs font-bold uppercase text-orange-700 dark:text-orange-400">Practice library</p>
         <h2 className="mt-3 text-3xl font-extrabold">Take a real mock test.</h2>
-        <p className="mt-3 text-slate-600 dark:text-slate-300">These tests come from the live ExamPro API. They are not duplicated into a standalone HTML exam engine.</p>
+        <p className="mt-3 text-slate-600 dark:text-slate-300">Tests come from the live Render/Neon catalogue. Use the language toggle for supported exam UI labels; automatic question translation needs Azure Translator configured on Render.</p>
+        {sharedError && <p className="mt-4 rounded-lg border border-amber-400 bg-amber-50 p-3 text-sm text-amber-950" role="alert">{sharedError}</p>}
         {catalogStatus ? <p className="mt-6" role="status">{catalogStatus}</p> : <>
           <div className="mt-6 flex flex-wrap gap-2" role="group" aria-label="Filter exams">{categories.map(c=>
             <button key={c} type="button" aria-pressed={filter===c} onClick={()=>setFilter(c)}
               className={'rounded-full border px-4 py-2 text-sm font-semibold ' + (filter===c?'border-slate-900 bg-slate-900 text-white dark:bg-white dark:text-slate-900':'border-slate-300 bg-white text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white')}>{c}</button>)}
           </div>
-          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">{shown.map(t=>
+          <div id="tgrid" className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">{shown.filter(t=>!competitive.some(c=>c.practiceTestId===t.id)).map(t=>
             <article key={t.id} className="ep-card flex h-full flex-col gap-3 rounded-2xl p-6 text-slate-900 dark:text-white">
               <div className="flex justify-between gap-2"><h3 className="font-bold">{t.name}</h3><span className={'h-fit rounded px-2 py-1 text-xs font-semibold ' + (t.tier==='free'?'bg-emerald-100 text-emerald-900':'bg-amber-100 text-amber-900')}>{t.tier==='free'?'Free':'Pro'}</span></div>
               <p className="text-sm text-slate-500 dark:text-slate-300">{t.exam} · {t.questionCount} questions · {t.minutes} min</p>
               <p className="text-xs text-slate-500 dark:text-slate-300">{t.sections.join(' · ')}</p>
               <Link href={'/india-mocks/'+encodeURIComponent(t.id)} className="mt-auto inline-flex min-h-10 items-center justify-center rounded-lg bg-slate-900 px-4 py-2 font-bold text-white dark:bg-white dark:text-slate-900">Open test</Link>
+              <ShareTestButtons testId={t.id} title={t.name} compact/>
             </article>)}
+            {competitive.filter(topic=>filter==='All'||topic.category===filter).map(topic=>
+              <article key={topic.id} className="ep-card flex h-full flex-col gap-3 rounded-2xl p-6">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="font-bold">{topic.name}</h3>
+                  <span className={'rounded px-2 py-1 text-xs font-semibold '+(topic.practiceTestId?'bg-emerald-100 text-emerald-900':'bg-amber-100 text-amber-950')}>
+                    {topic.practiceTestId?t('available'):t('upcoming')}
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground">{topic.category} · {topic.questionCount} questions in the question bank</p>
+                <p className="text-xs text-muted-foreground">{topic.practiceTestId?'Published practice topic':'Not yet published for students'}</p>
+                {topic.practiceTestId
+                  ? <Link href={'/india-mocks/'+encodeURIComponent(topic.practiceTestId)+'?mode=practice'}
+                      className="mt-auto inline-flex min-h-10 items-center justify-center rounded-lg bg-indigo-700 px-4 py-2 font-semibold text-white">Open practice</Link>
+                  : <span className="mt-auto inline-flex min-h-10 items-center justify-center rounded-lg border px-4 py-2 text-sm text-muted-foreground" aria-disabled="true">Awaiting admin review</span>}
+                {topic.practiceTestId && <ShareTestButtons testId={topic.practiceTestId} title={topic.name} compact/>}
+              </article>)}
           </div>
           {!shown.length && <p className="mt-6">No active mocks in this category.</p>}
         </>}
         <div className="mt-7 flex flex-wrap gap-3"><Link className="rounded-lg border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-900" href="/india-mocks">All mock tests</Link><Link className="rounded-lg border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-900" href="/certifications">IT certifications</Link><Link className="rounded-lg border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-900" href="/bookmarks">Saved questions</Link></div>
+      </section>
+
+      <section id="builder" className="mx-auto max-w-6xl px-4 pb-16">
+        <p className="font-mono text-xs font-bold uppercase text-indigo-700 dark:text-indigo-300">Live competitive question bank</p>
+        <h2 className="mt-3 text-3xl font-extrabold">Build a topic practice session</h2>
+        <p className="mt-3 max-w-3xl text-sm text-slate-600 dark:text-slate-300">
+          All four 125-question topics are synced from Neon. Only active topics can be selected.
+          Unpublished topics remain visible as coming soon, not as playable tests.
+          Multi-topic sessions are unscored practice; topic accuracy appears in the results.
+        </p>
+        <div id="bTopics" className="mt-6 grid gap-3 sm:grid-cols-2" role="group" aria-label="Competitive topics">
+          {competitive.map(topic=><label key={topic.id} className="ep-card flex items-start gap-3 rounded-xl p-4">
+            <input type="checkbox" className="mt-1 h-4 w-4" disabled={!topic.practiceTestId}
+              checked={Boolean(topic.practiceTestId&&selected.includes(topic.practiceTestId))}
+              onChange={event=>{
+                const id=topic.practiceTestId;
+                if(!id)return;
+                setSelected(before=>event.target.checked?[...before,id]:before.filter(value=>value!==id));
+              }}/>
+            <span className="flex-1">
+              <span className="block font-semibold">{topic.name}</span>
+              <span className="mt-1 block text-xs text-muted-foreground">{topic.questionCount} questions · {topic.practiceTestId?t('available'):t('upcoming')}</span>
+              {accuracy[topic.id]?.attempted
+                ? <span className="mt-3 block">
+                    <span className="text-xs text-muted-foreground">Scored accuracy: {accuracy[topic.id].percent}% from {accuracy[topic.id].attempted} answers</span>
+                    <span className="mt-1 block h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                      <span className="block h-full rounded-full bg-indigo-600" style={{width:accuracy[topic.id].percent+'%'}} />
+                    </span>
+                  </span>
+                : <span className="mt-2 block text-xs text-muted-foreground">No scored attempts yet</span>}
+            </span>
+            {topic.practiceTestId && <Link href={'/india-mocks/'+encodeURIComponent(topic.practiceTestId)+'?mode=practice'}
+              className="text-sm font-semibold text-indigo-700 underline dark:text-indigo-300">Practice</Link>}
+          </label>)}
+        </div>
+        {!competitive.length && <p className="mt-4 text-sm text-muted-foreground">Competitive topics are temporarily unavailable. Existing published mocks remain accessible above.</p>}
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          {selected.length>0
+            ? <Link href={'/exampro/custom-practice?topics='+encodeURIComponent(selected.join(','))}
+                className="inline-flex min-h-11 items-center rounded-lg bg-indigo-700 px-5 py-3 font-semibold text-white">
+                Start practice with {selected.length} topic{selected.length===1?'':'s'}
+              </Link>
+            : <span className="rounded-lg border bg-muted/40 px-5 py-3 text-sm text-muted-foreground">Choose an available topic to start</span>}
+          <Link href="/admin" className="text-sm font-semibold text-indigo-700 underline dark:text-indigo-300">Owner: review and publish topics</Link>
+        </div>
       </section>
 
       <section id="progress" className="border-y border-slate-200 bg-white py-14 text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-white">
@@ -224,6 +332,8 @@ export default function ExamProStudioPage() {
               {portal.group && !group && <p className="text-sm text-amber-300">Enter a valid https://chat.whatsapp.com invite URL.</p>}
               <p className="text-sm text-slate-300" role="status">{notice || 'Changes stay in this browser and are not uploaded.'}</p>
               <button type="button" onClick={()=>{setPortal(INITIAL);setLogoError('');}} className="inline-flex w-fit items-center gap-2 rounded-lg border border-slate-500 px-4 py-2 text-sm font-semibold"><RotateCcw size={16}/> Reset preview</button>
+              <button type="button" onClick={()=>void copyBrandedPortal()} className="inline-flex w-fit items-center gap-2 rounded-lg border border-slate-500 px-4 py-2 text-sm font-semibold">{portalCopied?'Branded preview link copied':'Copy branded portal link'}</button>
+              <p className="text-xs text-slate-300">Shares name, tagline, colours and batches as a preview only; logos and contact details are not included. Does not publish an institute portal.</p>
             </form>
             <div className="ep-preview-surface overflow-hidden rounded-3xl border border-slate-200 bg-white text-slate-900 shadow-xl lg:sticky lg:top-24 lg:self-start">
               <div className="flex gap-1 border-b border-slate-200 bg-slate-100 px-4 py-3"><span className="h-2 w-2 rounded-full bg-slate-400"/><span className="h-2 w-2 rounded-full bg-slate-400"/><span className="h-2 w-2 rounded-full bg-slate-400"/><span className="ml-3 truncate font-mono text-xs text-slate-500">institute-preview.exampro.example</span></div>

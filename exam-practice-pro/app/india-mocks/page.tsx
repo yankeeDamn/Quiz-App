@@ -8,6 +8,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
 import { WhatsAppButton } from '@/components/mocks/whatsapp-button';
+import { ShareTestButtons } from '@/components/exampro/share-test-buttons';
 import { usePlan } from '@/hooks/use-plan';
 import { IT_CERTS, buildCertTest } from '@/lib/it-certs';
 import { fetchCatalog, negativeLabel, type MockSummary } from '@/lib/mocks';
@@ -160,6 +161,7 @@ function Catalogue() {
                     </>
                   )}
                 </div>
+                <ShareTestButtons testId={t.id} title={t.name} compact />
               </article>
             );
           })}

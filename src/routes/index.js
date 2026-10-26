@@ -10,12 +10,14 @@ const mocksRoutes = require('./mocks');
 const adminRoutes = require('./admin');
 const examAttemptRoutes = require('./exam-attempts');
 const practiceRoutes = require('./practice');
+const { router: examproFeatures } = require('./exampro-features');
 
 const router = Router();
 
 // ── API v1 routes ──────────────────────────────────────
 router.use('/health', healthRoutes);
 router.use('/mocks', mocksRoutes);
+router.use('/exampro', examproFeatures);
 router.use('/practice', practiceRoutes);
 router.use('/exam-attempts', examAttemptRoutes);
 router.use('/admin', adminRoutes);

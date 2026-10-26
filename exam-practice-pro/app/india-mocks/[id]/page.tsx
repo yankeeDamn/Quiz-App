@@ -11,6 +11,7 @@ import { ExamEngine } from '@/components/mocks/exam-engine';
 import { SecureExam } from '@/components/mocks/secure-exam';
 
 import { WhatsAppButton } from '@/components/mocks/whatsapp-button';
+import { ShareTestButtons } from '@/components/exampro/share-test-buttons';
 import { fetchMock, negativeLabel, type MockLoad } from '@/lib/mocks';
 
 function Notice({ title, children }: { title: string; children: React.ReactNode }) {
@@ -112,6 +113,7 @@ function MockPage() {
           <li>Sections: {test.sections.map((s) => s.name).join(', ')}</li>
         </ul>
         <p className="text-muted-foreground">The timer starts when you press Start. The test submits itself when time runs out.</p>
+        <ShareTestButtons testId={test.id} title={test.name} compact />
         <div className="flex flex-wrap gap-2">
           <Button onClick={() => setStarted(true)}>Start test</Button>
           <Button variant="outline" asChild>

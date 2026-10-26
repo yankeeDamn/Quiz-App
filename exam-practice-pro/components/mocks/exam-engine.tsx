@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Bookmark, Clock, Flag, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { WhatsAppButton } from '@/components/mocks/whatsapp-button';
+import { LanguageSwitcher, useExamLanguage, useTranslatedTexts } from '@/components/exampro/exam-language';
+import { ShareTestButtons } from '@/components/exampro/share-test-buttons';
 import {
   type MockTest,
   type Shuffled,
@@ -53,6 +55,9 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [saved, setSaved] = useState<string[]>(() => readSaved());
   const [tabSwitches, setTabSwitches] = useState(0);
+  const {t} = useExamLanguage();
+  const visibleQuestion = items[current]?.question;
+  const translated = useTranslatedTexts(visibleQuestion?[visibleQuestion.question,...visibleQuestion.options,visibleQuestion.explanation]:[]);
   const spent = useRef<number[]>(test.questions.map(() => 0));
   const submitRef = useRef<() => void>(() => {});
 
@@ -209,7 +214,9 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
             <Layers className="mr-2 h-4 w-4" aria-hidden="true" />
             Palette
           </Button>
-          <Button onClick={() => setConfirming(true)}>{practice ? 'Finish' : 'Submit'}</Button>
+          <LanguageSwitcher small />
+          {test.id!=='custom-comp-practice' && <ShareTestButtons testId={test.id} title={test.name} compact/>}
+          <Button onClick={() => setConfirming(true)}>{practice ? 'Finish' : t('submit')}</Button>
         </div>
       </div>
 
@@ -252,7 +259,8 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
             </button>
           </div>
 
-          <h2 className="mt-4 text-xl font-semibold leading-snug">{q.question}</h2>
+          <h2 className="mt-4 text-xl font-semibold leading-snug">{translated.texts[0]||q.question}</h2>
+          {translated.warning&&<p role="status" className="mt-2 text-xs text-amber-700 dark:text-amber-300">{translated.warning}</p>}
 
           <div className="mt-5 grid gap-3" role="group" aria-label="Options">
             {item.order.map((original, position) => {
@@ -282,7 +290,7 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
                   >
                     {LETTERS[position]}
                   </span>
-                  <span className="min-w-0 break-words">{q.options[original]}</span>
+                  <span className="min-w-0 break-words">{translated.texts[1+original]||q.options[original]}</span>
                 </button>
               );
             })}
@@ -297,7 +305,7 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
               <p className="font-semibold">
                 {item.order[picked] === q.answer ? 'Correct.' : `Not quite. The answer is ${LETTERS[item.order.indexOf(q.answer)]}.`}
               </p>
-              <p className="mt-1 text-sm">{q.explanation}</p>
+              <p className="mt-1 text-sm">{translated.texts[1+q.options.length]||q.explanation}</p>
               <DoubtButton test={test} item={item} index={current} picked={picked} />
             </div>
           )}
@@ -328,12 +336,12 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
             )}
             <span className="flex-1" />
             <Button variant="outline" onClick={() => goTo(current - 1)} disabled={current === 0}>
-              Previous
+              {t('previous')}
             </Button>
             {current === test.questions.length - 1 ? (
               <Button onClick={() => setConfirming(true)}>{practice ? 'Finish practice' : 'Save and review'}</Button>
             ) : (
-              <Button onClick={() => goTo(current + 1)}>{practice ? 'Next' : 'Save and next'}</Button>
+              <Button onClick={() => goTo(current + 1)}>{practice ? t('next') : 'Save and next'}</Button>
             )}
           </div>
         </section>
@@ -518,6 +526,7 @@ function ResultView({
     <div className="mx-auto w-full max-w-4xl px-4 py-8">
       <p className="text-sm font-semibold text-blue-700 dark:text-blue-400">{practice ? 'Practice summary' : 'Result'}</p>
       <h1 className="mt-1 text-2xl font-bold">{test.name}</h1>
+      {test.id!=='custom-comp-practice' && <div className="mt-3"><ShareTestButtons testId={test.id} title={test.name} compact/></div>}
 
       <div className="mt-5 grid gap-4 rounded-xl border bg-card p-6 sm:grid-cols-[auto_1fr] sm:items-center">
         <p className="text-5xl font-extrabold tabular-nums">{headline}</p>
