@@ -31,15 +31,15 @@
       "reviewStatus": "needs_human_review"
     },
     {
-      "question": "Choose the correct preposition: 'The guest insisted ___ paying the bill.'",
+      "question": "Choose the correct preposition: 'The committee objected ___ the proposed changes.'",
       "options": [
-        "for",
         "on",
-        "at",
-        "by"
+        "to",
+        "for",
+        "at"
       ],
       "answer": 1,
-      "explanation": "The verb 'insist' is conventionally followed by 'on' before a noun or gerund: insisted on paying.",
+      "explanation": "In this construction, 'object to' means express disagreement with something; the natural form is 'objected to the proposed changes'.",
       "difficulty": "Moderate",
       "subtopic": "prepositions",
       "reviewStatus": "needs_human_review"
