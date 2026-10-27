@@ -1,0 +1,356 @@
+{
+  "section": "General Awareness",
+  "topicId": "ssc26-m01-awareness",
+  "questions": [
+    {
+      "question": "On which date did the Constituent Assembly of India adopt the Constitution?",
+      "options": [
+        "15 August 1947",
+        "26 January 1950",
+        "26 November 1949",
+        "2 October 1949"
+      ],
+      "answer": 2,
+      "explanation": "The Constituent Assembly adopted India's Constitution on 26 November 1949; most provisions came into force on 26 January 1950.",
+      "difficulty": "Moderate",
+      "subtopic": "polity-history",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Which Article of the Indian Constitution protects life and personal liberty?",
+      "options": [
+        "Article 14",
+        "Article 19",
+        "Article 21",
+        "Article 32"
+      ],
+      "answer": 2,
+      "explanation": "Article 21 states that no person shall be deprived of life or personal liberty except according to procedure established by law.",
+      "difficulty": "Easy",
+      "subtopic": "fundamental-rights",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "The Directive Principles of State Policy are contained in which Part of the Constitution?",
+      "options": [
+        "Part III",
+        "Part IV",
+        "Part IVA",
+        "Part V"
+      ],
+      "answer": 1,
+      "explanation": "Part IV, Articles 36 to 51, contains the Directive Principles of State Policy; Part III contains Fundamental Rights.",
+      "difficulty": "Moderate",
+      "subtopic": "constitutional-provisions",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Which Constitutional Amendment gave constitutional status to Panchayati Raj institutions?",
+      "options": [
+        "42nd Amendment",
+        "44th Amendment",
+        "73rd Amendment",
+        "86th Amendment"
+      ],
+      "answer": 2,
+      "explanation": "The 73rd Constitutional Amendment Act, 1992 added Part IX and the Eleventh Schedule for rural Panchayati Raj institutions.",
+      "difficulty": "Hard",
+      "subtopic": "local-government",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Who ordinarily presides over a sitting of the Lok Sabha?",
+      "options": [
+        "President of India",
+        "Speaker of the Lok Sabha",
+        "Chief Justice of India",
+        "Chairperson of the Rajya Sabha"
+      ],
+      "answer": 1,
+      "explanation": "The Speaker presides over Lok Sabha sittings, maintains order and applies the House's rules of procedure.",
+      "difficulty": "Moderate",
+      "subtopic": "parliament",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Which court can directly be approached under Article 32 for enforcement of Fundamental Rights?",
+      "options": [
+        "District Court",
+        "High Court only",
+        "Supreme Court",
+        "Gram Nyayalaya"
+      ],
+      "answer": 2,
+      "explanation": "Article 32 gives the right to move the Supreme Court for enforcement of the Fundamental Rights in Part III.",
+      "difficulty": "Moderate",
+      "subtopic": "fundamental-rights",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Which Veda is generally regarded as the oldest of the four Vedas?",
+      "options": [
+        "Atharvaveda",
+        "Rigveda",
+        "Samaveda",
+        "Yajurveda"
+      ],
+      "answer": 1,
+      "explanation": "The Rigveda is the earliest of the four Vedic collections and principally contains hymns to Vedic deities.",
+      "difficulty": "Moderate",
+      "subtopic": "ancient-history",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "In which city did the uprising of 1857 begin among sepoys on 10 May 1857?",
+      "options": [
+        "Lucknow",
+        "Kanpur",
+        "Meerut",
+        "Jhansi"
+      ],
+      "answer": 2,
+      "explanation": "The sepoy uprising broke out at Meerut on 10 May 1857 before rebels proceeded towards Delhi.",
+      "difficulty": "Easy",
+      "subtopic": "modern-history",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "The Dandi March of 1930 protested which colonial measure?",
+      "options": [
+        "Salt tax",
+        "Income tax",
+        "Land ceiling",
+        "Import duty on cotton"
+      ],
+      "answer": 0,
+      "explanation": "Gandhi's march from Sabarmati to Dandi challenged the British salt monopoly and the tax on salt.",
+      "difficulty": "Moderate",
+      "subtopic": "freedom-movement",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "The Chauri Chaura incident of 1922 is linked to the withdrawal of which movement?",
+      "options": [
+        "Civil Disobedience Movement",
+        "Quit India Movement",
+        "Non-Cooperation Movement",
+        "Swadeshi Movement"
+      ],
+      "answer": 2,
+      "explanation": "Following the violence at Chauri Chaura in February 1922, Gandhi suspended the Non-Cooperation Movement.",
+      "difficulty": "Moderate",
+      "subtopic": "freedom-movement",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "The 'Arthashastra' is traditionally attributed to which scholar?",
+      "options": [
+        "Kalidasa",
+        "Kautilya",
+        "Banabhatta",
+        "Patanjali"
+      ],
+      "answer": 1,
+      "explanation": "The treatise on statecraft and economic administration is traditionally associated with Kautilya, also called Chanakya.",
+      "difficulty": "Hard",
+      "subtopic": "ancient-history",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Which Indian state contains the famous Sun Temple at Konark?",
+      "options": [
+        "Odisha",
+        "Gujarat",
+        "Rajasthan",
+        "Karnataka"
+      ],
+      "answer": 0,
+      "explanation": "The thirteenth-century Konark Sun Temple stands on the Odisha coast and is dedicated to Surya.",
+      "difficulty": "Moderate",
+      "subtopic": "cultural-heritage",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Which physical feature runs broadly parallel to the western coast of peninsular India?",
+      "options": [
+        "Aravalli Range",
+        "Western Ghats",
+        "Vindhya Range",
+        "Eastern Ghats"
+      ],
+      "answer": 1,
+      "explanation": "The Western Ghats form a mountain chain along the western side of peninsular India, broadly parallel to the Arabian Sea coast.",
+      "difficulty": "Moderate",
+      "subtopic": "physical-geography",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "The Godavari is often called the Dakshin Ganga. Into which water body does it empty?",
+      "options": [
+        "Arabian Sea",
+        "Bay of Bengal",
+        "Gulf of Kutch",
+        "Chilika Lake"
+      ],
+      "answer": 1,
+      "explanation": "The Godavari flows generally east across peninsular India and forms a delta along the Bay of Bengal.",
+      "difficulty": "Easy",
+      "subtopic": "rivers",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Black or regur soil of the Deccan is particularly well suited to which major crop?",
+      "options": [
+        "Cotton",
+        "Tea",
+        "Jute",
+        "Rubber"
+      ],
+      "answer": 0,
+      "explanation": "Black cotton soil retains moisture and is traditionally associated with cotton cultivation in much of the Deccan plateau.",
+      "difficulty": "Moderate",
+      "subtopic": "agricultural-geography",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Chilika Lake, a large brackish-water lagoon, lies in which Indian state?",
+      "options": [
+        "West Bengal",
+        "Odisha",
+        "Kerala",
+        "Tamil Nadu"
+      ],
+      "answer": 1,
+      "explanation": "Chilika is a brackish-water lagoon situated on the Odisha coast, separated from the Bay of Bengal by a sandy barrier.",
+      "difficulty": "Moderate",
+      "subtopic": "Indian-geography",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Kaziranga National Park, associated with the Indian one-horned rhinoceros, is in which state?",
+      "options": [
+        "Assam",
+        "Sikkim",
+        "Bihar",
+        "Mizoram"
+      ],
+      "answer": 0,
+      "explanation": "Kaziranga is in Assam and is internationally known for its conservation of the greater one-horned rhinoceros.",
+      "difficulty": "Moderate",
+      "subtopic": "environment",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Most of Earth's protective atmospheric ozone layer occurs in which layer?",
+      "options": [
+        "Troposphere",
+        "Stratosphere",
+        "Mesosphere",
+        "Thermosphere"
+      ],
+      "answer": 1,
+      "explanation": "Most atmospheric ozone is concentrated in the stratosphere, where it absorbs much of the Sun's harmful ultraviolet radiation.",
+      "difficulty": "Hard",
+      "subtopic": "environmental-science",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Which element is present at the centre of the haem group in haemoglobin?",
+      "options": [
+        "Copper",
+        "Calcium",
+        "Iron",
+        "Sodium"
+      ],
+      "answer": 2,
+      "explanation": "Iron in the haem group of haemoglobin binds oxygen reversibly and helps transport it through blood.",
+      "difficulty": "Moderate",
+      "subtopic": "human-biology",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "A prolonged deficiency of vitamin C causes which condition?",
+      "options": [
+        "Rickets",
+        "Scurvy",
+        "Night blindness",
+        "Beriberi"
+      ],
+      "answer": 1,
+      "explanation": "Vitamin C is required for normal collagen formation; severe deficiency causes scurvy with bleeding gums and impaired wound healing.",
+      "difficulty": "Easy",
+      "subtopic": "nutrition",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Which plant tissue chiefly conducts water and dissolved minerals from roots towards leaves?",
+      "options": [
+        "Phloem",
+        "Cambium",
+        "Xylem",
+        "Epidermis"
+      ],
+      "answer": 2,
+      "explanation": "Xylem transports water and mineral ions upward through vessels and tracheids; phloem chiefly transports sugars.",
+      "difficulty": "Moderate",
+      "subtopic": "plant-biology",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "What is the SI unit of electrical resistance?",
+      "options": [
+        "Volt",
+        "Ohm",
+        "Ampere",
+        "Watt"
+      ],
+      "answer": 1,
+      "explanation": "Electrical resistance is measured in ohms (Ω); by Ohm's law, one ohm equals one volt per ampere.",
+      "difficulty": "Moderate",
+      "subtopic": "physics",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Which device is used to measure atmospheric pressure?",
+      "options": [
+        "Hygrometer",
+        "Barometer",
+        "Anemometer",
+        "Calorimeter"
+      ],
+      "answer": 1,
+      "explanation": "A barometer measures atmospheric pressure, while a hygrometer measures humidity and an anemometer measures wind speed.",
+      "difficulty": "Moderate",
+      "subtopic": "measurement",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "In which year did the Reserve Bank of India begin operations?",
+      "options": [
+        "1920",
+        "1935",
+        "1947",
+        "1950"
+      ],
+      "answer": 1,
+      "explanation": "The Reserve Bank of India commenced operations on 1 April 1935 under the Reserve Bank of India Act, 1934.",
+      "difficulty": "Moderate",
+      "subtopic": "Indian-economy",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Which of the following is an example of a direct tax in India?",
+      "options": [
+        "Goods and Services Tax",
+        "Customs duty",
+        "Income tax",
+        "Excise duty"
+      ],
+      "answer": 2,
+      "explanation": "Income tax is levied directly on the income of persons or entities; GST, customs duty and excise duty are indirect taxes.",
+      "difficulty": "Hard",
+      "subtopic": "taxation",
+      "reviewStatus": "needs_human_review"
+    }
+  ]
+}
