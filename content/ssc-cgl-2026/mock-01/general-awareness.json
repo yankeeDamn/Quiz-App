@@ -6,11 +6,11 @@
       "question": "On which date did the Constituent Assembly of India adopt the Constitution?",
       "options": [
         "15 August 1947",
-        "26 January 1950",
         "26 November 1949",
+        "26 January 1950",
         "2 October 1949"
       ],
-      "answer": 2,
+      "answer": 1,
       "explanation": "The Constituent Assembly adopted India's Constitution on 26 November 1949; most provisions came into force on 26 January 1950.",
       "difficulty": "Moderate",
       "subtopic": "polity-history",
@@ -34,11 +34,11 @@
       "question": "The Directive Principles of State Policy are contained in which Part of the Constitution?",
       "options": [
         "Part III",
-        "Part IV",
+        "Part V",
         "Part IVA",
-        "Part V"
+        "Part IV"
       ],
-      "answer": 1,
+      "answer": 3,
       "explanation": "Part IV, Articles 36 to 51, contains the Directive Principles of State Policy; Part III contains Fundamental Rights.",
       "difficulty": "Moderate",
       "subtopic": "constitutional-provisions",
@@ -47,12 +47,12 @@
     {
       "question": "Which Constitutional Amendment gave constitutional status to Panchayati Raj institutions?",
       "options": [
-        "42nd Amendment",
-        "44th Amendment",
         "73rd Amendment",
+        "44th Amendment",
+        "42nd Amendment",
         "86th Amendment"
       ],
-      "answer": 2,
+      "answer": 0,
       "explanation": "The 73rd Constitutional Amendment Act, 1992 added Part IX and the Eleventh Schedule for rural Panchayati Raj institutions.",
       "difficulty": "Hard",
       "subtopic": "local-government",
@@ -90,11 +90,11 @@
       "question": "Which Veda is generally regarded as the oldest of the four Vedas?",
       "options": [
         "Atharvaveda",
-        "Rigveda",
+        "Yajurveda",
         "Samaveda",
-        "Yajurveda"
+        "Rigveda"
       ],
-      "answer": 1,
+      "answer": 3,
       "explanation": "The Rigveda is the earliest of the four Vedic collections and principally contains hymns to Vedic deities.",
       "difficulty": "Moderate",
       "subtopic": "ancient-history",
@@ -103,12 +103,12 @@
     {
       "question": "In which city did the uprising of 1857 begin among sepoys on 10 May 1857?",
       "options": [
-        "Lucknow",
-        "Kanpur",
         "Meerut",
+        "Kanpur",
+        "Lucknow",
         "Jhansi"
       ],
-      "answer": 2,
+      "answer": 0,
       "explanation": "The sepoy uprising broke out at Meerut on 10 May 1857 before rebels proceeded towards Delhi.",
       "difficulty": "Easy",
       "subtopic": "modern-history",
@@ -117,12 +117,12 @@
     {
       "question": "The Dandi March of 1930 protested which colonial measure?",
       "options": [
-        "Salt tax",
         "Income tax",
+        "Salt tax",
         "Land ceiling",
         "Import duty on cotton"
       ],
-      "answer": 0,
+      "answer": 1,
       "explanation": "Gandhi's march from Sabarmati to Dandi challenged the British salt monopoly and the tax on salt.",
       "difficulty": "Moderate",
       "subtopic": "freedom-movement",
@@ -146,11 +146,11 @@
       "question": "The 'Arthashastra' is traditionally attributed to which scholar?",
       "options": [
         "Kalidasa",
-        "Kautilya",
+        "Patanjali",
         "Banabhatta",
-        "Patanjali"
+        "Kautilya"
       ],
-      "answer": 1,
+      "answer": 3,
       "explanation": "The treatise on statecraft and economic administration is traditionally associated with Kautilya, also called Chanakya.",
       "difficulty": "Hard",
       "subtopic": "ancient-history",
@@ -188,11 +188,11 @@
       "question": "The Godavari is often called the Dakshin Ganga. Into which water body does it empty?",
       "options": [
         "Arabian Sea",
-        "Bay of Bengal",
         "Gulf of Kutch",
+        "Bay of Bengal",
         "Chilika Lake"
       ],
-      "answer": 1,
+      "answer": 2,
       "explanation": "The Godavari flows generally east across peninsular India and forms a delta along the Bay of Bengal.",
       "difficulty": "Easy",
       "subtopic": "rivers",
@@ -201,12 +201,12 @@
     {
       "question": "Black or regur soil of the Deccan is particularly well suited to which major crop?",
       "options": [
-        "Cotton",
+        "Rubber",
         "Tea",
         "Jute",
-        "Rubber"
+        "Cotton"
       ],
-      "answer": 0,
+      "answer": 3,
       "explanation": "Black cotton soil retains moisture and is traditionally associated with cotton cultivation in much of the Deccan plateau.",
       "difficulty": "Moderate",
       "subtopic": "agricultural-geography",
@@ -215,12 +215,12 @@
     {
       "question": "Chilika Lake, a large brackish-water lagoon, lies in which Indian state?",
       "options": [
-        "West Bengal",
         "Odisha",
+        "West Bengal",
         "Kerala",
         "Tamil Nadu"
       ],
-      "answer": 1,
+      "answer": 0,
       "explanation": "Chilika is a brackish-water lagoon situated on the Odisha coast, separated from the Bay of Bengal by a sandy barrier.",
       "difficulty": "Moderate",
       "subtopic": "Indian-geography",
@@ -229,12 +229,12 @@
     {
       "question": "Kaziranga National Park, associated with the Indian one-horned rhinoceros, is in which state?",
       "options": [
-        "Assam",
         "Sikkim",
+        "Assam",
         "Bihar",
         "Mizoram"
       ],
-      "answer": 0,
+      "answer": 1,
       "explanation": "Kaziranga is in Assam and is internationally known for its conservation of the greater one-horned rhinoceros.",
       "difficulty": "Moderate",
       "subtopic": "environment",
@@ -244,11 +244,11 @@
       "question": "Most of Earth's protective atmospheric ozone layer occurs in which layer?",
       "options": [
         "Troposphere",
-        "Stratosphere",
         "Mesosphere",
+        "Stratosphere",
         "Thermosphere"
       ],
-      "answer": 1,
+      "answer": 2,
       "explanation": "Most atmospheric ozone is concentrated in the stratosphere, where it absorbs much of the Sun's harmful ultraviolet radiation.",
       "difficulty": "Hard",
       "subtopic": "environmental-science",
@@ -259,10 +259,10 @@
       "options": [
         "Copper",
         "Calcium",
-        "Iron",
-        "Sodium"
+        "Sodium",
+        "Iron"
       ],
-      "answer": 2,
+      "answer": 3,
       "explanation": "Iron in the haem group of haemoglobin binds oxygen reversibly and helps transport it through blood.",
       "difficulty": "Moderate",
       "subtopic": "human-biology",
@@ -271,12 +271,12 @@
     {
       "question": "A prolonged deficiency of vitamin C causes which condition?",
       "options": [
-        "Rickets",
         "Scurvy",
+        "Rickets",
         "Night blindness",
         "Beriberi"
       ],
-      "answer": 1,
+      "answer": 0,
       "explanation": "Vitamin C is required for normal collagen formation; severe deficiency causes scurvy with bleeding gums and impaired wound healing.",
       "difficulty": "Easy",
       "subtopic": "nutrition",
@@ -286,11 +286,11 @@
       "question": "Which plant tissue chiefly conducts water and dissolved minerals from roots towards leaves?",
       "options": [
         "Phloem",
-        "Cambium",
         "Xylem",
+        "Cambium",
         "Epidermis"
       ],
-      "answer": 2,
+      "answer": 1,
       "explanation": "Xylem transports water and mineral ions upward through vessels and tracheids; phloem chiefly transports sugars.",
       "difficulty": "Moderate",
       "subtopic": "plant-biology",
@@ -300,11 +300,11 @@
       "question": "What is the SI unit of electrical resistance?",
       "options": [
         "Volt",
-        "Ohm",
         "Ampere",
+        "Ohm",
         "Watt"
       ],
-      "answer": 1,
+      "answer": 2,
       "explanation": "Electrical resistance is measured in ohms (Ω); by Ohm's law, one ohm equals one volt per ampere.",
       "difficulty": "Moderate",
       "subtopic": "physics",
@@ -314,11 +314,11 @@
       "question": "Which device is used to measure atmospheric pressure?",
       "options": [
         "Hygrometer",
-        "Barometer",
+        "Calorimeter",
         "Anemometer",
-        "Calorimeter"
+        "Barometer"
       ],
-      "answer": 1,
+      "answer": 3,
       "explanation": "A barometer measures atmospheric pressure, while a hygrometer measures humidity and an anemometer measures wind speed.",
       "difficulty": "Moderate",
       "subtopic": "measurement",
@@ -327,12 +327,12 @@
     {
       "question": "In which year did the Reserve Bank of India begin operations?",
       "options": [
-        "1920",
         "1935",
+        "1920",
         "1947",
         "1950"
       ],
-      "answer": 1,
+      "answer": 0,
       "explanation": "The Reserve Bank of India commenced operations on 1 April 1935 under the Reserve Bank of India Act, 1934.",
       "difficulty": "Moderate",
       "subtopic": "Indian-economy",
@@ -342,11 +342,11 @@
       "question": "Which of the following is an example of a direct tax in India?",
       "options": [
         "Goods and Services Tax",
-        "Customs duty",
         "Income tax",
+        "Customs duty",
         "Excise duty"
       ],
-      "answer": 2,
+      "answer": 1,
       "explanation": "Income tax is levied directly on the income of persons or entities; GST, customs duty and excise duty are indirect taxes.",
       "difficulty": "Hard",
       "subtopic": "taxation",
