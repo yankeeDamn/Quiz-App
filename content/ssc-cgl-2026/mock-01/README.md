@@ -22,14 +22,14 @@
 
 ## Safe admin import after owner approves the PR (manual staging only)
 
-The PR **only adds source files**. It does **not** insert these questions into the production database.
+The PR adds draft content files and the small admin improvements needed to create and preview **inactive** question topics. It does **not** insert questions into the production database.
 
 1. Sign in to `/admin` with a verified admin email. Open **Questions** and create the **four new topics** from `manifest.json`. Use the exact topic IDs above, category `SSC`.
-2. **Keep each topic inactive before any questions are imported.** An active topic with questions is automatically displayed as a free topic-practice test even when the full mock is a draft. This is a distinct release risk from the mock's `active=false`. If your dashboard initially creates topics active, deactivate them immediately while they are still empty.
+2. **Leave the new 'Publish topic immediately' checkbox unchecked.** The included admin change now creates new topics as **inactive drafts** by default. An active topic with questions automatically becomes a free topic-practice test even while its full mock remains unpublished. The mock's `active=false` flag alone is not sufficient.
 3. For each matching topic, use **CSV question import → Choose CSV → Validate 25 rows → Import validated rows**. If an import reports duplicate rows, stop; do not retry blindly and do not import a second time. Preview checks do not mutate the database.
 4. Open **Mock tests → New mock test**. Enter the exact `manifest.json` `mock` values. Add four sections in the listed order with topic ranges **0 up to 25 (exclusive)**. Save with **Draft** status. Do **not** publish, and do not activate topics yet.
 5. Review all 100 stems, correct keys, explanations, difficulty, relevance, spelling, distractors and source provenance. Capture a named reviewer and sign-off *outside the public question file*. Translate/test UI separately if needed.
-6. **Stage-only limitation:** the current public mock catalogue excludes inactive topics. A draft cannot be taken by learners while those topics are inactive. Use admin-only editing/preview or a staging database during review; do not briefly expose unreviewed topic quizzes as a workaround.
+6. **Preview safely:** the protected **Mock tests → Preview** now loads draft questions from inactive topics for admin review, without publishing or exposing answer keys. The public mock catalogue continues to exclude inactive topics and inactive mocks. A draft cannot be taken by learners until explicitly activated.
 7. After review, confirm 4×25 question coverage, run the SSC content audit, rehearse autosave, deadline and section locks, and ensure scribe eligibility handling before activating four topics and then publishing the mock. Activating topics also enables standalone topic-practice quizzes, so approval must explicitly cover those as well.
 
 **Do not** run import SQL manually against production or amend Render's auto-migration/seeder. No payment or account changes are part of this milestone.
