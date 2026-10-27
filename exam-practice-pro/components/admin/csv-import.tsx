@@ -44,18 +44,21 @@ function downloadTemplate(){
 }
 export function CsvImport({topic,onSaved}:{topic:string;onSaved:()=>void}){
  const [rows,setRows]=useState<QuestionInput[]>([]);
+ const [selectedFile,setSelectedFile]=useState('');
  const [message,setMessage]=useState('');
  const [errors,setErrors]=useState<{row:number;message:string}[]>([]);
  const [approved,setApproved]=useState(false);
  const [busy,setBusy]=useState(false);
  const read=async(file?:File)=>{
-  setApproved(false);setErrors([]);setRows([]);setMessage('');
+  setApproved(false);setErrors([]);setRows([]);setMessage('');setSelectedFile('');
   if(!file)return;
   try{
    if(file.size>1024*1024)throw Error('Maximum CSV size is 1 MB');
+   if(!file.name.toLowerCase().endsWith('.csv'))throw Error('Choose a downloaded .csv file, not the GitHub HTML page.');
    const parsed=toRows(await file.text());
    if(parsed.length>200)throw Error('Maximum 200 questions per import');
-   setRows(parsed);setMessage(`${parsed.length} rows parsed. Validate against the database before importing.`);
+   setSelectedFile(file.name);
+   setRows(parsed);setMessage(`${file.name}: ${parsed.length} rows parsed. Validate against the database before importing.`);
   }catch(e){setMessage(e instanceof Error?e.message:'Could not parse CSV')}
  };
  const preview=async()=>{
@@ -82,7 +85,10 @@ export function CsvImport({topic,onSaved}:{topic:string;onSaved:()=>void}){
  return <section className="rounded-xl border bg-card p-5">
   <h2 className="text-lg font-bold">CSV question import</h2><p className="mt-1 text-sm text-muted-foreground">Download the original sample, edit it in a spreadsheet, then preview and validate before an all-or-nothing import. Existing questions are preserved.</p>
   <div className="mt-3 flex flex-wrap gap-3"><Button type="button" variant="outline" onClick={downloadTemplate}>Download CSV template</Button>
-   <label className="inline-flex cursor-pointer items-center rounded-lg border px-4 py-2 text-sm font-semibold">Choose CSV <input className="sr-only" type="file" accept=".csv,text/csv" onChange={e=>void read(e.target.files?.[0])}/></label></div>
+   <input aria-label="Choose CSV file" className="max-w-full rounded-lg border border-input px-3 py-2 text-sm file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-2 file:font-semibold" type="file" accept=".csv,text/csv"
+     onChange={e=>{const file=e.currentTarget.files?.[0];e.currentTarget.value='';void read(file)}}/></div>
+  <p className="mt-2 text-xs text-muted-foreground">Choose the downloaded raw .csv file for the selected topic (not the GitHub page). If the file dialog does not open, use Chrome or Edge on a desktop and try again.</p>
+  {selectedFile&&<p className="mt-2 text-sm font-semibold" aria-live="polite">Selected: {selectedFile} — {rows.length} rows</p>}
   {message&&<p className="mt-3 text-sm" role="status">{message}</p>}
   {errors.map((error,i)=><Notice key={i} kind="error">Row {error.row}: {error.message}</Notice>)}
   <div className="mt-4 flex gap-2"><Button type="button" disabled={!topic||busy||rows.length===0} onClick={()=>void preview()}>Validate {rows.length||''} rows</Button><Button type="button" disabled={!approved||busy} onClick={()=>void save()}>Import validated rows</Button></div>
