@@ -1,0 +1,98 @@
+{
+  "id": "ssc-cgl-2026-mock-01",
+  "version": "0.1-draft",
+  "year": 2026,
+  "reviewStatus": "needs_human_review",
+  "sourceType": "independently authored practice questions; not an official SSC paper",
+  "officialPatternSource": "https://ssc.gov.in/api/attachment/uploads/masterData/NoticeBoards/Notice_of_adv_cgl_2026.pdf",
+  "publicationAllowed": false,
+  "importRules": "Topics and mock must remain inactive until independently reviewed. Staging is opt-in only.",
+  "topics": [
+    {
+      "id": "ssc26-m01-reasoning",
+      "name": "SSC CGL 2026 Mock 01 Reasoning",
+      "category": "SSC",
+      "active": false,
+      "file": "reasoning.json",
+      "csv": "reasoning.csv"
+    },
+    {
+      "id": "ssc26-m01-awareness",
+      "name": "SSC CGL 2026 Mock 01 General Awareness",
+      "category": "SSC",
+      "active": false,
+      "file": "general-awareness.json",
+      "csv": "general-awareness.csv"
+    },
+    {
+      "id": "ssc26-m01-quant",
+      "name": "SSC CGL 2026 Mock 01 Quantitative Aptitude",
+      "category": "SSC",
+      "active": false,
+      "file": "quantitative-aptitude.json",
+      "csv": "quantitative-aptitude.csv"
+    },
+    {
+      "id": "ssc26-m01-english",
+      "name": "SSC CGL 2026 Mock 01 English",
+      "category": "SSC",
+      "active": false,
+      "file": "english.json",
+      "csv": "english.csv"
+    }
+  ],
+  "mock": {
+    "id": "ssc-cgl-2026-mock-01",
+    "name": "SSC CGL 2026 Tier-I Full Mock 01",
+    "exam": "SSC",
+    "level": "Moderate",
+    "tier": "free",
+    "minutes": 60,
+    "marksPerCorrect": 2,
+    "negativeMarks": 0.5,
+    "passPercent": 50,
+    "active": false,
+    "sections": [
+      {
+        "name": "General Intelligence and Reasoning",
+        "parts": [
+          {
+            "topic": "ssc26-m01-reasoning",
+            "from": 0,
+            "to": 25
+          }
+        ]
+      },
+      {
+        "name": "General Awareness",
+        "parts": [
+          {
+            "topic": "ssc26-m01-awareness",
+            "from": 0,
+            "to": 25
+          }
+        ]
+      },
+      {
+        "name": "Quantitative Aptitude",
+        "parts": [
+          {
+            "topic": "ssc26-m01-quant",
+            "from": 0,
+            "to": 25
+          }
+        ]
+      },
+      {
+        "name": "English Comprehension",
+        "parts": [
+          {
+            "topic": "ssc26-m01-english",
+            "from": 0,
+            "to": 25
+          }
+        ]
+      }
+    ]
+  }
+}
