@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
 import { useSession, signOut } from 'next-auth/react';
-import { GraduationCap, Moon, Sun, LayoutDashboard, Menu, BookmarkCheck, LogIn, LogOut, User } from 'lucide-react';
+import { GraduationCap, Moon, Sun, LayoutDashboard, Menu, LogIn, LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -16,7 +16,6 @@ import {
   SheetContent,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { Separator } from '@/components/ui/separator';
 import { useState } from 'react';
 import { clearTokenCache } from '@/lib/api';
 import { LanguageSwitcher } from '@/components/exampro/exam-language';
@@ -169,93 +168,84 @@ export function Header() {
                 <span className="sr-only">Open menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[min(90vw,350px)] overflow-y-auto">
-              <nav className="flex flex-col gap-4 mt-8">
-                <Link
-                  href="/"
-                  className="text-lg font-medium transition-colors hover:text-indigo-600"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Quizzes
-                </Link>
-                <Link href="/exampro" className="text-lg font-medium transition-colors hover:text-indigo-600" onClick={() => setMobileMenuOpen(false)}>Exam Hall</Link>
-                <Link href="/certifications" className="text-lg font-medium transition-colors hover:text-indigo-600" onClick={() => setMobileMenuOpen(false)}>Certifications</Link>
-                <Link
-                  href="/india-mocks"
-                  className="text-lg font-medium transition-colors hover:text-indigo-600"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  India Mocks
-                </Link>
-                <Link
-                  href="/dashboard"
-                  className="text-lg font-medium transition-colors hover:text-indigo-600"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Dashboard
-                </Link>
-                <Link href="/institutes" className="text-lg font-medium transition-colors hover:text-indigo-600" onClick={() => setMobileMenuOpen(false)}>Institutes</Link>
-                <Link
-                  href="/bookmarks"
-                  className="text-lg font-medium transition-colors hover:text-indigo-600"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Bookmarks
-                </Link>
-                <Link href="/admin" className="text-lg font-medium transition-colors hover:text-indigo-600" onClick={() => setMobileMenuOpen(false)}>Owner admin</Link>
-                <Link
-                  href="/pricing"
-                  className="text-lg font-medium transition-colors hover:text-indigo-600"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Pricing
-                </Link>
-                <Separator className="my-2" />
-                {session?.user ? (
-                  <>
-                    <div className="flex items-center gap-3 py-2">
+            <SheetContent
+              side="right"
+              className="w-[min(88vw,22rem)] max-w-none gap-0 overflow-y-auto border-l border-border bg-background px-0 pb-6 pt-14 text-foreground shadow-2xl"
+            >
+              <div className="border-b border-border/70 px-5 pb-4">
+                <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">Explore ExamPro</p>
+                <p className="mt-1 text-sm text-muted-foreground">Choose your learning space</p>
+              </div>
+              <nav aria-label="Mobile navigation" className="grid gap-1 px-3 py-3">
+                {([
+                  ['/', 'Quizzes'],
+                  ['/exampro', 'Exam Hall'],
+                  ['/certifications', 'Certifications'],
+                  ['/india-mocks', 'India Mocks'],
+                  ['/dashboard', 'Dashboard'],
+                  ['/institutes', 'Institutes'],
+                  ['/bookmarks', 'Bookmarks'],
+                  ['/pricing', 'Pricing'],
+                ] as const).map(([href, label]) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    className="flex min-h-11 items-center rounded-lg px-3 py-2 text-sm font-medium leading-5 text-foreground transition-colors hover:bg-muted hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-600 dark:hover:text-indigo-300 sm:text-base"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {label}
+                  </Link>
+                ))}
+              </nav>
+              <div className="border-t border-border/70 px-5 pt-4">
+                {status === 'loading' ? (
+                  <p className="text-sm text-muted-foreground" role="status">Checking account…</p>
+                ) : session?.user ? (
+                  <div className="grid gap-3">
+                    <div className="flex min-w-0 items-center gap-3 rounded-lg bg-muted/40 p-2">
                       {session.user.image ? (
                         <img
                           src={session.user.image}
                           alt=""
-                          className="h-8 w-8 rounded-full"
+                          className="h-9 w-9 shrink-0 rounded-full"
                           referrerPolicy="no-referrer"
                         />
                       ) : (
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900">
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-950">
                           <User className="h-4 w-4" />
-                        </div>
+                        </span>
                       )}
                       <div className="min-w-0">
-                        <p className="font-medium truncate">{session.user.name}</p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {session.user.email || 'Guest'}
-                        </p>
+                        <p className="truncate text-sm font-semibold">{session.user.name || 'Signed in'}</p>
+                        <p className="truncate text-xs text-muted-foreground">{session.user.email || 'Guest account'}</p>
                       </div>
                     </div>
                     <button
-                      className="flex items-center gap-2 text-lg font-medium text-red-600 transition-colors hover:text-red-700"
+                      type="button"
+                      className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40"
                       onClick={() => {
                         setMobileMenuOpen(false);
                         clearTokenCache();
-                        signOut({ callbackUrl: '/' });
+                        void signOut({ callbackUrl: '/' });
                       }}
                     >
-                      <LogOut className="h-5 w-5" />
+                      <LogOut className="h-4 w-4" />
                       Sign Out
                     </button>
-                  </>
+                  </div>
                 ) : (
                   <Link
                     href="/auth/signin"
-                    className="flex items-center gap-2 text-lg font-medium transition-colors hover:text-indigo-600"
+                    className="inline-flex min-h-11 w-full items-center gap-2 rounded-lg bg-indigo-600 px-4 text-sm font-semibold text-white hover:bg-indigo-700"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    <LogIn className="h-5 w-5" />
+                    <LogIn className="h-4 w-4" />
                     Sign In
                   </Link>
                 )}
-              </nav>
+              </div>
+              {/* Owner administration stays at /admin and is protected by Render.
+                  Do not display a public admin link without a verified owner role. */}
             </SheetContent>
           </Sheet>
         </div>
