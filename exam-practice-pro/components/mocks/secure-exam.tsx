@@ -13,7 +13,7 @@ type Review = {id:string;question:string;options:string[];selected:number;correc
 type Attempt = {
  id:string;testId:string;title:string;startedAt:string;deadlineAt:string;submittedAt:string|null;
  responses:Record<string,number>;
- test:{id:string;name:string;minutes:number;marksPerCorrect:number;negativeMarks:number;passPercent:number;questions:Question[];sections:{name:string;from:number;to:number}[]};
+ test:{id:string;name:string;minutes:number;marksPerCorrect:number;negativeMarks:number;passPercent:number;questions:Question[];sections:{name:string;from:number;to:number}[];sectionTimingMinutes?:number|null};
  result:null|{score:number;total:number;percentage:number;passed:boolean;correct:number;incorrect:number;skipped:number;review:Review[]}
 };
 
@@ -49,18 +49,28 @@ export function SecureExam({testId}:{testId:string}) {
  // Review flags are UI-only; answer submissions and deadlines remain server-authoritative.
  const [marked,setMarked] = useState<Record<string,boolean>>({});
  const {t} = useExamLanguage();
+ const sectionMinutes = attempt?.test.sectionTimingMinutes === 15 ? 15 : null;
+ const activeSection = sectionMinutes && attempt
+   ? Math.min(attempt.test.sections.length,
+       Math.max(0,Math.floor((Date.now()-new Date(attempt.startedAt).getTime())/(sectionMinutes*60000))))
+   : null;
  const displayed = attempt?.test.questions[current];
  const translated = useTranslatedTexts(displayed?[displayed.question,...displayed.options]:[]);
  const submitLock=useRef(false);
  const latest=useRef<Record<string,number>>({});
 
  const update = useCallback((id:string,value:number) => {
+   if(sectionMinutes && attempt){
+     const active=Math.floor((Date.now()-new Date(attempt.startedAt).getTime())/(sectionMinutes*60000));
+     const question=attempt.test.questions.find(q=>q.id===id);
+     if(!question || active!==question.section)return;
+   }
    setResponses(previous => {
      const next={...previous};if(value===-1) delete next[id];else next[id]=value;
      latest.current=next;return next;
    });
    setSaved(false);
- },[]);
+ },[attempt,sectionMinutes]);
 
  useEffect(()=>{
    if (status!=='authenticated'||!session?.user?.email)return;
@@ -72,7 +82,13 @@ export function SecureExam({testId}:{testId:string}) {
       setAttempt(r.data.attempt);
       setResponses(r.data.attempt.responses);
       latest.current=r.data.attempt.responses;
-      setSeconds(Math.max(0,Math.ceil((new Date(r.data.attempt.deadlineAt).getTime()-Date.now())/1000)));
+      const started=r.data.attempt;
+      if(started.test.sectionTimingMinutes===15){
+        const section=Math.min(started.test.sections.length-1,
+          Math.max(0,Math.floor((Date.now()-new Date(started.startedAt).getTime())/(15*60000))));
+        setCurrent(started.test.sections[section].from);
+      }else setCurrent(0);
+      setSeconds(Math.max(0,Math.ceil((new Date(started.deadlineAt).getTime()-Date.now())/1000)));
     }).catch(e=>{if(!cancelled)setError(e instanceof Error?e.message:'Cannot start your exam')});
    return ()=>{cancelled=true};
  },[status,session?.user?.email,testId]);
@@ -92,6 +108,16 @@ export function SecureExam({testId}:{testId:string}) {
  useEffect(()=>{
    if(!attempt||attempt.submittedAt)return;
    const clock=()=>{
+     const minutes=attempt.test.sectionTimingMinutes;
+     if(minutes===15 && attempt.test.sections.length===4){
+       const active=Math.max(0,Math.floor((Date.now()-new Date(attempt.startedAt).getTime())/(minutes*60000)));
+       if(active>=4){setSeconds(0);void submit();return;}
+       const cutoff=new Date(attempt.startedAt).getTime()+(active+1)*minutes*60000;
+       setSeconds(Math.max(0,Math.ceil((cutoff-Date.now())/1000)));
+       const section=attempt.test.sections[active];
+       setCurrent(old=>old<section.from||old>=section.to?section.from:old);
+       return;
+     }
      const left=Math.max(0,Math.ceil((new Date(attempt.deadlineAt).getTime()-Date.now())/1000));
      setSeconds(left);
      if(left===0)void submit();
