@@ -73,18 +73,19 @@
       "reviewStatus": "needs_human_review"
     },
     {
-      "question": "Which court can directly be approached under Article 32 for enforcement of Fundamental Rights?",
+      "question": "Why is stainless steel generally more resistant to rusting than ordinary carbon steel?",
       "options": [
-        "District Court",
-        "High Court only",
-        "Supreme Court",
-        "Gram Nyayalaya"
+        "It contains no iron",
+        "Its density is always lower",
+        "Chromium produces a protective oxide film",
+        "It never reacts with oxygen"
       ],
       "answer": 2,
-      "explanation": "Article 32 gives the right to move the Supreme Court for enforcement of the Fundamental Rights in Part III.",
+      "explanation": "Stainless steel contains chromium, which forms a thin, adherent and self-repairing chromium-rich oxide layer that reduces corrosion under suitable conditions.",
       "difficulty": "Moderate",
-      "subtopic": "fundamental-rights",
-      "reviewStatus": "needs_human_review"
+      "subtopic": "chemistry",
+      "reviewStatus": "needs_human_review",
+      "factSource": "https://bssa.org.uk/bssa_articles/when-is-stainless-steel-passive-or-active-formation-of-the-passive-layer/"
     },
     {
       "question": "Which Veda is generally regarded as the oldest of the four Vedas?",
@@ -213,18 +214,19 @@
       "reviewStatus": "needs_human_review"
     },
     {
-      "question": "Chilika Lake, a large brackish-water lagoon, lies in which Indian state?",
+      "question": "The NISAR Earth-observation satellite launched in July 2025 was developed jointly by which two space agencies?",
       "options": [
-        "Odisha",
-        "West Bengal",
-        "Kerala",
-        "Tamil Nadu"
+        "NASA and ISRO",
+        "ESA and ISRO",
+        "JAXA and NASA",
+        "ISRO and Roscosmos"
       ],
       "answer": 0,
-      "explanation": "Chilika is a brackish-water lagoon situated on the Odisha coast, separated from the Bay of Bengal by a sandy barrier.",
+      "explanation": "NISAR stands for NASA–ISRO Synthetic Aperture Radar. NASA and India's ISRO jointly developed the mission, which launched on 30 July 2025.",
       "difficulty": "Moderate",
-      "subtopic": "Indian-geography",
-      "reviewStatus": "needs_human_review"
+      "subtopic": "science-current-affairs",
+      "reviewStatus": "needs_human_review",
+      "factSource": "https://www.nasa.gov/news-release/nasa-isro-satellite-lifts-off-to-track-earths-changing-surfaces/"
     },
     {
       "question": "Kaziranga National Park, associated with the Indian one-horned rhinoceros, is in which state?",
