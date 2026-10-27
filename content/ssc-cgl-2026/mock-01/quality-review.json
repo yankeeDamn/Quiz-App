@@ -1,0 +1,909 @@
+{
+  "version": 1,
+  "reviewedOn": "2026-10-27",
+  "reviewType": "AI-based desk audit of each answer and rationale; independent human academic approval not obtained",
+  "publicationApproved": false,
+  "referenceNotice": "https://ssc.gov.in/api/attachment/uploads/masterData/NoticeBoards/Notice_of_adv_cgl_2026.pdf",
+  "records": [
+    {
+      "id": "REASONING-01",
+      "file": "reasoning.json",
+      "number": 1,
+      "answerLetter": "A",
+      "answerText": "159",
+      "evidence": "×2+1 yields 159",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "REASONING-02",
+      "file": "reasoning.json",
+      "number": 2,
+      "answerLetter": "B",
+      "answerText": "U",
+      "evidence": "Alphabet gaps increase; U",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "REASONING-03",
+      "file": "reasoning.json",
+      "number": 3,
+      "answerLetter": "C",
+      "answerText": "OCPIQ",
+      "evidence": "Each MANGO letter shifted +2",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "REASONING-04",
+      "file": "reasoning.json",
+      "number": 4,
+      "answerLetter": "D",
+      "answerText": "Compass : Direction",
+      "evidence": "Compass direction parallels thermometer temperature",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "REASONING-05",
+      "file": "reasoning.json",
+      "number": 5,
+      "answerLetter": "A",
+      "answerText": "500",
+      "evidence": "500 is not a cube",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "REASONING-06",
+      "file": "reasoning.json",
+      "number": 6,
+      "answerLetter": "B",
+      "answerText": "Maternal uncle",
+      "evidence": "Mother's brother is maternal uncle",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "REASONING-07",
+      "file": "reasoning.json",
+      "number": 7,
+      "answerLetter": "C",
+      "answerText": "Some pens are files",
+      "evidence": "Some pens must also be files",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "REASONING-08",
+      "file": "reasoning.json",
+      "number": 8,
+      "answerLetter": "D",
+      "answerText": "3 km east",
+      "evidence": "Net displacement east 3km",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "REASONING-09",
+      "file": "reasoning.json",
+      "number": 9,
+      "answerLetter": "A",
+      "answerText": "L",
+      "evidence": "K-L-M-N; L second",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "REASONING-10",
+      "file": "reasoning.json",
+      "number": 10,
+      "answerLetter": "B",
+      "answerText": "Thursday",
+      "evidence": "45 % 7 = 3: Thursday",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "REASONING-11",
+      "file": "reasoning.json",
+      "number": 11,
+      "answerLetter": "C",
+      "answerText": "30",
+      "evidence": "12+19−1=30",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "REASONING-12",
+      "file": "reasoning.json",
+      "number": 12,
+      "answerLetter": "D",
+      "answerText": "Bird",
+      "evidence": "Fertilised egg may become bird",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "REASONING-13",
+      "file": "reasoning.json",
+      "number": 13,
+      "answerLetter": "A",
+      "answerText": "48",
+      "evidence": "Differences rise odd numbers to 48",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "REASONING-14",
+      "file": "reasoning.json",
+      "number": 14,
+      "answerLetter": "B",
+      "answerText": "4-15-7",
+      "evidence": "DOG positions 4-15-7",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "REASONING-15",
+      "file": "reasoning.json",
+      "number": 15,
+      "answerLetter": "C",
+      "answerText": "Deepa",
+      "evidence": "Deepa lowest in height chain",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "REASONING-16",
+      "file": "reasoning.json",
+      "number": 16,
+      "answerLetter": "D",
+      "answerText": "All roses are flowers",
+      "evidence": "All roses are flowers stated",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "REASONING-17",
+      "file": "reasoning.json",
+      "number": 17,
+      "answerLetter": "A",
+      "answerText": "5",
+      "evidence": "Four unit squares + one larger",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "REASONING-18",
+      "file": "reasoning.json",
+      "number": 18,
+      "answerLetter": "B",
+      "answerText": "48",
+      "evidence": "TREE positions 20+18+5+5=48",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "REASONING-19",
+      "file": "reasoning.json",
+      "number": 19,
+      "answerLetter": "C",
+      "answerText": "17",
+      "evidence": "6 before + S +10 after =17",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "REASONING-20",
+      "file": "reasoning.json",
+      "number": 20,
+      "answerLetter": "D",
+      "answerText": "5",
+      "evidence": "Opposite 2 is 5 in sum-seven die",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "REASONING-21",
+      "file": "reasoning.json",
+      "number": 21,
+      "answerLetter": "A",
+      "answerText": "EV",
+      "evidence": "AZ BY CX DW EV",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "REASONING-22",
+      "file": "reasoning.json",
+      "number": 22,
+      "answerLetter": "B",
+      "answerText": "14",
+      "evidence": "Explicit operator substitution =14",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "REASONING-23",
+      "file": "reasoning.json",
+      "number": 23,
+      "answerLetter": "C",
+      "answerText": "Vani",
+      "evidence": "Vani between Uma and Waseem",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "REASONING-24",
+      "file": "reasoning.json",
+      "number": 24,
+      "answerLetter": "D",
+      "answerText": "2",
+      "evidence": "Punched double sheet yields two holes",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "REASONING-25",
+      "file": "reasoning.json",
+      "number": 25,
+      "answerLetter": "A",
+      "answerText": "Some catalogued books are reference books",
+      "evidence": "Existing reference book is catalogued",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-01",
+      "file": "general-awareness.json",
+      "number": 1,
+      "answerLetter": "B",
+      "answerText": "26 November 1949",
+      "evidence": "Constitution adopted Nov 26 1949",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-02",
+      "file": "general-awareness.json",
+      "number": 2,
+      "answerLetter": "C",
+      "answerText": "Article 21",
+      "evidence": "Article 21 for life/liberty",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-03",
+      "file": "general-awareness.json",
+      "number": 3,
+      "answerLetter": "D",
+      "answerText": "Part IV",
+      "evidence": "DPSPs in Part IV",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-04",
+      "file": "general-awareness.json",
+      "number": 4,
+      "answerLetter": "A",
+      "answerText": "Seventh Schedule",
+      "evidence": "Seventh Schedule contains 3 lists",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-05",
+      "file": "general-awareness.json",
+      "number": 5,
+      "answerLetter": "B",
+      "answerText": "Speaker of the Lok Sabha",
+      "evidence": "Lok Sabha Speaker presides",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-06",
+      "file": "general-awareness.json",
+      "number": 6,
+      "answerLetter": "C",
+      "answerText": "Chromium produces a protective oxide film",
+      "evidence": "Chromium oxide passivates stainless steel",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-07",
+      "file": "general-awareness.json",
+      "number": 7,
+      "answerLetter": "D",
+      "answerText": "Rigveda",
+      "evidence": "Rigveda earliest Vedic collection",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-08",
+      "file": "general-awareness.json",
+      "number": 8,
+      "answerLetter": "A",
+      "answerText": "Meerut",
+      "evidence": "1857 sepoy rising started at Meerut",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-09",
+      "file": "general-awareness.json",
+      "number": 9,
+      "answerLetter": "B",
+      "answerText": "Salt tax",
+      "evidence": "Dandi March challenged salt tax",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-10",
+      "file": "general-awareness.json",
+      "number": 10,
+      "answerLetter": "C",
+      "answerText": "Non-Cooperation Movement",
+      "evidence": "Chauri Chaura preceded Non-Cooperation suspension",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-11",
+      "file": "general-awareness.json",
+      "number": 11,
+      "answerLetter": "D",
+      "answerText": "Kautilya",
+      "evidence": "Arthashastra attributed to Kautilya",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-12",
+      "file": "general-awareness.json",
+      "number": 12,
+      "answerLetter": "A",
+      "answerText": "Assam",
+      "evidence": "Sattriya originated in Assam",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-13",
+      "file": "general-awareness.json",
+      "number": 13,
+      "answerLetter": "B",
+      "answerText": "Western Ghats",
+      "evidence": "Western Ghats parallel west coast",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-14",
+      "file": "general-awareness.json",
+      "number": 14,
+      "answerLetter": "C",
+      "answerText": "Bay of Bengal",
+      "evidence": "Godavari empties into Bay of Bengal",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-15",
+      "file": "general-awareness.json",
+      "number": 15,
+      "answerLetter": "D",
+      "answerText": "Cotton",
+      "evidence": "Black soil associated with cotton",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-16",
+      "file": "general-awareness.json",
+      "number": 16,
+      "answerLetter": "A",
+      "answerText": "NASA and ISRO",
+      "evidence": "NISAR joint NASA–ISRO mission",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-17",
+      "file": "general-awareness.json",
+      "number": 17,
+      "answerLetter": "B",
+      "answerText": "Assam",
+      "evidence": "Kaziranga in Assam",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-18",
+      "file": "general-awareness.json",
+      "number": 18,
+      "answerLetter": "C",
+      "answerText": "Stratosphere",
+      "evidence": "Ozone mainly stratospheric",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-19",
+      "file": "general-awareness.json",
+      "number": 19,
+      "answerLetter": "D",
+      "answerText": "Iron",
+      "evidence": "Haem contains iron",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-20",
+      "file": "general-awareness.json",
+      "number": 20,
+      "answerLetter": "A",
+      "answerText": "Scurvy",
+      "evidence": "Vitamin C deficiency causes scurvy",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-21",
+      "file": "general-awareness.json",
+      "number": 21,
+      "answerLetter": "B",
+      "answerText": "Xylem",
+      "evidence": "Xylem conducts water/minerals",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-22",
+      "file": "general-awareness.json",
+      "number": 22,
+      "answerLetter": "C",
+      "answerText": "7",
+      "evidence": "Neutral pure water pH7 at 25°C",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-23",
+      "file": "general-awareness.json",
+      "number": 23,
+      "answerLetter": "D",
+      "answerText": "Barometer",
+      "evidence": "Barometer for pressure",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-24",
+      "file": "general-awareness.json",
+      "number": 24,
+      "answerLetter": "A",
+      "answerText": "Changes in retail prices of a representative basket of consumer goods and services",
+      "evidence": "CPI measures consumer basket inflation",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "GENERAL_AWARENESS-25",
+      "file": "general-awareness.json",
+      "number": 25,
+      "answerLetter": "B",
+      "answerText": "Income tax",
+      "evidence": "Income tax is a direct tax",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-01",
+      "file": "quantitative-aptitude.json",
+      "number": 1,
+      "answerLetter": "C",
+      "answerText": "81",
+      "evidence": "0.18×450=81",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-02",
+      "file": "quantitative-aptitude.json",
+      "number": 2,
+      "answerLetter": "D",
+      "answerText": "₹1,020",
+      "evidence": "1200×0.85=1020",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-03",
+      "file": "quantitative-aptitude.json",
+      "number": 3,
+      "answerLetter": "A",
+      "answerText": "15%",
+      "evidence": "120/800=15%",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-04",
+      "file": "quantitative-aptitude.json",
+      "number": 4,
+      "answerLetter": "B",
+      "answerText": "₹1,200",
+      "evidence": "6000×8×2.5/100=1200",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-05",
+      "file": "quantitative-aptitude.json",
+      "number": 5,
+      "answerLetter": "C",
+      "answerText": "₹1,050",
+      "evidence": "5000×(1.1²−1)=1050",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-06",
+      "file": "quantitative-aptitude.json",
+      "number": 6,
+      "answerLetter": "D",
+      "answerText": "60",
+      "evidence": "96×5/8=60",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-07",
+      "file": "quantitative-aptitude.json",
+      "number": 7,
+      "answerLetter": "A",
+      "answerText": "20",
+      "evidence": "100/5=20",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-08",
+      "file": "quantitative-aptitude.json",
+      "number": 8,
+      "answerLetter": "B",
+      "answerText": "7.2 days",
+      "evidence": "1/(1/12+1/18)=7.2",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-09",
+      "file": "quantitative-aptitude.json",
+      "number": 9,
+      "answerLetter": "C",
+      "answerText": "12 seconds",
+      "evidence": "300 metres/25 metres-per-second=12s",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-10",
+      "file": "quantitative-aptitude.json",
+      "number": 10,
+      "answerLetter": "D",
+      "answerText": "10 km/h",
+      "evidence": "Boat still-water=(12+8)/2=10",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-11",
+      "file": "quantitative-aptitude.json",
+      "number": 11,
+      "answerLetter": "A",
+      "answerText": "216 m²",
+      "evidence": "18×12=216",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-12",
+      "file": "quantitative-aptitude.json",
+      "number": 12,
+      "answerLetter": "B",
+      "answerText": "154 cm²",
+      "evidence": "22/7×49=154",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-13",
+      "file": "quantitative-aptitude.json",
+      "number": 13,
+      "answerLetter": "C",
+      "answerText": "75°",
+      "evidence": "180−40−65=75",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-14",
+      "file": "quantitative-aptitude.json",
+      "number": 14,
+      "answerLetter": "D",
+      "answerText": "15",
+      "evidence": "360/24=15",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-15",
+      "file": "quantitative-aptitude.json",
+      "number": 15,
+      "answerLetter": "A",
+      "answerText": "42",
+      "evidence": "gcd(84,126)=42",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-16",
+      "file": "quantitative-aptitude.json",
+      "number": 16,
+      "answerLetter": "B",
+      "answerText": "60",
+      "evidence": "lcm(12,15,20)=60",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-17",
+      "file": "quantitative-aptitude.json",
+      "number": 17,
+      "answerLetter": "C",
+      "answerText": "23",
+      "evidence": "25−2=23",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-18",
+      "file": "quantitative-aptitude.json",
+      "number": 18,
+      "answerLetter": "D",
+      "answerText": "3 and 4",
+      "evidence": "3 and 4 roots",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-19",
+      "file": "quantitative-aptitude.json",
+      "number": 19,
+      "answerLetter": "A",
+      "answerText": "15 cm",
+      "evidence": "sqrt(81+144)=15",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-20",
+      "file": "quantitative-aptitude.json",
+      "number": 20,
+      "answerLetter": "B",
+      "answerText": "1/3",
+      "evidence": "2 of 6 faces=1/3",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-21",
+      "file": "quantitative-aptitude.json",
+      "number": 21,
+      "answerLetter": "C",
+      "answerText": "1,540 cm³",
+      "evidence": "22/7×7²×10=1540",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-22",
+      "file": "quantitative-aptitude.json",
+      "number": 22,
+      "answerLetter": "D",
+      "answerText": "20%",
+      "evidence": "6/30=20% with additive volumes",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-23",
+      "file": "quantitative-aptitude.json",
+      "number": 23,
+      "answerLetter": "A",
+      "answerText": "3/5",
+      "evidence": "3-4-5 triangle sin=3/5",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-24",
+      "file": "quantitative-aptitude.json",
+      "number": 24,
+      "answerLetter": "B",
+      "answerText": "(0, 4)",
+      "evidence": "x=0, y=4",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "QUANTITATIVE_APTITUDE-25",
+      "file": "quantitative-aptitude.json",
+      "number": 25,
+      "answerLetter": "C",
+      "answerText": "25%",
+      "evidence": "50/200=25%",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-01",
+      "file": "english.json",
+      "number": 1,
+      "answerLetter": "D",
+      "answerText": "is",
+      "evidence": "Neither singular→is",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-02",
+      "file": "english.json",
+      "number": 2,
+      "answerLetter": "A",
+      "answerText": "had been waiting",
+      "evidence": "Past perfect continuous had been waiting",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-03",
+      "file": "english.json",
+      "number": 3,
+      "answerLetter": "B",
+      "answerText": "to",
+      "evidence": "Objected to changes",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-04",
+      "file": "english.json",
+      "number": 4,
+      "answerLetter": "C",
+      "answerText": "an",
+      "evidence": "Silent h of honest needs an",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-05",
+      "file": "english.json",
+      "number": 5,
+      "answerLetter": "D",
+      "answerText": "Thorough",
+      "evidence": "Meticulous means thorough",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-06",
+      "file": "english.json",
+      "number": 6,
+      "answerLetter": "A",
+      "answerText": "Abundant",
+      "evidence": "Scarce opposite abundant",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-07",
+      "file": "english.json",
+      "number": 7,
+      "answerLetter": "B",
+      "answerText": "Reveal a secret",
+      "evidence": "Spill beans means reveal secret",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-08",
+      "file": "english.json",
+      "number": 8,
+      "answerLetter": "C",
+      "answerText": "Ornithologist",
+      "evidence": "Ornithologist studies birds",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-09",
+      "file": "english.json",
+      "number": 9,
+      "answerLetter": "D",
+      "answerText": "Accommodation",
+      "evidence": "Accommodation spelling two c and m",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-10",
+      "file": "english.json",
+      "number": 10,
+      "answerLetter": "A",
+      "answerText": "The proposal was approved by the manager.",
+      "evidence": "Passive: was approved",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-11",
+      "file": "english.json",
+      "number": 11,
+      "answerLetter": "B",
+      "answerText": "She said that she was tired.",
+      "evidence": "Reported speech: she was tired",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-12",
+      "file": "english.json",
+      "number": 12,
+      "answerLetter": "C",
+      "answerText": "He does not know the answer.",
+      "evidence": "Does not know",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-13",
+      "file": "english.json",
+      "number": 13,
+      "answerLetter": "D",
+      "answerText": "hiking",
+      "evidence": "Gerund hiking in parallel list",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-14",
+      "file": "english.json",
+      "number": 14,
+      "answerLetter": "A",
+      "answerText": "affect",
+      "evidence": "Affect means influence; effect means bring about",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-15",
+      "file": "english.json",
+      "number": 15,
+      "answerLetter": "B",
+      "answerText": "Ease",
+      "evidence": "Alleviate means ease",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-16",
+      "file": "english.json",
+      "number": 16,
+      "answerLetter": "C",
+      "answerText": "Although",
+      "evidence": "Although concessive conjunction",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-17",
+      "file": "english.json",
+      "number": 17,
+      "answerLetter": "D",
+      "answerText": "at",
+      "evidence": "Good at solving",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-18",
+      "file": "english.json",
+      "number": 18,
+      "answerLetter": "A",
+      "answerText": "Criteria",
+      "evidence": "Criteria plural of criterion",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-19",
+      "file": "english.json",
+      "number": 19,
+      "answerLetter": "B",
+      "answerText": "clearly",
+      "evidence": "Clearly is adverb",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-20",
+      "file": "english.json",
+      "number": 20,
+      "answerLetter": "C",
+      "answerText": "would have called",
+      "evidence": "Would have called third conditional",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-21",
+      "file": "english.json",
+      "number": 21,
+      "answerLetter": "D",
+      "answerText": "Inconvenient opening hours",
+      "evidence": "Office workers need after-six access",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-22",
+      "file": "english.json",
+      "number": 22,
+      "answerLetter": "A",
+      "answerText": "Stored energy in batteries",
+      "evidence": "Batteries store energy",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-23",
+      "file": "english.json",
+      "number": 23,
+      "answerLetter": "B",
+      "answerText": "Checked the instructions",
+      "evidence": "Mira checked instructions immediately beforehand",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-24",
+      "file": "english.json",
+      "number": 24,
+      "answerLetter": "C",
+      "answerText": "Crop rotation can help nitrogen management",
+      "evidence": "Legumes may assist nitrogen management",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    },
+    {
+      "id": "ENGLISH-25",
+      "file": "english.json",
+      "number": 25,
+      "answerLetter": "D",
+      "answerText": "Q-S-P-R",
+      "evidence": "Growth order Q-S-P-R",
+      "auditDisposition": "AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING"
+    }
+  ]
+}
