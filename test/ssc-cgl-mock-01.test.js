@@ -14,6 +14,10 @@ test('Mock 01 contains exactly 100 unique original draft stems and canonical adm
  assert.equal(report.manifest.publicationAllowed,false);
  assert.equal(report.reviewed,0);
  assert.equal(report.allQuestionRows.length,4);
+ const balance={A:0,B:0,C:0,D:0};
+ for(const section of report.allQuestionRows)for(const q of section.rows)balance['ABCD'[q.answer]]++;
+ assert.deepEqual(balance,{A:25,B:25,C:25,D:25},'correct option placement should be balanced');
+
  for(const section of report.allQuestionRows){
    assert.equal(section.topic.active,false,'no public topic quiz before review');
    assert.equal(section.rows.length,25);
