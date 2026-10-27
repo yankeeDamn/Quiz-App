@@ -23,7 +23,7 @@ router.get('/:id/analytics', wrap(async (req,res) => {
     return res.status(400).json({success:false,error:{message:'Invalid attempt ID'}});
   }
   const {rows} = await db.query(
-    'SELECT snapshot,result,started_at,submitted_at FROM exam_attempts_v2 WHERE id=$1 AND user_id=$2 AND submitted_at IS NOT NULL',
+    'SELECT snapshot,result,started_at,submitted_at FROM exam_attempts_v2 WHERE id=$1 AND user_id=$2 AND submitted_at IS NOT NULL AND (snapshot->>\'adminDraft\') IS DISTINCT FROM \'true\'',
     [req.params.id,req.user.id]
   );
   if (!rows.length) return res.status(404).json({success:false,error:{message:'Completed attempt not found'}});
