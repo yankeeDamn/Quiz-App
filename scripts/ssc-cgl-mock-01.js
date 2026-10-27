@@ -21,6 +21,14 @@ const csvFor=rows=>[HEAD,...rows.map(q=>[q.question,...q.options,ALPHABET[q.answ
 function validate({checkCsv=true}={}){
  const manifest=read('manifest.json');
  const errors=[],mapped=[],allStems=new Set(),allQuestionRows=[];
+ // Prevent exact repeats of stems already shipped in the starter and
+ // competitive library. This cannot replace a human plagiarism review.
+ const existingStarter=require('../src/data/mock-bank.json');
+ const existingCompetitive=require('../src/data/competitive-questions-500.json');
+ const existingStems=new Set([
+   ...existingStarter.topics.flatMap(t=>t.questions.map(q=>q.q)),
+   ...existingCompetitive.questions.map(q=>q.q)
+ ].map(normalized));
  if(manifest.id!=='ssc-cgl-2026-mock-01'||manifest.reviewStatus!=='needs_human_review'||
     manifest.publicationAllowed!==false||manifest.mock?.active!==false)
    errors.push('Draft manifest must remain inactive and unapproved');
@@ -44,6 +52,7 @@ function validate({checkCsv=true}={}){
      else {
        const key=normalized(checked.value.question);
        if(allStems.has(key))errors.push('Repeated stem: '+id);
+       if(existingStems.has(key))errors.push('Stem already exists in bundled question banks: '+id);
        allStems.add(key);
        if(checked.value.explanation.length<25)errors.push('Explanation requires 25+ characters: '+id);
        if(!String(q.subtopic||'').trim())errors.push('Missing subtopic: '+id);
