@@ -6,11 +6,11 @@
       "question": "Choose the correct verb: 'Neither of the two proposals ___ acceptable to the committee.'",
       "options": [
         "are",
-        "is",
+        "have",
         "were",
-        "have"
+        "is"
       ],
-      "answer": 1,
+      "answer": 3,
       "explanation": "Neither is a singular indefinite pronoun in this construction, so it takes the singular verb 'is'.",
       "difficulty": "Easy",
       "subtopic": "subject-verb-agreement",
@@ -19,12 +19,12 @@
     {
       "question": "Fill the blank: 'By the time the train arrived, we ___ for nearly an hour.'",
       "options": [
-        "have waited",
         "had been waiting",
+        "have waited",
         "are waiting",
         "will wait"
       ],
-      "answer": 1,
+      "answer": 0,
       "explanation": "The waiting began before another past event and continued until that event, so the past perfect continuous fits.",
       "difficulty": "Moderate",
       "subtopic": "tenses",
@@ -34,11 +34,11 @@
       "question": "Choose the correct preposition: 'The guest insisted ___ paying the bill.'",
       "options": [
         "for",
-        "at",
         "on",
+        "at",
         "by"
       ],
-      "answer": 2,
+      "answer": 1,
       "explanation": "The verb 'insist' is conventionally followed by 'on' before a noun or gerund: insisted on paying.",
       "difficulty": "Moderate",
       "subtopic": "prepositions",
@@ -48,11 +48,11 @@
       "question": "Select the article that completes the sentence: 'She is ___ honest employee.'",
       "options": [
         "a",
-        "an",
         "the",
+        "an",
         "no article"
       ],
-      "answer": 1,
+      "answer": 2,
       "explanation": "The first sound of 'honest' is a vowel because the h is silent, so the indefinite article is 'an'.",
       "difficulty": "Moderate",
       "subtopic": "articles",
@@ -63,10 +63,10 @@
       "options": [
         "Careless",
         "Hasty",
-        "Thorough",
-        "Indifferent"
+        "Indifferent",
+        "Thorough"
       ],
-      "answer": 2,
+      "answer": 3,
       "explanation": "A meticulous person pays very close attention to detail, so 'thorough' is the nearest option.",
       "difficulty": "Moderate",
       "subtopic": "synonyms",
@@ -75,12 +75,12 @@
     {
       "question": "Select the word opposite in meaning to 'scarce'.",
       "options": [
-        "Rare",
-        "Limited",
         "Abundant",
+        "Limited",
+        "Rare",
         "Insufficient"
       ],
-      "answer": 2,
+      "answer": 0,
       "explanation": "Scarce means not available in sufficient quantity; abundant means plentiful or available in large amounts.",
       "difficulty": "Moderate",
       "subtopic": "antonyms",
@@ -104,11 +104,11 @@
       "question": "A person who scientifically studies birds is called a:",
       "options": [
         "Geologist",
-        "Ornithologist",
         "Entomologist",
+        "Ornithologist",
         "Ichthyologist"
       ],
-      "answer": 1,
+      "answer": 2,
       "explanation": "Ornithology is the scientific study of birds; its practitioner is an ornithologist.",
       "difficulty": "Moderate",
       "subtopic": "one-word-substitution",
@@ -119,10 +119,10 @@
       "options": [
         "Accomodation",
         "Acommodation",
-        "Accommodation",
-        "Accommondation"
+        "Accommondation",
+        "Accommodation"
       ],
-      "answer": 2,
+      "answer": 3,
       "explanation": "The standard spelling is 'accommodation' with two c's and two m's.",
       "difficulty": "Hard",
       "subtopic": "spelling",
@@ -131,12 +131,12 @@
     {
       "question": "Choose the correct passive form of 'The manager approved the proposal.'",
       "options": [
-        "The proposal approved the manager.",
         "The proposal was approved by the manager.",
+        "The proposal approved the manager.",
         "The proposal has approving by the manager.",
         "The manager was approved by the proposal."
       ],
-      "answer": 1,
+      "answer": 0,
       "explanation": "The active simple past becomes 'was approved' in passive voice; the proposal is the receiver of the action.",
       "difficulty": "Moderate",
       "subtopic": "voice",
@@ -159,12 +159,12 @@
     {
       "question": "Correct the sentence: 'He do not know the answer.'",
       "options": [
-        "He does not know the answer.",
-        "He did not knows the answer.",
         "He do not knows the answer.",
+        "He did not knows the answer.",
+        "He does not know the answer.",
         "He does not knew the answer."
       ],
-      "answer": 0,
+      "answer": 2,
       "explanation": "A third-person singular subject in the present simple takes 'does not' followed by the base verb 'know'.",
       "difficulty": "Moderate",
       "subtopic": "error-correction",
@@ -174,11 +174,11 @@
       "question": "Complete the parallel list: 'She enjoys reading, painting, and ___ on weekends.'",
       "options": [
         "to hike",
-        "hiking",
+        "hike",
         "hiked",
-        "hike"
+        "hiking"
       ],
-      "answer": 1,
+      "answer": 3,
       "explanation": "The listed activities are gerunds after 'enjoys'; 'hiking' maintains parallel grammatical form with reading and painting.",
       "difficulty": "Easy",
       "subtopic": "parallel-structure",
@@ -187,12 +187,12 @@
     {
       "question": "Choose the appropriate word: 'The new timetable may ___ the attendance rate.'",
       "options": [
-        "effect",
         "affect",
+        "effect",
         "defect",
         "reflect on"
       ],
-      "answer": 1,
+      "answer": 0,
       "explanation": "The sentence needs a verb meaning 'influence'; 'affect' is the appropriate verb, whereas 'effect' is usually a noun here.",
       "difficulty": "Moderate",
       "subtopic": "word-usage",
@@ -229,12 +229,12 @@
     {
       "question": "Choose the correct preposition: 'Meera is particularly good ___ solving puzzles.'",
       "options": [
-        "at",
+        "on",
         "with",
         "for",
-        "on"
+        "at"
       ],
-      "answer": 0,
+      "answer": 3,
       "explanation": "In standard usage, 'good at' describes competence in an activity; the gerund 'solving' follows it.",
       "difficulty": "Hard",
       "subtopic": "prepositions",
@@ -243,12 +243,12 @@
     {
       "question": "Which word is the plural form of 'criterion'?",
       "options": [
-        "Criterions",
         "Criteria",
+        "Criterions",
         "Criterias",
         "Criterion's"
       ],
-      "answer": 1,
+      "answer": 0,
       "explanation": "Criterion is singular and criteria is its standard plural form, inherited from Greek.",
       "difficulty": "Moderate",
       "subtopic": "word-forms",
@@ -286,11 +286,11 @@
       "question": "Read: 'The city library extended its closing time from 6 p.m. to 9 p.m. after workers said they could rarely visit before dinner.' What problem did the change primarily address?",
       "options": [
         "Lack of new books",
-        "Inconvenient opening hours",
+        "Insufficient study desks",
         "High membership fees",
-        "Insufficient study desks"
+        "Inconvenient opening hours"
       ],
-      "answer": 1,
+      "answer": 3,
       "explanation": "The workers could not arrive during the old hours, so extending closing time mainly addressed access after work.",
       "difficulty": "Moderate",
       "subtopic": "reading-comprehension",
@@ -327,12 +327,12 @@
     {
       "question": "Read: 'A farmer alternated a cereal crop with a legume crop. Over several seasons, the soil required less purchased nitrogen fertiliser.' Which inference is best supported?",
       "options": [
-        "Crop rotation can help nitrogen management",
-        "Cereal crops require no nutrients",
         "Legumes consume all soil nitrogen",
+        "Cereal crops require no nutrients",
+        "Crop rotation can help nitrogen management",
         "Purchased fertiliser was banned"
       ],
-      "answer": 0,
+      "answer": 2,
       "explanation": "Legume-based rotations can contribute nitrogen through biological fixation, consistent with reduced purchased nitrogen fertiliser.",
       "difficulty": "Moderate",
       "subtopic": "reading-comprehension",
@@ -342,11 +342,11 @@
       "question": "Read: 'Volunteers noted the species and number of migratory birds seen at the wetland each Sunday. They submitted their records to a conservation group.' What information did the volunteers collect?",
       "options": [
         "Only the birds' colours",
-        "Species and counts of birds",
+        "The price of conservation equipment",
         "The age of every bird",
-        "The price of conservation equipment"
+        "Species and counts of birds"
       ],
-      "answer": 1,
+      "answer": 3,
       "explanation": "The passage explicitly says volunteers recorded which species were observed and the number of birds seen.",
       "difficulty": "Easy",
       "subtopic": "reading-comprehension",
