@@ -4,13 +4,27 @@ const rateLimit = require('express-rate-limit');
 const logger = require('../utils/logger');
 
 /**
+ * Do not count Render's frequent unauthenticated readiness/liveness probes
+ * against the user-facing API limit. Otherwise a 5-second health-check
+ * cadence exhausts the 100-per-15-minute quota and Render starts restarting
+ * a healthy service after receiving 429s. The admin API already applies its
+ * own independent request/failed-attempt limiter.
+ *
+ * Only exact known routes are excluded; mock/quiz/user endpoints still count.
+ */
+function shouldSkipGeneralRateLimit(req) {
+  const path = String(req.originalUrl || '').split('?')[0];
+  return /^\/api\/v1\/health(?:\/ready)?\/?$/.test(path) ||
+    /^\/api\/v1\/admin(?:\/|$)/.test(path);
+}
+
+/**
  * General API rate limiter — 100 requests per 15-minute window.
  */
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
-  // Admin has its own limiter below; editing many questions would hit this one.
-  skip: (req) => req.originalUrl.startsWith('/api/v1/admin'),
+  skip: shouldSkipGeneralRateLimit,
   standardHeaders: true,
   legacyHeaders: false,
   handler: (_req, res) => {
@@ -58,4 +72,4 @@ const adminLimiter = rateLimit({
   },
 });
 
-module.exports = { generalLimiter, authLimiter, adminLimiter };
+module.exports = { generalLimiter, authLimiter, adminLimiter, shouldSkipGeneralRateLimit };
