@@ -58,7 +58,7 @@ test('private routes reject guests, ordinary users, API keys, and hide keys befo
  assert.equal(eligible(exam),true,'full SSC pattern must trigger section timer');
  db.query=async(sql,params=[])=>{
    if(sql.includes('SELECT * FROM users')){
-      return {rows:[{id:userId,email:params[2],name:'QA admin',image:null,
+      return {rows:[{id:userId,email:params[2],name:'Review admin',image:null,
         provider:'google',provider_id:'oauth-id',plan:'free',role:'user'}],rowCount:1};
    }
    if(sql.includes('SELECT * FROM exam_attempts_v2 WHERE id=$1 AND user_id=$2')){
