@@ -159,7 +159,7 @@ export function QuestionsTab() {
         </details>
       </section>
 
-      <CsvImport topic={topic} onSaved={()=>void refresh()} />
+      <CsvImport key={topic} topic={topic} onSaved={()=>void refresh()} />
       <div className="grid gap-6 lg:grid-cols-2">
         <form onSubmit={save} className={`${card} grid h-fit gap-3`}>
           <h2 className="text-lg font-bold">{editing ? 'Edit question' : 'Add a question'}</h2>
