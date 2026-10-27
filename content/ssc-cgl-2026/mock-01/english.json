@@ -185,7 +185,7 @@
       "reviewStatus": "needs_human_review"
     },
     {
-      "question": "Choose the appropriate word: 'The new timetable may ___ the attendance rate.'",
+      "question": "Choose the word that means 'influence' in this sentence: 'The new timetable may ___ the attendance rate.'",
       "options": [
         "affect",
         "effect",
@@ -193,7 +193,7 @@
         "reflect on"
       ],
       "answer": 0,
-      "explanation": "The sentence needs a verb meaning 'influence'; 'affect' is the appropriate verb, whereas 'effect' is usually a noun here.",
+      "explanation": "'Affect' is the transitive verb meaning influence. Although 'effect' can also be a verb, it means 'bring about' and does not naturally mean 'influence' in this context.",
       "difficulty": "Moderate",
       "subtopic": "word-usage",
       "reviewStatus": "needs_human_review"
@@ -283,7 +283,7 @@
       "reviewStatus": "needs_human_review"
     },
     {
-      "question": "Read: 'The city library extended its closing time from 6 p.m. to 9 p.m. after workers said they could rarely visit before dinner.' What problem did the change primarily address?",
+      "question": "Read: 'The city library extended its closing time from 6 p.m. to 9 p.m. after office workers said they could rarely arrive before 6 p.m.' Which problem did the change primarily address?",
       "options": [
         "Lack of new books",
         "Insufficient study desks",
@@ -291,7 +291,7 @@
         "Inconvenient opening hours"
       ],
       "answer": 3,
-      "explanation": "The workers could not arrive during the old hours, so extending closing time mainly addressed access after work.",
+      "explanation": "Office workers struggled to reach the library before the previous 6 p.m. closing time, so the extended hours addressed access after work.",
       "difficulty": "Moderate",
       "subtopic": "reading-comprehension",
       "reviewStatus": "needs_human_review"
@@ -325,7 +325,7 @@
       "reviewStatus": "needs_human_review"
     },
     {
-      "question": "Read: 'A farmer alternated a cereal crop with a legume crop. Over several seasons, the soil required less purchased nitrogen fertiliser.' Which inference is best supported?",
+      "question": "Read: 'A farmer alternated a cereal crop with a legume crop. Over several seasons the farmer was able to apply less purchased nitrogen fertiliser.' Which inference is best supported?",
       "options": [
         "Legumes consume all soil nitrogen",
         "Cereal crops require no nutrients",
@@ -333,23 +333,23 @@
         "Purchased fertiliser was banned"
       ],
       "answer": 2,
-      "explanation": "Legume-based rotations can contribute nitrogen through biological fixation, consistent with reduced purchased nitrogen fertiliser.",
+      "explanation": "Legumes can contribute biologically fixed nitrogen to cropping systems. The observation is consistent with improved nitrogen management but does not prove that crop rotation was the only cause.",
       "difficulty": "Moderate",
       "subtopic": "reading-comprehension",
       "reviewStatus": "needs_human_review"
     },
     {
-      "question": "Read: 'Volunteers noted the species and number of migratory birds seen at the wetland each Sunday. They submitted their records to a conservation group.' What information did the volunteers collect?",
+      "question": "Arrange these statements into the most logical order for a flowering plant's growth: P. The mature plant produces flowers. Q. A seed is placed in moist soil. R. The flowers later develop into fruits. S. A seedling emerges and grows.",
       "options": [
-        "Only the birds' colours",
-        "The price of conservation equipment",
-        "The age of every bird",
-        "Species and counts of birds"
+        "P-Q-S-R",
+        "Q-P-S-R",
+        "S-Q-P-R",
+        "Q-S-P-R"
       ],
       "answer": 3,
-      "explanation": "The passage explicitly says volunteers recorded which species were observed and the number of birds seen.",
+      "explanation": "The biological sequence is planting the seed (Q), emergence and growth (S), flowering (P), and fruit formation (R). Therefore Q-S-P-R is the logical order.",
       "difficulty": "Easy",
-      "subtopic": "reading-comprehension",
+      "subtopic": "sentence-rearrangement",
       "reviewStatus": "needs_human_review"
     }
   ]
