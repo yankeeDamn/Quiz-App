@@ -157,7 +157,7 @@
       "reviewStatus": "needs_human_review"
     },
     {
-      "question": "Select the word that completes the analogy: Seed : Plant :: Egg : ?",
+      "question": "Complete the analogy: Seed of a flowering plant : Mature plant :: Fertilised bird's egg : ?",
       "options": [
         "Nest",
         "Feather",
@@ -165,7 +165,7 @@
         "Bird"
       ],
       "answer": 3,
-      "explanation": "A seed can develop into a plant, just as a fertilised bird's egg can develop into a bird.",
+      "explanation": "A seed of a flowering plant can grow into a mature plant; similarly, a fertilised bird's egg can develop into a bird.",
       "difficulty": "Moderate",
       "subtopic": "analogy",
       "reviewStatus": "needs_human_review"
@@ -227,17 +227,17 @@
       "reviewStatus": "needs_human_review"
     },
     {
-      "question": "Three friends P, Q and R have different ages. P is older than Q but younger than R. Who is the oldest?",
+      "question": "A square is divided into four equal smaller squares by one horizontal and one vertical line through its centre. How many squares of all sizes are present?",
       "options": [
-        "R",
-        "Q",
-        "P",
-        "Cannot be determined"
+        "5",
+        "4",
+        "6",
+        "8"
       ],
       "answer": 0,
-      "explanation": "R is older than P, and P is older than Q, so R must be the oldest.",
+      "explanation": "There are four small squares plus the single outer square. Together they make 4 + 1 = 5 squares.",
       "difficulty": "Moderate",
-      "subtopic": "ordering",
+      "subtopic": "figural-counting",
       "reviewStatus": "needs_human_review"
     },
     {
@@ -297,7 +297,7 @@
       "reviewStatus": "needs_human_review"
     },
     {
-      "question": "If 'A + B' means A multiplied by B, and 'A × B' means A minus B, what is 6 + 3 × 4?",
+      "question": "In a code, the symbol '+' means multiplication and the symbol '×' means subtraction. Replace the symbols by the stated operations, then apply normal arithmetic precedence. Find the value of 6 + 3 × 4.",
       "options": [
         "10",
         "14",
@@ -305,7 +305,7 @@
         "20"
       ],
       "answer": 1,
-      "explanation": "Substitute the defined operations into the expression: (6 × 3) − 4 = 18 − 4 = 14.",
+      "explanation": "Replacing the coded operators gives 6 multiplied by 3, minus 4. Perform multiplication first: 6 × 3 − 4 = 14.",
       "difficulty": "Moderate",
       "subtopic": "symbol-operations",
       "reviewStatus": "needs_human_review"
@@ -325,17 +325,17 @@
       "reviewStatus": "needs_human_review"
     },
     {
-      "question": "Which is the next number in the series: 11, 22, 44, 88, ?",
+      "question": "A rectangular sheet of paper is folded once along its vertical centre line. A single hole is punched through both layers at a point away from the fold. How many holes are visible when the paper is completely unfolded?",
       "options": [
-        "154",
-        "165",
-        "188",
-        "176"
+        "1",
+        "3",
+        "4",
+        "2"
       ],
       "answer": 3,
-      "explanation": "Each term is multiplied by 2, so the next number is 88 × 2 = 176.",
+      "explanation": "Punching through both layers makes one hole in each half of the original sheet; after unfolding, two holes appear symmetrically about the fold.",
       "difficulty": "Moderate",
-      "subtopic": "number-series",
+      "subtopic": "paper-folding",
       "reviewStatus": "needs_human_review"
     },
     {
