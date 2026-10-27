@@ -115,31 +115,31 @@
       "reviewStatus": "needs_human_review"
     },
     {
-      "question": "A train 180 m long passes a stationary pole in 9 seconds. What is its speed in km/h?",
+      "question": "Two trains of lengths 120 m and 180 m move in opposite directions at 54 km/h and 36 km/h. How many seconds do they take to cross each other completely?",
       "options": [
-        "60 km/h",
-        "64 km/h",
-        "72 km/h",
-        "80 km/h"
+        "9 seconds",
+        "10 seconds",
+        "12 seconds",
+        "15 seconds"
       ],
       "answer": 2,
-      "explanation": "The train covers its own 180 m length in 9 seconds: 20 m/s. Multiply by 18/5 to obtain 72 km/h.",
+      "explanation": "The distance to clear is 120 + 180 = 300 m. Relative speed in opposite directions is 54 + 36 = 90 km/h = 25 m/s. Time = 300/25 = 12 seconds.",
       "difficulty": "Moderate",
       "subtopic": "trains",
       "reviewStatus": "needs_human_review"
     },
     {
-      "question": "A traveller goes from A to B at 40 km/h and returns the same distance at 60 km/h. Find the average speed for the full trip.",
+      "question": "A boat travels 24 km downstream in 2 hours and the same distance upstream in 3 hours. What is its speed in still water?",
       "options": [
-        "45 km/h",
-        "52 km/h",
-        "50 km/h",
-        "48 km/h"
+        "8 km/h",
+        "9 km/h",
+        "11 km/h",
+        "10 km/h"
       ],
       "answer": 3,
-      "explanation": "For equal distances, average speed is 2ab/(a+b) = 2×40×60/(40+60) = 48 km/h.",
+      "explanation": "Downstream speed = 24/2 = 12 km/h; upstream speed = 24/3 = 8 km/h. Speed in still water is (12 + 8)/2 = 10 km/h.",
       "difficulty": "Moderate",
-      "subtopic": "speed-distance",
+      "subtopic": "boats-and-streams",
       "reviewStatus": "needs_human_review"
     },
     {
