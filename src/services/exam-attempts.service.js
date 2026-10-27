@@ -3,6 +3,7 @@ const db = require('../config/database');
 const mocks = require('./mocks.service');
 const { isPlanActive } = require('./plan.service');
 const { cleanResponses, grade, visibleAttempt } = require('./exam-grade');
+const { eligible, sectionTiming, lockedResponses } = require('./ssc-section-timing');
 
 const fail = (message, statusCode = 400) => Object.assign(new Error(message), { statusCode });
 const VALID_ID = /^[a-z0-9-]{1,60}$/;
@@ -30,7 +31,8 @@ async function start(user, testId) {
     // Include stable text and key snapshot for reviews after edits or retirements.
     const snapshot = { name: test.name, minutes: test.minutes, tier: test.tier,
       marksPerCorrect: test.marksPerCorrect, negativeMarks: test.negativeMarks,
-      passPercent: test.passPercent ?? 50, sections: test.sections, questions: test.questions };
+      passPercent: test.passPercent ?? 50, sections: test.sections, questions: test.questions,
+      sectionTimingMinutes: eligible(test) ? 15 : null };
     const saved = await client.query(
       `INSERT INTO exam_attempts_v2 (user_id,test_id,snapshot,deadline_at)
        VALUES ($1,$2,$3::jsonb,NOW()+($4*INTERVAL '1 minute')) RETURNING *`,
@@ -59,9 +61,15 @@ async function save(userId, id, source, submit = false) {
     const row = r.rows[0];
     if (row.submitted_at) { await client.query('COMMIT'); return visibleAttempt(row); }
     const expired = Date.now() >= new Date(row.deadline_at).getTime();
-    // When time expires, grade only previously persisted choices, not late incoming answers.
-    if (!submit && expired) throw fail('Exam time expired: submit your saved answers',409);
-    const responses = expired ? row.responses : cleanResponses(row.snapshot, source);
+    const clock = sectionTiming(row.snapshot, row.started_at);
+    // Expiry is determined by the server, not the browser's clock. Late input
+    // must never mutate previously saved answers or unlock an old section.
+    if (!submit && (expired || clock?.finished)) throw fail('Exam time expired: submit your saved answers',409);
+    const responses = (expired || clock?.finished)
+      ? row.responses
+      : clock
+        ? lockedResponses(row.snapshot, row.responses || {}, cleanResponses(row.snapshot, source), clock)
+        : cleanResponses(row.snapshot, source);
     const result = submit ? grade(row.snapshot,responses) : null;
     const updated = await client.query(
       `UPDATE exam_attempts_v2 SET responses=$2::jsonb, submitted_at=CASE WHEN $3 THEN NOW() ELSE NULL END,
