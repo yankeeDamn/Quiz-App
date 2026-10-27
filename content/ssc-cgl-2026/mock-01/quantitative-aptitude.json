@@ -283,21 +283,21 @@
       "reviewStatus": "needs_human_review"
     },
     {
-      "question": "Eight workers complete a job in 12 days. How many days would six equally efficient workers need?",
+      "question": "A right circular cylinder has radius 7 cm and height 10 cm. Using π = 22/7, what is its volume?",
       "options": [
-        "14",
-        "15",
-        "16",
-        "18"
+        "1,320 cm³",
+        "1,440 cm³",
+        "1,540 cm³",
+        "1,640 cm³"
       ],
       "answer": 2,
-      "explanation": "Total effort is 8×12 = 96 worker-days. At six workers the duration is 96/6 = 16 days.",
+      "explanation": "Volume of a cylinder = πr²h = (22/7) × 7 × 7 × 10 = 1,540 cm³.",
       "difficulty": "Moderate",
-      "subtopic": "time-work",
+      "subtopic": "three-dimensional-mensuration",
       "reviewStatus": "needs_human_review"
     },
     {
-      "question": "A 20-litre mixture contains 30% acid by volume. Ten litres of pure water are added. What is the new acid percentage?",
+      "question": "A 20-litre mixture contains 30% acid by volume. Ten litres of water are added. Assuming the volumes add without contraction, what is the new acid percentage?",
       "options": [
         "15%",
         "18%",
@@ -305,7 +305,7 @@
         "20%"
       ],
       "answer": 3,
-      "explanation": "The acid volume stays 0.30×20 = 6 litres; total volume becomes 30 litres, and 6/30×100 = 20%.",
+      "explanation": "Initially acid occupies 30% of 20 L, or 6 L. Under the stated additive-volume assumption, total volume becomes 30 L. Hence 6/30 × 100 = 20%.",
       "difficulty": "Hard",
       "subtopic": "mixtures",
       "reviewStatus": "needs_human_review"
@@ -325,17 +325,17 @@
       "reviewStatus": "needs_human_review"
     },
     {
-      "question": "Solve the linear equation 3x − 7 = 2x + 8.",
+      "question": "At which point does the straight line 2x + 3y = 12 intersect the y-axis?",
       "options": [
-        "11",
-        "15",
-        "13",
-        "17"
+        "(6, 0)",
+        "(0, 4)",
+        "(0, 6)",
+        "(4, 0)"
       ],
       "answer": 1,
-      "explanation": "Subtract 2x from both sides and add 7: x = 8 + 7 = 15.",
+      "explanation": "At the y-axis, x = 0. Substitute into 2x + 3y = 12 to get 3y = 12 and y = 4, so the intersection is (0, 4).",
       "difficulty": "Moderate",
-      "subtopic": "linear-equations",
+      "subtopic": "graphs-linear-equations",
       "reviewStatus": "needs_human_review"
     },
     {
