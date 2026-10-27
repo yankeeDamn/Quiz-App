@@ -1,4 +1,6 @@
 'use strict';
+// jose v6 requires WebCrypto; Node 18 exposes it as node:crypto.webcrypto.
+if (!globalThis.crypto) globalThis.crypto = require('node:crypto').webcrypto;
 process.env.NODE_ENV = 'test';
 process.env.EXAMPRO_ENV = 'staging';
 process.env.ENABLE_ADMIN_DRAFT_TESTS = 'true';
