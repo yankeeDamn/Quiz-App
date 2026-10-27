@@ -45,17 +45,17 @@
       "reviewStatus": "needs_human_review"
     },
     {
-      "question": "Which Constitutional Amendment gave constitutional status to Panchayati Raj institutions?",
+      "question": "Which Schedule of the Constitution of India contains the Union List, State List and Concurrent List?",
       "options": [
-        "73rd Amendment",
-        "44th Amendment",
-        "42nd Amendment",
-        "86th Amendment"
+        "Seventh Schedule",
+        "Eighth Schedule",
+        "Ninth Schedule",
+        "Tenth Schedule"
       ],
       "answer": 0,
-      "explanation": "The 73rd Constitutional Amendment Act, 1992 added Part IX and the Eleventh Schedule for rural Panchayati Raj institutions.",
+      "explanation": "The Seventh Schedule allocates legislative subjects among the Union, State and Concurrent Lists. The Eighth Schedule concerns languages.",
       "difficulty": "Hard",
-      "subtopic": "local-government",
+      "subtopic": "constitutional-provisions",
       "reviewStatus": "needs_human_review"
     },
     {
@@ -158,17 +158,17 @@
       "reviewStatus": "needs_human_review"
     },
     {
-      "question": "Which Indian state contains the famous Sun Temple at Konark?",
+      "question": "Sattriya, a classical Indian dance tradition associated with Vaishnavite monasteries, originated in which state?",
       "options": [
+        "Assam",
         "Odisha",
-        "Gujarat",
-        "Rajasthan",
-        "Karnataka"
+        "Kerala",
+        "Manipur"
       ],
       "answer": 0,
-      "explanation": "The thirteenth-century Konark Sun Temple stands on the Odisha coast and is dedicated to Surya.",
+      "explanation": "Sattriya developed in the Vaishnavite sattras (monastic institutions) of Assam and is recognised as an Indian classical dance form.",
       "difficulty": "Moderate",
-      "subtopic": "cultural-heritage",
+      "subtopic": "art-and-culture",
       "reviewStatus": "needs_human_review"
     },
     {
@@ -299,17 +299,17 @@
       "reviewStatus": "needs_human_review"
     },
     {
-      "question": "What is the SI unit of electrical resistance?",
+      "question": "What is the pH of pure neutral water at 25°C?",
       "options": [
-        "Volt",
-        "Ampere",
-        "Ohm",
-        "Watt"
+        "1",
+        "5",
+        "7",
+        "14"
       ],
       "answer": 2,
-      "explanation": "Electrical resistance is measured in ohms (Ω); by Ohm's law, one ohm equals one volt per ampere.",
+      "explanation": "At 25°C, neutral pure water has equal hydrogen-ion and hydroxide-ion concentrations of 10⁻⁷ mol/L. Therefore pH = −log₁₀(10⁻⁷) = 7.",
       "difficulty": "Moderate",
-      "subtopic": "physics",
+      "subtopic": "chemistry",
       "reviewStatus": "needs_human_review"
     },
     {
@@ -327,15 +327,15 @@
       "reviewStatus": "needs_human_review"
     },
     {
-      "question": "In which year did the Reserve Bank of India begin operations?",
+      "question": "What does the Consumer Price Index (CPI) primarily track?",
       "options": [
-        "1935",
-        "1920",
-        "1947",
-        "1950"
+        "Changes in retail prices of a representative basket of consumer goods and services",
+        "The number of unemployed people",
+        "Total tonnes of industrial output",
+        "The government's fiscal deficit"
       ],
       "answer": 0,
-      "explanation": "The Reserve Bank of India commenced operations on 1 April 1935 under the Reserve Bank of India Act, 1934.",
+      "explanation": "The CPI measures changes over time in prices paid by consumers for a representative basket of goods and services and is used as an inflation indicator.",
       "difficulty": "Moderate",
       "subtopic": "Indian-economy",
       "reviewStatus": "needs_human_review"
