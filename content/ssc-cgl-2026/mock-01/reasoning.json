@@ -1,0 +1,356 @@
+{
+  "section": "General Intelligence and Reasoning",
+  "topicId": "ssc26-m01-reasoning",
+  "questions": [
+    {
+      "question": "Find the missing term in the series: 4, 9, 19, 39, 79, ?",
+      "options": [
+        "157",
+        "159",
+        "161",
+        "163"
+      ],
+      "answer": 1,
+      "explanation": "Each term is twice the previous term plus 1: 79 × 2 + 1 = 159.",
+      "difficulty": "Easy",
+      "subtopic": "number-series",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Which letter comes next in the sequence A, C, F, J, O, ?",
+      "options": [
+        "T",
+        "U",
+        "V",
+        "W"
+      ],
+      "answer": 1,
+      "explanation": "The alphabet positions are 1, 3, 6, 10 and 15; increasing gaps of 2, 3, 4 and 5 give position 21, U.",
+      "difficulty": "Moderate",
+      "subtopic": "letter-series",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "In a code, each letter is replaced by the letter two places ahead. How is MANGO coded?",
+      "options": [
+        "OBPIQ",
+        "OCPIQ",
+        "OCPKQ",
+        "OCQIQ"
+      ],
+      "answer": 1,
+      "explanation": "M→O, A→C, N→P, G→I and O→Q; applying the same two-place shift produces OCPIQ.",
+      "difficulty": "Moderate",
+      "subtopic": "coding-decoding",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Choose the pair that follows the same relationship as 'Thermometer : Temperature'.",
+      "options": [
+        "Compass : Direction",
+        "Clock : Distance",
+        "Ruler : Weight",
+        "Barometer : Speed"
+      ],
+      "answer": 0,
+      "explanation": "A thermometer measures temperature and a compass indicates direction; the other devices do not measure their paired quantities.",
+      "difficulty": "Moderate",
+      "subtopic": "analogy",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Which number does not belong with the others?",
+      "options": [
+        "64",
+        "125",
+        "216",
+        "500"
+      ],
+      "answer": 3,
+      "explanation": "64, 125 and 216 are the cubes of 4, 5 and 6 respectively; 500 is not an integer cube.",
+      "difficulty": "Moderate",
+      "subtopic": "classification",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "A is the brother of B's mother. How is A related to B?",
+      "options": [
+        "Paternal uncle",
+        "Maternal uncle",
+        "Cousin",
+        "Grandfather"
+      ],
+      "answer": 1,
+      "explanation": "B's mother's brother is B's maternal uncle by definition of the family relationship.",
+      "difficulty": "Easy",
+      "subtopic": "blood-relations",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Statements: Some pens are books. All books are files. Which conclusion must follow?",
+      "options": [
+        "All pens are files",
+        "Some pens are files",
+        "No pen is a file",
+        "All files are pens"
+      ],
+      "answer": 1,
+      "explanation": "The pens that are books must also be files because every book is a file; nothing is said about all pens.",
+      "difficulty": "Hard",
+      "subtopic": "syllogism",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "A student walks 5 km north, then 3 km east, then 5 km south. Where is the student from the starting point?",
+      "options": [
+        "3 km west",
+        "5 km east",
+        "3 km east",
+        "8 km south"
+      ],
+      "answer": 2,
+      "explanation": "The northward and southward movements cancel; only a net displacement of 3 km east remains.",
+      "difficulty": "Moderate",
+      "subtopic": "direction-sense",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Four students stand in a row facing north. K is left of L, M is right of L, and N is right of M. Who stands second from the left?",
+      "options": [
+        "K",
+        "L",
+        "M",
+        "N"
+      ],
+      "answer": 1,
+      "explanation": "The stated order forces K–L–M–N from left to right; L occupies the second position.",
+      "difficulty": "Moderate",
+      "subtopic": "linear-arrangement",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "If today is Monday, what day of the week will it be 45 days from today?",
+      "options": [
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday"
+      ],
+      "answer": 1,
+      "explanation": "A full week contributes no weekday change. Since 45 leaves a remainder of 3 on division by 7, Monday advances to Thursday.",
+      "difficulty": "Moderate",
+      "subtopic": "calendar",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Rina ranks 12th from the top and 19th from the bottom in a class with no tied ranks. How many students are there?",
+      "options": [
+        "29",
+        "30",
+        "31",
+        "32"
+      ],
+      "answer": 1,
+      "explanation": "Count both ranks and subtract Rina once: 12 + 19 − 1 = 30 students.",
+      "difficulty": "Easy",
+      "subtopic": "ranking",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Select the word that completes the analogy: Seed : Plant :: Egg : ?",
+      "options": [
+        "Nest",
+        "Bird",
+        "Shell",
+        "Feather"
+      ],
+      "answer": 1,
+      "explanation": "A seed can develop into a plant, just as a fertilised bird's egg can develop into a bird.",
+      "difficulty": "Moderate",
+      "subtopic": "analogy",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "What number should replace the question mark: 3, 8, 15, 24, 35, ?",
+      "options": [
+        "46",
+        "47",
+        "48",
+        "49"
+      ],
+      "answer": 2,
+      "explanation": "Consecutive differences are 5, 7, 9 and 11; the next difference is 13, giving 35 + 13 = 48.",
+      "difficulty": "Hard",
+      "subtopic": "number-series",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Suppose CAT is written as 3-1-20 using alphabet positions. How is DOG written?",
+      "options": [
+        "4-15-7",
+        "5-14-7",
+        "4-14-8",
+        "3-15-8"
+      ],
+      "answer": 0,
+      "explanation": "The letters D, O and G occupy positions 4, 15 and 7 in the English alphabet.",
+      "difficulty": "Moderate",
+      "subtopic": "coding-decoding",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Arun is taller than Bela. Bela is taller than Charu. Deepa is shorter than Charu. Who is the shortest?",
+      "options": [
+        "Arun",
+        "Bela",
+        "Charu",
+        "Deepa"
+      ],
+      "answer": 3,
+      "explanation": "The given inequalities are Arun > Bela > Charu > Deepa, so Deepa is the shortest.",
+      "difficulty": "Moderate",
+      "subtopic": "ordering",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "All roses in a garden are flowers. Some flowers are red. Which statement is definitely true?",
+      "options": [
+        "All roses are red",
+        "Some roses are red",
+        "All roses are flowers",
+        "No flower is a rose"
+      ],
+      "answer": 2,
+      "explanation": "The first premise directly states that every rose is a flower; red flowers need not be roses.",
+      "difficulty": "Easy",
+      "subtopic": "logical-reasoning",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Three friends P, Q and R have different ages. P is older than Q but younger than R. Who is the oldest?",
+      "options": [
+        "P",
+        "Q",
+        "R",
+        "Cannot be determined"
+      ],
+      "answer": 2,
+      "explanation": "R is older than P, and P is older than Q, so R must be the oldest.",
+      "difficulty": "Moderate",
+      "subtopic": "ordering",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "The sum of alphabet positions of the letters in TREE is what number? Use A=1, B=2 and so on.",
+      "options": [
+        "46",
+        "47",
+        "48",
+        "49"
+      ],
+      "answer": 2,
+      "explanation": "T=20, R=18 and each E=5. Their sum is 20+18+5+5 = 48.",
+      "difficulty": "Moderate",
+      "subtopic": "letter-coding",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "In a queue, S is 7th from the front and there are 10 people behind S. How many people are in the queue?",
+      "options": [
+        "16",
+        "17",
+        "18",
+        "19"
+      ],
+      "answer": 1,
+      "explanation": "Six people stand before S; including S and the ten behind gives 6 + 1 + 10 = 17.",
+      "difficulty": "Hard",
+      "subtopic": "ranking",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "If the opposite faces of a particular numbered die always add to 7, which number is opposite 2?",
+      "options": [
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "answer": 2,
+      "explanation": "The opposite face must total 7 with the visible 2, so its number is 7−2 = 5.",
+      "difficulty": "Moderate",
+      "subtopic": "spatial-reasoning",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Choose the next term: AZ, BY, CX, DW, ?",
+      "options": [
+        "EV",
+        "FU",
+        "EW",
+        "FV"
+      ],
+      "answer": 0,
+      "explanation": "First letters move forward A, B, C, D, E while second letters move backward Z, Y, X, W, V.",
+      "difficulty": "Easy",
+      "subtopic": "letter-series",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "If 'A + B' means A multiplied by B, and 'A × B' means A minus B, what is 6 + 3 × 4?",
+      "options": [
+        "10",
+        "14",
+        "18",
+        "20"
+      ],
+      "answer": 1,
+      "explanation": "Substitute the defined operations into the expression: (6 × 3) − 4 = 18 − 4 = 14.",
+      "difficulty": "Moderate",
+      "subtopic": "symbol-operations",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "In a group of five, Uma is immediately before Vani, who is immediately before Waseem. Which person must be between the other two?",
+      "options": [
+        "Uma",
+        "Vani",
+        "Waseem",
+        "None of them"
+      ],
+      "answer": 1,
+      "explanation": "The consecutive order is Uma–Vani–Waseem, placing Vani between Uma and Waseem.",
+      "difficulty": "Moderate",
+      "subtopic": "arrangement",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Which is the next number in the series: 11, 22, 44, 88, ?",
+      "options": [
+        "154",
+        "165",
+        "176",
+        "188"
+      ],
+      "answer": 2,
+      "explanation": "Each term is multiplied by 2, so the next number is 88 × 2 = 176.",
+      "difficulty": "Moderate",
+      "subtopic": "number-series",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "In a library, every reference book is catalogued, and at least one reference book exists. What follows?",
+      "options": [
+        "Some catalogued books are reference books",
+        "All catalogued books are reference books",
+        "No reference book is catalogued",
+        "Some reference books are uncatalogued"
+      ],
+      "answer": 0,
+      "explanation": "Because at least one reference book exists and every such book is catalogued, at least one catalogued book is a reference book.",
+      "difficulty": "Hard",
+      "subtopic": "syllogism",
+      "reviewStatus": "needs_human_review"
+    }
+  ]
+}
