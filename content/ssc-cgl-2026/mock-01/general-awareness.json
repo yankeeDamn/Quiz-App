@@ -1,0 +1,358 @@
+{
+  "section": "General Awareness",
+  "topicId": "ssc26-m01-awareness",
+  "questions": [
+    {
+      "question": "On which date did the Constituent Assembly of India adopt the Constitution?",
+      "options": [
+        "15 August 1947",
+        "26 November 1949",
+        "26 January 1950",
+        "2 October 1949"
+      ],
+      "answer": 1,
+      "explanation": "The Constituent Assembly adopted India's Constitution on 26 November 1949; most provisions came into force on 26 January 1950.",
+      "difficulty": "Moderate",
+      "subtopic": "polity-history",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Which Article of the Indian Constitution protects life and personal liberty?",
+      "options": [
+        "Article 14",
+        "Article 19",
+        "Article 21",
+        "Article 32"
+      ],
+      "answer": 2,
+      "explanation": "Article 21 states that no person shall be deprived of life or personal liberty except according to procedure established by law.",
+      "difficulty": "Easy",
+      "subtopic": "fundamental-rights",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "The Directive Principles of State Policy are contained in which Part of the Constitution?",
+      "options": [
+        "Part III",
+        "Part V",
+        "Part IVA",
+        "Part IV"
+      ],
+      "answer": 3,
+      "explanation": "Part IV, Articles 36 to 51, contains the Directive Principles of State Policy; Part III contains Fundamental Rights.",
+      "difficulty": "Moderate",
+      "subtopic": "constitutional-provisions",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Which Schedule of the Constitution of India contains the Union List, State List and Concurrent List?",
+      "options": [
+        "Seventh Schedule",
+        "Eighth Schedule",
+        "Ninth Schedule",
+        "Tenth Schedule"
+      ],
+      "answer": 0,
+      "explanation": "The Seventh Schedule allocates legislative subjects among the Union, State and Concurrent Lists. The Eighth Schedule concerns languages.",
+      "difficulty": "Hard",
+      "subtopic": "constitutional-provisions",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Who ordinarily presides over a sitting of the Lok Sabha?",
+      "options": [
+        "President of India",
+        "Speaker of the Lok Sabha",
+        "Chief Justice of India",
+        "Chairperson of the Rajya Sabha"
+      ],
+      "answer": 1,
+      "explanation": "The Speaker presides over Lok Sabha sittings, maintains order and applies the House's rules of procedure.",
+      "difficulty": "Moderate",
+      "subtopic": "parliament",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Why is stainless steel generally more resistant to rusting than ordinary carbon steel?",
+      "options": [
+        "It contains no iron",
+        "Its density is always lower",
+        "Chromium produces a protective oxide film",
+        "It never reacts with oxygen"
+      ],
+      "answer": 2,
+      "explanation": "Stainless steel contains chromium, which forms a thin, adherent and self-repairing chromium-rich oxide layer that reduces corrosion under suitable conditions.",
+      "difficulty": "Moderate",
+      "subtopic": "chemistry",
+      "reviewStatus": "needs_human_review",
+      "factSource": "https://bssa.org.uk/bssa_articles/when-is-stainless-steel-passive-or-active-formation-of-the-passive-layer/"
+    },
+    {
+      "question": "Which Veda is generally regarded as the oldest of the four Vedas?",
+      "options": [
+        "Atharvaveda",
+        "Yajurveda",
+        "Samaveda",
+        "Rigveda"
+      ],
+      "answer": 3,
+      "explanation": "The Rigveda is the earliest of the four Vedic collections and principally contains hymns to Vedic deities.",
+      "difficulty": "Moderate",
+      "subtopic": "ancient-history",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "In which city did the uprising of 1857 begin among sepoys on 10 May 1857?",
+      "options": [
+        "Meerut",
+        "Kanpur",
+        "Lucknow",
+        "Jhansi"
+      ],
+      "answer": 0,
+      "explanation": "The sepoy uprising broke out at Meerut on 10 May 1857 before rebels proceeded towards Delhi.",
+      "difficulty": "Easy",
+      "subtopic": "modern-history",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "The Dandi March of 1930 protested which colonial measure?",
+      "options": [
+        "Income tax",
+        "Salt tax",
+        "Land ceiling",
+        "Import duty on cotton"
+      ],
+      "answer": 1,
+      "explanation": "Gandhi's march from Sabarmati to Dandi challenged the British salt monopoly and the tax on salt.",
+      "difficulty": "Moderate",
+      "subtopic": "freedom-movement",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "The Chauri Chaura incident of 1922 is linked to the withdrawal of which movement?",
+      "options": [
+        "Civil Disobedience Movement",
+        "Quit India Movement",
+        "Non-Cooperation Movement",
+        "Swadeshi Movement"
+      ],
+      "answer": 2,
+      "explanation": "Following the violence at Chauri Chaura in February 1922, Gandhi suspended the Non-Cooperation Movement.",
+      "difficulty": "Moderate",
+      "subtopic": "freedom-movement",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "The 'Arthashastra' is traditionally attributed to which scholar?",
+      "options": [
+        "Kalidasa",
+        "Patanjali",
+        "Banabhatta",
+        "Kautilya"
+      ],
+      "answer": 3,
+      "explanation": "The treatise on statecraft and economic administration is traditionally associated with Kautilya, also called Chanakya.",
+      "difficulty": "Hard",
+      "subtopic": "ancient-history",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Sattriya, a classical Indian dance tradition associated with Vaishnavite monasteries, originated in which state?",
+      "options": [
+        "Assam",
+        "Odisha",
+        "Kerala",
+        "Manipur"
+      ],
+      "answer": 0,
+      "explanation": "Sattriya developed in the Vaishnavite sattras (monastic institutions) of Assam and is recognised as an Indian classical dance form.",
+      "difficulty": "Moderate",
+      "subtopic": "art-and-culture",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Which physical feature runs broadly parallel to the western coast of peninsular India?",
+      "options": [
+        "Aravalli Range",
+        "Western Ghats",
+        "Vindhya Range",
+        "Eastern Ghats"
+      ],
+      "answer": 1,
+      "explanation": "The Western Ghats form a mountain chain along the western side of peninsular India, broadly parallel to the Arabian Sea coast.",
+      "difficulty": "Moderate",
+      "subtopic": "physical-geography",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "The Godavari is often called the Dakshin Ganga. Into which water body does it empty?",
+      "options": [
+        "Arabian Sea",
+        "Gulf of Kutch",
+        "Bay of Bengal",
+        "Chilika Lake"
+      ],
+      "answer": 2,
+      "explanation": "The Godavari flows generally east across peninsular India and forms a delta along the Bay of Bengal.",
+      "difficulty": "Easy",
+      "subtopic": "rivers",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Black or regur soil of the Deccan is particularly well suited to which major crop?",
+      "options": [
+        "Rubber",
+        "Tea",
+        "Jute",
+        "Cotton"
+      ],
+      "answer": 3,
+      "explanation": "Black cotton soil retains moisture and is traditionally associated with cotton cultivation in much of the Deccan plateau.",
+      "difficulty": "Moderate",
+      "subtopic": "agricultural-geography",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "The NISAR Earth-observation satellite launched in July 2025 was developed jointly by which two space agencies?",
+      "options": [
+        "NASA and ISRO",
+        "ESA and ISRO",
+        "JAXA and NASA",
+        "ISRO and Roscosmos"
+      ],
+      "answer": 0,
+      "explanation": "NISAR stands for NASA–ISRO Synthetic Aperture Radar. NASA and India's ISRO jointly developed the mission, which launched on 30 July 2025.",
+      "difficulty": "Moderate",
+      "subtopic": "science-current-affairs",
+      "reviewStatus": "needs_human_review",
+      "factSource": "https://www.nasa.gov/news-release/nasa-isro-satellite-lifts-off-to-track-earths-changing-surfaces/"
+    },
+    {
+      "question": "Kaziranga National Park, associated with the Indian one-horned rhinoceros, is in which state?",
+      "options": [
+        "Sikkim",
+        "Assam",
+        "Bihar",
+        "Mizoram"
+      ],
+      "answer": 1,
+      "explanation": "Kaziranga is in Assam and is internationally known for its conservation of the greater one-horned rhinoceros.",
+      "difficulty": "Moderate",
+      "subtopic": "environment",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Most of Earth's protective atmospheric ozone layer occurs in which layer?",
+      "options": [
+        "Troposphere",
+        "Mesosphere",
+        "Stratosphere",
+        "Thermosphere"
+      ],
+      "answer": 2,
+      "explanation": "Most atmospheric ozone is concentrated in the stratosphere, where it absorbs much of the Sun's harmful ultraviolet radiation.",
+      "difficulty": "Hard",
+      "subtopic": "environmental-science",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Which element is present at the centre of the haem group in haemoglobin?",
+      "options": [
+        "Copper",
+        "Calcium",
+        "Sodium",
+        "Iron"
+      ],
+      "answer": 3,
+      "explanation": "Iron in the haem group of haemoglobin binds oxygen reversibly and helps transport it through blood.",
+      "difficulty": "Moderate",
+      "subtopic": "human-biology",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "A prolonged deficiency of vitamin C causes which condition?",
+      "options": [
+        "Scurvy",
+        "Rickets",
+        "Night blindness",
+        "Beriberi"
+      ],
+      "answer": 0,
+      "explanation": "Vitamin C is required for normal collagen formation; severe deficiency causes scurvy with bleeding gums and impaired wound healing.",
+      "difficulty": "Easy",
+      "subtopic": "nutrition",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Which plant tissue chiefly conducts water and dissolved minerals from roots towards leaves?",
+      "options": [
+        "Phloem",
+        "Xylem",
+        "Cambium",
+        "Epidermis"
+      ],
+      "answer": 1,
+      "explanation": "Xylem transports water and mineral ions upward through vessels and tracheids; phloem chiefly transports sugars.",
+      "difficulty": "Moderate",
+      "subtopic": "plant-biology",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "What is the pH of pure neutral water at 25°C?",
+      "options": [
+        "1",
+        "5",
+        "7",
+        "14"
+      ],
+      "answer": 2,
+      "explanation": "At 25°C, neutral pure water has equal hydrogen-ion and hydroxide-ion concentrations of 10⁻⁷ mol/L. Therefore pH = −log₁₀(10⁻⁷) = 7.",
+      "difficulty": "Moderate",
+      "subtopic": "chemistry",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Which device is used to measure atmospheric pressure?",
+      "options": [
+        "Hygrometer",
+        "Calorimeter",
+        "Anemometer",
+        "Barometer"
+      ],
+      "answer": 3,
+      "explanation": "A barometer measures atmospheric pressure, while a hygrometer measures humidity and an anemometer measures wind speed.",
+      "difficulty": "Moderate",
+      "subtopic": "measurement",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "What does the Consumer Price Index (CPI) primarily track?",
+      "options": [
+        "Changes in retail prices of a representative basket of consumer goods and services",
+        "The number of unemployed people",
+        "Total tonnes of industrial output",
+        "The government's fiscal deficit"
+      ],
+      "answer": 0,
+      "explanation": "The CPI measures changes over time in prices paid by consumers for a representative basket of goods and services and is used as an inflation indicator.",
+      "difficulty": "Moderate",
+      "subtopic": "Indian-economy",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Which of the following is an example of a direct tax in India?",
+      "options": [
+        "Goods and Services Tax",
+        "Income tax",
+        "Customs duty",
+        "Excise duty"
+      ],
+      "answer": 1,
+      "explanation": "Income tax is levied directly on the income of persons or entities; GST, customs duty and excise duty are indirect taxes.",
+      "difficulty": "Hard",
+      "subtopic": "taxation",
+      "reviewStatus": "needs_human_review"
+    }
+  ]
+}

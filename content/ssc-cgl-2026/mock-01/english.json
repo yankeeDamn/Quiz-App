@@ -1,0 +1,356 @@
+{
+  "section": "English Comprehension",
+  "topicId": "ssc26-m01-english",
+  "questions": [
+    {
+      "question": "Choose the correct verb: 'Neither of the two proposals ___ acceptable to the committee.'",
+      "options": [
+        "are",
+        "have",
+        "were",
+        "is"
+      ],
+      "answer": 3,
+      "explanation": "Neither is a singular indefinite pronoun in this construction, so it takes the singular verb 'is'.",
+      "difficulty": "Easy",
+      "subtopic": "subject-verb-agreement",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Fill the blank: 'By the time the train arrived, we ___ for nearly an hour.'",
+      "options": [
+        "had been waiting",
+        "have waited",
+        "are waiting",
+        "will wait"
+      ],
+      "answer": 0,
+      "explanation": "The waiting began before another past event and continued until that event, so the past perfect continuous fits.",
+      "difficulty": "Moderate",
+      "subtopic": "tenses",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Choose the correct preposition: 'The committee objected ___ the proposed changes.'",
+      "options": [
+        "on",
+        "to",
+        "for",
+        "at"
+      ],
+      "answer": 1,
+      "explanation": "In this construction, 'object to' means express disagreement with something; the natural form is 'objected to the proposed changes'.",
+      "difficulty": "Moderate",
+      "subtopic": "prepositions",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Select the article that completes the sentence: 'She is ___ honest employee.'",
+      "options": [
+        "a",
+        "the",
+        "an",
+        "no article"
+      ],
+      "answer": 2,
+      "explanation": "The first sound of 'honest' is a vowel because the h is silent, so the indefinite article is 'an'.",
+      "difficulty": "Moderate",
+      "subtopic": "articles",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Which word is closest in meaning to 'meticulous'?",
+      "options": [
+        "Careless",
+        "Hasty",
+        "Indifferent",
+        "Thorough"
+      ],
+      "answer": 3,
+      "explanation": "A meticulous person pays very close attention to detail, so 'thorough' is the nearest option.",
+      "difficulty": "Moderate",
+      "subtopic": "synonyms",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Select the word opposite in meaning to 'scarce'.",
+      "options": [
+        "Abundant",
+        "Limited",
+        "Rare",
+        "Insufficient"
+      ],
+      "answer": 0,
+      "explanation": "Scarce means not available in sufficient quantity; abundant means plentiful or available in large amounts.",
+      "difficulty": "Moderate",
+      "subtopic": "antonyms",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "What does the idiom 'spill the beans' mean in ordinary usage?",
+      "options": [
+        "Waste food",
+        "Reveal a secret",
+        "Make a plan",
+        "Win an argument"
+      ],
+      "answer": 1,
+      "explanation": "To spill the beans is to disclose information that was supposed to remain confidential.",
+      "difficulty": "Easy",
+      "subtopic": "idioms",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "A person who scientifically studies birds is called a:",
+      "options": [
+        "Geologist",
+        "Entomologist",
+        "Ornithologist",
+        "Ichthyologist"
+      ],
+      "answer": 2,
+      "explanation": "Ornithology is the scientific study of birds; its practitioner is an ornithologist.",
+      "difficulty": "Moderate",
+      "subtopic": "one-word-substitution",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Which spelling correctly refers to a place to stay or lodging?",
+      "options": [
+        "Accomodation",
+        "Acommodation",
+        "Accommondation",
+        "Accommodation"
+      ],
+      "answer": 3,
+      "explanation": "The standard spelling is 'accommodation' with two c's and two m's.",
+      "difficulty": "Hard",
+      "subtopic": "spelling",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Choose the correct passive form of 'The manager approved the proposal.'",
+      "options": [
+        "The proposal was approved by the manager.",
+        "The proposal approved the manager.",
+        "The proposal has approving by the manager.",
+        "The manager was approved by the proposal."
+      ],
+      "answer": 0,
+      "explanation": "The active simple past becomes 'was approved' in passive voice; the proposal is the receiver of the action.",
+      "difficulty": "Moderate",
+      "subtopic": "voice",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Choose the correct reported speech for: She said, 'I am tired.'",
+      "options": [
+        "She said that I am tired.",
+        "She said that she was tired.",
+        "She says that she had tired.",
+        "She said that she is being tired."
+      ],
+      "answer": 1,
+      "explanation": "With a past reporting verb, 'am' ordinarily backshifts to 'was', and 'I' changes to 'she' to keep the speaker's identity.",
+      "difficulty": "Moderate",
+      "subtopic": "reported-speech",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Correct the sentence: 'He do not know the answer.'",
+      "options": [
+        "He do not knows the answer.",
+        "He did not knows the answer.",
+        "He does not know the answer.",
+        "He does not knew the answer."
+      ],
+      "answer": 2,
+      "explanation": "A third-person singular subject in the present simple takes 'does not' followed by the base verb 'know'.",
+      "difficulty": "Moderate",
+      "subtopic": "error-correction",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Complete the parallel list: 'She enjoys reading, painting, and ___ on weekends.'",
+      "options": [
+        "to hike",
+        "hike",
+        "hiked",
+        "hiking"
+      ],
+      "answer": 3,
+      "explanation": "The listed activities are gerunds after 'enjoys'; 'hiking' maintains parallel grammatical form with reading and painting.",
+      "difficulty": "Easy",
+      "subtopic": "parallel-structure",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Choose the word that means 'influence' in this sentence: 'The new timetable may ___ the attendance rate.'",
+      "options": [
+        "affect",
+        "effect",
+        "defect",
+        "reflect on"
+      ],
+      "answer": 0,
+      "explanation": "'Affect' is the transitive verb meaning influence. Although 'effect' can also be a verb, it means 'bring about' and does not naturally mean 'influence' in this context.",
+      "difficulty": "Moderate",
+      "subtopic": "word-usage",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Which word best replaces 'alleviate' in 'The medicine may alleviate the discomfort'?",
+      "options": [
+        "Intensify",
+        "Ease",
+        "Prolong",
+        "Conceal"
+      ],
+      "answer": 1,
+      "explanation": "To alleviate discomfort is to lessen or ease its severity, not to intensify or merely conceal it.",
+      "difficulty": "Moderate",
+      "subtopic": "vocabulary",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Select the conjunction: '___ it was raining, the outdoor event continued.'",
+      "options": [
+        "Because",
+        "Unless",
+        "Although",
+        "So that"
+      ],
+      "answer": 2,
+      "explanation": "Although introduces a concession: the event continued despite the rain, matching the meaning of the sentence.",
+      "difficulty": "Moderate",
+      "subtopic": "conjunctions",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Choose the correct preposition: 'Meera is particularly good ___ solving puzzles.'",
+      "options": [
+        "on",
+        "with",
+        "for",
+        "at"
+      ],
+      "answer": 3,
+      "explanation": "In standard usage, 'good at' describes competence in an activity; the gerund 'solving' follows it.",
+      "difficulty": "Hard",
+      "subtopic": "prepositions",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Which word is the plural form of 'criterion'?",
+      "options": [
+        "Criteria",
+        "Criterions",
+        "Criterias",
+        "Criterion's"
+      ],
+      "answer": 0,
+      "explanation": "Criterion is singular and criteria is its standard plural form, inherited from Greek.",
+      "difficulty": "Moderate",
+      "subtopic": "word-forms",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Fill the blank with the grammatically correct form: 'The lecturer explained the idea ___.'",
+      "options": [
+        "clear",
+        "clearly",
+        "clarity",
+        "clearness"
+      ],
+      "answer": 1,
+      "explanation": "The verb 'explained' requires an adverb of manner here, so 'clearly' is the correct form.",
+      "difficulty": "Easy",
+      "subtopic": "adverbs",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Complete the conditional: 'If I had known about the delay, I ___ you earlier.'",
+      "options": [
+        "will call",
+        "would call",
+        "would have called",
+        "had call"
+      ],
+      "answer": 2,
+      "explanation": "An unreal past conditional uses 'if + past perfect' and 'would have + past participle' in the main clause.",
+      "difficulty": "Moderate",
+      "subtopic": "conditionals",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Read: 'The city library extended its closing time from 6 p.m. to 9 p.m. after office workers said they could rarely arrive before 6 p.m.' Which problem did the change primarily address?",
+      "options": [
+        "Lack of new books",
+        "Insufficient study desks",
+        "High membership fees",
+        "Inconvenient opening hours"
+      ],
+      "answer": 3,
+      "explanation": "Office workers struggled to reach the library before the previous 6 p.m. closing time, so the extended hours addressed access after work.",
+      "difficulty": "Moderate",
+      "subtopic": "reading-comprehension",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Read: 'A village installed solar-powered lamps with rechargeable batteries. The lamps continued to operate during two cloudy evenings.' What made the lamps work after sunset without direct sunlight?",
+      "options": [
+        "Stored energy in batteries",
+        "Heat from the road",
+        "A diesel generator",
+        "Moonlight collected directly"
+      ],
+      "answer": 0,
+      "explanation": "The rechargeable batteries stored electrical energy generated earlier and supplied it to the lamps when sunlight was absent.",
+      "difficulty": "Moderate",
+      "subtopic": "reading-comprehension",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Read: 'Before beginning the experiment, Mira labelled three samples and checked the instructions. She then recorded each sample's starting temperature.' What did Mira do immediately before recording the temperatures?",
+      "options": [
+        "Disposed of the samples",
+        "Checked the instructions",
+        "Heated all three samples",
+        "Calculated the final result"
+      ],
+      "answer": 1,
+      "explanation": "The passage states that Mira checked the instructions and then recorded the starting temperatures; no intervening action is described.",
+      "difficulty": "Moderate",
+      "subtopic": "reading-comprehension",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Read: 'A farmer alternated a cereal crop with a legume crop. Over several seasons the farmer was able to apply less purchased nitrogen fertiliser.' Which inference is best supported?",
+      "options": [
+        "Legumes consume all soil nitrogen",
+        "Cereal crops require no nutrients",
+        "Crop rotation can help nitrogen management",
+        "Purchased fertiliser was banned"
+      ],
+      "answer": 2,
+      "explanation": "Legumes can contribute biologically fixed nitrogen to cropping systems. The observation is consistent with improved nitrogen management but does not prove that crop rotation was the only cause.",
+      "difficulty": "Moderate",
+      "subtopic": "reading-comprehension",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Arrange these statements into the most logical order for a flowering plant's growth: P. The mature plant produces flowers. Q. A seed is placed in moist soil. R. The flowers later develop into fruits. S. A seedling emerges and grows.",
+      "options": [
+        "P-Q-S-R",
+        "Q-P-S-R",
+        "S-Q-P-R",
+        "Q-S-P-R"
+      ],
+      "answer": 3,
+      "explanation": "The biological sequence is planting the seed (Q), emergence and growth (S), flowering (P), and fruit formation (R). Therefore Q-S-P-R is the logical order.",
+      "difficulty": "Easy",
+      "subtopic": "sentence-rearrangement",
+      "reviewStatus": "needs_human_review"
+    }
+  ]
+}
