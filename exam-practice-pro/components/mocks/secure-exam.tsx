@@ -156,7 +156,8 @@ export function SecureExam({testId}:{testId:string}) {
  const mm=Math.floor(seconds/60),ss=String(seconds%60).padStart(2,'0');
  return <section className="space-y-5">
    <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border bg-card p-4">
-     <div><h1 className="text-xl font-bold">{attempt.title}</h1><p className="text-sm text-muted-foreground">{Object.keys(responses).length}/{questions.length} answered · {saved?t('save'):t('saving')}</p></div>
+     <div><h1 className="text-xl font-bold">{attempt.title}</h1><p className="text-sm text-muted-foreground">{Object.keys(responses).length}/{questions.length} answered · {saved?t('save'):t('saving')}</p>
+      {sectionMinutes!==null&&activeSection!==null&&<p className="mt-1 text-sm font-semibold text-indigo-700 dark:text-indigo-300">Section {Math.min(activeSection+1,4)} / 4 · {sectionMinutes} min per section · earlier sections locked</p>}</div>
      <div className="flex flex-wrap items-center gap-2">
       <LanguageSwitcher small/><ShareTestButtons testId={testId} title={attempt.title} compact/>
       <div role="timer" className="font-mono text-xl font-bold">{mm}:{ss}</div>
@@ -164,10 +165,11 @@ export function SecureExam({testId}:{testId:string}) {
    </div>
    {error&&<p className="rounded-lg border border-red-500 p-3 text-sm" role="alert">{error}</p>}
    <div className="flex flex-wrap gap-2" role="group" aria-label="Exam sections">
-     {attempt.test.sections.map((section,i)=><button key={i} type="button" onClick={()=>setCurrent(Math.min(Math.max(section.from,0),questions.length-1))}
+     {attempt.test.sections.map((section,i)=><button key={i} type="button" disabled={sectionMinutes!==null && activeSection!==i}
+       onClick={()=>setCurrent(Math.min(Math.max(section.from,0),questions.length-1))}
        aria-pressed={current>=section.from && current<section.to}
        className={'min-h-10 rounded-lg border px-3 py-2 text-sm font-semibold ' +
-         (current>=section.from && current<section.to ? 'border-indigo-600 bg-indigo-50 text-indigo-900 dark:bg-indigo-950 dark:text-indigo-100' : 'hover:bg-muted')}>
+         (current>=section.from && current<section.to ? 'border-indigo-600 bg-indigo-50 text-indigo-900 dark:bg-indigo-950 dark:text-indigo-100' : 'hover:bg-muted')+(sectionMinutes!==null&&activeSection!==i?' cursor-not-allowed opacity-40':'')}>
        {section.name}
      </button>)}
    </div>
@@ -179,7 +181,7 @@ export function SecureExam({testId}:{testId:string}) {
        <legend className="sr-only">{t('answer')}</legend>
        {question.options.map((choice,i)=><label key={i} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border p-3 hover:bg-muted"><input type="radio" name={question.id} checked={selected===i} onChange={()=>update(question.id,i)}/><span>{String.fromCharCode(65+i)}. {translated.texts[i+1]||choice}</span></label>)}
      </fieldset>
-     <div className="mt-4 flex flex-wrap gap-2"><Button variant="outline" onClick={()=>update(question.id,-1)}>Clear answer</Button><Button variant="outline" aria-pressed={Boolean(marked[question.id])} onClick={()=>setMarked(old=>({...old,[question.id]:!old[question.id]}))}>{marked[question.id]?'Unmark review':'Mark for review'}</Button><Button variant="outline" disabled={current===0} onClick={()=>setCurrent(x=>x-1)}>{t('previous')}</Button><Button disabled={current===questions.length-1} onClick={()=>setCurrent(x=>x+1)}>{t('next')}</Button></div>
+     <div className="mt-4 flex flex-wrap gap-2"><Button variant="outline" onClick={()=>update(question.id,-1)}>Clear answer</Button><Button variant="outline" aria-pressed={Boolean(marked[question.id])} onClick={()=>setMarked(old=>({...old,[question.id]:!old[question.id]}))}>{marked[question.id]?'Unmark review':'Mark for review'}</Button><Button variant="outline" disabled={current===0 || (sectionMinutes!==null&&activeSection!==null&&current<=(attempt.test.sections[activeSection]?.from??0))} onClick={()=>setCurrent(x=>x-1)}>{t('previous')}</Button><Button disabled={current===questions.length-1 || (sectionMinutes!==null&&activeSection!==null&&current>=(attempt.test.sections[activeSection]?.to??0)-1)} onClick={()=>setCurrent(x=>x+1)}>{t('next')}</Button></div>
    </article>
    <div aria-label="Question status legend" className="flex flex-wrap gap-3 text-xs text-muted-foreground">
      <span className="flex items-center gap-1"><i className="h-3 w-3 rounded-sm bg-slate-200 dark:bg-slate-700"/> Unanswered</span>
@@ -190,18 +192,19 @@ export function SecureExam({testId}:{testId:string}) {
    <div className="flex flex-wrap gap-2" role="group" aria-label="Question navigation">{questions.map((q,i)=>{
      const answered=responses[q.id]!==undefined;
      const flag=Boolean(marked[q.id]);
-     return <button type="button" key={q.id} aria-label={'Question '+(i+1)+(answered?', answered':' , unanswered')+(flag?', marked for review':'')}
+     return <button type="button" key={q.id} disabled={sectionMinutes!==null&&q.section!==activeSection}
+       aria-label={'Question '+(i+1)+(answered?', answered':' , unanswered')+(flag?', marked for review':'')}
        aria-current={i===current?'true':undefined} onClick={()=>setCurrent(i)}
        className={'h-10 min-w-10 border text-sm font-semibold ' +
          (flag ? 'rounded-full bg-purple-600 text-white' :
          answered ? 'rounded-lg bg-emerald-600 text-white' :
          'rounded-lg bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-white') +
-         (i===current ? ' border-indigo-500 ring-2 ring-indigo-500 ring-offset-2' : ' border-transparent')}>
+         (i===current ? ' border-indigo-500 ring-2 ring-indigo-500 ring-offset-2' : ' border-transparent')+(sectionMinutes!==null&&q.section!==activeSection?' cursor-not-allowed opacity-40':'')}>
        {i+1}
      </button>;
    })}</div>
    <p className="text-xs text-muted-foreground">Marks for review are visual reminders in this browser tab; only your selected answers are saved to the server.</p>
    <Button disabled={busy} onClick={()=>void submit()}>{busy?t('saving'):t('submit')}</Button>
-   <p className="text-xs text-muted-foreground">This is a server-timed exam. Refreshing the page recovers saved answers and the original deadline. Answers and explanations appear only after submission.</p>
+   <p className="text-xs text-muted-foreground">This is a server-timed exam. Refresh recovers saved answers. {sectionMinutes!==null?'Sections advance automatically after 15 minutes and earlier sections cannot be edited.':'The original overall deadline stays the same.'} Answers and explanations appear only after submission.</p>
  </section>;
 }
