@@ -40,6 +40,7 @@ function visibleAttempt(row) {
       id: row.test_id, name: snapshot.name, minutes: snapshot.minutes, tier: snapshot.tier,
       marksPerCorrect: snapshot.marksPerCorrect, negativeMarks: snapshot.negativeMarks,
       passPercent: snapshot.passPercent, sections: snapshot.sections,
+      sectionTimingMinutes: snapshot.sectionTimingMinutes || null,
       questions: snapshot.questions.map((q) => ({ id: q.id, topic: q.topic, section: q.section, question: q.question, options: q.options })),
     },
     result,
