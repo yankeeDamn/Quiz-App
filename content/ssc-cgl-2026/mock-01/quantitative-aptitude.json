@@ -1,0 +1,356 @@
+{
+  "section": "Quantitative Aptitude",
+  "topicId": "ssc26-m01-quant",
+  "questions": [
+    {
+      "question": "Find the value of 18% of 450.",
+      "options": [
+        "72",
+        "81",
+        "84",
+        "90"
+      ],
+      "answer": 1,
+      "explanation": "Compute 18/100 × 450 = 81. Dividing 450 by 100 and multiplying by 18 gives the same answer.",
+      "difficulty": "Easy",
+      "subtopic": "percentages",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "A jacket marked at ₹1,200 is sold after a 15% discount. What is its selling price?",
+      "options": [
+        "₹980",
+        "₹1,020",
+        "₹1,040",
+        "₹1,080"
+      ],
+      "answer": 1,
+      "explanation": "The discount is 0.15 × 1,200 = ₹180; therefore the selling price is ₹1,200 − ₹180 = ₹1,020.",
+      "difficulty": "Moderate",
+      "subtopic": "discount",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "An article costs ₹800 and is sold for ₹920. What is the profit percentage?",
+      "options": [
+        "12%",
+        "14%",
+        "15%",
+        "18%"
+      ],
+      "answer": 2,
+      "explanation": "Profit = 920 − 800 = ₹120, and profit percentage is 120/800 × 100 = 15%.",
+      "difficulty": "Moderate",
+      "subtopic": "profit-loss",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "An investment of ₹6,000 earns simple interest at 8% annually for 2.5 years. Find the interest.",
+      "options": [
+        "₹960",
+        "₹1,120",
+        "₹1,200",
+        "₹1,280"
+      ],
+      "answer": 2,
+      "explanation": "Simple interest = principal × rate × time / 100 = 6,000 × 8 × 2.5 / 100 = ₹1,200.",
+      "difficulty": "Moderate",
+      "subtopic": "simple-interest",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Find the compound interest on ₹5,000 for 2 years at 10% per annum, compounded yearly.",
+      "options": [
+        "₹1,000",
+        "₹1,050",
+        "₹1,100",
+        "₹1,150"
+      ],
+      "answer": 1,
+      "explanation": "The amount is ₹5,000 × (1.10)^2 = ₹6,050, so compound interest is ₹6,050 − ₹5,000 = ₹1,050.",
+      "difficulty": "Moderate",
+      "subtopic": "compound-interest",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Two sums are in the ratio 3:5 and their total is 96. Find the larger sum.",
+      "options": [
+        "48",
+        "54",
+        "60",
+        "64"
+      ],
+      "answer": 2,
+      "explanation": "The ratio has eight equal parts; each equals 96/8 = 12, and the larger sum is 5 × 12 = 60.",
+      "difficulty": "Moderate",
+      "subtopic": "ratio-proportion",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "What is the arithmetic mean of 12, 18, 20, 24 and 26?",
+      "options": [
+        "18",
+        "19",
+        "20",
+        "22"
+      ],
+      "answer": 2,
+      "explanation": "The sum of the five numbers is 100. Dividing by five gives a mean of 20.",
+      "difficulty": "Easy",
+      "subtopic": "averages",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "A can finish a task in 12 days and B in 18 days. How long will they take working together at constant rates?",
+      "options": [
+        "6 days",
+        "7.2 days",
+        "8 days",
+        "9 days"
+      ],
+      "answer": 1,
+      "explanation": "Their combined daily rate is 1/12 + 1/18 = 5/36 of the job. Time is 36/5 = 7.2 days.",
+      "difficulty": "Hard",
+      "subtopic": "time-work",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "A train 180 m long passes a stationary pole in 9 seconds. What is its speed in km/h?",
+      "options": [
+        "60 km/h",
+        "64 km/h",
+        "72 km/h",
+        "80 km/h"
+      ],
+      "answer": 2,
+      "explanation": "The train covers its own 180 m length in 9 seconds: 20 m/s. Multiply by 18/5 to obtain 72 km/h.",
+      "difficulty": "Moderate",
+      "subtopic": "trains",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "A traveller goes from A to B at 40 km/h and returns the same distance at 60 km/h. Find the average speed for the full trip.",
+      "options": [
+        "45 km/h",
+        "48 km/h",
+        "50 km/h",
+        "52 km/h"
+      ],
+      "answer": 1,
+      "explanation": "For equal distances, average speed is 2ab/(a+b) = 2×40×60/(40+60) = 48 km/h.",
+      "difficulty": "Moderate",
+      "subtopic": "speed-distance",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "A rectangular garden is 18 m long and 12 m wide. What is its area?",
+      "options": [
+        "196 m²",
+        "204 m²",
+        "216 m²",
+        "240 m²"
+      ],
+      "answer": 2,
+      "explanation": "A rectangle's area is length × breadth. Multiplying 18 by 12 gives 216 square metres.",
+      "difficulty": "Moderate",
+      "subtopic": "mensuration",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Using π = 22/7, find the area of a circle of radius 7 cm.",
+      "options": [
+        "144 cm²",
+        "154 cm²",
+        "164 cm²",
+        "176 cm²"
+      ],
+      "answer": 1,
+      "explanation": "Area = πr² = (22/7) × 7 × 7 = 154 cm². Radius must be squared before multiplying by π.",
+      "difficulty": "Moderate",
+      "subtopic": "circle",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Two interior angles of a triangle are 40° and 65°. Find the third angle.",
+      "options": [
+        "65°",
+        "70°",
+        "75°",
+        "85°"
+      ],
+      "answer": 2,
+      "explanation": "Interior angles of any triangle add to 180°. The third angle is 180° − (40°+65°) = 75°.",
+      "difficulty": "Easy",
+      "subtopic": "geometry",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Each exterior angle of a regular polygon measures 24°. How many sides does it have?",
+      "options": [
+        "12",
+        "14",
+        "15",
+        "18"
+      ],
+      "answer": 2,
+      "explanation": "The exterior angles of a convex polygon add to 360°. A regular polygon with 24° per exterior angle has 360/24 = 15 sides.",
+      "difficulty": "Moderate",
+      "subtopic": "polygons",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Find the highest common factor (HCF) of 84 and 126.",
+      "options": [
+        "14",
+        "21",
+        "28",
+        "42"
+      ],
+      "answer": 3,
+      "explanation": "84 = 2²×3×7 and 126 = 2×3²×7, so the common product with minimum powers is 2×3×7 = 42.",
+      "difficulty": "Hard",
+      "subtopic": "number-system",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "What is the least common multiple (LCM) of 12, 15 and 20?",
+      "options": [
+        "30",
+        "45",
+        "60",
+        "120"
+      ],
+      "answer": 2,
+      "explanation": "The largest prime powers needed are 2² from 12 or 20, 3 from 12 or 15, and 5 from 15 or 20. Product = 60.",
+      "difficulty": "Moderate",
+      "subtopic": "number-system",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "If x is nonzero and x + 1/x = 5, what is x² + 1/x²?",
+      "options": [
+        "21",
+        "23",
+        "25",
+        "27"
+      ],
+      "answer": 1,
+      "explanation": "Squaring yields x² + 2 + 1/x² = 25. Subtracting 2 gives x² + 1/x² = 23.",
+      "difficulty": "Moderate",
+      "subtopic": "algebra",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "What are the two roots of x² − 7x + 12 = 0?",
+      "options": [
+        "2 and 6",
+        "3 and 4",
+        "1 and 12",
+        "−3 and −4"
+      ],
+      "answer": 1,
+      "explanation": "Factor the quadratic as (x−3)(x−4)=0. Hence x equals either 3 or 4.",
+      "difficulty": "Moderate",
+      "subtopic": "quadratic-equations",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "A right-angled triangle has perpendicular sides of 9 cm and 12 cm. Find the hypotenuse.",
+      "options": [
+        "13 cm",
+        "14 cm",
+        "15 cm",
+        "16 cm"
+      ],
+      "answer": 2,
+      "explanation": "By Pythagoras, the hypotenuse squared is 9²+12² = 81+144 = 225. Its positive length is 15 cm.",
+      "difficulty": "Easy",
+      "subtopic": "geometry",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "A fair six-sided die is rolled once. What is the probability of getting a number greater than 4?",
+      "options": [
+        "1/6",
+        "1/3",
+        "1/2",
+        "2/3"
+      ],
+      "answer": 1,
+      "explanation": "Only 5 and 6 are favourable among six equally likely outcomes, so probability is 2/6 = 1/3.",
+      "difficulty": "Moderate",
+      "subtopic": "probability",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Eight workers complete a job in 12 days. How many days would six equally efficient workers need?",
+      "options": [
+        "14",
+        "15",
+        "16",
+        "18"
+      ],
+      "answer": 2,
+      "explanation": "Total effort is 8×12 = 96 worker-days. At six workers the duration is 96/6 = 16 days.",
+      "difficulty": "Moderate",
+      "subtopic": "time-work",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "A 20-litre mixture contains 30% acid by volume. Ten litres of pure water are added. What is the new acid percentage?",
+      "options": [
+        "15%",
+        "18%",
+        "20%",
+        "25%"
+      ],
+      "answer": 2,
+      "explanation": "The acid volume stays 0.30×20 = 6 litres; total volume becomes 30 litres, and 6/30×100 = 20%.",
+      "difficulty": "Hard",
+      "subtopic": "mixtures",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "For an acute angle θ, tan θ = 3/4. Find sin θ.",
+      "options": [
+        "3/5",
+        "4/5",
+        "3/4",
+        "5/4"
+      ],
+      "answer": 0,
+      "explanation": "Use an opposite:adjacent ratio of 3:4. The hypotenuse is 5 from the 3-4-5 triangle, so sine equals 3/5.",
+      "difficulty": "Moderate",
+      "subtopic": "trigonometry",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "Solve the linear equation 3x − 7 = 2x + 8.",
+      "options": [
+        "11",
+        "13",
+        "15",
+        "17"
+      ],
+      "answer": 2,
+      "explanation": "Subtract 2x from both sides and add 7: x = 8 + 7 = 15.",
+      "difficulty": "Moderate",
+      "subtopic": "linear-equations",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "question": "A shop sold 120 and 80 items in two categories in 2024, then 150 and 100 in 2025. By what percentage did combined sales rise?",
+      "options": [
+        "20%",
+        "22%",
+        "25%",
+        "30%"
+      ],
+      "answer": 2,
+      "explanation": "Combined sales grew from 120+80 = 200 to 150+100 = 250. Increase = 50, which is 50/200×100 = 25%.",
+      "difficulty": "Easy",
+      "subtopic": "data-interpretation",
+      "reviewStatus": "needs_human_review"
+    }
+  ]
+}
