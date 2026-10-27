@@ -90,14 +90,17 @@ class ContentService {
     return rows;
   }
 
-  async createTopic({ id, name, category }) {
+  async createTopic({ id, name, category, active = true }) {
     const slug = str(id).toLowerCase();
     if (!SLUG.test(slug)) return fail('Topic id: 2 to 39 characters, lower-case letters, numbers and dashes.');
     if (str(name).length < 3 || str(name).length > 120) return fail('Topic name must be 3 to 120 characters.');
     if (str(category).length < 2 || str(category).length > 60) return fail('Category must be 2 to 60 characters.');
     const exists = await db.query('SELECT 1 FROM mock_topics WHERE id = $1', [slug]);
     if (exists.rowCount) return fail('A topic with this id already exists.');
-    await db.query('INSERT INTO mock_topics (id, name, category) VALUES ($1, $2, $3)', [slug, str(name), str(category)]);
+    // New admin drafts can be inactive from the first insert; an active topic
+    // automatically becomes a public free topic-practice quiz after import.
+    if(typeof active !== 'boolean') return fail('Topic active must be a boolean.');
+    await db.query('INSERT INTO mock_topics (id, name, category, active) VALUES ($1, $2, $3, $4)', [slug, str(name), str(category), active]);
     mocks.invalidate();
     return { ok: true, value: { id: slug } };
   }
@@ -164,9 +167,26 @@ class ContentService {
   }
 
   // ── Tests ────────────────────────────────────────────
+  /**
+   * Admin-only preview includes live question rows from inactive draft topics.
+   * Unlike public mocks.loadBank(), it never depends on mock_tests.active or
+   * mock_topics.active, and never changes publication flags.
+   */
   async previewTest(definition) {
-    const bank = await mocks.loadBank();
-    const built = mocks.build(bank,{...definition,kind:'mock'});
+    const topicIds = [...new Set(definition.sections.flatMap(s=>s.parts.map(p=>p.topic)))];
+    const [topics, questions] = await Promise.all([
+      db.query('SELECT id, name, category FROM mock_topics WHERE id = ANY($1::text[])', [topicIds]),
+      db.query(`SELECT topic_id, position, question, options, answer, explanation
+         FROM mock_questions WHERE topic_id = ANY($1::text[]) AND active
+         ORDER BY topic_id, position`, [topicIds]),
+    ]);
+    const byTopic = new Map(topics.rows.map(t=>[t.id,{...t,questions:[]}]));
+    for(const q of questions.rows) {
+      const t=byTopic.get(q.topic_id);
+      if(t)t.questions.push({position:q.position,q:q.question,options:q.options,answer:q.answer,explanation:q.explanation});
+    }
+    const bank={topics:[...byTopic.values()],mocks:[]};
+    const built=mocks.build(bank,{...definition,kind:'mock'});
     return {id:definition.id,name:definition.name,questionCount:built.questions.length,minutes:definition.minutes,
       questionIds:built.questions.map(q=>q.id),questions:built.questions.map(q=>({id:q.id,question:q.question,topic:q.topic}))};
   }
