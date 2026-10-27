@@ -92,3 +92,27 @@ test('CSV export escapes punctuation and retains exact eight admin column header
  assert.match(csv,/"B"/);
  assert.equal(normalized('  A—B  '),normalized('a b'));
 });
+
+
+test('all 100 individually reviewed answer texts still agree with the keyed CSV and JSON files',()=>{
+ const fs=require('node:fs');
+ const path=require('node:path');
+ const base=path.resolve(__dirname,'../content/ssc-cgl-2026/mock-01');
+ const audit=JSON.parse(fs.readFileSync(path.join(base,'quality-review.json'),'utf8'));
+ assert.equal(audit.publicationApproved,false,'QA must not silently approve publication');
+ assert.equal(audit.records.length,100);
+ const seen=new Set();
+ for(const item of audit.records){
+   const id=item.file+'#'+item.number;
+   assert.equal(seen.has(id),false,'each question must have one review record');
+   seen.add(id);
+   const data=JSON.parse(fs.readFileSync(path.join(base,item.file),'utf8'));
+   const q=data.questions[item.number-1];
+   assert.ok(q,id+' missing');
+   assert.equal('ABCD'[q.answer],item.answerLetter,id+' correct letter changed without review');
+   assert.equal(q.options[q.answer],item.answerText,id+' correct option text changed without review');
+   assert.ok(item.evidence.length>4,id+' requires an audit rationale');
+   assert.equal(item.auditDisposition,'AI_DESK_REVIEWED_HUMAN_SIGNOFF_PENDING');
+   assert.equal(q.reviewStatus,'needs_human_review','subject expert approval still pending');
+ }
+});
