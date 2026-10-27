@@ -19,7 +19,7 @@ export function QuestionsTab() {
   const [editing, setEditing] = useState<string | null>(null);
   const [draft, setDraft] = useState<QuestionInput>(EMPTY);
   const [bulk, setBulk] = useState('');
-  const [newTopic, setNewTopic] = useState({ id: '', name: '', category: '' });
+  const [newTopic, setNewTopic] = useState({ id: '', name: '', category: '', active: false });
   const [showInactive, setShowInactive] = useState(false);
   const [topicDetails,setTopicDetails] = useState({name:'',category:''});
 
@@ -98,9 +98,9 @@ export function QuestionsTab() {
     e.preventDefault();
     const r = await admin('/topics', 'POST', newTopic);
     if (r.ok) {
-      setMsg({ kind: 'ok', text: `Topic "${newTopic.name}" created. Add questions to it, then use it in a mock test.` });
+      setMsg({ kind: 'ok', text: `Topic "${newTopic.name}" created as ${newTopic.active ? 'active' : 'an inactive draft'}. Import questions, validate the mock, and publish only after review.` });
       setTopic(newTopic.id.toLowerCase());
-      setNewTopic({ id: '', name: '', category: '' });
+      setNewTopic({ id: '', name: '', category: '', active: false });
       void loadTopics();
     } else setMsg({ kind: 'error', text: r.message });
   };
@@ -148,7 +148,13 @@ export function QuestionsTab() {
             <Field label="Id" hint="Lower case, no spaces"><input className={input} required value={newTopic.id} onChange={(e) => setNewTopic({ ...newTopic, id: e.target.value })} /></Field>
             <Field label="Name"><input className={input} required value={newTopic.name} onChange={(e) => setNewTopic({ ...newTopic, name: e.target.value })} /></Field>
             <Field label="Category" hint="For example Quantitative"><input className={input} required value={newTopic.category} onChange={(e) => setNewTopic({ ...newTopic, category: e.target.value })} /></Field>
-            <div className="flex items-end"><Button type="submit">Create topic</Button></div>
+            <div className="flex flex-col justify-end gap-2">
+              <label className="flex items-center gap-2 text-xs">
+                <input type="checkbox" checked={newTopic.active} onChange={e=>setNewTopic({...newTopic,active:e.target.checked})}/>
+                Publish topic immediately (not recommended for new exam banks)
+              </label>
+              <Button type="submit">Create {newTopic.active?'active topic':'inactive draft topic'}</Button>
+            </div>
           </form>
         </details>
       </section>
