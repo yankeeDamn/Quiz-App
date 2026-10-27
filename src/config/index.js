@@ -36,6 +36,12 @@ const config = {
   // The backend verifies tokens signed with this same secret.
   authSecret: process.env.AUTH_SECRET || '',
 
+  // ── Unpublished exam QA (staging only; opt-in on staging Render) ──
+  draftTesting: {
+    environment: process.env.EXAMPRO_ENV || '',
+    enabled: process.env.ENABLE_ADMIN_DRAFT_TESTS === 'true',
+  },
+
   // ── CORS ─────────────────────────────────────────────
   cors: {
     origins: process.env.CORS_ORIGINS
