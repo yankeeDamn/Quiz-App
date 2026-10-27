@@ -5,12 +5,12 @@
     {
       "question": "Find the missing term in the series: 4, 9, 19, 39, 79, ?",
       "options": [
-        "157",
         "159",
+        "157",
         "161",
         "163"
       ],
-      "answer": 1,
+      "answer": 0,
       "explanation": "Each term is twice the previous term plus 1: 79 × 2 + 1 = 159.",
       "difficulty": "Easy",
       "subtopic": "number-series",
@@ -34,11 +34,11 @@
       "question": "In a code, each letter is replaced by the letter two places ahead. How is MANGO coded?",
       "options": [
         "OBPIQ",
-        "OCPIQ",
         "OCPKQ",
+        "OCPIQ",
         "OCQIQ"
       ],
-      "answer": 1,
+      "answer": 2,
       "explanation": "M→O, A→C, N→P, G→I and O→Q; applying the same two-place shift produces OCPIQ.",
       "difficulty": "Moderate",
       "subtopic": "coding-decoding",
@@ -47,12 +47,12 @@
     {
       "question": "Choose the pair that follows the same relationship as 'Thermometer : Temperature'.",
       "options": [
-        "Compass : Direction",
+        "Barometer : Speed",
         "Clock : Distance",
         "Ruler : Weight",
-        "Barometer : Speed"
+        "Compass : Direction"
       ],
-      "answer": 0,
+      "answer": 3,
       "explanation": "A thermometer measures temperature and a compass indicates direction; the other devices do not measure their paired quantities.",
       "difficulty": "Moderate",
       "subtopic": "analogy",
@@ -61,12 +61,12 @@
     {
       "question": "Which number does not belong with the others?",
       "options": [
-        "64",
+        "500",
         "125",
         "216",
-        "500"
+        "64"
       ],
-      "answer": 3,
+      "answer": 0,
       "explanation": "64, 125 and 216 are the cubes of 4, 5 and 6 respectively; 500 is not an integer cube.",
       "difficulty": "Moderate",
       "subtopic": "classification",
@@ -90,11 +90,11 @@
       "question": "Statements: Some pens are books. All books are files. Which conclusion must follow?",
       "options": [
         "All pens are files",
-        "Some pens are files",
         "No pen is a file",
+        "Some pens are files",
         "All files are pens"
       ],
-      "answer": 1,
+      "answer": 2,
       "explanation": "The pens that are books must also be files because every book is a file; nothing is said about all pens.",
       "difficulty": "Hard",
       "subtopic": "syllogism",
@@ -105,10 +105,10 @@
       "options": [
         "3 km west",
         "5 km east",
-        "3 km east",
-        "8 km south"
+        "8 km south",
+        "3 km east"
       ],
-      "answer": 2,
+      "answer": 3,
       "explanation": "The northward and southward movements cancel; only a net displacement of 3 km east remains.",
       "difficulty": "Moderate",
       "subtopic": "direction-sense",
@@ -117,12 +117,12 @@
     {
       "question": "Four students stand in a row facing north. K is left of L, M is right of L, and N is right of M. Who stands second from the left?",
       "options": [
-        "K",
         "L",
+        "K",
         "M",
         "N"
       ],
-      "answer": 1,
+      "answer": 0,
       "explanation": "The stated order forces K–L–M–N from left to right; L occupies the second position.",
       "difficulty": "Moderate",
       "subtopic": "linear-arrangement",
@@ -146,11 +146,11 @@
       "question": "Rina ranks 12th from the top and 19th from the bottom in a class with no tied ranks. How many students are there?",
       "options": [
         "29",
-        "30",
         "31",
+        "30",
         "32"
       ],
-      "answer": 1,
+      "answer": 2,
       "explanation": "Count both ranks and subtract Rina once: 12 + 19 − 1 = 30 students.",
       "difficulty": "Easy",
       "subtopic": "ranking",
@@ -160,11 +160,11 @@
       "question": "Select the word that completes the analogy: Seed : Plant :: Egg : ?",
       "options": [
         "Nest",
-        "Bird",
+        "Feather",
         "Shell",
-        "Feather"
+        "Bird"
       ],
-      "answer": 1,
+      "answer": 3,
       "explanation": "A seed can develop into a plant, just as a fertilised bird's egg can develop into a bird.",
       "difficulty": "Moderate",
       "subtopic": "analogy",
@@ -173,12 +173,12 @@
     {
       "question": "What number should replace the question mark: 3, 8, 15, 24, 35, ?",
       "options": [
-        "46",
-        "47",
         "48",
+        "47",
+        "46",
         "49"
       ],
-      "answer": 2,
+      "answer": 0,
       "explanation": "Consecutive differences are 5, 7, 9 and 11; the next difference is 13, giving 35 + 13 = 48.",
       "difficulty": "Hard",
       "subtopic": "number-series",
@@ -187,12 +187,12 @@
     {
       "question": "Suppose CAT is written as 3-1-20 using alphabet positions. How is DOG written?",
       "options": [
-        "4-15-7",
         "5-14-7",
+        "4-15-7",
         "4-14-8",
         "3-15-8"
       ],
-      "answer": 0,
+      "answer": 1,
       "explanation": "The letters D, O and G occupy positions 4, 15 and 7 in the English alphabet.",
       "difficulty": "Moderate",
       "subtopic": "coding-decoding",
@@ -203,10 +203,10 @@
       "options": [
         "Arun",
         "Bela",
-        "Charu",
-        "Deepa"
+        "Deepa",
+        "Charu"
       ],
-      "answer": 3,
+      "answer": 2,
       "explanation": "The given inequalities are Arun > Bela > Charu > Deepa, so Deepa is the shortest.",
       "difficulty": "Moderate",
       "subtopic": "ordering",
@@ -217,10 +217,10 @@
       "options": [
         "All roses are red",
         "Some roses are red",
-        "All roses are flowers",
-        "No flower is a rose"
+        "No flower is a rose",
+        "All roses are flowers"
       ],
-      "answer": 2,
+      "answer": 3,
       "explanation": "The first premise directly states that every rose is a flower; red flowers need not be roses.",
       "difficulty": "Easy",
       "subtopic": "logical-reasoning",
@@ -229,12 +229,12 @@
     {
       "question": "Three friends P, Q and R have different ages. P is older than Q but younger than R. Who is the oldest?",
       "options": [
-        "P",
-        "Q",
         "R",
+        "Q",
+        "P",
         "Cannot be determined"
       ],
-      "answer": 2,
+      "answer": 0,
       "explanation": "R is older than P, and P is older than Q, so R must be the oldest.",
       "difficulty": "Moderate",
       "subtopic": "ordering",
@@ -244,11 +244,11 @@
       "question": "The sum of alphabet positions of the letters in TREE is what number? Use A=1, B=2 and so on.",
       "options": [
         "46",
-        "47",
         "48",
+        "47",
         "49"
       ],
-      "answer": 2,
+      "answer": 1,
       "explanation": "T=20, R=18 and each E=5. Their sum is 20+18+5+5 = 48.",
       "difficulty": "Moderate",
       "subtopic": "letter-coding",
@@ -258,11 +258,11 @@
       "question": "In a queue, S is 7th from the front and there are 10 people behind S. How many people are in the queue?",
       "options": [
         "16",
-        "17",
         "18",
+        "17",
         "19"
       ],
-      "answer": 1,
+      "answer": 2,
       "explanation": "Six people stand before S; including S and the ten behind gives 6 + 1 + 10 = 17.",
       "difficulty": "Hard",
       "subtopic": "ranking",
@@ -273,10 +273,10 @@
       "options": [
         "3",
         "4",
-        "5",
-        "6"
+        "6",
+        "5"
       ],
-      "answer": 2,
+      "answer": 3,
       "explanation": "The opposite face must total 7 with the visible 2, so its number is 7−2 = 5.",
       "difficulty": "Moderate",
       "subtopic": "spatial-reasoning",
@@ -314,11 +314,11 @@
       "question": "In a group of five, Uma is immediately before Vani, who is immediately before Waseem. Which person must be between the other two?",
       "options": [
         "Uma",
-        "Vani",
         "Waseem",
+        "Vani",
         "None of them"
       ],
-      "answer": 1,
+      "answer": 2,
       "explanation": "The consecutive order is Uma–Vani–Waseem, placing Vani between Uma and Waseem.",
       "difficulty": "Moderate",
       "subtopic": "arrangement",
@@ -329,10 +329,10 @@
       "options": [
         "154",
         "165",
-        "176",
-        "188"
+        "188",
+        "176"
       ],
-      "answer": 2,
+      "answer": 3,
       "explanation": "Each term is multiplied by 2, so the next number is 88 × 2 = 176.",
       "difficulty": "Moderate",
       "subtopic": "number-series",
