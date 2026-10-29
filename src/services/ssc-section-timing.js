@@ -27,10 +27,10 @@ function eligible(test) {
 
 /** Returns null for conventional timed exams and all current incomplete mini-mocks. */
 function sectionTiming(snapshot, startedAt, now = Date.now()) {
-  if (snapshot?.sectionTimingMinutes !== 15 || !Array.isArray(snapshot.sections) || snapshot.sections.length !== 4) return null;
+  if (![15,20].includes(snapshot?.sectionTimingMinutes) || !Array.isArray(snapshot.sections) || snapshot.sections.length !== 4) return null;
   const start = new Date(startedAt).getTime();
   if (!Number.isFinite(start)) throw new Error('Invalid stored exam start time');
-  const duration = 15 * 60 * 1000;
+  const duration = snapshot.sectionTimingMinutes * 60 * 1000;
   const elapsed = Math.max(0, now - start);
   const sectionIndex = Math.min(4, Math.floor(elapsed / duration));
   const sectionEndsAt = new Date(start + (Math.min(sectionIndex, 3) + 1) * duration).toISOString();
