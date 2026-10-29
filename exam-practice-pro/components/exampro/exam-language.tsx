@@ -74,6 +74,16 @@ export function LanguageSwitcher({small=false}:{small?:boolean}) {
     </button>)}
   </div>;
 }
+// Private exam and draft text must never persist in localStorage across
+// account changes. This bounded per-tab cache avoids refetching repeat toggles.
+const privateExamTranslations=new Map<string,{source:string;translated:string[]}>();
+function rememberPrivateTranslation(key:string,source:string,translated:string[]){
+  if(privateExamTranslations.has(key))privateExamTranslations.delete(key);
+  privateExamTranslations.set(key,{source,translated});
+  while(privateExamTranslations.size>500)privateExamTranslations.delete(privateExamTranslations.keys().next().value!);
+}
+function readPrivateTranslation(key:string){return privateExamTranslations.get(key)||null;}
+
 function hashKey(s:string) {
   let h=2166136261;
   for(let i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),16777619);}
@@ -94,7 +104,7 @@ export function useTranslatedTexts(texts:string[], options?:{exam?:boolean}) {
     let cancelled=false;
     const storageKey='exampro:translated:v1:'+key;
     try {
-      const cached=JSON.parse(localStorage.getItem(storageKey)||'null') as {source?:string;translated?:string[]}|null;
+      const cached=(exam ? readPrivateTranslation(key) : JSON.parse(localStorage.getItem(storageKey)||'null')) as {source?:string;translated?:string[]}|null;
       if(cached?.source===serialized && cached.translated?.length===texts.length) {
         setState({key,texts:cached.translated,warning:'',machine:true});return;
       }
@@ -108,7 +118,8 @@ export function useTranslatedTexts(texts:string[], options?:{exam?:boolean}) {
         }
         setState({key,texts:r.data.texts,warning:'',machine:true});
         try {
-          localStorage.setItem(storageKey,JSON.stringify({source:serialized,translated:r.data.texts}));
+          if(exam)rememberPrivateTranslation(key,serialized,r.data.texts);
+          else localStorage.setItem(storageKey,JSON.stringify({source:serialized,translated:r.data.texts}));
         } catch { /* private browser */ }
       })
       .catch(()=>{if(!cancelled)setState({key,texts,warning:'Azure translation is unavailable. Showing English.',machine:false});});
