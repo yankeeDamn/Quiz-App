@@ -59,6 +59,7 @@ test('private routes reject guests, ordinary users, API keys, and hide keys befo
  const exam=makeExam();
  assert.equal(eligible(exam),true,'full SSC pattern must trigger section timer');
  db.query=async(sql,params=[])=>{
+   if(sql.includes('FROM exam_time_accommodations'))return {rows:[],rowCount:0};
    if(sql.includes('SELECT * FROM users')){
       return {rows:[{id:userId,email:params[2],name:'Review admin',image:null,
         provider:'google',provider_id:'oauth-id',plan:'free',role:'user'}],rowCount:1};
