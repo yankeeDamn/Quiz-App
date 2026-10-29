@@ -242,6 +242,72 @@ class ContentService {
     return test;
   }
 
+  /**
+   * Fail closed before an admin turns a draft mock into a public exam.
+   * The protected draft Preview includes inactive topic content by design, so
+   * it is NOT a publication gate. The public mock builder requires both
+   * active topics and active question rows at every configured position.
+   * This check never updates publication or content flags.
+   */
+  async publicationReadiness(definition) {
+    const sections = definition?.sections;
+    if (!Array.isArray(sections) || !sections.length ||
+        sections.some(s => !Array.isArray(s.parts) || !s.parts.length)) {
+      return fail('Publication blocked: sections are missing or incomplete.');
+    }
+    const parts = sections.flatMap(s => s.parts);
+    if (parts.some(p => typeof p.topic !== 'string' || !Number.isSafeInteger(p.from) ||
+      !Number.isSafeInteger(p.to) || p.from < 0 || p.to <= p.from || p.to - p.from > 500)) {
+      return fail('Publication blocked: question ranges are invalid.');
+    }
+    const topicIds = [...new Set(parts.map(p => p.topic))];
+    const [topics, questions] = await Promise.all([
+      db.query('SELECT id, name, category, active FROM mock_topics WHERE id = ANY($1::text[])', [topicIds]),
+      db.query(`SELECT topic_id, position, question, options, answer, explanation
+         FROM mock_questions WHERE topic_id = ANY($1::text[]) AND active ORDER BY topic_id, position`, [topicIds]),
+    ]);
+    if (topics.rows.length !== topicIds.length) {
+      return fail('Publication blocked: one or more referenced topics do not exist.');
+    }
+    if (topics.rows.some(t => !t.active)) {
+      return fail('Publication blocked: all referenced topics must be reviewed and activated first. Use Test Draft for private QA.');
+    }
+    const byTopic = new Map(topics.rows.map(t => [t.id, {...t, questions: []}]));
+    for (const q of questions.rows) {
+      byTopic.get(q.topic_id)?.questions.push({
+        position: q.position, q: q.question, options: q.options,
+        answer: q.answer, explanation: q.explanation,
+      });
+    }
+    const expected = parts.reduce((sum,p) => sum + p.to-p.from, 0);
+    const available = parts.reduce((sum,p) => {
+      const topic = byTopic.get(p.topic);
+      return sum + (topic?.questions.filter(q => q.position >= p.from && q.position < p.to).length || 0);
+    }, 0);
+    if (available > expected) {
+      return fail('Publication blocked: duplicate active question positions were found in a source topic.');
+    }
+    if (expected === 0 || available !== expected) {
+      return fail(`Publication blocked: ${available} of ${expected} configured active questions are available. Restore or replace missing positions before publishing.`);
+    }
+    const bank = {topics: [...byTopic.values()], mocks: []};
+    const built = mocks.build(bank, {...definition, kind: 'mock'});
+    if (built.questions.length !== expected || new Set(built.questions.map(q => q.id)).size !== expected) {
+      return fail('Publication blocked: duplicate or missing question IDs.');
+    }
+    // A test presented as a full SSC CGL Tier-I mock must match the
+    // four-section standard pattern; partial practice mocks are unaffected.
+    if (/ssc/i.test(String(definition.exam)) &&
+        /cgl/i.test(String(definition.name)) &&
+        /full\s+mock/i.test(String(definition.name))) {
+      const { eligible } = require('./ssc-section-timing');
+      if (!eligible(built)) {
+        return fail('Publication blocked: a full SSC CGL mock requires 100 questions in four 25-question sections, 60 minutes, +2 correct and -0.5 incorrect.');
+      }
+    }
+    return {ok:true, questionCount:expected};
+  }
+
   async listTests() {
     const { rows } = await db.query(
       `SELECT id, name, exam, minutes, marks_per_correct, negative_marks, pass_percent, level, tier, sections, active

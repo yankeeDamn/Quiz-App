@@ -53,6 +53,9 @@ export function TestsTab() {
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!draft) return;
+    const existing = tests.find(t => t.id === editingId);
+    if (draft.active && !existing?.active &&
+      !window.confirm('Publish this mock to learners? All source topics must already be active and every configured question present. Finish academic, language and accessibility review first.')) return;
     setMsg(null);
     const r = editingId ? await admin(`/tests/${editingId}`, 'PUT', toBody(draft)) : await admin('/tests', 'POST', toBody(draft));
     if (r.ok) {
@@ -64,6 +67,8 @@ export function TestsTab() {
   };
 
   const quick = async (t: AdminTest, change: Partial<AdminTest>) => {
+    if (change.active === true && !t.active &&
+      !window.confirm('Publish "' + t.name + '" to learners? This is NOT a private Test Draft. Source topics must be active and all questions reviewed.')) return;
     const next = { ...t, ...change };
     const r = await admin(`/tests/${t.id}`, 'PUT', next);
     if (!r.ok) setMsg({ kind: 'error', text: r.message });
@@ -93,6 +98,7 @@ export function TestsTab() {
           <Button onClick={() => { setEditingId(null); setDraft(blank(firstTopic)); }}>New mock test</Button>
         </div>
         <p className="mt-1 text-xs text-muted-foreground">Topic tests are made automatically for every topic with questions, and are always free.</p>
+        <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">Publishing is separate from Test Draft: the backend blocks it until all referenced topics and question positions are active. Complete independent editorial and accessibility review before activating topics.</p>
         {draftTestingEnabled && <p className="mt-2 rounded-lg border border-amber-400 p-3 text-xs" role="status">Staging draft exam QA is enabled for verified admins. Use <strong>Test Draft</strong> to start a private, server-timed exam without publishing topics or tests. Draft question counts are configured ranges; use Preview to verify active question rows.</p>}
         <div className="mt-3 overflow-x-auto">
           <table className="w-full text-sm">
@@ -109,7 +115,7 @@ export function TestsTab() {
                     </button>
                   </td>
                   <td className="pr-3">
-                    <button className="rounded border px-2 py-1 text-xs font-semibold" onClick={() => void quick(t, { active: !t.active })} aria-label={`Publish or unpublish ${t.name}`}>
+                    <button className="rounded border px-2 py-1 text-xs font-semibold" onClick={() => void quick(t, { active: !t.active })} aria-label={`Publish or unpublish ${t.name}`} title="Publishing requires active source topics, all questions present, and confirmation">
                       {t.active ? 'Published' : 'Draft'}
                     </button>
                   </td>
