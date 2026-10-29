@@ -2,6 +2,7 @@
 
 const db = require('../config/database');
 const mocks = require('./mocks.service');
+const { isFullCglMock } = require('./ssc-full-mock-classifier');
 
 const SLUG = /^[a-z0-9][a-z0-9-]{1,38}$/;
 const LEVELS = ['Easy', 'Moderate', 'Hard', 'Practice'];
@@ -297,9 +298,7 @@ class ContentService {
     }
     // A test presented as a full SSC CGL Tier-I mock must match the
     // four-section standard pattern; partial practice mocks are unaffected.
-    if (/ssc/i.test(String(definition.exam)) &&
-        /cgl/i.test(String(definition.name)) &&
-        /full\s+mock/i.test(String(definition.name))) {
+    if (isFullCglMock(definition)) {
       const { eligible } = require('./ssc-section-timing');
       if (!eligible(built)) {
         return fail('Publication blocked: a full SSC CGL mock requires 100 questions in four 25-question sections, 60 minutes, +2 correct and -0.5 incorrect.');
