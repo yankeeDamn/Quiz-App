@@ -18,12 +18,13 @@ import {
 } from '@/components/ui/sheet';
 import { useState } from 'react';
 import { clearTokenCache } from '@/lib/api';
-import { LanguageSwitcher } from '@/components/exampro/exam-language';
+import { LanguageSwitcher, useExamLanguage } from '@/components/exampro/exam-language';
 
 export function Header() {
   const { setTheme, theme } = useTheme();
   const { data: session, status } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { language, t } = useExamLanguage();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200/70 bg-background/90 shadow-sm shadow-slate-900/[0.025] backdrop-blur-xl supports-[backdrop-filter]:bg-background/75 dark:border-slate-800/70">
@@ -39,41 +40,41 @@ export function Header() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden 2xl:flex items-center gap-4">
+        <nav lang={language} aria-label="Primary navigation" className="hidden 2xl:flex items-center gap-4">
           <Link
             href="/"
             className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300"
-          >
-            Quizzes
+          lang={language}>
+            {t('quizzes')}
           </Link>
-          <Link href="/certifications" className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300">Certifications</Link>
+          <Link href="/certifications" className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300"> {t('certifications')}</Link>
           <Link
             href="/india-mocks"
             className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300"
           >
-            India Mocks
+            {t('indiaMocks')}
           </Link>
-          <Link href="/exampro" className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300">Exam Hall</Link>
+          <Link href="/exampro" className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300">{t('examHall')}</Link>
           <Link
             href="/dashboard"
             className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300"
           >
-            Dashboard
+            {t('dashboard')}
           </Link>
           <Link
-            href="/institutes" className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300">Institutes</Link>
+            href="/institutes" className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300">{t('institutes')}</Link>
           <Link
             href="/bookmarks"
             className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300"
           >
-            Bookmarks
+            {t('bookmarks')}
           </Link>
 
           <Link
             href="/pricing"
             className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300"
           >
-            Pricing
+            {t('pricing')}
           </Link>
         </nav>
 
@@ -88,7 +89,7 @@ export function Header() {
           >
             <Link href="/dashboard">
               <LayoutDashboard className="mr-2 h-4 w-4" />
-              Dashboard
+              {t('dashboard')}
             </Link>
           </Button>
 
@@ -101,18 +102,18 @@ export function Header() {
               <Button variant="ghost" size="icon" className="h-9 w-9">
                 <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                 <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                <span className="sr-only">Toggle theme</span>
+                <span className="sr-only">{t('toggleTheme')}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => setTheme('light')}>
-                Light
+                {t('light')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setTheme('dark')}>
-                Dark
+                {t('dark')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setTheme('system')}>
-                System
+                {t('system')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -141,11 +142,11 @@ export function Header() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem disabled className="text-xs text-muted-foreground">
-                      {session.user.email || 'Guest account'}
+                      {session.user.email || t('guest')}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => { clearTokenCache(); signOut({ callbackUrl: '/' }); }}>
                       <LogOut className="mr-2 h-4 w-4" />
-                      Sign Out
+                      {t('signOut')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -153,7 +154,7 @@ export function Header() {
                 <Button variant="ghost" size="sm" asChild className="hidden 2xl:flex">
                   <Link href="/auth/signin">
                     <LogIn className="mr-2 h-4 w-4" />
-                    Sign In
+                    {t('signIn')}
                   </Link>
                 </Button>
               )}
@@ -165,7 +166,7 @@ export function Header() {
             <SheetTrigger asChild className="2xl:hidden">
               <Button variant="ghost" size="icon" className="h-9 w-9">
                 <Menu className="h-5 w-5" />
-                <span className="sr-only">Open menu</span>
+                <span className="sr-only">{t('openMenu')}</span>
               </Button>
             </SheetTrigger>
             <SheetContent
@@ -173,19 +174,19 @@ export function Header() {
               className="w-[min(88vw,22rem)] max-w-none gap-0 overflow-y-auto border-l border-border bg-background px-0 pb-6 pt-14 text-foreground shadow-2xl"
             >
               <div className="border-b border-border/70 px-5 pb-4">
-                <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">Explore ExamPro</p>
-                <p className="mt-1 text-sm text-muted-foreground">Choose your learning space</p>
+                <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">{t('explore')}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{t('learningSpace')}</p>
               </div>
-              <nav aria-label="Mobile navigation" className="grid gap-1 px-3 py-3">
+              <nav lang={language} aria-label="Mobile navigation" className="grid gap-1 px-3 py-3">
                 {([
-                  ['/', 'Quizzes'],
-                  ['/exampro', 'Exam Hall'],
-                  ['/certifications', 'Certifications'],
-                  ['/india-mocks', 'India Mocks'],
-                  ['/dashboard', 'Dashboard'],
-                  ['/institutes', 'Institutes'],
-                  ['/bookmarks', 'Bookmarks'],
-                  ['/pricing', 'Pricing'],
+                  ['/', 'quizzes'],
+                  ['/exampro', 'examHall'],
+                  ['/certifications', 'certifications'],
+                  ['/india-mocks', 'indiaMocks'],
+                  ['/dashboard', 'dashboard'],
+                  ['/institutes', 'institutes'],
+                  ['/bookmarks', 'bookmarks'],
+                  ['/pricing', 'pricing'],
                 ] as const).map(([href, label]) => (
                   <Link
                     key={href}
@@ -193,13 +194,13 @@ export function Header() {
                     className="flex min-h-11 items-center rounded-lg px-3 py-2 text-sm font-medium leading-5 text-foreground transition-colors hover:bg-muted hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-600 dark:hover:text-indigo-300 sm:text-base"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    {label}
+                    {t(label)}
                   </Link>
                 ))}
               </nav>
               <div className="border-t border-border/70 px-5 pt-4">
                 {status === 'loading' ? (
-                  <p className="text-sm text-muted-foreground" role="status">Checking account…</p>
+                  <p className="text-sm text-muted-foreground" role="status">{t('checking')}</p>
                 ) : session?.user ? (
                   <div className="grid gap-3">
                     <div className="flex min-w-0 items-center gap-3 rounded-lg bg-muted/40 p-2">
@@ -216,8 +217,8 @@ export function Header() {
                         </span>
                       )}
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold">{session.user.name || 'Signed in'}</p>
-                        <p className="truncate text-xs text-muted-foreground">{session.user.email || 'Guest account'}</p>
+                        <p className="truncate text-sm font-semibold">{session.user.name || t('signedIn')}</p>
+                        <p className="truncate text-xs text-muted-foreground">{session.user.email || t('guest')}</p>
                       </div>
                     </div>
                     <button
@@ -230,7 +231,7 @@ export function Header() {
                       }}
                     >
                       <LogOut className="h-4 w-4" />
-                      Sign Out
+                      {t('signOut')}
                     </button>
                   </div>
                 ) : (
@@ -240,7 +241,7 @@ export function Header() {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <LogIn className="h-4 w-4" />
-                    Sign In
+                    {t('signIn')}
                   </Link>
                 )}
               </div>
