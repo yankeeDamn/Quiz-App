@@ -272,8 +272,10 @@ router.put('/tests/:id', wrap(async (req, res) => {
   if (!r.ok) return bad(res, r.error);
   const active = req.body.active === true;
   if(active){
-    const preview = await content.previewTest({...r.value,id:req.params.id});
-    if(preview.questionCount===0)return bad(res,'Cannot publish a test without active questions.');
+    // A private preview intentionally reads inactive topics; do not use it as
+    // evidence that the *public* catalogue will expose the complete paper.
+    const readiness = await content.publicationReadiness({...r.value,id:req.params.id});
+    if(!readiness.ok)return bad(res,readiness.error,409);
   }
   return (await content.updateTest(req.params.id, r.value, active)) ? ok(res, {}) : bad(res, 'Test not found', 404);
 }));
