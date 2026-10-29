@@ -31,7 +31,7 @@
 - **Admin → Mock tests → Review questions**: select a draft non-English-Comprehension question, press **Generate Hindi draft with Azure**. It fills question, four choices and explanation **without saving any DB record or marking verified**. Review and edit the six fields; only a genuine qualified human reviewer may save Verified. English Comprehension is exempt from SSC Hindi review.
 - Switch off `AZURE_TRANSLATOR_KEY` in staging to test graceful English fallback and error messages; restore once verified.
 - Check that guests cannot call `/api/v1/exampro/translate-exam` (401); public previews remain IP-limited at 30 requests / 15 min and signed-in exams are user-limited at 130 / 15 min. Service batches max 8 strings and 3600 total chars.
-- Repeated source/question translations cache client-side by language and content hash, and server-side (bounded 1500 entries, 7-day expiry). Caching on Render Free is ephemeral; starting a new instance may cause extra Azure requests.
+- Repeated source/question translations cache client-side by language and content hash. Private exams use **per-tab in-memory caching only**, so draft question text is not persisted in localStorage. Public preview pages may still use localStorage. The server uses a bounded cache (1500 entries, 7-day expiry). Caching on Render Free is ephemeral; starting a new instance may cause extra Azure requests.
 - Confirm `npm test` and Next.js production build pass in GitHub Actions.
 
 ## Academic safety
