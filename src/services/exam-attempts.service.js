@@ -3,6 +3,7 @@ const db = require('../config/database');
 const mocks = require('./mocks.service');
 const content = require('./content.service');
 const accommodations = require('./ssc-accommodations.service');
+const quality = require('./mock-quality.service');
 const { isPlanActive } = require('./plan.service');
 const { cleanResponses, grade, visibleAttempt } = require('./exam-grade');
 const { eligible, sectionTiming, lockedResponses } = require('./ssc-section-timing');
@@ -41,10 +42,11 @@ async function start(user, testId, adminDraft = false) {
     const approved = sscFullMock ? await accommodations.approvedMode(user.id,testId) : null;
     const sectionMinutes = sscFullMock ? (approved === 'scribe_compensatory' ? 20 : 15) : null;
     const effectiveMinutes = sectionMinutes === 20 ? 80 : loadedTest.minutes;
+    const localizedTest = sscFullMock ? await quality.attachApprovedHindi(testId,loadedTest) : loadedTest;
     // Include stable text and key snapshot for reviews after edits or retirements.
     const snapshot = { name: loadedTest.name, minutes: effectiveMinutes, tier: loadedTest.tier,
       marksPerCorrect: loadedTest.marksPerCorrect, negativeMarks: loadedTest.negativeMarks,
-      passPercent: loadedTest.passPercent ?? 50, sections: loadedTest.sections, questions: loadedTest.questions,
+      passPercent: loadedTest.passPercent ?? 50, sections: localizedTest.sections, questions: localizedTest.questions,
       adminDraft: Boolean(adminDraft),
       sectionTimingMinutes: sectionMinutes, accommodationMode: approved || 'standard' };
     const saved = await client.query(
