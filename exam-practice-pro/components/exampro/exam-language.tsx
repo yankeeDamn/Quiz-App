@@ -74,6 +74,16 @@ export function LanguageSwitcher({small=false}:{small?:boolean}) {
     </button>)}
   </div>;
 }
+// Private exam and draft text must never persist in localStorage across
+// account changes. This bounded per-tab cache avoids refetching repeat toggles.
+const privateExamTranslations=new Map<string,{source:string;translated:string[]}>();
+function rememberPrivateTranslation(key:string,source:string,translated:string[]){
+  if(privateExamTranslations.has(key))privateExamTranslations.delete(key);
+  privateExamTranslations.set(key,{source,translated});
+  while(privateExamTranslations.size>500)privateExamTranslations.delete(privateExamTranslations.keys().next().value!);
+}
+function readPrivateTranslation(key:string){return privateExamTranslations.get(key)||null;}
+
 function hashKey(s:string) {
   let h=2166136261;
   for(let i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),16777619);}
@@ -83,9 +93,10 @@ function hashKey(s:string) {
  * Advisory display-only translations. Never alter the canonical question,
  * option indexes, answer keys, deadlines or scored attempt payloads.
  */
-export function useTranslatedTexts(texts:string[]) {
+export function useTranslatedTexts(texts:string[], options?:{exam?:boolean}) {
   const {language}=useExamLanguage();
-  const [state,setState]=useState<{key:string;texts:string[];warning:string}|null>(null);
+  const exam=options?.exam===true;
+  const [state,setState]=useState<{key:string;texts:string[];warning:string;machine:boolean}|null>(null);
   const serialized=JSON.stringify(texts);
   const key=useMemo(()=>language+':'+hashKey(serialized),[language,serialized]);
   useEffect(()=>{
@@ -93,30 +104,33 @@ export function useTranslatedTexts(texts:string[]) {
     let cancelled=false;
     const storageKey='exampro:translated:v1:'+key;
     try {
-      const cached=JSON.parse(localStorage.getItem(storageKey)||'null') as {source?:string;translated?:string[]}|null;
+      const cached=(exam ? readPrivateTranslation(key) : JSON.parse(localStorage.getItem(storageKey)||'null')) as {source?:string;translated?:string[]}|null;
       if(cached?.source===serialized && cached.translated?.length===texts.length) {
-        setState({key,texts:cached.translated,warning:''});return;
+        setState({key,texts:cached.translated,warning:'',machine:true});return;
       }
     }catch{ /* no cache */ }
-    api<{texts:string[]}>('/api/v1/exampro/translate',{public:true,method:'POST',body:{language,texts}})
+    api<{texts:string[]}>(exam?'/api/v1/exampro/translate-exam':'/api/v1/exampro/translate', {public:!exam,method:'POST',body:{language,texts}})
       .then(r=>{
         if(cancelled)return;
         if(!r.success||!r.data||r.data.texts.length!==texts.length){
-          setState({key,texts,warning:'Automatic translation is not available. Showing the original English text.'});
+          setState({key,texts,warning:'Azure translation is unavailable. The original English text is shown.',machine:false});
           return;
         }
-        setState({key,texts:r.data.texts,warning:''});
+        setState({key,texts:r.data.texts,warning:'',machine:true});
         try {
-          localStorage.setItem(storageKey,JSON.stringify({source:serialized,translated:r.data.texts}));
+          if(exam)rememberPrivateTranslation(key,serialized,r.data.texts);
+          else localStorage.setItem(storageKey,JSON.stringify({source:serialized,translated:r.data.texts}));
         } catch { /* private browser */ }
       })
-      .catch(()=>{if(!cancelled)setState({key,texts,warning:'Automatic translation is not available. Showing English.'});});
+      .catch(()=>{if(!cancelled)setState({key,texts,warning:'Azure translation is unavailable. Showing English.',machine:false});});
     return()=>{cancelled=true;};
   // serialized is a stable representation of the content for this displayed question.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[language,serialized,key]);
+  },[language,serialized,key,exam]);
   return {
     texts: language==='en' || state?.key!==key ? texts : state.texts,
     warning:language==='en'||state?.key!==key?'':state.warning,
+    machineTranslated:language!=='en'&&state?.key===key&&state.machine,
+    loading:language!=='en'&&texts.length>0&&state?.key!==key,
   };
 }

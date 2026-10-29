@@ -21,7 +21,7 @@ function TranslatedReview({q,index}:{q:Review;index:number}) {
   const [expanded,setExpanded]=useState(false);
   const {language}=useExamLanguage();
   const source=expanded?[q.question,...q.options,q.explanation]:[];
-  const translated=useTranslatedTexts(source);
+  const translated=useTranslatedTexts(source,{exam:true});
   const question=expanded&&translated.texts.length?translated.texts[0]:q.question;
   const options=expanded&&translated.texts.length?translated.texts.slice(1,1+q.options.length):q.options;
   const explanation=expanded&&translated.texts.length?translated.texts[1+q.options.length]:q.explanation;
@@ -34,6 +34,7 @@ function TranslatedReview({q,index}:{q:Review;index:number}) {
       {expanded?'Show original English':'Translate this review'}
     </button>}
     {expanded&&translated.warning&&<p className="mt-1 text-xs text-amber-700" role="status">{translated.warning}</p>}
+    {expanded&&translated.machineTranslated&&<p className="mt-1 text-xs text-amber-700">Azure machine translation is advisory; original English text is authoritative.</p>}
   </article>;
 }
 
@@ -60,7 +61,7 @@ export function SecureExam({testId,draftMode=false}:{testId:string;draftMode?:bo
        Math.max(0,Math.floor((Date.now()-new Date(attempt.startedAt).getTime())/(sectionMinutes*60000))))
    : null;
  const displayed = attempt?.test.questions[current];
- const translated = useTranslatedTexts(displayed&&!(language==='hi'&&displayed.hindi)?[displayed.question,...displayed.options]:[]);
+ const translated = useTranslatedTexts(displayed&&!(language==='hi'&&displayed.hindi)?[displayed.question,...displayed.options]:[],{exam:true});
  const submitLock=useRef(false);
  const latest=useRef<Record<string,number>>({});
 
@@ -198,6 +199,8 @@ export function SecureExam({testId,draftMode=false}:{testId:string;draftMode?:bo
      <h2 ref={headingRef} tabIndex={-1} className="mt-3 text-lg font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-600">{approvedHindi?.question||translated.texts[0]||question.question}</h2>
      {translated.warning&&!approvedHindi&&<p className="mt-2 text-xs text-amber-700 dark:text-amber-300" role="status">{translated.warning}</p>}
      {approvedHindi&&<p className="mt-2 text-xs text-emerald-700 dark:text-emerald-300">Human-verified Hindi text</p>}
+     {!approvedHindi&&translated.loading&&language!=='en'&&<p role="status" className="mt-2 text-xs text-muted-foreground">Translating this question with Azure…</p>}
+     {!approvedHindi&&translated.machineTranslated&&<p className="mt-2 text-xs text-amber-700 dark:text-amber-300">Azure machine translation · advisory only. Switch to EN to verify wording.</p>}
      <fieldset className="mt-4 space-y-2">
        <legend className="sr-only">{t('answer')}</legend>
        {question.options.map((choice,i)=><label key={i} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border p-3 hover:bg-muted"><input type="radio" name={question.id} checked={selected===i} onChange={()=>update(question.id,i)}/><span>{String.fromCharCode(65+i)}. {approvedHindi?.options[i]||translated.texts[i+1]||choice}</span></label>)}

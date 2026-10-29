@@ -6,6 +6,7 @@ const db = require('../config/database');
 const config = require('../config');
 const { authenticateNextAuth } = require('../middleware/nextauth');
 const mocks = require('../services/mocks.service');
+const azure = require('../services/azure-translator.service');
 
 const router = Router();
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -64,57 +65,32 @@ router.get('/topic-accuracy', authenticateNextAuth, wrap(async (req, res) => {
 }));
 
 const translateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 30,
-  standardHeaders: true,
-  legacyHeaders: false,
+  windowMs:15*60*1000,max:30,standardHeaders:true,legacyHeaders:false,
 });
 
-function validTexts(texts) {
-  return Array.isArray(texts) && texts.length > 0 && texts.length <= 8 &&
-    texts.every(t => typeof t === 'string' && t.trim().length > 0 && t.length <= 1000) &&
-    texts.reduce((sum, s) => sum + s.length, 0) <= 3600;
+// Full mock requires up to 100 distinct questions (5 strings per item).
+// An authenticated user's ID, not a shared NAT IP, is the quota bucket.
+const examTranslateLimiter = rateLimit({
+  windowMs:15*60*1000,max:130,standardHeaders:true,legacyHeaders:false,
+  keyGenerator:req=>'exam-translation:'+req.user.id,
+});
+
+async function translateRequest(req,res) {
+  const {language,texts}=req.body||{};
+  if(!['hi','bn'].includes(language)||!azure.validTexts(texts))
+    return res.status(400).json({success:false,error:{message:'Invalid language or text batch.'}});
+  const result=await azure.translate(texts,language);
+  res.set('Cache-Control','no-store');
+  return res.json({success:true,data:result});
 }
 
-/**
- * Optional Azure AI Translator proxy. All secrets remain server-side.
- * Treat these responses as advisory text; they NEVER change exam answer keys.
- */
-router.post('/translate', translateLimiter, wrap(async (req, res) => {
-  const { language, texts } = req.body || {};
-  if (!['hi','bn'].includes(language) || !validTexts(texts)) {
-    return res.status(400).json({success:false,error:{message:'Invalid language or text batch.'}});
-  }
-  const key = process.env.AZURE_TRANSLATOR_KEY;
-  const region = process.env.AZURE_TRANSLATOR_REGION;
-  if (!key || !region) {
-    return res.status(503).json({success:false,error:{code:'TRANSLATION_UNAVAILABLE', message:'Translation is not configured on the backend.'}});
-  }
-  const url = 'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&to=' + language;
-  let response;
-  try {
-    response = await fetch(url, {
-      method: 'POST',
-      signal: AbortSignal.timeout(7000),
-      headers: {
-        'Content-Type':'application/json',
-        'Ocp-Apim-Subscription-Key':key,
-        'Ocp-Apim-Subscription-Region':region,
-      },
-      body: JSON.stringify(texts.map(text => ({Text:text}))),
-    });
-  } catch {
-    return res.status(502).json({success:false,error:{message:'Translation provider is unavailable.'}});
-  }
-  if (!response.ok) return res.status(502).json({success:false,error:{message:'Translation provider rejected the request.'}});
-  let data;
-  try { data = await response.json(); } catch { return res.status(502).json({success:false,error:{message:'Invalid translation response.'}}); }
-  const translated = Array.isArray(data) && data.length === texts.length
-    ? data.map(v => v?.translations?.[0]?.text) : [];
-  if (translated.length !== texts.length || translated.some(v => typeof v !== 'string')) {
-    return res.status(502).json({success:false,error:{message:'Incomplete translation response.'}});
-  }
-  return res.json({success:true,data:{texts:translated}});
-}));
+/** Legacy public translation: tightly IP-rate limited for visitor previews. */
+router.post('/translate',translateLimiter,wrap(translateRequest));
 
-module.exports = {router, validTexts, topicIds};
+/**
+ * Higher per-user quota for the real, signed-in exam hall and Admin review.
+ * User cannot supply keys, URLs, question-answer data, or approval flags.
+ */
+router.post('/translate-exam',authenticateNextAuth,examTranslateLimiter,wrap(translateRequest));
+
+module.exports = {router, validTexts:azure.validTexts, topicIds};
