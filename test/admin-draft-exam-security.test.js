@@ -17,6 +17,7 @@ const app = require('../src/app');
 const db = require('../src/config/database');
 const config = require('../src/config');
 const content = require('../src/services/content.service');
+const quality = require('../src/services/mock-quality.service');
 const mocks = require('../src/services/mocks.service');
 const gate = require('../src/services/draft-testing-gate');
 const exams = require('../src/services/exam-attempts.service');
@@ -55,10 +56,11 @@ test('staging-only guard fails closed when any prerequisite is missing',()=>{
 
 test('private routes reject guests, ordinary users, API keys, and hide keys before submit',async t=>{
  let row=null;
- const originals={query:db.query,client:db.getClient,draft:content.buildDraftExam,publicMock:mocks.findMock};
+ const originals={query:db.query,client:db.getClient,draft:content.buildDraftExam,localized:quality.attachApprovedHindi,publicMock:mocks.findMock};
  const exam=makeExam();
  assert.equal(eligible(exam),true,'full SSC pattern must trigger section timer');
  db.query=async(sql,params=[])=>{
+   if(sql.includes('FROM exam_time_accommodations'))return {rows:[],rowCount:0};
    if(sql.includes('SELECT * FROM users')){
       return {rows:[{id:userId,email:params[2],name:'Review admin',image:null,
         provider:'google',provider_id:'oauth-id',plan:'free',role:'user'}],rowCount:1};
@@ -70,6 +72,7 @@ test('private routes reject guests, ordinary users, API keys, and hide keys befo
    throw Error('unexpected draft QA db.query: '+sql);
  };
  content.buildDraftExam=async id=>id===key?exam:null;
+ quality.attachApprovedHindi=async(_id,t)=>t;
  mocks.findMock=async()=>null;
  db.getClient=async()=>({
    release(){},
@@ -101,7 +104,7 @@ test('private routes reject guests, ordinary users, API keys, and hide keys befo
  });
  t.after(async()=>{
    Object.assign(db,{query:originals.query,getClient:originals.client});
-   content.buildDraftExam=originals.draft;mocks.findMock=originals.publicMock;
+   content.buildDraftExam=originals.draft;quality.attachApprovedHindi=originals.localized;mocks.findMock=originals.publicMock;
    await new Promise((resolve,reject)=>server.close(err=>err?reject(err):resolve()));
  });
  const base='http://127.0.0.1:'+server.address().port;
@@ -120,6 +123,15 @@ test('private routes reject guests, ordinary users, API keys, and hide keys befo
    return {status:res.status,body:await res.json()};
  };
  const start='/admin/tests/'+key+'/draft-attempt';
+ // Review and accommodation changes must not be authorized by API-key-only
+ // users, other candidates, or unauthenticated guests.
+ assert.equal((await api('/admin/tests/'+key+'/reviews','GET',undefined,undefined,{'x-admin-key':process.env.ADMIN_API_KEY})).status,403);
+ assert.equal((await api('/admin/tests/'+key+'/reviews','GET',nonAdmin)).status,403);
+ assert.equal((await api('/admin/tests/'+key+'/reviews','GET')).status,401);
+ assert.equal((await api('/admin/tests/'+key+'/accommodations','PUT',undefined,
+   {email:'candidate@example.test',approved:true,eligibilityChecked:true},
+   {'x-admin-key':process.env.ADMIN_API_KEY})).status,403);
+
  assert.equal((await api(start,'POST')).status,401);
  assert.equal((await api(start,'POST',nonAdmin)).status,403);
  assert.equal((await api(start,'POST',invalidProvider)).status,403);
@@ -161,6 +173,19 @@ test('private routes reject guests, ordinary users, API keys, and hide keys befo
  assert.equal(graded.body.data.attempt.result.total,200);
  assert.equal(graded.body.data.attempt.result.review[0].correctAnswer,0);
  assert.equal((await api('/exam-attempts/'+attemptId,'GET',adminAuth)).status,404,'draft stays private after grading');
+ // Approval comes only from the server-side entitlement record, not a client
+ // request flag. Starting a subsequent attempt snapshots 20×4 / 80 minutes.
+ const originalQuery=db.query;
+ db.query=async(sql,params=[])=>{
+   if(sql.includes('FROM exam_time_accommodations'))return {rows:[{mode:'scribe_compensatory'}],rowCount:1};
+   return originalQuery(sql,params);
+ };
+ const assisted=await api(start,'POST',adminAuth,{testId:key,sectionTimingMinutes:20});
+ assert.equal(assisted.status,200,JSON.stringify(assisted.body));
+ assert.equal(assisted.body.data.attempt.test.sectionTimingMinutes,20);
+ assert.equal(assisted.body.data.attempt.test.minutes,80);
+ assert.equal(row.snapshot.accommodationMode,'scribe_compensatory');
+
 });
 
 test('normal exam-attempt endpoint cannot read admin draft owned by same user',async t=>{

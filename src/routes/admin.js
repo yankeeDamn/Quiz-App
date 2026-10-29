@@ -12,6 +12,8 @@ const userService = require('../services/user.service');
 const content = require('../services/content.service');
 const exams = require('../services/exam-attempts.service');
 const draftGate = require('../services/draft-testing-gate');
+const quality = require('../services/mock-quality.service');
+const accommodations = require('../services/ssc-accommodations.service');
 const importer = require('../services/question-import');
 const { PAID_PLANS, MAX_MONTHS, isPlanActive } = require('../services/plan.service');
 
@@ -248,6 +250,33 @@ router.post('/draft-attempts/:id/submit',requireDraftTester,wrap(async(req,res)=
   return ok(res,{attempt:await exams.save(req.user.id,req.params.id,req.body?.responses,true,true)});
 }));
 
+// ── Academic and bilingual review (verified human admin accounts only) ──
+// API keys can automate imports, but cannot claim independent human approval.
+function requireHumanReviewer(req,res,next) {
+  if(req.admin?.via!=='account'||!req.admin?.email) return bad(res,'Signed-in reviewer required.',403);
+  next();
+}
+router.get('/tests/:id/reviews',requireHumanReviewer,wrap(async(req,res)=>{
+  if(!SLUG.test(req.params.id))return bad(res,'Invalid test ID',400);
+  return ok(res,await quality.list(req.params.id));
+}));
+router.put('/tests/:id/reviews/:questionId',requireHumanReviewer,wrap(async(req,res)=>{
+  if(!SLUG.test(req.params.id)||!/^[0-9a-f-]{36}$/i.test(req.params.questionId))
+    return bad(res,'Invalid review IDs',400);
+  return ok(res,await quality.update(req.params.id,req.params.questionId,req.body,req.admin.email));
+}));
+
+// Eligible-candidate timing must be individually authorized; this endpoint
+// records no health data and cannot be called by exam takers themselves.
+router.put('/tests/:id/accommodations',requireHumanReviewer,wrap(async(req,res)=>{
+  if(!draftGate.enabled())return bad(res,'Staging QA accommodations only.',404);
+  if(!SLUG.test(req.params.id)||typeof req.body?.approved!=='boolean')
+    return bad(res,'Valid test ID and approved boolean required.',400);
+  if(req.body.approved && req.body.eligibilityChecked!==true)
+    return bad(res,'Admin must confirm eligibility was verified outside ExamPro.',400);
+  return ok(res,await accommodations.setApproved(req.params.id,req.body.email,req.body.approved,req.admin.email));
+}));
+
 // ── Mock tests ─────────────────────────────────────────
 
 router.get('/tests', wrap(async (_req, res) => ok(res, { tests: await content.listTests() })));
@@ -276,6 +305,13 @@ router.put('/tests/:id', wrap(async (req, res) => {
     // evidence that the *public* catalogue will expose the complete paper.
     const readiness = await content.publicationReadiness({...r.value,id:req.params.id});
     if(!readiness.ok)return bad(res,readiness.error,409);
+    // Academic/Hindi sign-off is a separate mandatory gate from merely
+    // having 100 live database rows. It never self-approves content.
+    if (/ssc/i.test(r.value.exam) && /cgl/i.test(r.value.name) &&
+        /full\\s+mock/i.test(r.value.name)) {
+      const editorial=await quality.readiness(req.params.id);
+      if(!editorial.ok)return bad(res,editorial.error,409);
+    }
   }
   return (await content.updateTest(req.params.id, r.value, active)) ? ok(res, {}) : bad(res, 'Test not found', 404);
 }));

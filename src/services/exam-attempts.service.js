@@ -2,6 +2,8 @@
 const db = require('../config/database');
 const mocks = require('./mocks.service');
 const content = require('./content.service');
+const accommodations = require('./ssc-accommodations.service');
+const quality = require('./mock-quality.service');
 const { isPlanActive } = require('./plan.service');
 const { cleanResponses, grade, visibleAttempt } = require('./exam-grade');
 const { eligible, sectionTiming, lockedResponses } = require('./ssc-section-timing');
@@ -34,16 +36,23 @@ async function start(user, testId, adminDraft = false) {
       return visibleAttempt(existing.rows[0]);
     }
     const loadedTest = adminDraft ? test : found.build();
+    // Never accept a requested timing profile from the client. Grant lives in
+    // Postgres, is managed by admins, and is frozen into the attempt snapshot.
+    const sscFullMock = eligible(loadedTest);
+    const approved = sscFullMock ? await accommodations.approvedMode(user.id,testId) : null;
+    const sectionMinutes = sscFullMock ? (approved === 'scribe_compensatory' ? 20 : 15) : null;
+    const effectiveMinutes = sectionMinutes === 20 ? 80 : loadedTest.minutes;
+    const localizedTest = sscFullMock ? await quality.attachApprovedHindi(testId,loadedTest) : loadedTest;
     // Include stable text and key snapshot for reviews after edits or retirements.
-    const snapshot = { name: loadedTest.name, minutes: loadedTest.minutes, tier: loadedTest.tier,
+    const snapshot = { name: loadedTest.name, minutes: effectiveMinutes, tier: loadedTest.tier,
       marksPerCorrect: loadedTest.marksPerCorrect, negativeMarks: loadedTest.negativeMarks,
-      passPercent: loadedTest.passPercent ?? 50, sections: loadedTest.sections, questions: loadedTest.questions,
+      passPercent: loadedTest.passPercent ?? 50, sections: localizedTest.sections, questions: localizedTest.questions,
       adminDraft: Boolean(adminDraft),
-      sectionTimingMinutes: eligible(loadedTest) ? 15 : null };
+      sectionTimingMinutes: sectionMinutes, accommodationMode: approved || 'standard' };
     const saved = await client.query(
       `INSERT INTO exam_attempts_v2 (user_id,test_id,snapshot,deadline_at)
        VALUES ($1,$2,$3::jsonb,NOW()+($4*INTERVAL '1 minute')) RETURNING *`,
-      [user.id,storedId,JSON.stringify(snapshot),loadedTest.minutes]
+      [user.id,storedId,JSON.stringify(snapshot),effectiveMinutes]
     );
     await client.query('COMMIT');
     return visibleAttempt(saved.rows[0]);
