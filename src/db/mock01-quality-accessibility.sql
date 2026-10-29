@@ -1,7 +1,7 @@
 -- ExamPro editorial QA and approved accommodations. Additive and idempotent.
 -- Never store disability certificates, medical history, or eligibility documents here.
 CREATE TABLE IF NOT EXISTS mock_question_reviews (
-  question_id UUID PRIMARY KEY REFERENCES mock_questions(id) ON DELETE CASCADE,
+  question_id UUID NOT NULL REFERENCES mock_questions(id) ON DELETE CASCADE,
   test_id VARCHAR(40) NOT NULL REFERENCES mock_tests(id) ON DELETE CASCADE,
   content_hash CHAR(64) NOT NULL,
   academic_status VARCHAR(24) NOT NULL DEFAULT 'pending'
@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS mock_question_reviews (
   hindi_options JSONB,
   hindi_explanation TEXT,
   hindi_reviewer VARCHAR(255),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY(test_id,question_id)
 );
 CREATE INDEX IF NOT EXISTS mock_question_reviews_test ON mock_question_reviews(test_id);
 
