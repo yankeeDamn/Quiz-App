@@ -112,15 +112,27 @@ async function readiness(testId){
   return {ok:true};
 }
 
-async function approvedHindi(testId,questions) {
+/** Use only human-verified, unmodified Hindi strings in scored exam payloads. */
+async function attachApprovedHindi(testId,builtExam) {
+  const {questions}=await loadQuestions(testId);
   const ids=questions.map(q=>q.id);
-  if(!ids.length)return new Map();
+  if(!ids.length)return builtExam;
   const {rows}=await db.query(`SELECT question_id,content_hash,hindi_status,hindi_question,hindi_options
     FROM mock_question_reviews WHERE test_id=$1 AND question_id = ANY($2::uuid[])`,[testId,ids]);
   const byId=new Map(questions.map(q=>[q.id,q]));
-  return new Map(rows.filter(r=>{
-    const q=byId.get(r.question_id);
-    return q&&r.hindi_status==='verified'&&r.content_hash===sourceHash(q);
-  }).map(r=>[r.question_id,{question:r.hindi_question,options:r.hindi_options}]));
+  const approved=new Map();
+  for(const r of rows) {
+    const source=byId.get(r.question_id);
+    if(source&&r.hindi_status==='verified'&&r.content_hash===sourceHash(source)&&
+       Array.isArray(r.hindi_options)&&r.hindi_options.length===4) {
+      approved.set(source.topic_id+':'+source.position,{
+        question:r.hindi_question,options:r.hindi_options,
+      });
+    }
+  }
+  return {...builtExam,questions:builtExam.questions.map(q=>{
+    const hi=approved.get(q.id);
+    return hi?{...q,hindi:hi}:q;
+  })};
 }
-module.exports={sourceHash,loadQuestions,list,update,readiness,approvedHindi};
+module.exports={sourceHash,loadQuestions,list,update,readiness,attachApprovedHindi};
