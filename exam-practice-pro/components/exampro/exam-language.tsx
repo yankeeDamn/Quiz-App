@@ -85,7 +85,8 @@ function hashKey(s:string) {
  */
 export function useTranslatedTexts(texts:string[], options?:{exam?:boolean}) {
   const {language}=useExamLanguage();
-  const [state,setState]=useState<{key:string;texts:string[];warning:string}|null>(null);
+  const exam=options?.exam===true;
+  const [state,setState]=useState<{key:string;texts:string[];warning:string;machine:boolean}|null>(null);
   const serialized=JSON.stringify(texts);
   const key=useMemo(()=>language+':'+hashKey(serialized),[language,serialized]);
   useEffect(()=>{
