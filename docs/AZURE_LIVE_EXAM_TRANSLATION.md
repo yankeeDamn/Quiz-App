@@ -47,3 +47,46 @@ Production release requires separate approved staging-to-production content impo
 - `POST /api/v1/exampro/translate`: public, IP-limited, existing landing-page preview; JSON `{language:"hi"|"bn",texts:string[]}`.
 - `POST /api/v1/exampro/translate-exam`: verified Auth.js OAuth bearer required; larger per-user limit for active exams and reviewer drafts; same input/output.
 - Responses: `{success:true,data:{texts:string[],provider:"azure",advisory:true,cached:number}}` or a bounded error. No Azure key is returned.
+
+## Troubleshooting after a successful deployment
+
+When the staging Render deployment says **Live**, this only proves the Node API
+started; it does not prove the Azure service accepted a translation request.
+
+1. Open `https://exampro-staging-ui.vercel.app/admin` while signed in with the
+   approved Google account. Use **Mock tests → Review questions**, select one
+   non-English-Comprehension question, then press **Generate Hindi draft with Azure**.
+   Or start a secure private **Test Draft** and tap **हिं** or **বাং**. Switching
+   languages on the Admin navigation alone does not translate every admin label.
+2. If the request fails, open Chrome DevTools → **Network**, filter
+   `translate-exam` and inspect the HTTP status and safe JSON error message.
+   Do not copy your Authorization bearer header or Azure key into tickets.
+3. **No translate-exam request**: check that you are in the secure exam or review
+   UI, that you are signed in, and that staging Vercel's
+   `NEXT_PUBLIC_API_URL` points to `https://exampro-staging-api.onrender.com`.
+   Also confirm Vercel is deployed from the latest commit.
+4. **401 from ExamPro**: check Auth.js sign-in and `AUTH_SECRET` alignment
+   between staging Vercel and staging Render. This is not an Azure-key error.
+5. **400**: input did not pass the batch validator; check question/choice/
+   explanation presence and total payload size.
+6. **429 from ExamPro**: proxy-based/global limit or per-user translation limit.
+   On Render the backend now trusts the last platform proxy hop; the dedicated
+   authenticated exam limit is 130 requests/15 minutes per user. Public
+   translation preview remains 30 requests/15 minutes per IP.
+7. **502 with Azure HTTP 401/403**: check Azure KEY 1, resource type and
+   `AZURE_TRANSLATOR_REGION`. For a Global single-service Translator
+   resource, an unnecessary `global` region header can be wrong; leave
+   `AZURE_TRANSLATOR_REGION` unset if the resource uses Global and Azure
+   documentation says no region is required.
+8. **502 with Azure HTTP 404**: check `AZURE_TRANSLATOR_ENDPOINT`. The global
+   default is `https://api.cognitive.microsofttranslator.com` (no /translate
+   suffix needed in the environment variable).
+9. **503 for quota**: check Azure F0 plan usage and
+   `AZURE_TRANSLATOR_DAILY_CHARS`. This in-memory limit is per instance, so
+   configure subscription-level budgets/alerts too.
+10. **CORS or API_UNAVAILABLE**: check `CORS_ORIGINS` on staging Render contains
+   `https://exampro-staging-ui.vercel.app` and the frontend uses the
+   matching staging API URL. Do not point staging at the production API.
+
+The rendered translated text is machine-generated and advisory. Approved SSC
+bilingual content still requires independent human editorial sign-off.
