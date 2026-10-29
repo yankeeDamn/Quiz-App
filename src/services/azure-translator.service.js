@@ -7,6 +7,15 @@ const crypto = require('node:crypto');
 const CACHE_MAX = 1500;
 const CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
 const cache = new Map();
+// Best-effort per-instance spending brake. Use Azure F0 quota, service
+// metrics and Azure budget alerts for reliable subscription-level controls.
+let dailyUsage={day:'',characters:0};
+function dayKey(){return new Date().toISOString().slice(0,10);}
+function dailyLimit(){
+  const n=Number(process.env.AZURE_TRANSLATOR_DAILY_CHARS||60000);
+  return Number.isInteger(n)&&n>=1000&&n<=2000000?n:60000;
+}
+
 
 function validTexts(texts) {
   return Array.isArray(texts) && texts.length > 0 && texts.length <= 8 &&
@@ -70,6 +79,12 @@ async function translate(texts,language) {
     else missing.set(digest,{text:texts[i],indices:[i],digest});
   }
   if(missing.size){
+    const day=dayKey();
+    if(dailyUsage.day!==day)dailyUsage={day,characters:0};
+    const requested=[...missing.values()].reduce((n,v)=>n+v.text.length,0);
+    if(dailyUsage.characters+requested>dailyLimit()) {
+      throw fail('Translation daily character budget reached. Try again later or switch to English.',503);
+    }
     const url=endpointUrl();
     url.searchParams.set('from','en');
     url.searchParams.set('to',language);
@@ -94,6 +109,7 @@ async function translate(texts,language) {
     let data;
     try {data=await response.json();}catch{throw fail('Azure Translator returned an invalid response.',502);}
     if(!Array.isArray(data)||data.length!==missing.size)throw fail('Azure Translator returned an incomplete translation.',502);
+    dailyUsage.characters+=requested;
     const vals=[...missing.values()];
     for(let i=0;i<vals.length;i++){
       const localized=data[i]?.translations?.find(t=>t.to===language)?.text;
@@ -104,5 +120,5 @@ async function translate(texts,language) {
   }
   return {texts:outputs,provider:'azure',advisory:true,cached:cacheHits};
 }
-function resetCacheForTests(){cache.clear();}
+function resetCacheForTests(){cache.clear();dailyUsage={day:'',characters:0};}
 module.exports={validTexts,translate,endpointUrl,resetCacheForTests};
