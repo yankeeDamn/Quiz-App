@@ -46,12 +46,15 @@ export function SecureExam({testId,draftMode=false}:{testId:string;draftMode?:bo
  const [busy,setBusy] = useState(false);
  const [error,setError] = useState('');
  const [seconds,setSeconds] = useState(0);
+ const [announcement,setAnnouncement]=useState('');
+ const headingRef=useRef<HTMLHeadingElement>(null);
+ const lastSection=useRef<number|null>(null);
  const [current,setCurrent] = useState(0);
  const [saved,setSaved] = useState(true);
  // Review flags are UI-only; answer submissions and deadlines remain server-authoritative.
  const [marked,setMarked] = useState<Record<string,boolean>>({});
  const {t} = useExamLanguage();
- const sectionMinutes = attempt?.test.sectionTimingMinutes === 15 ? 15 : null;
+ const sectionMinutes = [15,20].includes(attempt?.test.sectionTimingMinutes ?? 0) ? attempt!.test.sectionTimingMinutes! : null;
  const activeSection = sectionMinutes && attempt
    ? Math.min(attempt.test.sections.length,
        Math.max(0,Math.floor((Date.now()-new Date(attempt.startedAt).getTime())/(sectionMinutes*60000))))
@@ -85,9 +88,10 @@ export function SecureExam({testId,draftMode=false}:{testId:string;draftMode?:bo
       setResponses(r.data.attempt.responses);
       latest.current=r.data.attempt.responses;
       const started=r.data.attempt;
-      if(started.test.sectionTimingMinutes===15){
+      if([15,20].includes(started.test.sectionTimingMinutes??0)){
+        const minutes=started.test.sectionTimingMinutes!;
         const section=Math.min(started.test.sections.length-1,
-          Math.max(0,Math.floor((Date.now()-new Date(started.startedAt).getTime())/(15*60000))));
+          Math.max(0,Math.floor((Date.now()-new Date(started.startedAt).getTime())/(minutes*60000))));
         setCurrent(started.test.sections[section].from);
       }else setCurrent(0);
       setSeconds(Math.max(0,Math.ceil((new Date(started.deadlineAt).getTime()-Date.now())/1000)));
@@ -111,9 +115,14 @@ export function SecureExam({testId,draftMode=false}:{testId:string;draftMode?:bo
    if(!attempt||attempt.submittedAt)return;
    const clock=()=>{
      const minutes=attempt.test.sectionTimingMinutes;
-     if(minutes===15 && attempt.test.sections.length===4){
+     if((minutes===15 || minutes===20) && attempt.test.sections.length===4){
        const active=Math.max(0,Math.floor((Date.now()-new Date(attempt.startedAt).getTime())/(minutes*60000)));
        if(active>=4){setSeconds(0);void submit();return;}
+       if(lastSection.current!==active){
+         lastSection.current=active;
+         setAnnouncement('Section '+(active+1)+' of 4: '+attempt.test.sections[active].name+
+           '. Previous sections are now locked. '+minutes+' minutes for this section.');
+       }
        const cutoff=new Date(attempt.startedAt).getTime()+(active+1)*minutes*60000;
        setSeconds(Math.max(0,Math.ceil((cutoff-Date.now())/1000)));
        const section=attempt.test.sections[active];
@@ -141,6 +150,8 @@ export function SecureExam({testId,draftMode=false}:{testId:string;draftMode?:bo
    return()=>{cancelled=true;window.clearTimeout(timeout)};
  },[attempt,saved,responses]);
 
+ useEffect(()=>{ if(attempt && !attempt.submittedAt) headingRef.current?.focus(); },[current,attempt?.id,attempt?.submittedAt]);
+
  if(status==='loading')return <p className="p-6" aria-busy="true">Checking sign-in…</p>;
  if(status!=='authenticated'||!session?.user?.email)return <section className="rounded-xl border p-6"><h1 className="text-xl font-bold">Sign in to take a scored exam</h1><p className="mt-2 text-sm text-muted-foreground">Guest practice is available, but scored exams require a verified Google or GitHub account to sync results across devices.</p><Button className="mt-4" asChild><Link href={`/auth/signin?callbackUrl=${encodeURIComponent((draftMode?'/admin/draft-test/':'/india-mocks/')+testId)}`}>Sign in</Link></Button></section>;
  if(error&&!attempt)return <div className="rounded-lg border p-5" role="alert">{error}<p className="mt-2 text-sm">Check that the API, Neon database and OAuth credentials are configured, then reload the page.</p></div>;
@@ -155,16 +166,22 @@ export function SecureExam({testId,draftMode=false}:{testId:string;draftMode?:bo
  const questions=attempt.test.questions;
  const question=questions[current];
  const selected=responses[question.id]??-1;
+ // Keep question titles reachable with keyboard and screen-reader navigation.
+ // Focus only when the actual question changes, not every timer tick.
  const mm=Math.floor(seconds/60),ss=String(seconds%60).padStart(2,'0');
+ const timerWarning=seconds<=60?'Under one minute remaining in this section.':seconds<=300?'Five minutes or less remaining.':'';
  return <section className="space-y-5">
+   <a href="#exam-question" className="sr-only focus:not-sr-only focus:inline-block focus:rounded focus:bg-background focus:p-2 focus:underline">Skip to current question</a>
+   <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</p>
    <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border bg-card p-4">
-     <div>{draftMode&&<p className="text-xs font-bold uppercase tracking-wider text-amber-700">Private staging QA · unpublished draft</p>}<h1 className="text-xl font-bold">{attempt.title}</h1><p className="text-sm text-muted-foreground">{Object.keys(responses).length}/{questions.length} answered · {saved?t('save'):t('saving')}</p>
+     <div>{draftMode&&<p className="text-xs font-bold uppercase tracking-wider text-amber-700">Private staging QA · unpublished draft</p>}<h1 className="text-xl font-bold">{attempt.title}</h1><p className="text-sm text-muted-foreground" aria-live="polite" aria-atomic="true">{Object.keys(responses).length}/{questions.length} answered · {saved?t('save'):t('saving')}</p>
       {sectionMinutes!==null&&activeSection!==null&&<p className="mt-1 text-sm font-semibold text-indigo-700 dark:text-indigo-300">Section {Math.min(activeSection+1,4)} / 4 · {sectionMinutes} min per section · earlier sections locked</p>}</div>
      <div className="flex flex-wrap items-center gap-2">
       <LanguageSwitcher small/>{!draftMode&&<ShareTestButtons testId={testId} title={attempt.title} compact/>}
-      <div role="timer" className="font-mono text-xl font-bold">{mm}:{ss}</div>
+      <div role="timer" aria-label="Time remaining in current section" aria-live="off" className="font-mono text-xl font-bold tabular-nums">{mm}:{ss}</div>
      </div>
    </div>
+   {timerWarning&&<p className="text-xs font-medium text-amber-800 dark:text-amber-200" role="status" aria-live="off">{timerWarning}</p>}
    {error&&<p className="rounded-lg border border-red-500 p-3 text-sm" role="alert">{error}</p>}
    <div className="flex flex-wrap gap-2" role="group" aria-label="Exam sections">
      {attempt.test.sections.map((section,i)=><button key={i} type="button" disabled={sectionMinutes!==null && activeSection!==i}
@@ -175,9 +192,9 @@ export function SecureExam({testId,draftMode=false}:{testId:string;draftMode?:bo
        {section.name}
      </button>)}
    </div>
-   <article className="rounded-xl border bg-card p-5">
+   <article id="exam-question" className="rounded-xl border bg-card p-5">
      <p className="text-sm text-muted-foreground">{t('question')} {current+1} of {questions.length}</p>
-     <h2 className="mt-3 text-lg font-semibold">{translated.texts[0]||question.question}</h2>
+     <h2 ref={headingRef} tabIndex={-1} className="mt-3 text-lg font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-600">{translated.texts[0]||question.question}</h2>
      {translated.warning&&<p className="mt-2 text-xs text-amber-700 dark:text-amber-300" role="status">{translated.warning}</p>}
      <fieldset className="mt-4 space-y-2">
        <legend className="sr-only">{t('answer')}</legend>
@@ -207,6 +224,6 @@ export function SecureExam({testId,draftMode=false}:{testId:string;draftMode?:bo
    })}</div>
    <p className="text-xs text-muted-foreground">Marks for review are visual reminders in this browser tab; only your selected answers are saved to the server.</p>
    <Button disabled={busy} onClick={()=>void submit()}>{busy?t('saving'):t('submit')}</Button>
-   <p className="text-xs text-muted-foreground">This is a server-timed exam. Refresh recovers saved answers. {sectionMinutes!==null?'Sections advance automatically after 15 minutes and earlier sections cannot be edited.':'The original overall deadline stays the same.'} Answers and explanations appear only after submission.</p>
+   <p className="text-xs text-muted-foreground">This is a server-timed exam. Refresh recovers saved answers. {sectionMinutes!==null?'Sections advance automatically after {sectionMinutes} minutes and earlier sections cannot be edited.':'The original overall deadline stays the same.'} Answers and explanations appear only after submission.</p>
  </section>;
 }
