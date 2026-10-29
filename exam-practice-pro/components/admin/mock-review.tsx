@@ -2,6 +2,7 @@
 
 import {useCallback,useEffect,useState} from 'react';
 import {admin} from '@/lib/admin';
+import {api} from '@/lib/api';
 
 type Status='pending'|'approved'|'changes_required';
 type HindiStatus='pending'|'verified'|'changes_required'|'not_required';
@@ -28,6 +29,7 @@ export function MockReview({testId,onClose}:{testId:string;onClose:()=>void}) {
  const [edit,setEdit]=useState<Edit|null>(null);
  const [search,setSearch]=useState('');
  const [saving,setSaving]=useState(false);
+ const [translating,setTranslating]=useState(false);
  const [message,setMessage]=useState('');
  const [email,setEmail]=useState('');
  const [eligibilityChecked,setEligibilityChecked]=useState(false);
@@ -55,6 +57,25 @@ export function MockReview({testId,onClose}:{testId:string;onClose:()=>void}) {
   if(!r.ok){setMessage(r.message);return}
   setMessage('Review recorded. Only the signed-in reviewer receives credit; content changes invalidate approvals.');
   await load();
+ };
+ const translateDraft=async()=>{
+  if(!entry||!edit||!entry.hindiRequired||!report?.draft)return;
+  const questionId=entry.id;
+  setMessage('');setTranslating(true);
+  const r=await api<{texts:string[]}>('/api/v1/exampro/translate-exam',{
+    method:'POST',body:{language:'hi',texts:[entry.question,...entry.options,entry.explanation]},
+  });
+  setTranslating(false);
+  if(!r.success||!r.data||r.data.texts.length!==6){
+    setMessage(r.error?.message||'Azure Translator is unavailable. Check staging Render configuration.');return;
+  }
+  if(selectedId!==questionId)return;
+  const translated=r.data.texts;
+  setEdit(old=>old?{...old,
+    hindiStatus:'pending',hindiQuestion:translated[0],
+    hindiOptions:translated.slice(1,5),hindiExplanation:translated[5],
+  }:old);
+  setMessage('Azure filled a Hindi DRAFT only. Review all six fields with a qualified bilingual reviewer. It is NOT saved or verified.');
  };
  const setAccommodation=async(approved:boolean)=>{
   if(!email.trim()){setMessage('Enter the candidate sign-in email.');return}
@@ -114,6 +135,12 @@ export function MockReview({testId,onClose}:{testId:string;onClose:()=>void}) {
     </label>
     {entry.hindiRequired ? <>
      <h4 className="font-semibold">Hindi translation verification · required</h4>
+     <div className="rounded-lg border border-indigo-300 p-3">
+      <button type="button" disabled={saving||translating||!report?.draft}
+       className="rounded-lg bg-indigo-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+       onClick={()=>void translateDraft()}>{translating?'Translating with Azure…':'Generate Hindi draft with Azure'}</button>
+      <p className="mt-2 text-xs text-muted-foreground">Fills question, four choices and explanation without a translation database. This is editable machine output, not human verification; approval stays Pending until independently checked.</p>
+     </div>
      <p className="text-xs text-muted-foreground">Enter and proofread the complete Hindi version manually. Do not mark verified from an automatic translation alone.</p>
      <label className="block text-sm font-semibold">Hindi question
       <textarea lang="hi" className={input} rows={2} value={edit.hindiQuestion} onChange={e=>setEdit({...edit,hindiQuestion:e.target.value})}/>
