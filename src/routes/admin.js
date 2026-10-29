@@ -13,6 +13,7 @@ const content = require('../services/content.service');
 const exams = require('../services/exam-attempts.service');
 const draftGate = require('../services/draft-testing-gate');
 const quality = require('../services/mock-quality.service');
+const { isFullCglMock } = require('../services/ssc-full-mock-classifier');
 const accommodations = require('../services/ssc-accommodations.service');
 const importer = require('../services/question-import');
 const { PAID_PLANS, MAX_MONTHS, isPlanActive } = require('../services/plan.service');
@@ -307,8 +308,7 @@ router.put('/tests/:id', wrap(async (req, res) => {
     if(!readiness.ok)return bad(res,readiness.error,409);
     // Academic/Hindi sign-off is a separate mandatory gate from merely
     // having 100 live database rows. It never self-approves content.
-    if (/ssc/i.test(r.value.exam) && /cgl/i.test(r.value.name) &&
-        /full\\s+mock/i.test(r.value.name)) {
+    if (isFullCglMock({ ...r.value, id: req.params.id })) {
       const editorial=await quality.readiness(req.params.id);
       if(!editorial.ok)return bad(res,editorial.error,409);
     }
