@@ -51,7 +51,7 @@ async function list(testId) {
       hindiRequired:requiresHindi,
       hindiStatus:current?v.hindi_status:'pending',
       hindiQuestion:current?v.hindi_question||'':'',
-      hindiOptions:current?v.hindi_options||['','','',''],
+      hindiOptions:current?(v.hindi_options||['','','','']):['','','',''],
       hindiExplanation:current?v.hindi_explanation||'':'',
       hindiReviewer:current?v.hindi_reviewer:null,
       stale:Boolean(v&&!current),
