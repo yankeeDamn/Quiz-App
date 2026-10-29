@@ -83,7 +83,7 @@ function hashKey(s:string) {
  * Advisory display-only translations. Never alter the canonical question,
  * option indexes, answer keys, deadlines or scored attempt payloads.
  */
-export function useTranslatedTexts(texts:string[]) {
+export function useTranslatedTexts(texts:string[], options?:{exam?:boolean}) {
   const {language}=useExamLanguage();
   const [state,setState]=useState<{key:string;texts:string[];warning:string}|null>(null);
   const serialized=JSON.stringify(texts);
@@ -95,28 +95,30 @@ export function useTranslatedTexts(texts:string[]) {
     try {
       const cached=JSON.parse(localStorage.getItem(storageKey)||'null') as {source?:string;translated?:string[]}|null;
       if(cached?.source===serialized && cached.translated?.length===texts.length) {
-        setState({key,texts:cached.translated,warning:''});return;
+        setState({key,texts:cached.translated,warning:'',machine:true});return;
       }
     }catch{ /* no cache */ }
-    api<{texts:string[]}>('/api/v1/exampro/translate',{public:true,method:'POST',body:{language,texts}})
+    api<{texts:string[]}>(exam?'/api/v1/exampro/translate-exam':'/api/v1/exampro/translate', {public:!exam,method:'POST',body:{language,texts}})
       .then(r=>{
         if(cancelled)return;
         if(!r.success||!r.data||r.data.texts.length!==texts.length){
-          setState({key,texts,warning:'Automatic translation is not available. Showing the original English text.'});
+          setState({key,texts,warning:'Azure translation is unavailable. The original English text is shown.',machine:false});
           return;
         }
-        setState({key,texts:r.data.texts,warning:''});
+        setState({key,texts:r.data.texts,warning:'',machine:true});
         try {
           localStorage.setItem(storageKey,JSON.stringify({source:serialized,translated:r.data.texts}));
         } catch { /* private browser */ }
       })
-      .catch(()=>{if(!cancelled)setState({key,texts,warning:'Automatic translation is not available. Showing English.'});});
+      .catch(()=>{if(!cancelled)setState({key,texts,warning:'Azure translation is unavailable. Showing English.',machine:false});});
     return()=>{cancelled=true;};
   // serialized is a stable representation of the content for this displayed question.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[language,serialized,key]);
+  },[language,serialized,key,exam]);
   return {
     texts: language==='en' || state?.key!==key ? texts : state.texts,
     warning:language==='en'||state?.key!==key?'':state.warning,
+    machineTranslated:language!=='en'&&state?.key===key&&state.machine,
+    loading:language!=='en'&&texts.length>0&&state?.key!==key,
   };
 }
