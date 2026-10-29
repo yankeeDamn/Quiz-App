@@ -8,7 +8,7 @@ import { api } from '@/lib/api';
 import { LanguageSwitcher, useExamLanguage, useTranslatedTexts } from '@/components/exampro/exam-language';
 import { ShareTestButtons } from '@/components/exampro/share-test-buttons';
 
-type Question = {id:string;topic:string;section:number;question:string;options:string[]};
+type Question = {id:string;topic:string;section:number;question:string;options:string[];hindi?:{question:string;options:string[]}|null};
 type Review = {id:string;question:string;options:string[];selected:number;correctAnswer:number;explanation:string;correct:boolean};
 type Attempt = {
  id:string;testId:string;title:string;startedAt:string;deadlineAt:string;submittedAt:string|null;
@@ -53,14 +53,14 @@ export function SecureExam({testId,draftMode=false}:{testId:string;draftMode?:bo
  const [saved,setSaved] = useState(true);
  // Review flags are UI-only; answer submissions and deadlines remain server-authoritative.
  const [marked,setMarked] = useState<Record<string,boolean>>({});
- const {t} = useExamLanguage();
+ const {t,language} = useExamLanguage();
  const sectionMinutes = [15,20].includes(attempt?.test.sectionTimingMinutes ?? 0) ? attempt!.test.sectionTimingMinutes! : null;
  const activeSection = sectionMinutes && attempt
    ? Math.min(attempt.test.sections.length,
        Math.max(0,Math.floor((Date.now()-new Date(attempt.startedAt).getTime())/(sectionMinutes*60000))))
    : null;
  const displayed = attempt?.test.questions[current];
- const translated = useTranslatedTexts(displayed?[displayed.question,...displayed.options]:[]);
+ const translated = useTranslatedTexts(displayed&&!(language==='hi'&&displayed.hindi)?[displayed.question,...displayed.options]:[]);
  const submitLock=useRef(false);
  const latest=useRef<Record<string,number>>({});
 
@@ -165,6 +165,7 @@ export function SecureExam({testId,draftMode=false}:{testId:string;draftMode?:bo
  </section>;
  const questions=attempt.test.questions;
  const question=questions[current];
+ const approvedHindi=language==='hi'?question.hindi:null;
  const selected=responses[question.id]??-1;
  // Keep question titles reachable with keyboard and screen-reader navigation.
  // Focus only when the actual question changes, not every timer tick.
@@ -194,11 +195,12 @@ export function SecureExam({testId,draftMode=false}:{testId:string;draftMode?:bo
    </div>
    <article id="exam-question" className="rounded-xl border bg-card p-5">
      <p className="text-sm text-muted-foreground">{t('question')} {current+1} of {questions.length}</p>
-     <h2 ref={headingRef} tabIndex={-1} className="mt-3 text-lg font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-600">{translated.texts[0]||question.question}</h2>
-     {translated.warning&&<p className="mt-2 text-xs text-amber-700 dark:text-amber-300" role="status">{translated.warning}</p>}
+     <h2 ref={headingRef} tabIndex={-1} className="mt-3 text-lg font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-600">{approvedHindi?.question||translated.texts[0]||question.question}</h2>
+     {translated.warning&&!approvedHindi&&<p className="mt-2 text-xs text-amber-700 dark:text-amber-300" role="status">{translated.warning}</p>}
+     {approvedHindi&&<p className="mt-2 text-xs text-emerald-700 dark:text-emerald-300">Human-verified Hindi text</p>}
      <fieldset className="mt-4 space-y-2">
        <legend className="sr-only">{t('answer')}</legend>
-       {question.options.map((choice,i)=><label key={i} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border p-3 hover:bg-muted"><input type="radio" name={question.id} checked={selected===i} onChange={()=>update(question.id,i)}/><span>{String.fromCharCode(65+i)}. {translated.texts[i+1]||choice}</span></label>)}
+       {question.options.map((choice,i)=><label key={i} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border p-3 hover:bg-muted"><input type="radio" name={question.id} checked={selected===i} onChange={()=>update(question.id,i)}/><span>{String.fromCharCode(65+i)}. {approvedHindi?.options[i]||translated.texts[i+1]||choice}</span></label>)}
      </fieldset>
      <div className="mt-4 flex flex-wrap gap-2"><Button variant="outline" onClick={()=>update(question.id,-1)}>Clear answer</Button><Button variant="outline" aria-pressed={Boolean(marked[question.id])} onClick={()=>setMarked(old=>({...old,[question.id]:!old[question.id]}))}>{marked[question.id]?'Unmark review':'Mark for review'}</Button><Button variant="outline" disabled={current===0 || (sectionMinutes!==null&&activeSection!==null&&current<=(attempt.test.sections[activeSection]?.from??0))} onClick={()=>setCurrent(x=>x-1)}>{t('previous')}</Button><Button disabled={current===questions.length-1 || (sectionMinutes!==null&&activeSection!==null&&current>=(attempt.test.sections[activeSection]?.to??0)-1)} onClick={()=>setCurrent(x=>x+1)}>{t('next')}</Button></div>
    </article>
