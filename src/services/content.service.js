@@ -191,6 +191,57 @@ class ContentService {
       questionIds:built.questions.map(q=>q.id),questions:built.questions.map(q=>({id:q.id,question:q.question,topic:q.topic}))};
   }
 
+  /**
+   * Build a private, unpublished exam from inactive mock/topics for staging QA.
+   * Called only behind authenticated admin + explicit staging feature gates.
+   * Never use loadBank(), which intentionally excludes inactive content.
+   * This value includes answer keys and MUST never be serialised to clients.
+   */
+  async buildDraftExam(testId) {
+    const { rows: definitions } = await db.query(
+      `SELECT id, name, exam, minutes, marks_per_correct, negative_marks,
+              pass_percent, level, tier, sections, active
+         FROM mock_tests WHERE id=$1 AND active=false`, [testId]
+    );
+    if (!definitions.length) return null;
+    const d = definitions[0];
+    const definition = {
+      id: d.id, name: d.name, exam: d.exam, minutes: d.minutes,
+      marksPerCorrect: Number(d.marks_per_correct), negativeMarks: Number(d.negative_marks),
+      passPercent: Number(d.pass_percent), level: d.level, tier: d.tier,
+      sections: d.sections, active: false, kind: 'mock',
+    };
+    if (!Array.isArray(definition.sections) || !definition.sections.length) {
+      throw Object.assign(new Error('Draft sections are incomplete.'), { statusCode: 409 });
+    }
+    const ids = [...new Set(definition.sections.flatMap(s => s.parts.map(p => p.topic)))];
+    const [topicRows, questionRows] = await Promise.all([
+      db.query('SELECT id, name, category, active FROM mock_topics WHERE id = ANY($1::text[])', [ids]),
+      db.query(`SELECT topic_id, position, question, options, answer, explanation
+         FROM mock_questions WHERE topic_id = ANY($1::text[]) AND active
+         ORDER BY topic_id, position`, [ids]),
+    ]);
+    // Restrict testing to drafts whose entire source bank is hidden to learners.
+    if (topicRows.rows.length !== ids.length || topicRows.rows.some(t => t.active)) {
+      throw Object.assign(new Error('Draft test requires four inactive source topics.'), { statusCode: 409 });
+    }
+    const byTopic = new Map(topicRows.rows.map(t => [t.id, {...t, questions: []}]));
+    for (const q of questionRows.rows) {
+      byTopic.get(q.topic_id)?.questions.push({
+        position: q.position, q: q.question, options: q.options,
+        answer: q.answer, explanation: q.explanation,
+      });
+    }
+    const bank = { topics: [...byTopic.values()], mocks: [] };
+    const expected = definition.sections.reduce((n,s) => n + s.parts.reduce((v,p) => v + p.to-p.from,0),0);
+    const test = mocks.build(bank,definition);
+    if (!expected || test.questions.length !== expected ||
+        new Set(test.questions.map(q=>q.id)).size !== expected) {
+      throw Object.assign(new Error('Draft contains missing or duplicate questions.'), { statusCode: 409 });
+    }
+    return test;
+  }
+
   async listTests() {
     const { rows } = await db.query(
       `SELECT id, name, exam, minutes, marks_per_correct, negative_marks, pass_percent, level, tier, sections, active

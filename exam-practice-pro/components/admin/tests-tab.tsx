@@ -2,6 +2,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { admin, type AdminTest, type AdminTopic, type TestSection } from '@/lib/admin';
 import { Field, Notice, card, input } from '@/components/admin/ui';
@@ -25,18 +26,20 @@ const blank = (topic: string): Draft => ({
   sections: [{ name: '', parts: [{ topic, from: 0, to: 10 }] }], active: false,
 });
 
-const countOf = (t: AdminTest) => t.questionCount ?? t.sections.reduce((n, s) => n + s.parts.reduce((m, p) => m + (p.to - p.from), 0), 0);
+const countOf = (t: AdminTest) => t.active && t.questionCount !== undefined ? t.questionCount : t.sections.reduce((n, s) => n + s.parts.reduce((m, p) => m + (p.to - p.from), 0), 0);
 
 export function TestsTab() {
   const [tests, setTests] = useState<AdminTest[]>([]);
   const [topics, setTopics] = useState<AdminTopic[]>([]);
+  const [draftTestingEnabled,setDraftTestingEnabled] = useState(false);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [preview, setPreview] = useState<{name:string;minutes:number;questionCount:number;questions:{id:string;question:string}[]}|null>(null);
   const [msg, setMsg] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
 
   const load = useCallback(async () => {
-    const [t, p] = await Promise.all([admin<{ tests: AdminTest[] }>('/tests'), admin<{ topics: AdminTopic[] }>('/topics')]);
+    const [t, p, status] = await Promise.all([admin<{ tests: AdminTest[] }>('/tests'), admin<{ topics: AdminTopic[] }>('/topics'), admin<{enabled:boolean}>('/draft-testing/status')]);
+    setDraftTestingEnabled(status.ok && status.data.enabled);
     if (t.ok) setTests(t.data.tests); else setMsg({ kind: 'error', text: t.message });
     if (p.ok) setTopics(p.data.topics);
   }, []);
@@ -90,6 +93,7 @@ export function TestsTab() {
           <Button onClick={() => { setEditingId(null); setDraft(blank(firstTopic)); }}>New mock test</Button>
         </div>
         <p className="mt-1 text-xs text-muted-foreground">Topic tests are made automatically for every topic with questions, and are always free.</p>
+        {draftTestingEnabled && <p className="mt-2 rounded-lg border border-amber-400 p-3 text-xs" role="status">Staging draft exam QA is enabled for verified admins. Use <strong>Test Draft</strong> to start a private, server-timed exam without publishing topics or tests. Draft question counts are configured ranges; use Preview to verify active question rows.</p>}
         <div className="mt-3 overflow-x-auto">
           <table className="w-full text-sm">
             <thead><tr className="text-left text-xs uppercase text-muted-foreground"><th className="py-1 pr-3">Test</th><th className="pr-3">Exam</th><th className="pr-3">Questions</th><th className="pr-3">Access</th><th className="pr-3">Live</th><th /></tr></thead>
@@ -109,7 +113,10 @@ export function TestsTab() {
                       {t.active ? 'Published' : 'Draft'}
                     </button>
                   </td>
-                  <td className="text-right"><button className="underline" onClick={() => void showPreview(t)}>Preview</button> · <button className="underline" onClick={() => edit(t)}>Edit</button></td>
+                  <td className="text-right whitespace-nowrap">
+                    {!t.active && draftTestingEnabled && <><Link className="font-semibold text-indigo-700 underline dark:text-indigo-300" href={`/admin/draft-test/${encodeURIComponent(t.id)}`}>Test Draft</Link> · </>}
+                    <button className="underline" onClick={() => void showPreview(t)}>Preview</button> · <button className="underline" onClick={() => edit(t)}>Edit</button>
+                  </td>
                 </tr>
               ))}
               {tests.length === 0 && <tr><td colSpan={6} className="py-3 text-muted-foreground">No mock tests yet.</td></tr>}

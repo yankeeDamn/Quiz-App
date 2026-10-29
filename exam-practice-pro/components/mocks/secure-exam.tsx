@@ -37,8 +37,10 @@ function TranslatedReview({q,index}:{q:Review;index:number}) {
   </article>;
 }
 
-export function SecureExam({testId}:{testId:string}) {
+export function SecureExam({testId,draftMode=false}:{testId:string;draftMode?:boolean}) {
  const {data:session,status} = useSession();
+ const attemptStartUrl = draftMode ? `/api/v1/admin/tests/${testId}/draft-attempt` : '/api/v1/exam-attempts/start';
+ const attemptBase = (id:string) => draftMode ? `/api/v1/admin/draft-attempts/${id}` : `/api/v1/exam-attempts/${id}`;
  const [attempt,setAttempt] = useState<Attempt|null>(null);
  const [responses,setResponses] = useState<Record<string,number>>({});
  const [busy,setBusy] = useState(false);
@@ -75,7 +77,7 @@ export function SecureExam({testId}:{testId:string}) {
  useEffect(()=>{
    if (status!=='authenticated'||!session?.user?.email)return;
    let cancelled=false;
-   void api<{attempt:Attempt}>('/api/v1/exam-attempts/start',{method:'POST',body:{testId}})
+   void api<{attempt:Attempt}>(attemptStartUrl,{method:'POST',body:{testId}})
     .then(r=>{
       if(cancelled)return;
       if(!r.success||!r.data)throw Error(r.error?.message||'Cannot start your exam');
@@ -91,13 +93,13 @@ export function SecureExam({testId}:{testId:string}) {
       setSeconds(Math.max(0,Math.ceil((new Date(started.deadlineAt).getTime()-Date.now())/1000)));
     }).catch(e=>{if(!cancelled)setError(e instanceof Error?e.message:'Cannot start your exam')});
    return ()=>{cancelled=true};
- },[status,session?.user?.email,testId]);
+ },[status,session?.user?.email,testId,attemptStartUrl]);
 
  const submit = useCallback(async()=>{
    if(!attempt || attempt.submittedAt || submitLock.current)return;
    submitLock.current=true;setBusy(true);setError('');
    try{
-     const r=await api<{attempt:Attempt}>(`/api/v1/exam-attempts/${attempt.id}/submit`,{method:'POST',body:{responses:latest.current}});
+     const r=await api<{attempt:Attempt}>(`${attemptBase(attempt.id)}/submit`,{method:'POST',body:{responses:latest.current}});
      if(!r.success||!r.data)throw Error(r.error?.message||'Submission failed');
      setAttempt(r.data.attempt);
      setSaved(true);
@@ -131,7 +133,7 @@ export function SecureExam({testId}:{testId:string}) {
    const timeout=window.setTimeout(async()=>{
      const saving=latest.current;
      try {
-       const r=await api<{attempt:Attempt}>(`/api/v1/exam-attempts/${attempt.id}/progress`,{method:'PUT',body:{responses:saving}});
+       const r=await api<{attempt:Attempt}>(`${attemptBase(attempt.id)}/progress`,{method:'PUT',body:{responses:saving}});
        if(!r.success)throw Error(r.error?.message||'Could not save progress');
        if(!cancelled && saving===latest.current){setSaved(true);setError('');}
      } catch(e) {if(!cancelled)setError(e instanceof Error?e.message:'Progress not saved. Try submitting.')}
@@ -140,13 +142,13 @@ export function SecureExam({testId}:{testId:string}) {
  },[attempt,saved,responses]);
 
  if(status==='loading')return <p className="p-6" aria-busy="true">Checking sign-in…</p>;
- if(status!=='authenticated'||!session?.user?.email)return <section className="rounded-xl border p-6"><h1 className="text-xl font-bold">Sign in to take a scored exam</h1><p className="mt-2 text-sm text-muted-foreground">Guest practice is available, but scored exams require a verified Google or GitHub account to sync results across devices.</p><Button className="mt-4" asChild><Link href={`/auth/signin?callbackUrl=${encodeURIComponent('/india-mocks/'+testId)}`}>Sign in</Link></Button></section>;
+ if(status!=='authenticated'||!session?.user?.email)return <section className="rounded-xl border p-6"><h1 className="text-xl font-bold">Sign in to take a scored exam</h1><p className="mt-2 text-sm text-muted-foreground">Guest practice is available, but scored exams require a verified Google or GitHub account to sync results across devices.</p><Button className="mt-4" asChild><Link href={`/auth/signin?callbackUrl=${encodeURIComponent((draftMode?'/admin/draft-test/':'/india-mocks/')+testId)}`}>Sign in</Link></Button></section>;
  if(error&&!attempt)return <div className="rounded-lg border p-5" role="alert">{error}<p className="mt-2 text-sm">Check that the API, Neon database and OAuth credentials are configured, then reload the page.</p></div>;
  if(!attempt)return <p className="p-6" aria-busy="true">Starting or recovering your saved exam…</p>;
  if(attempt.submittedAt&&attempt.result)return <section className="space-y-6">
-   <div className="rounded-xl border bg-card p-6"><h1 className="text-2xl font-bold">{attempt.title} — Result</h1><p className="mt-2 text-xl font-semibold">{attempt.result.score} / {attempt.result.total} marks ({attempt.result.percentage}%)</p><p>{attempt.result.passed?'Passed':'Not passed'} · {attempt.result.correct} correct · {attempt.result.incorrect} incorrect · {attempt.result.skipped} skipped</p><Button className="mt-4" asChild><Link href="/dashboard">View dashboard</Link></Button></div>
+   <div className="rounded-xl border bg-card p-6"><h1 className="text-2xl font-bold">{attempt.title} — Result</h1><p className="mt-2 text-xl font-semibold">{attempt.result.score} / {attempt.result.total} marks ({attempt.result.percentage}%)</p><p>{attempt.result.passed?'Passed':'Not passed'} · {attempt.result.correct} correct · {attempt.result.incorrect} incorrect · {attempt.result.skipped} skipped</p><Button className="mt-4" asChild><Link href={draftMode?'/admin':'/dashboard'}>{draftMode?'Return to Admin':'View dashboard'}</Link></Button></div>
    <div className="flex flex-wrap items-center justify-between gap-3">
-      <h2 className="text-xl font-bold">Answer review</h2><ShareTestButtons testId={testId} title={attempt.title} compact/>
+      <h2 className="text-xl font-bold">Answer review</h2>{!draftMode&&<ShareTestButtons testId={testId} title={attempt.title} compact/>}
     </div>
    {attempt.result.review.map((q,i)=><TranslatedReview key={q.id} q={q} index={i}/> )}
  </section>;
@@ -156,10 +158,10 @@ export function SecureExam({testId}:{testId:string}) {
  const mm=Math.floor(seconds/60),ss=String(seconds%60).padStart(2,'0');
  return <section className="space-y-5">
    <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border bg-card p-4">
-     <div><h1 className="text-xl font-bold">{attempt.title}</h1><p className="text-sm text-muted-foreground">{Object.keys(responses).length}/{questions.length} answered · {saved?t('save'):t('saving')}</p>
+     <div>{draftMode&&<p className="text-xs font-bold uppercase tracking-wider text-amber-700">Private staging QA · unpublished draft</p>}<h1 className="text-xl font-bold">{attempt.title}</h1><p className="text-sm text-muted-foreground">{Object.keys(responses).length}/{questions.length} answered · {saved?t('save'):t('saving')}</p>
       {sectionMinutes!==null&&activeSection!==null&&<p className="mt-1 text-sm font-semibold text-indigo-700 dark:text-indigo-300">Section {Math.min(activeSection+1,4)} / 4 · {sectionMinutes} min per section · earlier sections locked</p>}</div>
      <div className="flex flex-wrap items-center gap-2">
-      <LanguageSwitcher small/><ShareTestButtons testId={testId} title={attempt.title} compact/>
+      <LanguageSwitcher small/>{!draftMode&&<ShareTestButtons testId={testId} title={attempt.title} compact/>}
       <div role="timer" className="font-mono text-xl font-bold">{mm}:{ss}</div>
      </div>
    </div>

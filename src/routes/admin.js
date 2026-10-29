@@ -10,6 +10,8 @@ const { adminLimiter } = require('../middleware/rate-limiter');
 const { authenticateNextAuth } = require('../middleware/nextauth');
 const userService = require('../services/user.service');
 const content = require('../services/content.service');
+const exams = require('../services/exam-attempts.service');
+const draftGate = require('../services/draft-testing-gate');
 const importer = require('../services/question-import');
 const { PAID_PLANS, MAX_MONTHS, isPlanActive } = require('../services/plan.service');
 
@@ -214,6 +216,36 @@ router.put('/questions/:qid', wrap(async (req, res) => {
 router.post('/questions/:qid/active', [body('active').isBoolean().toBoolean()], validate, wrap(async (req, res) => {
   if (!UUID.test(req.params.qid)) return bad(res, 'Bad question id');
   return (await content.setQuestionActive(req.params.qid, req.body.active)) ? ok(res, {}) : bad(res, 'Question not found', 404);
+}));
+
+// ── Staging-only private exam QA ─────────────────────
+// Admin route middleware (verified OAuth/allowlist) runs before this gate.
+// Automation/admin API keys do not grant the power to take draft tests.
+function requireDraftTester(req, res, next) {
+  if (!draftGate.enabled()) return bad(res, 'Draft testing is disabled outside the isolated staging environment.', 404);
+  if (req.admin?.via !== 'account' || !req.user?.id) return bad(res, 'Verified admin sign-in required.', 403);
+  return next();
+}
+
+router.get('/draft-testing/status', (req,res) => ok(res, {
+  enabled: draftGate.enabled() && req.admin?.via === 'account',
+}));
+
+router.post('/tests/:id/draft-attempt', requireDraftTester, wrap(async(req,res)=>{
+  if (!SLUG.test(req.params.id)) return bad(res,'Invalid draft test ID',400);
+  return ok(res,{attempt:await exams.start(req.user,req.params.id,true)});
+}));
+
+router.get('/draft-attempts/:id',requireDraftTester,wrap(async(req,res)=>{
+  return ok(res,{attempt:await exams.get(req.user.id,req.params.id,true)});
+}));
+
+router.put('/draft-attempts/:id/progress',requireDraftTester,wrap(async(req,res)=>{
+  return ok(res,{attempt:await exams.save(req.user.id,req.params.id,req.body?.responses,false,true)});
+}));
+
+router.post('/draft-attempts/:id/submit',requireDraftTester,wrap(async(req,res)=>{
+  return ok(res,{attempt:await exams.save(req.user.id,req.params.id,req.body?.responses,true,true)});
 }));
 
 // ── Mock tests ─────────────────────────────────────────
