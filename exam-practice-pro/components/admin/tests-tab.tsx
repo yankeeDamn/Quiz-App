@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { admin, type AdminTest, type AdminTopic, type TestSection } from '@/lib/admin';
 import { Field, Notice, card, input } from '@/components/admin/ui';
+import { MockReview } from '@/components/admin/mock-review';
 
 interface Draft {
   id: string;
@@ -34,6 +35,7 @@ export function TestsTab() {
   const [draftTestingEnabled,setDraftTestingEnabled] = useState(false);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [reviewId,setReviewId] = useState<string|null>(null);
   const [preview, setPreview] = useState<{name:string;minutes:number;questionCount:number;questions:{id:string;question:string}[]}|null>(null);
   const [msg, setMsg] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
 
@@ -121,6 +123,7 @@ export function TestsTab() {
                   </td>
                   <td className="text-right whitespace-nowrap">
                     {!t.active && draftTestingEnabled && <><Link className="font-semibold text-indigo-700 underline dark:text-indigo-300" href={`/admin/draft-test/${encodeURIComponent(t.id)}`}>Test Draft</Link> · </>}
+                    <button className="underline" onClick={() => {setReviewId(t.id);setPreview(null)}}>Review questions</button> ·
                     <button className="underline" onClick={() => void showPreview(t)}>Preview</button> · <button className="underline" onClick={() => edit(t)}>Edit</button>
                   </td>
                 </tr>
@@ -130,6 +133,8 @@ export function TestsTab() {
           </table>
         </div>
       </section>
+
+      {reviewId && <MockReview key={reviewId} testId={reviewId} onClose={()=>setReviewId(null)} />}
 
       {preview && <section className={card}><h2 className="text-lg font-semibold">Preview: {preview.name}</h2><p className="text-sm text-muted-foreground">{preview.questionCount} active questions · {preview.minutes} minutes. Only published tests appear in the student catalogue.</p><ol className="mt-3 list-inside list-decimal space-y-1 text-sm">{preview.questions.slice(0,30).map(q=><li key={q.id}>{q.question}</li>)}</ol><Button className="mt-4" variant="outline" onClick={()=>setPreview(null)}>Close preview</Button></section>}
 
