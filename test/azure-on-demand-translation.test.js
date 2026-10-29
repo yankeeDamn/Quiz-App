@@ -123,3 +123,33 @@ test('authenticated exam proxy requires a valid bearer and admin generator canno
  const backend=fs.readFileSync(path.resolve(__dirname,'../src/routes/exampro-features.js'),'utf8');
  assert.match(backend,/router\.post\('\/translate-exam',authenticateNextAuth,examTranslateLimiter/);
 });
+
+
+test('provider errors give safe auth/region/endpoint hints without leaking secrets',async()=>{
+ service.resetCacheForTests();
+ process.env.AZURE_TRANSLATOR_KEY='super-secret-test-only-key';
+ process.env.AZURE_TRANSLATOR_ENDPOINT='https://api.cognitive.microsofttranslator.com';
+ for(const [status,expected] of [[401,/authentication failed/],[403,/authentication failed/],
+   [404,/endpoint was not found/],[400,/rejected the text request/]]) {
+  global.fetch=async()=>({ok:false,status});
+  await assert.rejects(service.translate(['Unique test '+status],'hi'),err=>{
+   assert.equal(err.statusCode,502);
+   assert.match(err.message,expected);
+   assert.doesNotMatch(err.message,/super-secret-test-only-key/);
+   return true;
+  });
+ }
+});
+
+test('Render proxy is trusted one hop only, and exam translation has an independent user quota',()=>{
+ const {shouldSkipGeneralRateLimit}=require('../src/middleware/rate-limiter');
+ assert.equal(shouldSkipGeneralRateLimit({originalUrl:'/api/v1/exampro/translate-exam'}),true);
+ assert.equal(shouldSkipGeneralRateLimit({originalUrl:'/api/v1/exampro/translate-exam?lang=hi'}),true);
+ assert.equal(shouldSkipGeneralRateLimit({originalUrl:'/api/v1/exampro/translate'}),false);
+ assert.equal(shouldSkipGeneralRateLimit({originalUrl:'/api/v1/exampro/translate-exam-other'}),false);
+ const app=require('../src/app');
+ const fs=require('node:fs'),path=require('node:path');
+ const server=fs.readFileSync(path.resolve(__dirname,'../src/app.js'),'utf8');
+ assert.match(server,/if \(process\.env\.RENDER_SERVICE_ID\) \{\s*app\.set\('trust proxy', 1\)/);
+ assert.equal(typeof app.get('trust proxy'),'boolean','unit-test app does not trust spoofed X-Forwarded-For');
+});

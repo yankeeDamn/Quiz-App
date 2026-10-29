@@ -113,7 +113,7 @@ export function useTranslatedTexts(texts:string[], options?:{exam?:boolean}) {
       .then(r=>{
         if(cancelled)return;
         if(!r.success||!r.data||r.data.texts.length!==texts.length){
-          setState({key,texts,warning:'Azure translation is unavailable. The original English text is shown.',machine:false});
+          setState({key,texts,warning:(r.error?.message||'Azure translation is unavailable.')+' Showing the original English text.',machine:false});
           return;
         }
         setState({key,texts:r.data.texts,warning:'',machine:true});

@@ -15,7 +15,10 @@ const logger = require('../utils/logger');
 function shouldSkipGeneralRateLimit(req) {
   const path = String(req.originalUrl || '').split('?')[0];
   return /^\/api\/v1\/health(?:\/ready)?\/?$/.test(path) ||
-    /^\/api\/v1\/admin(?:\/|$)/.test(path);
+    /^\/api\/v1\/admin(?:\/|$)/.test(path) ||
+    // OAuth-protected translations have their own stricter per-user limiter;
+    // the general 100/IP quota must not unintentionally override 130/user.
+    /^\/api\/v1\/exampro\/translate-exam\/?$/.test(path);
 }
 
 /**

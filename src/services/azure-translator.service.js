@@ -103,8 +103,15 @@ async function translate(texts,language) {
       });
     }catch{throw fail('Azure Translator timed out or could not be reached. Retry later.',502);}
     if(!response.ok) {
-      if(response.status===429)return Promise.reject(fail('Azure translation quota or rate limit reached.',503));
-      throw fail('Azure Translator rejected this request. Check the resource key, region and quota.',502);
+      // Never echo the Azure response body, subscription headers or API key.
+      // These user-safe hints help distinguish key, endpoint and quota errors.
+      if(response.status===429)throw fail('Azure Translator quota or rate limit reached (HTTP 429). Check resource usage.',503);
+      if(response.status===401||response.status===403) {
+        throw fail('Azure Translator authentication failed (HTTP '+response.status+'). Verify the resource key and required resource region.',502);
+      }
+      if(response.status===404)throw fail('Azure Translator endpoint was not found (HTTP 404). Verify AZURE_TRANSLATOR_ENDPOINT.',502);
+      if(response.status===400)throw fail('Azure Translator rejected the text request (HTTP 400). Check the selected resource and endpoint.',502);
+      throw fail('Azure Translator request failed (HTTP '+response.status+'). Check the Azure resource and quota.',502);
     }
     let data;
     try {data=await response.json();}catch{throw fail('Azure Translator returned an invalid response.',502);}
