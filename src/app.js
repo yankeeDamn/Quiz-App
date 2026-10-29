@@ -11,6 +11,14 @@ const { generalLimiter } = require('./middleware/rate-limiter');
 
 const app = express();
 
+// Render puts one trusted edge proxy in front of each web service. Express
+// must recognize that single hop to rate-limit the real client instead of
+// treating all visitors as the same proxy IP. Never trust arbitrary chains.
+// Local development and tests remain untrusted by default.
+if (process.env.RENDER_SERVICE_ID) {
+  app.set('trust proxy', 1);
+}
+
 // ──────────────────────────────────────────────────────────
 // 1. Security headers (OWASP A05:2021 – Security Misconfiguration)
 // ──────────────────────────────────────────────────────────
