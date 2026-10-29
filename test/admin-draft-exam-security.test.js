@@ -123,6 +123,15 @@ test('private routes reject guests, ordinary users, API keys, and hide keys befo
    return {status:res.status,body:await res.json()};
  };
  const start='/admin/tests/'+key+'/draft-attempt';
+ // Review and accommodation changes must not be authorized by API-key-only
+ // users, other candidates, or unauthenticated guests.
+ assert.equal((await api('/admin/tests/'+key+'/reviews','GET',undefined,undefined,{'x-admin-key':process.env.ADMIN_API_KEY})).status,403);
+ assert.equal((await api('/admin/tests/'+key+'/reviews','GET',nonAdmin)).status,403);
+ assert.equal((await api('/admin/tests/'+key+'/reviews','GET')).status,401);
+ assert.equal((await api('/admin/tests/'+key+'/accommodations','PUT',undefined,
+   {email:'candidate@example.test',approved:true,eligibilityChecked:true},
+   {'x-admin-key':process.env.ADMIN_API_KEY})).status,403);
+
  assert.equal((await api(start,'POST')).status,401);
  assert.equal((await api(start,'POST',nonAdmin)).status,403);
  assert.equal((await api(start,'POST',invalidProvider)).status,403);
@@ -164,6 +173,19 @@ test('private routes reject guests, ordinary users, API keys, and hide keys befo
  assert.equal(graded.body.data.attempt.result.total,200);
  assert.equal(graded.body.data.attempt.result.review[0].correctAnswer,0);
  assert.equal((await api('/exam-attempts/'+attemptId,'GET',adminAuth)).status,404,'draft stays private after grading');
+ // Approval comes only from the server-side entitlement record, not a client
+ // request flag. Starting a subsequent attempt snapshots 20×4 / 80 minutes.
+ const originalQuery=db.query;
+ db.query=async(sql,params=[])=>{
+   if(sql.includes('FROM exam_time_accommodations'))return {rows:[{mode:'scribe_compensatory'}],rowCount:1};
+   return originalQuery(sql,params);
+ };
+ const assisted=await api(start,'POST',adminAuth,{testId:key,sectionTimingMinutes:20});
+ assert.equal(assisted.status,200,JSON.stringify(assisted.body));
+ assert.equal(assisted.body.data.attempt.test.sectionTimingMinutes,20);
+ assert.equal(assisted.body.data.attempt.test.minutes,80);
+ assert.equal(row.snapshot.accommodationMode,'scribe_compensatory');
+
 });
 
 test('normal exam-attempt endpoint cannot read admin draft owned by same user',async t=>{
