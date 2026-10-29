@@ -284,6 +284,9 @@ class ContentService {
       const topic = byTopic.get(p.topic);
       return sum + (topic?.questions.filter(q => q.position >= p.from && q.position < p.to).length || 0);
     }, 0);
+    if (available > expected) {
+      return fail('Publication blocked: duplicate active question positions were found in a source topic.');
+    }
     if (expected === 0 || available !== expected) {
       return fail(`Publication blocked: ${available} of ${expected} configured active questions are available. Restore or replace missing positions before publishing.`);
     }
