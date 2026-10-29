@@ -7,18 +7,21 @@ export type ExamLanguage = 'en' | 'hi' | 'bn';
 const STORAGE = 'exampro:language:v1';
 const LABELS: Record<ExamLanguage,Record<string,string>> = {
   en: {
+    quizzes:'Quizzes', certifications:'Certifications', indiaMocks:'India Mocks', examHall:'Exam Hall', dashboard:'Dashboard', institutes:'Institutes', bookmarks:'Bookmarks', pricing:'Pricing', signIn:'Sign In', signOut:'Sign Out', explore:'Explore ExamPro', learningSpace:'Choose your learning space', checking:'Checking account…', signedIn:'Signed in', guest:'Guest account', openMenu:'Open menu', toggleTheme:'Toggle theme', light:'Light', dark:'Dark', system:'System',
     question:'Question', next:'Next', previous:'Previous', submit:'Submit exam',
     save:'Progress saved', saving:'Saving…', answer:'Select your answer',
     share:'Share on WhatsApp', copy:'Copy link', copied:'Link copied',
     available:'Available', upcoming:'Coming soon', language:'Language',
   },
   hi: {
+    quizzes:'क्विज़', certifications:'प्रमाणपत्र', indiaMocks:'भारत मॉक टेस्ट', examHall:'परीक्षा कक्ष', dashboard:'डैशबोर्ड', institutes:'संस्थान', bookmarks:'बुकमार्क', pricing:'मूल्य', signIn:'साइन इन', signOut:'साइन आउट', explore:'ExamPro देखें', learningSpace:'अपना अध्ययन क्षेत्र चुनें', checking:'खाता जाँचा जा रहा है…', signedIn:'साइन इन किया', guest:'अतिथि खाता', openMenu:'मेनू खोलें', toggleTheme:'थीम बदलें', light:'हल्का', dark:'गहरा', system:'सिस्टम',
     question:'प्रश्न', next:'अगला', previous:'पिछला', submit:'परीक्षा जमा करें',
     save:'प्रगति सहेजी गई', saving:'सहेजा जा रहा है…', answer:'अपना उत्तर चुनें',
     share:'WhatsApp पर साझा करें', copy:'लिंक कॉपी करें', copied:'लिंक कॉपी हुआ',
     available:'उपलब्ध', upcoming:'जल्द उपलब्ध', language:'भाषा',
   },
   bn: {
+    quizzes:'কুইজ', certifications:'সার্টিফিকেশন', indiaMocks:'ভারতের মক টেস্ট', examHall:'পরীক্ষা কক্ষ', dashboard:'ড্যাশবোর্ড', institutes:'প্রতিষ্ঠান', bookmarks:'বুকমার্ক', pricing:'মূল্য', signIn:'সাইন ইন', signOut:'সাইন আউট', explore:'ExamPro ঘুরে দেখুন', learningSpace:'আপনার পড়াশোনার বিভাগ বেছে নিন', checking:'অ্যাকাউন্ট যাচাই হচ্ছে…', signedIn:'সাইন ইন করা হয়েছে', guest:'অতিথি অ্যাকাউন্ট', openMenu:'মেনু খুলুন', toggleTheme:'থিম পরিবর্তন', light:'লাইট', dark:'ডার্ক', system:'সিস্টেম',
     question:'প্রশ্ন', next:'পরবর্তী', previous:'পূর্ববর্তী', submit:'পরীক্ষা জমা দিন',
     save:'অগ্রগতি সংরক্ষিত', saving:'সংরক্ষণ হচ্ছে…', answer:'আপনার উত্তর বেছে নিন',
     share:'WhatsApp-এ শেয়ার করুন', copy:'লিংক কপি করুন', copied:'লিংক কপি হয়েছে',
