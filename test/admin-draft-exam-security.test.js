@@ -17,6 +17,7 @@ const app = require('../src/app');
 const db = require('../src/config/database');
 const config = require('../src/config');
 const content = require('../src/services/content.service');
+const quality = require('../src/services/mock-quality.service');
 const mocks = require('../src/services/mocks.service');
 const gate = require('../src/services/draft-testing-gate');
 const exams = require('../src/services/exam-attempts.service');
@@ -55,7 +56,7 @@ test('staging-only guard fails closed when any prerequisite is missing',()=>{
 
 test('private routes reject guests, ordinary users, API keys, and hide keys before submit',async t=>{
  let row=null;
- const originals={query:db.query,client:db.getClient,draft:content.buildDraftExam,publicMock:mocks.findMock};
+ const originals={query:db.query,client:db.getClient,draft:content.buildDraftExam,localized:quality.attachApprovedHindi,publicMock:mocks.findMock};
  const exam=makeExam();
  assert.equal(eligible(exam),true,'full SSC pattern must trigger section timer');
  db.query=async(sql,params=[])=>{
@@ -71,6 +72,7 @@ test('private routes reject guests, ordinary users, API keys, and hide keys befo
    throw Error('unexpected draft QA db.query: '+sql);
  };
  content.buildDraftExam=async id=>id===key?exam:null;
+ quality.attachApprovedHindi=async(_id,t)=>t;
  mocks.findMock=async()=>null;
  db.getClient=async()=>({
    release(){},
@@ -102,7 +104,7 @@ test('private routes reject guests, ordinary users, API keys, and hide keys befo
  });
  t.after(async()=>{
    Object.assign(db,{query:originals.query,getClient:originals.client});
-   content.buildDraftExam=originals.draft;mocks.findMock=originals.publicMock;
+   content.buildDraftExam=originals.draft;quality.attachApprovedHindi=originals.localized;mocks.findMock=originals.publicMock;
    await new Promise((resolve,reject)=>server.close(err=>err?reject(err):resolve()));
  });
  const base='http://127.0.0.1:'+server.address().port;
