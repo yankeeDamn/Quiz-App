@@ -229,6 +229,6 @@ export function SecureExam({testId,draftMode=false}:{testId:string;draftMode?:bo
    })}</div>
    <p className="text-xs text-muted-foreground">Marks for review are visual reminders in this browser tab; only your selected answers are saved to the server.</p>
    <Button disabled={busy} onClick={()=>void submit()}>{busy?t('saving'):t('submit')}</Button>
-   <p className="text-xs text-muted-foreground">This is a server-timed exam. Refresh recovers saved answers. {sectionMinutes!==null?'Sections advance automatically after {sectionMinutes} minutes and earlier sections cannot be edited.':'The original overall deadline stays the same.'} Answers and explanations appear only after submission.</p>
+   <p className="text-xs text-muted-foreground">This is a server-timed exam. Refresh recovers saved answers. {sectionMinutes!==null?'Sections advance automatically after '+sectionMinutes+' minutes and earlier sections cannot be edited.':'The original overall deadline stays the same.'} Answers and explanations appear only after submission.</p>
  </section>;
 }
