@@ -38,6 +38,49 @@ async function preview(number,questions){
  const r=await db.query('SELECT question FROM mock_questions');
  return inspect(number,questions,r.rows.map(x=>x.question));
 }
+async function stage(number,questions){
+ if(!gate.enabled())throw bad('Draft creation is enabled only on isolated staging.',404);
+ const client=await db.getClient();
+ let committed=false;
+ try{
+  await client.query('BEGIN');
+  // Serialize pipeline writers across Mock 02–10 on this database.
+  await client.query('SELECT pg_advisory_xact_lock(hashtext($1))',['exampro-ssc-content-pipeline']);
+  const testId='ssc-cgl-2026-mock-'+String(number).padStart(2,'0');
+  const existingTest=await client.query('SELECT id FROM mock_tests WHERE id=$1',[testId]);
+  if(existingTest.rowCount)throw bad('This mock already exists. Refusing to overwrite existing drafts.',409);
+  const prior=await client.query('SELECT question FROM mock_questions');
+  const checked=inspect(number,questions,prior.rows.map(r=>r.question));
+  if(!checked.valid)throw Object.assign(bad('Draft validation failed.',422),{issues:checked.issues});
+  const sectionsForTest=[];
+  for(const section of sections){
+   const topicId='ssc26-m'+String(number).padStart(2,'0')+'-'+(section==='general-awareness'?'gk':section);
+   const existingTopic=await client.query('SELECT id FROM mock_topics WHERE id=$1',[topicId]);
+   if(existingTopic.rowCount)throw bad('Draft source topic already exists: '+topicId,409);
+   const title=section==='general-awareness'?'General Awareness':section[0].toUpperCase()+section.slice(1);
+   await client.query('INSERT INTO mock_topics(id,name,category,active) VALUES($1,$2,$3,false)',
+     [topicId,'SSC CGL 2026 Mock '+String(number).padStart(2,'0')+' '+title,'SSC CGL']);
+   for(let index=0;index<25;index++){
+    const v=content.checkQuestion(questions[section][index]).value;
+    await client.query(`INSERT INTO mock_questions(topic_id,position,question,options,answer,explanation,difficulty,active)
+      VALUES($1,$2,$3,$4::jsonb,$5,$6,$7,true)`,
+      [topicId,index,v.question,JSON.stringify(v.options),v.answer,v.explanation,v.difficulty]);
+   }
+   sectionsForTest.push({name:title,parts:[{topic:topicId,from:0,to:25}]});
+  }
+  await client.query(`INSERT INTO mock_tests
+   (id,name,exam,minutes,marks_per_correct,negative_marks,level,tier,sections,pass_percent,active)
+   VALUES($1,$2,$3,60,2,0.5,'Moderate','free',$4::jsonb,50,false)`,
+   [testId,'SSC CGL 2026 Mock '+String(number).padStart(2,'0'),'SSC',JSON.stringify(sectionsForTest)]);
+  await client.query('COMMIT');committed=true;
+  require('./mocks.service').invalidate();
+  return {testId,created:true,active:false,topicsActive:false,questions:100,
+   academicApproved:0,hindiVerified:0,hindiRequired:75};
+ }catch(error){
+  if(!committed)await client.query('ROLLBACK').catch(()=>{});
+  throw error;
+ }finally{client.release();}
+}
 async function dashboard(){
  if(!gate.enabled())throw bad('Content dashboard is enabled only on isolated staging.',404);
  const r=await db.query(`SELECT id,name,active FROM mock_tests
@@ -52,4 +95,4 @@ async function dashboard(){
  }
  return {draftOnly:true,tests,target:9,missing:9-tests.length};
 }
-module.exports={sections,key,inspect,preview,dashboard};
+module.exports={sections,key,inspect,preview,stage,dashboard};
