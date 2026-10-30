@@ -14,6 +14,7 @@ const exams = require('../services/exam-attempts.service');
 const draftGate = require('../services/draft-testing-gate');
 const quality = require('../services/mock-quality.service');
 const releaseReadiness = require('../services/mock-release-readiness.service');
+const mockAudit = require('../services/mock01-02-audit.service');
 const betaInvitations = require('../services/beta-invitations.service');
 const betaFeedback = require('../services/beta-feedback.service');
 const { isFullCglMock } = require('../services/ssc-full-mock-classifier');
@@ -261,6 +262,10 @@ function requireHumanReviewer(req,res,next) {
   if(req.admin?.via!=='account'||!req.admin?.email) return bad(res,'Signed-in reviewer required.',403);
   next();
 }
+router.get('/mock01-02/audit',requireHumanReviewer,wrap(async(req,res)=>{
+ res.set('Cache-Control','private, no-store');
+ return ok(res,await mockAudit.report());
+}));
 // Summary only: no answer keys, no review mutations, and no publish operation.
 router.get('/tests/:id/release-readiness',requireHumanReviewer,wrap(async(req,res)=>{
   if(!SLUG.test(req.params.id))return bad(res,'Invalid test ID',400);
