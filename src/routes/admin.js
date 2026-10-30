@@ -14,6 +14,7 @@ const exams = require('../services/exam-attempts.service');
 const draftGate = require('../services/draft-testing-gate');
 const quality = require('../services/mock-quality.service');
 const releaseReadiness = require('../services/mock-release-readiness.service');
+const betaInvitations = require('../services/beta-invitations.service');
 const { isFullCglMock } = require('../services/ssc-full-mock-classifier');
 const accommodations = require('../services/ssc-accommodations.service');
 const importer = require('../services/question-import');
@@ -283,6 +284,16 @@ router.put('/tests/:id/accommodations',requireHumanReviewer,wrap(async(req,res)=
   if(req.body.approved && req.body.eligibilityChecked!==true)
     return bad(res,'Admin must confirm eligibility was verified outside ExamPro.',400);
   return ok(res,await accommodations.setApproved(req.params.id,req.body.email,req.body.approved,req.admin.email));
+}));
+
+// Only verified human administrators may grant or revoke staging beta access.
+// The raw random code is returned once; no admin role is given to the invitee.
+router.post('/beta/invitations',requireHumanReviewer,wrap(async(req,res)=>{
+ const invite=await betaInvitations.create(req.body?.email,req.body?.hours,req.admin.email);
+ return ok(res,invite);
+}));
+router.post('/beta/invitations/:id/revoke',requireHumanReviewer,wrap(async(req,res)=>{
+ return ok(res,await betaInvitations.revoke(req.params.id));
 }));
 
 // ── Mock tests ─────────────────────────────────────────
