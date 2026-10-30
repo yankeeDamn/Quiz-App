@@ -1,5 +1,6 @@
 import { api, getUserProfile } from '@/lib/api';
 import { buildCertTest } from '@/lib/it-certs';
+import { buildSeparatePractice, separateSummaries } from '@/lib/separate-exams';
 import { fetchPracticeLibrary } from '@/lib/practice-overrides';
 
 export interface MockSummary {
@@ -42,11 +43,13 @@ export type MockLoad =
 export async function fetchCatalog(): Promise<MockSummary[]> {
   const res = await api<{ tests: MockSummary[] }>('/api/v1/mocks', { public: true });
   if (!res.success || !res.data) throw new Error(res.error?.message || 'Could not load the tests');
-  return res.data.tests;
+  return [...res.data.tests,...separateSummaries()];
 }
 
 export async function fetchMock(id: string, mode: 'test' | 'practice' = 'test'): Promise<MockLoad> {
   // Free IT certification starters ship with the site and do not need the API.
+  const separate = buildSeparatePractice(id);
+  if(separate) return mode==='practice'?{status:'ok',test:separate}:{status:'error',message:'Use Practice for this introductory question pack.'};
   const cert = buildCertTest(id);
   if (cert && mode === 'practice') {
     try {
