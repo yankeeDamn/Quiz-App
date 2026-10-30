@@ -8,6 +8,7 @@ import { admin, type AdminTest, type AdminTopic, type TestSection } from '@/lib/
 import { Field, Notice, card, input } from '@/components/admin/ui';
 import { MockReview } from '@/components/admin/mock-review';
 import { MockReleaseReadiness } from '@/components/admin/mock-release-readiness';
+import { MockComparisonAudit } from '@/components/admin/mock-comparison-audit';
 import { BetaInvitePanel } from '@/components/admin/beta-invite-panel';
 import { CglContentPipeline } from '@/components/admin/cgl-content-pipeline';
 import { BetaFeedbackDashboard } from '@/components/admin/beta-feedback-dashboard';
@@ -140,6 +141,7 @@ export function TestsTab() {
         </div>
       </section>
 
+      {draftTestingEnabled && <MockComparisonAudit />}
       {draftTestingEnabled && <CglContentPipeline />}
       {draftTestingEnabled && <BetaInvitePanel />}
       {draftTestingEnabled && <BetaFeedbackDashboard />}
