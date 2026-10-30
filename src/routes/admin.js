@@ -18,6 +18,7 @@ const betaInvitations = require('../services/beta-invitations.service');
 const { isFullCglMock } = require('../services/ssc-full-mock-classifier');
 const accommodations = require('../services/ssc-accommodations.service');
 const importer = require('../services/question-import');
+const cglPipeline = require('../services/ssc-content-pipeline.service');
 const { PAID_PLANS, MAX_MONTHS, isPlanActive } = require('../services/plan.service');
 
 const EMAIL_OPTS = { gmail_remove_dots: false, gmail_remove_subaddress: false, gmail_convert_googlemaildotcom: false };
@@ -294,6 +295,14 @@ router.post('/beta/invitations',requireHumanReviewer,wrap(async(req,res)=>{
 }));
 router.post('/beta/invitations/:id/revoke',requireHumanReviewer,wrap(async(req,res)=>{
  return ok(res,await betaInvitations.revoke(req.params.id));
+}));
+
+// Staging, signed-in human admin only. These endpoints never write to DB.
+router.post('/content-pipeline/preview',requireHumanReviewer,wrap(async(req,res)=>{
+ return ok(res,await cglPipeline.preview(req.body?.number,req.body?.questions));
+}));
+router.get('/content-pipeline/dashboard',requireHumanReviewer,wrap(async(req,res)=>{
+ return ok(res,await cglPipeline.dashboard());
 }));
 
 // ── Mock tests ─────────────────────────────────────────
