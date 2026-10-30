@@ -11,7 +11,7 @@ const readiness=require('../src/services/mock-release-readiness.service');
 test('exact normalized and heuristic near-duplicate evidence is separated',()=>{
  const entry=(id,question)=>({id,question,options:['a','b','c','d'],answer:1,explanation:'A complete reviewer explanation is present.',academicStatus:'pending',hindiStatus:'pending',hindiRequired:true,stale:false});
  const a={testId:audit.IDS[0],expected:2,actual:2,entries:[entry('a1','How can a train arrive safely?'),entry('a2','Find the square of thirteen')] ,academicApproved:0,hindiVerified:0,hindiRequired:2};
- const b={...a,testId:audit.IDS[1],entries:[entry('b1','HOW can a train arrive safely!'),entry('b2','How can a train arrive safely at the station?')]};
+ const b={...a,testId:audit.IDS[1],entries:[entry('b1','HOW can a train arrive safely!'),entry('b2','How can a train arrive safely at station?')]};
  const r=audit.analyze(a,b);
  assert.equal(r.exact.length,1);
  assert.equal(r.exact[0].mock02Id,'b1');
