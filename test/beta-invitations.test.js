@@ -32,7 +32,8 @@ test('create validates email and bounded expiry, stores only code hash',async()=
  const invitation=await invitations.create('Student@Example.Test',48,'reviewer@example.test');
  assert.match(invitation.invitationCode,/^[a-f0-9]{64}$/);
  assert.equal(invitation.email,'student@example.test');
- assert.equal(written.length,1);
+ assert.equal(written.length,2);
+ assert.match(written[1].sql,/exam_beta_invitation_audit/);
  assert.equal(written[0].params[1],'student@example.test');
  assert.notEqual(written[0].params[2],invitation.invitationCode);
  assert.match(written[0].params[2],/^[a-f0-9]{64}$/);
@@ -40,6 +41,7 @@ test('create validates email and bounded expiry, stores only code hash',async()=
 test('redemption is bound to verified identity, nonexpired code and active grant',async()=>{
  let issuedHash='';
  db.query=async(sql,params)=>{
+  if(sql.includes('INSERT INTO exam_beta_invitation_audit'))return {rowCount:1,rows:[]};
   if(sql.includes('UPDATE exam_beta_invitations')){
    issuedHash=params[1];
    return {rowCount:params[0]===user.id&&params[3]==='student@example.test'?1:0,
