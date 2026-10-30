@@ -17,7 +17,7 @@ function fixture({academic=0,hindi=0,stale=0,actual=100,publication=false}={}){
  quality.list=async()=>({
   expected:100,actual,academicApproved:academic,hindiRequired:75,hindiVerified:hindi,
   ready:actual===100&&academic===100&&hindi===75&&stale===0,
-  entries:Array.from({length:actual},(_,i)=>({id:'q'+i,stale:i<stale})),
+  entries:Array.from({length:actual},(_,i)=>({id:'q'+i,topicId:i<25?'reasoning':i<50?'awareness':i<75?'quant':'english',stale:i<stale,academicStatus:i<academic?'approved':'pending',hindiRequired:i<75,hindiStatus:i<hindi?'verified':'pending'})),
  });
  content.publicationReadiness=async()=>publication?{ok:true}:{ok:false,error:'Inactive topics: keep the draft private.'};
 }
@@ -69,4 +69,19 @@ test('summary endpoint requires human OAuth reviewer; view never offers publish'
  const view=fs.readFileSync(path.resolve(__dirname,'../exam-practice-pro/components/admin/mock-release-readiness.tsx'),'utf8');
  assert.match(view,/publicationBlocker/);
  assert.doesNotMatch(view,/admin<.*>\([^)]*,\s*'PUT'/);
+});
+
+test('section breakdown keeps answer keys private and tracks pending approvals',async()=>{
+ fixture({academic:30,hindi:12,stale:1});
+ const r=await readiness.report(id);
+ assert.equal(r.sections.length,4);
+ const reasoning=r.sections.find(s=>s.topicId==='reasoning');
+ assert.equal(reasoning.questions,25);
+ assert.equal(reasoning.academicApproved,24,'stale approval cannot count');
+ assert.equal(reasoning.hindiVerified,11,'stale Hindi cannot count');
+ assert.equal(reasoning.stale,1);
+ const english=r.sections.find(s=>s.topicId==='english');
+ assert.equal(english.hindiRequired,0);
+ assert.equal(english.hindiVerified,0);
+ assert.equal(JSON.stringify(r).includes('correctAnswer'),false);
 });
