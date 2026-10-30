@@ -1,0 +1,1210 @@
+{
+  "reasoning": [
+    {
+      "question": "In the sequence 4, 9, 19, 39, 79, what comes next?",
+      "options": [
+        "149",
+        "159",
+        "169",
+        "179"
+      ],
+      "answer": 1,
+      "explanation": "Each term doubles and then adds one: 4×2+1=9, continuing through 79×2+1=159.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "If TABLE is coded as UBCMF by shifting every letter forward, how is CHAIR coded?",
+      "options": [
+        "DIBJS",
+        "DIBIR",
+        "DJBJS",
+        "DHAJS"
+      ],
+      "answer": 0,
+      "explanation": "Each letter advances by one in the alphabet: C→D, H→I, A→B, I→J and R→S.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "A woman points to a boy and says, 'He is my mother's only son's child.' How is the boy related to her?",
+      "options": [
+        "Son",
+        "Brother",
+        "Nephew",
+        "Cousin"
+      ],
+      "answer": 2,
+      "explanation": "Her mother's only son is her brother; her brother's child is her nephew.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "A walker faces north, turns right, walks 6 m, turns left and walks 4 m. Relative to the start, where is the walker?",
+      "options": [
+        "North-west",
+        "South-east",
+        "North-east",
+        "South-west"
+      ],
+      "answer": 2,
+      "explanation": "The first walk moves 6 m east; the left turn from east points north, adding 4 m north. The final location is north-east.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which letter completes the series B, E, I, N, T, ?",
+      "options": [
+        "Y",
+        "Z",
+        "A",
+        "B"
+      ],
+      "answer": 2,
+      "explanation": "Alphabet positions are 2,5,9,14,20: successive increments are +3,+4,+5,+6, so add 7 to reach 27, wrapping to A.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Choose the odd one out: 64, 125, 216, 343, 400.",
+      "options": [
+        "125",
+        "216",
+        "343",
+        "400"
+      ],
+      "answer": 3,
+      "explanation": "64=4³, 125=5³, 216=6³ and 343=7³; 400 is not an integer cube.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "All roses are flowers. Some flowers are yellow. Which conclusion follows necessarily?",
+      "options": [
+        "Some roses are yellow",
+        "All yellow things are roses",
+        "All roses are flowers",
+        "No rose is yellow"
+      ],
+      "answer": 2,
+      "explanation": "Only the universal relationship stated in the first sentence is guaranteed. The yellow flowers need not include roses.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "If yesterday was Monday, what day will it be three days after tomorrow?",
+      "options": [
+        "Friday",
+        "Saturday",
+        "Sunday",
+        "Thursday"
+      ],
+      "answer": 1,
+      "explanation": "Yesterday Monday means today Tuesday; tomorrow is Wednesday and three days after Wednesday is Saturday.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "A is taller than B, B is taller than C, and D is shorter than C. Who is shortest?",
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer": 3,
+      "explanation": "The order is A > B > C > D, so D is the shortest.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Select the pair with the same relation as BOOK : READ.",
+      "options": [
+        "Food : Eat",
+        "Road : Walk",
+        "Pen : Ink",
+        "Water : Glass"
+      ],
+      "answer": 0,
+      "explanation": "A book is something one reads; food is something one eats. Both pairs express object and usual action.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "In a row of 31 people, R is 12th from the left. What is R's position from the right?",
+      "options": [
+        "18th",
+        "19th",
+        "20th",
+        "21st"
+      ],
+      "answer": 2,
+      "explanation": "Right-side position equals total minus left position plus one: 31−12+1=20.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "What replaces the question mark in 7 : 49 :: 11 : ?",
+      "options": [
+        "111",
+        "121",
+        "132",
+        "144"
+      ],
+      "answer": 1,
+      "explanation": "The second member is the square of the first: 7²=49 and 11²=121.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Five friends P, Q, R, S, T stand in that order from left to right. Who stands between Q and S?",
+      "options": [
+        "P",
+        "R",
+        "T",
+        "Q"
+      ],
+      "answer": 1,
+      "explanation": "The given order is P–Q–R–S–T; R is directly between Q and S.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which number does not belong: 14, 21, 28, 36, 42?",
+      "options": [
+        "21",
+        "28",
+        "36",
+        "42"
+      ],
+      "answer": 2,
+      "explanation": "The others are multiples of seven; 36 is not divisible by seven.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "A clock shows 3:00. What is the smaller angle between its hands?",
+      "options": [
+        "60°",
+        "75°",
+        "90°",
+        "120°"
+      ],
+      "answer": 2,
+      "explanation": "At 3:00 the minute hand is at 12 and the hour hand at 3, three 30-degree intervals apart: 90°.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "If CAT is written as 3-1-20 using alphabet positions, what is DOG?",
+      "options": [
+        "4-15-7",
+        "5-14-8",
+        "4-14-7",
+        "3-15-8"
+      ],
+      "answer": 0,
+      "explanation": "D is the fourth letter, O the fifteenth and G the seventh.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Complete the series 2, 6, 12, 20, 30, ?",
+      "options": [
+        "40",
+        "42",
+        "44",
+        "46"
+      ],
+      "answer": 1,
+      "explanation": "The differences are 4,6,8,10; the next difference is 12, yielding 42.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "If the symbol # means multiplication and @ means addition, what is 6 # 3 @ 4?",
+      "options": [
+        "22",
+        "42",
+        "24",
+        "18"
+      ],
+      "answer": 0,
+      "explanation": "Apply the substituted operators with standard precedence: 6×3+4=18+4=22.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Among a circle, triangle, square and pentagon, which has no straight side?",
+      "options": [
+        "Triangle",
+        "Square",
+        "Pentagon",
+        "Circle"
+      ],
+      "answer": 3,
+      "explanation": "A circle is curved throughout and has no straight sides; the other shapes are polygons.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which word will appear first in dictionary order?",
+      "options": [
+        "Caution",
+        "Cause",
+        "Causal",
+        "Caustic"
+      ],
+      "answer": 2,
+      "explanation": "All begin 'Cau'; 'Causal' comes before 'Cause', 'Caustic' and 'Caution' by comparing subsequent letters.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Six workers complete a task in 8 days at equal rates. How many days would 12 such workers need?",
+      "options": [
+        "2",
+        "4",
+        "6",
+        "16"
+      ],
+      "answer": 1,
+      "explanation": "The task requires 6×8=48 worker-days. Dividing by 12 workers gives 4 days.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "At a family gathering, M is N's father, and N is O's mother. M is O's what?",
+      "options": [
+        "Brother",
+        "Uncle",
+        "Maternal grandfather",
+        "Paternal uncle"
+      ],
+      "answer": 2,
+      "explanation": "N is O's mother, and M is N's father; therefore M is O's maternal grandfather.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "If the letters of RAIN are arranged alphabetically, which letter occupies the third position?",
+      "options": [
+        "A",
+        "I",
+        "N",
+        "R"
+      ],
+      "answer": 2,
+      "explanation": "Alphabetical order is A, I, N, R; the third is N.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "A cube has how many edges?",
+      "options": [
+        "6",
+        "8",
+        "12",
+        "16"
+      ],
+      "answer": 2,
+      "explanation": "A cube has four edges on each of its top and bottom faces plus four vertical connecting edges, totaling 12.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Find the missing number: 3, 8, 15, 24, 35, ?",
+      "options": [
+        "46",
+        "48",
+        "49",
+        "50"
+      ],
+      "answer": 1,
+      "explanation": "Successive gaps are 5,7,9,11; the next odd gap is 13, so 35+13=48.",
+      "difficulty": "Moderate"
+    }
+  ],
+  "general-awareness": [
+    {
+      "question": "Which fundamental right is protected by Article 21 of the Constitution of India?",
+      "options": [
+        "Right to property",
+        "Protection of life and personal liberty",
+        "Freedom of religion only",
+        "Right to vote"
+      ],
+      "answer": 1,
+      "explanation": "Article 21 states that no person shall be deprived of life or personal liberty except according to procedure established by law.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Who chaired the Drafting Committee of India's Constituent Assembly?",
+      "options": [
+        "Jawaharlal Nehru",
+        "B. R. Ambedkar",
+        "Rajendra Prasad",
+        "Sardar Vallabhbhai Patel"
+      ],
+      "answer": 1,
+      "explanation": "Dr B. R. Ambedkar served as chairman of the Constitution's Drafting Committee, constituted in 1947.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which is the longest river entirely within India?",
+      "options": [
+        "Ganga",
+        "Brahmaputra",
+        "Godavari",
+        "Indus"
+      ],
+      "answer": 2,
+      "explanation": "The Godavari is commonly identified as India's longest river flowing entirely within the country's territory.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "What is the SI unit of electric resistance?",
+      "options": [
+        "Volt",
+        "Ohm",
+        "Ampere",
+        "Watt"
+      ],
+      "answer": 1,
+      "explanation": "Electric resistance is measured in ohms (Ω); one ohm equals one volt per ampere.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which part of a plant typically performs most photosynthesis?",
+      "options": [
+        "Root hairs",
+        "Leaves",
+        "Seed coat",
+        "Bark"
+      ],
+      "answer": 1,
+      "explanation": "Leaves contain chloroplast-rich cells that absorb light and convert carbon dioxide and water into carbohydrates.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "The Battle of Plassey took place in which year?",
+      "options": [
+        "1757",
+        "1764",
+        "1857",
+        "1707"
+      ],
+      "answer": 0,
+      "explanation": "The Battle of Plassey was fought in 1757 between the East India Company's forces and those of Siraj ud-Daulah.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which Indian state is home to Kaziranga National Park?",
+      "options": [
+        "Assam",
+        "Kerala",
+        "Rajasthan",
+        "Gujarat"
+      ],
+      "answer": 0,
+      "explanation": "Kaziranga National Park lies in Assam and is well known for its population of greater one-horned rhinoceroses.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which gas makes up the largest proportion of Earth's dry atmosphere?",
+      "options": [
+        "Oxygen",
+        "Carbon dioxide",
+        "Nitrogen",
+        "Argon"
+      ],
+      "answer": 2,
+      "explanation": "Nitrogen accounts for about 78 percent of the dry atmosphere by volume, followed by oxygen at about 21 percent.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which organ produces insulin in the human body?",
+      "options": [
+        "Liver",
+        "Pancreas",
+        "Kidney",
+        "Spleen"
+      ],
+      "answer": 1,
+      "explanation": "Beta cells in the pancreatic islets produce insulin, a hormone involved in regulating blood glucose.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which latitude crosses India near its middle?",
+      "options": [
+        "Equator",
+        "Arctic Circle",
+        "Tropic of Cancer",
+        "Tropic of Capricorn"
+      ],
+      "answer": 2,
+      "explanation": "The Tropic of Cancer lies near 23.5° north latitude and passes through several Indian states.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Who wrote the Bengali novel 'Anandamath'?",
+      "options": [
+        "Rabindranath Tagore",
+        "Bankim Chandra Chattopadhyay",
+        "Sarat Chandra Chattopadhyay",
+        "Michael Madhusudan Dutt"
+      ],
+      "answer": 1,
+      "explanation": "Bankim Chandra Chattopadhyay authored Anandamath, a nineteenth-century Bengali novel.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which vitamin is synthesized in human skin upon exposure to sunlight?",
+      "options": [
+        "Vitamin A",
+        "Vitamin B12",
+        "Vitamin C",
+        "Vitamin D"
+      ],
+      "answer": 3,
+      "explanation": "UVB light initiates the conversion of a cholesterol derivative in skin into vitamin D3.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "What is the chemical formula of common salt?",
+      "options": [
+        "NaCl",
+        "KCl",
+        "Na2CO3",
+        "CaCO3"
+      ],
+      "answer": 0,
+      "explanation": "Table salt is sodium chloride, comprising sodium and chloride ions in a 1:1 ratio.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "The Reserve Bank of India began operations in which year?",
+      "options": [
+        "1925",
+        "1935",
+        "1947",
+        "1950"
+      ],
+      "answer": 1,
+      "explanation": "The Reserve Bank of India commenced operations on 1 April 1935 under the RBI Act, 1934.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which instrument measures atmospheric pressure?",
+      "options": [
+        "Thermometer",
+        "Anemometer",
+        "Barometer",
+        "Hygrometer"
+      ],
+      "answer": 2,
+      "explanation": "A barometer measures atmospheric pressure; an anemometer measures wind speed and a hygrometer measures humidity.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "In which Indian state is the Sun Temple at Konark situated?",
+      "options": [
+        "Odisha",
+        "Bihar",
+        "Madhya Pradesh",
+        "Tamil Nadu"
+      ],
+      "answer": 0,
+      "explanation": "The thirteenth-century Konark Sun Temple is located on the coast of Odisha.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which layer of the atmosphere contains most of the ozone layer?",
+      "options": [
+        "Troposphere",
+        "Stratosphere",
+        "Mesosphere",
+        "Exosphere"
+      ],
+      "answer": 1,
+      "explanation": "Most atmospheric ozone is concentrated in the stratosphere, where it absorbs much harmful ultraviolet radiation.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which blood cells are chiefly responsible for carrying oxygen?",
+      "options": [
+        "White blood cells",
+        "Platelets",
+        "Red blood cells",
+        "Plasma cells"
+      ],
+      "answer": 2,
+      "explanation": "Red blood cells contain haemoglobin, which binds oxygen for transport through the bloodstream.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "The first session of the Indian National Congress was held in which city?",
+      "options": [
+        "Calcutta",
+        "Bombay",
+        "Madras",
+        "Allahabad"
+      ],
+      "answer": 1,
+      "explanation": "The Indian National Congress held its first session in Bombay (now Mumbai) in December 1885.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which metal is liquid at typical room temperature?",
+      "options": [
+        "Copper",
+        "Mercury",
+        "Aluminium",
+        "Zinc"
+      ],
+      "answer": 1,
+      "explanation": "Mercury has a melting point of approximately −38.8°C and remains liquid at ordinary room temperatures.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Who is traditionally credited with authoring the 'Arthashastra'?",
+      "options": [
+        "Kalidasa",
+        "Kautilya",
+        "Banabhatta",
+        "Panini"
+      ],
+      "answer": 1,
+      "explanation": "The Arthashastra is traditionally attributed to Kautilya, also known as Chanakya.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which Indian classical dance form originated in Kerala?",
+      "options": [
+        "Kathakali",
+        "Kathak",
+        "Odissi",
+        "Manipuri"
+      ],
+      "answer": 0,
+      "explanation": "Kathakali is a classical dance-drama associated with Kerala, notable for elaborate costume and makeup.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "What is the approximate pH of a neutral aqueous solution at 25°C?",
+      "options": [
+        "1",
+        "5",
+        "7",
+        "12"
+      ],
+      "answer": 2,
+      "explanation": "At 25°C pure water has equal hydrogen and hydroxide ion concentrations, corresponding to pH 7.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which constitutional amendment lowered India's voting age from 21 to 18?",
+      "options": [
+        "42nd Amendment",
+        "44th Amendment",
+        "61st Amendment",
+        "73rd Amendment"
+      ],
+      "answer": 2,
+      "explanation": "The Constitution (Sixty-first Amendment) Act, 1988 reduced the minimum voting age to 18.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which planet is known for the Great Red Spot?",
+      "options": [
+        "Mars",
+        "Saturn",
+        "Jupiter",
+        "Venus"
+      ],
+      "answer": 2,
+      "explanation": "The Great Red Spot is a long-lived storm system in Jupiter's atmosphere.",
+      "difficulty": "Moderate"
+    }
+  ],
+  "quant": [
+    {
+      "question": "What is 18% of 250?",
+      "options": [
+        "40",
+        "45",
+        "50",
+        "55"
+      ],
+      "answer": 1,
+      "explanation": "Calculate 250×18/100=45.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "A shopkeeper buys an item for ₹800 and sells it for ₹920. What is the profit percentage?",
+      "options": [
+        "12%",
+        "15%",
+        "18%",
+        "20%"
+      ],
+      "answer": 1,
+      "explanation": "Profit is ₹120; profit percentage is 120/800×100=15%.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Find the simple interest on ₹4,000 at 6% per annum for 3 years.",
+      "options": [
+        "₹620",
+        "₹700",
+        "₹720",
+        "₹840"
+      ],
+      "answer": 2,
+      "explanation": "Simple interest PRT/100 = 4000×6×3/100 = ₹720.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "The ratio of two numbers is 3:5 and their sum is 64. What is the larger number?",
+      "options": [
+        "24",
+        "32",
+        "40",
+        "48"
+      ],
+      "answer": 2,
+      "explanation": "Eight equal ratio parts total 64, so one part is 8. The larger number is 5×8=40.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "If x+7=19, what is 3x?",
+      "options": [
+        "30",
+        "33",
+        "36",
+        "39"
+      ],
+      "answer": 2,
+      "explanation": "Solve x=19−7=12; therefore 3x=36.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "A 180 m train crosses a pole in 12 seconds. What is its speed in km/h?",
+      "options": [
+        "45",
+        "48",
+        "54",
+        "60"
+      ],
+      "answer": 2,
+      "explanation": "Speed is 180/12=15 m/s. Multiply by 3.6 to get 54 km/h.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "What is the average of 12, 15, 18, 21 and 24?",
+      "options": [
+        "17",
+        "18",
+        "19",
+        "20"
+      ],
+      "answer": 1,
+      "explanation": "The sum is 90 and there are five terms; average=90/5=18.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "A rectangular field is 24 m long and 15 m wide. Find its perimeter.",
+      "options": [
+        "39 m",
+        "68 m",
+        "78 m",
+        "360 m"
+      ],
+      "answer": 2,
+      "explanation": "The perimeter is 2(l+w)=2(24+15)=78 m.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "A number rises from 80 to 100. What is the percentage increase?",
+      "options": [
+        "20%",
+        "25%",
+        "30%",
+        "40%"
+      ],
+      "answer": 1,
+      "explanation": "The increase is 20 on the original 80, so 20/80×100=25%.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "What is the least common multiple of 12 and 18?",
+      "options": [
+        "24",
+        "30",
+        "36",
+        "72"
+      ],
+      "answer": 2,
+      "explanation": "12=2²×3 and 18=2×3², so LCM=2²×3²=36.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "A can finish a job in 10 days and B in 15 days. How long together?",
+      "options": [
+        "5 days",
+        "6 days",
+        "8 days",
+        "12 days"
+      ],
+      "answer": 1,
+      "explanation": "Their daily work rates sum to 1/10+1/15=1/6; together they take 6 days.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "If the radius of a circle is 7 cm, what is its area using π=22/7?",
+      "options": [
+        "44 cm²",
+        "88 cm²",
+        "154 cm²",
+        "308 cm²"
+      ],
+      "answer": 2,
+      "explanation": "Area=πr²=(22/7)×7²=154 square centimetres.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "A marked price of ₹1,200 is discounted by 10%. What is the selling price?",
+      "options": [
+        "₹1,020",
+        "₹1,080",
+        "₹1,100",
+        "₹1,120"
+      ],
+      "answer": 1,
+      "explanation": "A 10% discount is ₹120, leaving a selling price of ₹1080.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Solve: 5²+3³−4².",
+      "options": [
+        "32",
+        "34",
+        "36",
+        "38"
+      ],
+      "answer": 2,
+      "explanation": "Evaluate powers first: 25+27−16=36.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Two successive discounts of 10% and 20% are equivalent to a single discount of what percentage?",
+      "options": [
+        "26%",
+        "28%",
+        "30%",
+        "32%"
+      ],
+      "answer": 1,
+      "explanation": "The net price factor is 0.9×0.8=0.72, so the equivalent discount is 28%.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "What is the median of 7, 2, 11, 5, 9?",
+      "options": [
+        "5",
+        "7",
+        "9",
+        "11"
+      ],
+      "answer": 1,
+      "explanation": "Sorted data are 2,5,7,9,11; the middle value is 7.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "A tank fills through one pipe in 8 hours and empties through another in 12 hours. If both are open, how long to fill?",
+      "options": [
+        "16 hours",
+        "20 hours",
+        "24 hours",
+        "30 hours"
+      ],
+      "answer": 2,
+      "explanation": "Net filling rate is 1/8−1/12=1/24 of a tank per hour, so filling takes 24 hours.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "If 3/4 of a number is 45, find the number.",
+      "options": [
+        "54",
+        "56",
+        "60",
+        "64"
+      ],
+      "answer": 2,
+      "explanation": "Let the number be n. Then 3n/4=45, so n=45×4/3=60.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Find the compound interest on ₹1,000 at 10% annually for 2 years.",
+      "options": [
+        "₹200",
+        "₹210",
+        "₹220",
+        "₹230"
+      ],
+      "answer": 1,
+      "explanation": "Amount=1000(1.1)²=₹1210, so compound interest=₹210.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "What is the value of tan 45°?",
+      "options": [
+        "0",
+        "1",
+        "√2",
+        "√3"
+      ],
+      "answer": 1,
+      "explanation": "In a 45°–45°–90° triangle, opposite and adjacent legs are equal; tan45°=1.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "If a:b=2:3 and b:c=4:5, find a:c.",
+      "options": [
+        "8:15",
+        "2:5",
+        "3:10",
+        "5:8"
+      ],
+      "answer": 0,
+      "explanation": "Make b consistent: a:b=8:12 and b:c=12:15, therefore a:c=8:15.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "A cylinder has radius 3 cm and height 10 cm. What is its volume?",
+      "options": [
+        "30π cm³",
+        "60π cm³",
+        "90π cm³",
+        "120π cm³"
+      ],
+      "answer": 2,
+      "explanation": "Cylinder volume πr²h=π×3²×10=90π cubic centimetres.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "The roots of x²−5x+6=0 are which pair?",
+      "options": [
+        "1 and 6",
+        "2 and 3",
+        "−2 and −3",
+        "−1 and −6"
+      ],
+      "answer": 1,
+      "explanation": "Factor x²−5x+6=(x−2)(x−3); the roots are 2 and 3.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "A student scores 72, 84 and 90 in three tests. What score is needed in a fourth test for an average of 85?",
+      "options": [
+        "90",
+        "92",
+        "94",
+        "96"
+      ],
+      "answer": 2,
+      "explanation": "A total of 4×85=340 is required. Existing total is 246, so the fourth score must be 94.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "The angles of a triangle are in the ratio 2:3:4. What is its largest angle?",
+      "options": [
+        "60°",
+        "70°",
+        "80°",
+        "90°"
+      ],
+      "answer": 2,
+      "explanation": "The nine ratio parts total 180°, so one part is 20°. The largest angle is 4×20°=80°.",
+      "difficulty": "Moderate"
+    }
+  ],
+  "english": [
+    {
+      "question": "Choose the correctly spelled word.",
+      "options": [
+        "Accomodation",
+        "Accommodation",
+        "Acommodation",
+        "Accommondation"
+      ],
+      "answer": 1,
+      "explanation": "Accommodation is correctly spelled with double c and double m.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Select the synonym of 'meticulous'.",
+      "options": [
+        "Careless",
+        "Thorough",
+        "Hasty",
+        "Indifferent"
+      ],
+      "answer": 1,
+      "explanation": "Meticulous describes someone extremely careful and attentive to detail, making thorough the closest synonym.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Select the antonym of 'scarce'.",
+      "options": [
+        "Rare",
+        "Limited",
+        "Plentiful",
+        "Sparse"
+      ],
+      "answer": 2,
+      "explanation": "Scarce means in short supply; plentiful means abundant.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Fill in the blank: She has been preparing for the exam ___ January.",
+      "options": [
+        "for",
+        "since",
+        "from",
+        "by"
+      ],
+      "answer": 1,
+      "explanation": "Since introduces a specific starting point in time with the present perfect continuous tense.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Identify the grammatically correct sentence.",
+      "options": [
+        "Neither of the answers are correct.",
+        "Neither of the answers is correct.",
+        "Neither answers is correct.",
+        "Neither answers are correct."
+      ],
+      "answer": 1,
+      "explanation": "In formal agreement, neither is singular and takes the singular verb is.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Choose the correct passive voice: 'The team completed the project.'",
+      "options": [
+        "The project completes by the team.",
+        "The project was completed by the team.",
+        "The project had complete by the team.",
+        "The project is completed by the team yesterday."
+      ],
+      "answer": 1,
+      "explanation": "Simple past active becomes was/were plus past participle in the passive: was completed.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Choose the correct indirect speech: He said, 'I am tired.'",
+      "options": [
+        "He said that I am tired.",
+        "He said that he was tired.",
+        "He said that he is tired.",
+        "He said he tired."
+      ],
+      "answer": 1,
+      "explanation": "With a past reporting verb, present 'am' normally backshifts to past 'was', and I changes to he.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "What does the idiom 'break the ice' mean?",
+      "options": [
+        "Destroy something fragile",
+        "Start a friendly conversation",
+        "Lose one's temper",
+        "Interrupt a performance"
+      ],
+      "answer": 1,
+      "explanation": "To break the ice means to reduce initial social awkwardness and begin interaction.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Fill in the blank: Each of the players ___ a numbered jersey.",
+      "options": [
+        "have",
+        "has",
+        "are having",
+        "were"
+      ],
+      "answer": 1,
+      "explanation": "Each is the singular subject, so it takes has.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Choose the one-word substitution for 'a person who studies stars and celestial bodies'.",
+      "options": [
+        "Astrologer",
+        "Astronomer",
+        "Geologist",
+        "Meteorologist"
+      ],
+      "answer": 1,
+      "explanation": "An astronomer studies celestial objects scientifically; an astrologer interprets supposed influences.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Select the correct preposition: She is proficient ___ mathematics.",
+      "options": [
+        "at",
+        "to",
+        "in",
+        "on"
+      ],
+      "answer": 2,
+      "explanation": "The conventional collocation is proficient in a subject or skill.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Pick the correctly punctuated sentence.",
+      "options": [
+        "However we decided to continue.",
+        "However, we decided to continue.",
+        "However we, decided to continue.",
+        "However; we decided, to continue."
+      ],
+      "answer": 1,
+      "explanation": "The introductory conjunctive adverb However is followed by a comma.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Identify the part of speech of 'quickly' in 'She quickly answered.'",
+      "options": [
+        "Noun",
+        "Adjective",
+        "Adverb",
+        "Preposition"
+      ],
+      "answer": 2,
+      "explanation": "Quickly modifies the verb answered by describing how the action was performed.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Fill in the blank: By the time we reached the station, the train ___.",
+      "options": [
+        "leaves",
+        "had left",
+        "has leave",
+        "leaving"
+      ],
+      "answer": 1,
+      "explanation": "Past perfect had left marks an action completed before another past action.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Choose the closest meaning of 'ambiguous'.",
+      "options": [
+        "Clear",
+        "Uncertain in meaning",
+        "Very brief",
+        "Impossible"
+      ],
+      "answer": 1,
+      "explanation": "An ambiguous expression can reasonably be interpreted in more than one way.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Select the antonym of 'expand'.",
+      "options": [
+        "Increase",
+        "Stretch",
+        "Contract",
+        "Enlarge"
+      ],
+      "answer": 2,
+      "explanation": "Expand means make larger; contract means become smaller.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Choose the correct article: He is ___ honest officer.",
+      "options": [
+        "a",
+        "an",
+        "the",
+        "no article"
+      ],
+      "answer": 1,
+      "explanation": "Honest begins with a vowel sound because h is silent, so an is appropriate.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which sentence uses the correct comparative form?",
+      "options": [
+        "This route is more shorter.",
+        "This route is shorter than that one.",
+        "This route is most short.",
+        "This route is shortest than that one."
+      ],
+      "answer": 1,
+      "explanation": "Shorter is the comparative of short and combines with than.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Fill in the blank: Hardly had she entered ___ the lights went out.",
+      "options": [
+        "than",
+        "when",
+        "then",
+        "while"
+      ],
+      "answer": 1,
+      "explanation": "The standard correlative construction is hardly/scarcely ... when.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Identify the error: 'One of my friend lives in Jaipur.'",
+      "options": [
+        "One of",
+        "my friend",
+        "lives",
+        "in Jaipur"
+      ],
+      "answer": 1,
+      "explanation": "The phrase one of is followed by a plural count noun: one of my friends.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "What is the plural of 'criterion'?",
+      "options": [
+        "Criterions",
+        "Criteria",
+        "Criterias",
+        "Criterii"
+      ],
+      "answer": 1,
+      "explanation": "Criterion is singular; its standard plural in English is criteria.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Choose the appropriate word: The principal gave the students useful ___.",
+      "options": [
+        "advise",
+        "advice",
+        "advises",
+        "advices"
+      ],
+      "answer": 1,
+      "explanation": "Advice is the uncountable noun meaning guidance; advise is a verb.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Select the sentence with correct subject–verb agreement.",
+      "options": [
+        "The list of items are on the desk.",
+        "The list of items is on the desk.",
+        "The list of items have on the desk.",
+        "The list of items were on the desk."
+      ],
+      "answer": 1,
+      "explanation": "The singular head noun list controls the verb; the prepositional phrase of items does not.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Choose the phrasal verb meaning 'postpone'.",
+      "options": [
+        "Put off",
+        "Put up",
+        "Put out",
+        "Put through"
+      ],
+      "answer": 0,
+      "explanation": "Put off means to delay or postpone an event or activity.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Fill in the blank: If I ___ more time, I would learn another language.",
+      "options": [
+        "have",
+        "had",
+        "will have",
+        "having"
+      ],
+      "answer": 1,
+      "explanation": "The second conditional uses if plus past simple (had) with would plus the base verb.",
+      "difficulty": "Moderate"
+    }
+  ]
+}
