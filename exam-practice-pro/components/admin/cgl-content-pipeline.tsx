@@ -54,3 +54,5 @@ export function CglContentPipeline(){
    <ul className="max-h-64 overflow-y-auto list-disc pl-5">{preview.issues.slice(0,100).map((i,k)=><li key={k}>{i.section}, row {i.row}: {i.message}</li>)}</ul>
   </div>}
  </section>;
+
+}
