@@ -38,10 +38,10 @@ function TranslatedReview({q,index}:{q:Review;index:number}) {
   </article>;
 }
 
-export function SecureExam({testId,draftMode=false}:{testId:string;draftMode?:boolean}) {
+export function SecureExam({testId,draftMode=false,betaMode=false}:{testId:string;draftMode?:boolean;betaMode?:boolean}) {
  const {data:session,status} = useSession();
- const attemptStartUrl = draftMode ? `/api/v1/admin/tests/${testId}/draft-attempt` : '/api/v1/exam-attempts/start';
- const attemptBase = (id:string) => draftMode ? `/api/v1/admin/draft-attempts/${id}` : `/api/v1/exam-attempts/${id}`;
+ const attemptStartUrl = betaMode ? '/api/v1/beta/attempt' : draftMode ? `/api/v1/admin/tests/${testId}/draft-attempt` : '/api/v1/exam-attempts/start';
+ const attemptBase = (id:string) => betaMode ? `/api/v1/beta/attempts/${id}` : draftMode ? `/api/v1/admin/draft-attempts/${id}` : `/api/v1/exam-attempts/${id}`;
  const [attempt,setAttempt] = useState<Attempt|null>(null);
  const [responses,setResponses] = useState<Record<string,number>>({});
  const [busy,setBusy] = useState(false);
@@ -154,13 +154,13 @@ export function SecureExam({testId,draftMode=false}:{testId:string;draftMode?:bo
  useEffect(()=>{ if(attempt && !attempt.submittedAt) headingRef.current?.focus(); },[current,attempt?.id,attempt?.submittedAt]);
 
  if(status==='loading')return <p className="p-6" aria-busy="true">Checking sign-in…</p>;
- if(status!=='authenticated'||!session?.user?.email)return <section className="rounded-xl border p-6"><h1 className="text-xl font-bold">Sign in to take a scored exam</h1><p className="mt-2 text-sm text-muted-foreground">Guest practice is available, but scored exams require a verified Google or GitHub account to sync results across devices.</p><Button className="mt-4" asChild><Link href={`/auth/signin?callbackUrl=${encodeURIComponent((draftMode?'/admin/draft-test/':'/india-mocks/')+testId)}`}>Sign in</Link></Button></section>;
+ if(status!=='authenticated'||!session?.user?.email)return <section className="rounded-xl border p-6"><h1 className="text-xl font-bold">Sign in to take a scored exam</h1><p className="mt-2 text-sm text-muted-foreground">Guest practice is available, but scored exams require a verified Google or GitHub account to sync results across devices.</p><Button className="mt-4" asChild><Link href={`/auth/signin?callbackUrl=${encodeURIComponent((betaMode?'/exampro/beta/mock-01':(draftMode?'/admin/draft-test/':'/india-mocks/')+testId))}`}>Sign in</Link></Button></section>;
  if(error&&!attempt)return <div className="rounded-lg border p-5" role="alert">{error}<p className="mt-2 text-sm">Check that the API, Neon database and OAuth credentials are configured, then reload the page.</p></div>;
  if(!attempt)return <p className="p-6" aria-busy="true">Starting or recovering your saved exam…</p>;
  if(attempt.submittedAt&&attempt.result)return <section className="space-y-6">
-   <div className="rounded-xl border bg-card p-6"><h1 className="text-2xl font-bold">{attempt.title} — Result</h1><p className="mt-2 text-xl font-semibold">{attempt.result.score} / {attempt.result.total} marks ({attempt.result.percentage}%)</p><p>{attempt.result.passed?'Passed':'Not passed'} · {attempt.result.correct} correct · {attempt.result.incorrect} incorrect · {attempt.result.skipped} skipped</p><Button className="mt-4" asChild><Link href={draftMode?'/admin':'/dashboard'}>{draftMode?'Return to Admin':'View dashboard'}</Link></Button></div>
+   <div className="rounded-xl border bg-card p-6"><h1 className="text-2xl font-bold">{attempt.title} — Result</h1><p className="mt-2 text-xl font-semibold">{attempt.result.score} / {attempt.result.total} marks ({attempt.result.percentage}%)</p><p>{attempt.result.passed?'Passed':'Not passed'} · {attempt.result.correct} correct · {attempt.result.incorrect} incorrect · {attempt.result.skipped} skipped</p><Button className="mt-4" asChild><Link href={draftMode?'/admin':betaMode?'/exampro/beta/mock-01':'/dashboard'}>{draftMode?'Return to Admin':betaMode?'Return to beta':'View dashboard'}</Link></Button></div>
    <div className="flex flex-wrap items-center justify-between gap-3">
-      <h2 className="text-xl font-bold">Answer review</h2>{!draftMode&&<ShareTestButtons testId={testId} title={attempt.title} compact/>}
+      <h2 className="text-xl font-bold">Answer review</h2>{!draftMode&&!betaMode&&<ShareTestButtons testId={testId} title={attempt.title} compact/>}
     </div>
    {attempt.result.review.map((q,i)=><TranslatedReview key={q.id} q={q} index={i}/> )}
  </section>;
@@ -176,7 +176,7 @@ export function SecureExam({testId,draftMode=false}:{testId:string;draftMode?:bo
    <a href="#exam-question" className="sr-only focus:not-sr-only focus:inline-block focus:rounded focus:bg-background focus:p-2 focus:underline">Skip to current question</a>
    <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</p>
    <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border bg-card p-4">
-     <div>{draftMode&&<p className="text-xs font-bold uppercase tracking-wider text-amber-700">Private staging QA · unpublished draft</p>}<h1 className="text-xl font-bold">{attempt.title}</h1><p className="text-sm text-muted-foreground" aria-live="polite" aria-atomic="true">{Object.keys(responses).length}/{questions.length} answered · {saved?t('save'):t('saving')}</p>
+     <div>{(draftMode||betaMode)&&<p className="text-xs font-bold uppercase tracking-wider text-amber-700">Private staging QA · unpublished draft</p>}<h1 className="text-xl font-bold">{attempt.title}</h1><p className="text-sm text-muted-foreground" aria-live="polite" aria-atomic="true">{Object.keys(responses).length}/{questions.length} answered · {saved?t('save'):t('saving')}</p>
       {sectionMinutes!==null&&activeSection!==null&&<p className="mt-1 text-sm font-semibold text-indigo-700 dark:text-indigo-300">Section {Math.min(activeSection+1,4)} / 4 · {sectionMinutes} min per section · earlier sections locked</p>}</div>
      <div className="flex flex-wrap items-center gap-2">
       <LanguageSwitcher small/>{!draftMode&&<ShareTestButtons testId={testId} title={attempt.title} compact/>}
