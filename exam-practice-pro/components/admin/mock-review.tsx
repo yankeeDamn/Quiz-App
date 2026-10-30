@@ -1,6 +1,6 @@
 'use client';
 
-import {useCallback,useEffect,useState} from 'react';
+import {useCallback,useEffect,useRef,useState} from 'react';
 import {admin} from '@/lib/admin';
 import {api} from '@/lib/api';
 
@@ -26,6 +26,8 @@ const statusText=(entry:Entry)=>entry.stale?'Source changed: review again':entry
 export function MockReview({testId,onClose}:{testId:string;onClose:()=>void}) {
  const [report,setReport]=useState<Report|null>(null);
  const [selectedId,setSelectedId]=useState<string>('');
+ const selectedIdRef=useRef('');
+ useEffect(()=>{selectedIdRef.current=selectedId},[selectedId]);
  const [edit,setEdit]=useState<Edit|null>(null);
  const [search,setSearch]=useState('');
  const [saving,setSaving]=useState(false);
@@ -69,7 +71,9 @@ export function MockReview({testId,onClose}:{testId:string;onClose:()=>void}) {
   if(!r.success||!r.data||r.data.texts.length!==6){
     setMessage(r.error?.message||'Azure Translator is unavailable. Check staging Render configuration.');return;
   }
-  if(selectedId!==questionId)return;
+  // The async closure captured the old selectedId; read the live ref so
+  // a delayed response cannot overwrite a different question's draft.
+  if(selectedIdRef.current!==questionId)return;
   const translated=r.data.texts;
   setEdit(old=>old?{...old,
     hindiStatus:'pending',hindiQuestion:translated[0],
@@ -107,7 +111,7 @@ export function MockReview({testId,onClose}:{testId:string;onClose:()=>void}) {
     <label className="block text-sm font-semibold" htmlFor="review-search">Find a question</label>
     <input id="review-search" className={input} placeholder="Topic or question text" value={search} onChange={e=>setSearch(e.target.value)}/>
     <div className="max-h-96 space-y-1 overflow-y-auto rounded-lg border p-2" role="group" aria-label="Questions to review">
-     {found.map(q=><button type="button" key={q.id} onClick={()=>setSelectedId(q.id)}
+     {found.map(q=><button type="button" key={q.id} onClick={()=>{selectedIdRef.current=q.id;setSelectedId(q.id)}}
       aria-pressed={selectedId===q.id}
       className={`block w-full rounded-lg px-3 py-2 text-left text-xs focus-visible:outline-2 focus-visible:outline-indigo-600 ${selectedId===q.id?'bg-indigo-100 text-indigo-950 dark:bg-indigo-950 dark:text-white':'hover:bg-muted'}`}>
       <span className="font-semibold">{q.topicId.replace('ssc26-m01-','')} #{q.position+1}</span>
