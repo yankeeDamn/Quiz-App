@@ -153,3 +153,35 @@ test('Render proxy is trusted one hop only, and exam translation has an independ
  assert.match(server,/if \(process\.env\.RENDER_SERVICE_ID\) \{\s*app\.set\('trust proxy', 1\)/);
  assert.equal(typeof app.get('trust proxy'),'boolean','unit-test app does not trust spoofed X-Forwarded-For');
 });
+
+
+test('malformed Azure batches are atomic: failed requests never poison the translation cache',async()=>{
+ service.resetCacheForTests();
+ process.env.AZURE_TRANSLATOR_KEY='fake-key-pr55-only';
+ process.env.AZURE_TRANSLATOR_REGION='eastus';
+ process.env.AZURE_TRANSLATOR_ENDPOINT='https://api.cognitive.microsofttranslator.com';
+ process.env.AZURE_TRANSLATOR_DAILY_CHARS='60000';
+ let requests=0;
+ global.fetch=async()=>{
+  requests++;
+  return {ok:true,json:async()=>[
+   {translations:[{to:'hi',text:'पहला वैध अनुवाद'}]},
+   {translations:[{to:'bn',text:'wrong target language'}]},
+  ]};
+ };
+ await assert.rejects(service.translate(['First prompt','Second prompt'],'hi'),
+   e=>e.statusCode===502&&/incomplete translation/.test(e.message));
+ global.fetch=async(_url,options)=>{
+  requests++;
+  return {ok:true,json:async()=>JSON.parse(options.body).map(v=>({
+   translations:[{to:'hi',text:'fresh '+v.Text}],
+  }))};
+ };
+ const retry=await service.translate(['First prompt','Second prompt'],'hi');
+ assert.deepEqual(retry.texts,['fresh First prompt','fresh Second prompt']);
+ assert.equal(retry.cached,0,'neither item from a failed batch may be reused');
+ assert.equal(requests,2);
+ const repeat=await service.translate(['First prompt','Second prompt'],'hi');
+ assert.equal(repeat.cached,2);
+ assert.equal(requests,2);
+});

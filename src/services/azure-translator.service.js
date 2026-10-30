@@ -116,13 +116,17 @@ async function translate(texts,language) {
     let data;
     try {data=await response.json();}catch{throw fail('Azure Translator returned an invalid response.',502);}
     if(!Array.isArray(data)||data.length!==missing.size)throw fail('Azure Translator returned an incomplete translation.',502);
-    dailyUsage.characters+=requested;
+    // Validate the entire provider response *before* publishing cache entries.
+    // A partially malformed Azure batch must never mix cached translations
+    // from a failed request with fresh data on a later retry.
     const vals=[...missing.values()];
+    const localizedBatch=vals.map((_,i)=>data[i]?.translations?.find(t=>t.to===language)?.text);
+    if(localizedBatch.some(v=>typeof v!=='string'||!v.trim()))
+      throw fail('Azure Translator returned an incomplete translation.',502);
+    dailyUsage.characters+=requested;
     for(let i=0;i<vals.length;i++){
-      const localized=data[i]?.translations?.find(t=>t.to===language)?.text;
-      if(typeof localized!=='string'||!localized.trim())throw fail('Azure Translator returned an incomplete translation.',502);
-      for(const ix of vals[i].indices)outputs[ix]=localized;
-      remember(vals[i].digest,localized);
+      for(const ix of vals[i].indices)outputs[ix]=localizedBatch[i];
+      remember(vals[i].digest,localizedBatch[i]);
     }
   }
   return {texts:outputs,provider:'azure',advisory:true,cached:cacheHits};
