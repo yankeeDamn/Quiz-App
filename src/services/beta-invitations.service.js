@@ -3,6 +3,11 @@ const crypto=require('node:crypto');
 const db=require('../config/database');
 const gate=require('./draft-testing-gate');
 const TEST_ID='ssc-cgl-2026-mock-01';
+// Best-effort audit for denied access must never leak raw invite tokens.
+async function logAudit(action,id,user){
+ await db.query('INSERT INTO exam_beta_invitation_audit(invitation_id,action,actor_user_id,actor_email) VALUES($1,$2,$3,$4)',
+ [id||null,action,user?.id||null,user?.email||null]);
+}
 const fail=(message,statusCode=403)=>Object.assign(new Error(message),{statusCode});
 const emailOf=v=>String(v||'').trim().toLowerCase();
 const digest=s=>crypto.createHash('sha256').update(s).digest('hex');
@@ -19,6 +24,7 @@ async function create(email,hours,by){
  const inserted=await db.query(`INSERT INTO exam_beta_invitations(test_id,email,token_hash,expires_at,created_by)
   VALUES($1,$2,$3,NOW()+($4*INTERVAL '1 hour'),$5) RETURNING id`,
  [TEST_ID,normalized,digest(token),hours,by]);
+ await logAudit('created',inserted.rows[0].id,{email:by});
  return {invitationId:inserted.rows[0].id,invitationCode:token,expiresInHours:hours,testId:TEST_ID,email:normalized};
 }
 async function redeem(user,code){
@@ -32,6 +38,7 @@ async function redeem(user,code){
  AND (redeemed_user_id IS NULL OR redeemed_user_id=$1)
  RETURNING id,expires_at`,[user.id,digest(code),TEST_ID,email]);
  if(!r.rowCount)throw fail('Invitation is expired, revoked or issued to another verified account.');
+ await logAudit('redeemed',r.rows[0].id,user);
  return {testId:TEST_ID,expiresAt:r.rows[0].expires_at};
 }
 async function authorized(user){
@@ -47,6 +54,7 @@ async function revoke(id){
  ensureStaging();
  if(!/^[a-f0-9-]{36}$/i.test(String(id)))throw fail('Invalid invitation ID.',400);
  const r=await db.query('UPDATE exam_beta_invitations SET revoked_at=NOW() WHERE id=$1 AND revoked_at IS NULL',[id]);
+ if(r.rowCount)await logAudit('revoked',id,null);
  return {revoked:r.rowCount>0};
 }
 module.exports={TEST_ID,ensureStaging,create,redeem,authorized,revoke};

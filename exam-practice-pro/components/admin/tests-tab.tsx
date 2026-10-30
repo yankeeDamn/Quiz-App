@@ -9,6 +9,7 @@ import { Field, Notice, card, input } from '@/components/admin/ui';
 import { MockReview } from '@/components/admin/mock-review';
 import { MockReleaseReadiness } from '@/components/admin/mock-release-readiness';
 import { BetaInvitePanel } from '@/components/admin/beta-invite-panel';
+import { BetaFeedbackDashboard } from '@/components/admin/beta-feedback-dashboard';
 
 interface Draft {
   id: string;
@@ -139,6 +140,7 @@ export function TestsTab() {
       </section>
 
       {draftTestingEnabled && <BetaInvitePanel />}
+      {draftTestingEnabled && <BetaFeedbackDashboard />}
       {readinessId && <MockReleaseReadiness key={readinessId} testId={readinessId} onClose={()=>setReadinessId(null)} />}
       {reviewId && <MockReview key={reviewId} testId={reviewId} onClose={()=>setReviewId(null)} />}
 

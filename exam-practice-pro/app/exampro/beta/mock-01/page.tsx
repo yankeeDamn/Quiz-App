@@ -4,6 +4,7 @@ import {useSession} from 'next-auth/react';
 import Link from 'next/link';
 import {api} from '@/lib/api';
 import {SecureExam} from '@/components/mocks/secure-exam';
+import {BetaFeedback} from '@/components/exampro/beta-feedback';
 
 const TEST_ID='ssc-cgl-2026-mock-01';
 export default function StudentBetaPage(){
@@ -23,7 +24,7 @@ export default function StudentBetaPage(){
   <h1 className="text-2xl font-bold">ExamPro · invitation-only staging beta</h1>
   <p className="rounded border border-amber-400 p-3 text-sm">This is an unpublished practice mock for invited testers only. Do not share questions or screenshots. Results are for QA and are not official SSC scores.</p>
   {status!=='authenticated'?<p>Sign in with the verified Google/GitHub account that received the invitation. <Link className="underline" href="/auth/signin?callbackUrl=%2Fexampro%2Fbeta%2Fmock-01">Sign in</Link></p>:
-  ready?<SecureExam testId={TEST_ID} betaMode/>:
+  ready?<div className="space-y-6"><SecureExam testId={TEST_ID} betaMode/><BetaFeedback/></div>:
   <div className="space-y-4">
    <form onSubmit={redeem} className="space-y-3 rounded-xl border p-5">
     <label className="block text-sm font-medium" htmlFor="invitation-code">Private invitation code</label>
