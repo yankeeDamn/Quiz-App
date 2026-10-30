@@ -11,6 +11,7 @@ type ReleaseReport={
  questions:{expected:number;actual:number;missing:number;stale:number};
  editorialReady:boolean;technicalReady:boolean;humanSignoffRequired:boolean;
  publicationPerformed:boolean;checks:Check[];publicationBlocker:string|null;
+ sections:{topicId:string;questions:number;academicApproved:number;hindiRequired:number;hindiVerified:number;stale:number}[];
 };
 
 export function MockReleaseReadiness({testId,onClose}:{testId:string;onClose:()=>void}){
@@ -43,6 +44,18 @@ export function MockReleaseReadiness({testId,onClose}:{testId:string;onClose:()=
      <p className="rounded border p-3"><strong className="text-xl tabular-nums">{report.academic.approved}/{report.academic.required}</strong><span className="block text-sm">Academic approvals</span></p>
      <p className="rounded border p-3"><strong className="text-xl tabular-nums">{report.hindi.verified}/{report.hindi.required}</strong><span className="block text-sm">Human-verified Hindi</span></p>
      <p className="rounded border p-3"><strong className="text-xl tabular-nums">{report.questions.actual}/{report.questions.expected}</strong><span className="block text-sm">Question rows · {report.questions.stale} stale reviews</span></p>
+    </div>
+    <div className="overflow-x-auto">
+     <h3 className="mb-2 text-sm font-semibold">Section-by-section review progress</h3>
+     <table className="w-full min-w-[480px] text-left text-sm">
+      <thead><tr><th className="p-2">Topic</th><th className="p-2">Questions</th><th className="p-2">Academic</th><th className="p-2">Hindi</th><th className="p-2">Stale</th></tr></thead>
+      <tbody>{(report.sections||[]).map(group=><tr key={group.topicId} className="border-t">
+       <td className="p-2">{group.topicId}</td><td className="p-2 tabular-nums">{group.questions}</td>
+       <td className="p-2 tabular-nums">{group.academicApproved}/{group.questions}</td>
+       <td className="p-2 tabular-nums">{group.hindiVerified}/{group.hindiRequired}</td>
+       <td className="p-2 tabular-nums">{group.stale}</td>
+      </tr>)}</tbody>
+     </table>
     </div>
     <ul className="space-y-2 text-sm">{report.checks.map(check=><li key={check.id} className="flex gap-2">
       <span aria-label={check.passed?'Passed':'Blocked'}>{check.passed?'✓':'✕'}</span><span>{check.label}</span>
