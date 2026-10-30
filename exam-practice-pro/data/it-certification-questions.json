@@ -358,5 +358,485 @@
     "correct_option": "A",
     "explanation": "ping sends ICMP echo requests and reports responses when permitted.",
     "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-AZ900-001",
+    "exam_code": "AZ-900",
+    "subject": "Identity",
+    "question": "Which Microsoft service manages cloud identities and access for Microsoft 365 and Azure?",
+    "options": [
+      "Microsoft Entra ID",
+      "Azure Blob Storage",
+      "Azure Monitor",
+      "Azure DNS"
+    ],
+    "correct_option": "A",
+    "explanation": "Microsoft Entra ID is the cloud identity and access management service formerly known as Azure Active Directory.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-AZ900-002",
+    "exam_code": "AZ-900",
+    "subject": "Governance",
+    "question": "Which Azure service applies and evaluates organization-wide resource rules?",
+    "options": [
+      "Azure Policy",
+      "Azure Bastion",
+      "Azure Backup",
+      "Azure Files"
+    ],
+    "correct_option": "A",
+    "explanation": "Azure Policy evaluates resource properties against assigned policy definitions and can deny noncompliant configurations.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-AZ900-003",
+    "exam_code": "AZ-900",
+    "subject": "Cost Management",
+    "question": "Which tool helps estimate Azure service costs before deployment?",
+    "options": [
+      "Azure Pricing Calculator",
+      "Azure Key Vault",
+      "Azure Advisor alerts only",
+      "Azure Traffic Manager"
+    ],
+    "correct_option": "A",
+    "explanation": "The Azure Pricing Calculator estimates service charges based on selected configurations and projected usage.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-AZ900-004",
+    "exam_code": "AZ-900",
+    "subject": "Resilience",
+    "question": "What describes a region pair in Azure?",
+    "options": [
+      "Two regions in the same or nearby geography linked for disaster recovery considerations",
+      "Two virtual machines in one availability set",
+      "A subscription's two owners",
+      "Two disks in one VM"
+    ],
+    "correct_option": "A",
+    "explanation": "Azure region pairs are designated geographic pairs relevant to platform recovery and update sequencing; not every region has a pair.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-AZ900-005",
+    "exam_code": "AZ-900",
+    "subject": "Storage",
+    "question": "Which storage service is best suited for unstructured object data such as images?",
+    "options": [
+      "Azure Blob Storage",
+      "Azure Queue Storage",
+      "Azure Files only",
+      "Azure SQL Database"
+    ],
+    "correct_option": "A",
+    "explanation": "Azure Blob Storage is object storage optimized for large quantities of unstructured data.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-AZ900-006",
+    "exam_code": "AZ-900",
+    "subject": "Networking",
+    "question": "Which Azure network feature provides a private network boundary for deployed resources?",
+    "options": [
+      "Virtual network",
+      "Azure Monitor workbook",
+      "Resource group tag",
+      "Cost alert"
+    ],
+    "correct_option": "A",
+    "explanation": "An Azure virtual network provides isolated address space and networking for supported Azure resources.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-AZ900-007",
+    "exam_code": "AZ-900",
+    "subject": "Security",
+    "question": "Which cloud service manages cryptographic keys and application secrets?",
+    "options": [
+      "Azure Key Vault",
+      "Azure Load Balancer",
+      "Azure Front Door",
+      "Azure Data Explorer"
+    ],
+    "correct_option": "A",
+    "explanation": "Azure Key Vault is designed to securely manage keys, certificates and secrets.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-AZ900-008",
+    "exam_code": "AZ-900",
+    "subject": "Governance",
+    "question": "What is the purpose of an Azure resource group?",
+    "options": [
+      "A logical container for resources with shared lifecycle management",
+      "A required physical data centre",
+      "A billing credit balance",
+      "A replacement for authentication"
+    ],
+    "correct_option": "A",
+    "explanation": "A resource group is a management container for Azure resources, allowing collective organization and lifecycle operations.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-AWSCLFC02-001",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Security",
+    "question": "Which AWS service records account API activity for auditing?",
+    "options": [
+      "Amazon CloudWatch Logs only",
+      "AWS CloudTrail",
+      "Amazon Route 53",
+      "AWS Glue"
+    ],
+    "correct_option": "B",
+    "explanation": "AWS CloudTrail records supported API activity and account events for audit and security analysis.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-AWSCLFC02-002",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Storage",
+    "question": "Which AWS storage option is designed for durable object storage?",
+    "options": [
+      "Amazon S3",
+      "Amazon EBS only",
+      "Amazon EC2 instance memory",
+      "AWS IAM"
+    ],
+    "correct_option": "A",
+    "explanation": "Amazon S3 is a highly durable object storage service accessed through buckets and object keys.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-AWSCLFC02-003",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Networking",
+    "question": "Which service distributes network traffic across healthy application targets?",
+    "options": [
+      "AWS Elastic Load Balancing",
+      "AWS CloudFormation",
+      "AWS Organizations",
+      "Amazon Inspector"
+    ],
+    "correct_option": "A",
+    "explanation": "Elastic Load Balancing routes incoming requests among healthy configured targets.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-AWSCLFC02-004",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Cost",
+    "question": "Which pricing approach generally charges for consumed cloud capacity without a long-term commitment?",
+    "options": [
+      "On-Demand",
+      "Reserved Instances only",
+      "Savings Plans only",
+      "Dedicated Hosts only"
+    ],
+    "correct_option": "A",
+    "explanation": "On-Demand pricing generally lets customers pay for resources as used without a fixed-term purchase commitment.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-AWSCLFC02-005",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Identity",
+    "question": "What is the recommended AWS approach for granting an application temporary permissions?",
+    "options": [
+      "Hard-code root account credentials",
+      "Use an IAM role",
+      "Share a permanent administrator access key",
+      "Disable signing"
+    ],
+    "correct_option": "B",
+    "explanation": "IAM roles provide temporary credentials with scoped permissions and avoid long-lived shared secrets.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-AWSCLFC02-006",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Reliability",
+    "question": "What is an AWS Availability Zone?",
+    "options": [
+      "An isolated location within an AWS Region",
+      "A separate billing account",
+      "A dedicated IAM permission",
+      "A global DNS record"
+    ],
+    "correct_option": "A",
+    "explanation": "An Availability Zone is one or more data centres in a region with independent infrastructure characteristics.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-AWSCLFC02-007",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Compute",
+    "question": "Which AWS service executes code in response to events without managing servers?",
+    "options": [
+      "AWS Lambda",
+      "Amazon EBS",
+      "AWS Direct Connect",
+      "Amazon Route 53"
+    ],
+    "correct_option": "A",
+    "explanation": "AWS Lambda runs event-driven code while AWS manages the underlying compute infrastructure.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-AWSCLFC02-008",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Databases",
+    "question": "Which AWS managed service offers relational database engines?",
+    "options": [
+      "Amazon RDS",
+      "Amazon S3 Glacier",
+      "AWS CloudTrail",
+      "Amazon CloudFront"
+    ],
+    "correct_option": "A",
+    "explanation": "Amazon RDS is a managed relational database service supporting several database engines.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-CompTIAA-001",
+    "exam_code": "CompTIA-A+",
+    "subject": "Networking",
+    "question": "Which command can display local IP configuration on a Windows PC?",
+    "options": [
+      "ipconfig",
+      "format",
+      "chkdsk",
+      "taskkill"
+    ],
+    "correct_option": "A",
+    "explanation": "The ipconfig command displays configured IP addresses and adapters on Windows.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-CompTIAA-002",
+    "exam_code": "CompTIA-A+",
+    "subject": "Hardware",
+    "question": "Which internal component stores firmware used to initialize a modern PC?",
+    "options": [
+      "UEFI firmware flash memory",
+      "CPU cache only",
+      "Display panel",
+      "Mechanical fan"
+    ],
+    "correct_option": "A",
+    "explanation": "UEFI firmware is typically stored in nonvolatile flash memory on the motherboard.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-CompTIAA-003",
+    "exam_code": "CompTIA-A+",
+    "subject": "Security",
+    "question": "What is the strongest first response to a suspected phishing email?",
+    "options": [
+      "Open the attachment to inspect it",
+      "Report it and avoid clicking its links",
+      "Forward it to all contacts",
+      "Reply with a password"
+    ],
+    "correct_option": "B",
+    "explanation": "Reporting the email through approved channels without opening links or attachments reduces phishing exposure.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-CompTIAA-004",
+    "exam_code": "CompTIA-A+",
+    "subject": "Troubleshooting",
+    "question": "A monitor says 'No Signal' while the PC appears powered on. Which check is a sensible first step?",
+    "options": [
+      "Verify display cable and selected input",
+      "Replace the CPU immediately",
+      "Reinstall all applications",
+      "Disable the firewall"
+    ],
+    "correct_option": "A",
+    "explanation": "Checking cable connections and the monitor's selected input is a low-risk first diagnostic step.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-CompTIAA-005",
+    "exam_code": "CompTIA-A+",
+    "subject": "Storage",
+    "question": "Which type of drive has no moving mechanical platters?",
+    "options": [
+      "Solid-state drive",
+      "Traditional hard disk drive",
+      "Optical DVD drive",
+      "Magnetic tape drive"
+    ],
+    "correct_option": "A",
+    "explanation": "Solid-state drives store data in flash memory rather than rotating magnetic platters.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-CompTIAA-006",
+    "exam_code": "CompTIA-A+",
+    "subject": "Operating Systems",
+    "question": "Which Windows utility shows currently running processes and resource use?",
+    "options": [
+      "Task Manager",
+      "Disk Cleanup only",
+      "Notepad",
+      "Character Map"
+    ],
+    "correct_option": "A",
+    "explanation": "Task Manager displays processes, performance metrics and active resource utilization.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-CompTIAA-007",
+    "exam_code": "CompTIA-A+",
+    "subject": "Security",
+    "question": "Why should endpoint operating system updates be applied promptly?",
+    "options": [
+      "They always increase disk capacity",
+      "They can patch known security vulnerabilities",
+      "They eliminate the need for backups",
+      "They guarantee no future malware"
+    ],
+    "correct_option": "B",
+    "explanation": "Vendor updates often fix security vulnerabilities and stability issues; prompt testing and deployment reduce exposure.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-CompTIAA-008",
+    "exam_code": "CompTIA-A+",
+    "subject": "Networking",
+    "question": "Which protocol typically provides automatic IPv4 address configuration on a local network?",
+    "options": [
+      "DHCP",
+      "HTTPS",
+      "SMTP",
+      "FTP"
+    ],
+    "correct_option": "A",
+    "explanation": "The Dynamic Host Configuration Protocol leases IPv4 address settings and related network information.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-GCPCDL-001",
+    "exam_code": "GCP-CDL",
+    "subject": "Cloud Concepts",
+    "question": "Which describes a Google Cloud project?",
+    "options": [
+      "A resource and administrative boundary for services, IAM and billing association",
+      "A physical data centre only",
+      "A user password manager",
+      "A single virtual machine"
+    ],
+    "correct_option": "A",
+    "explanation": "A Google Cloud project groups resources and establishes key boundaries for service activation and access control.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-GCPCDL-002",
+    "exam_code": "GCP-CDL",
+    "subject": "Security",
+    "question": "Which Google Cloud feature grants permissions to principals on resources?",
+    "options": [
+      "IAM",
+      "Cloud DNS",
+      "Cloud Storage lifecycle",
+      "BigQuery SQL"
+    ],
+    "correct_option": "A",
+    "explanation": "Identity and Access Management assigns roles containing permissions to users and workloads.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-GCPCDL-003",
+    "exam_code": "GCP-CDL",
+    "subject": "Compute",
+    "question": "Which managed service runs containerized applications without managing servers?",
+    "options": [
+      "Cloud Run",
+      "Cloud Storage",
+      "Cloud DNS",
+      "Cloud Interconnect"
+    ],
+    "correct_option": "A",
+    "explanation": "Cloud Run provides managed execution of containerized workloads with scaling handled by the platform.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-GCPCDL-004",
+    "exam_code": "GCP-CDL",
+    "subject": "Data",
+    "question": "Which Google Cloud product is designed for analytical SQL on large datasets?",
+    "options": [
+      "BigQuery",
+      "Cloud Armor",
+      "Cloud CDN",
+      "Cloud NAT"
+    ],
+    "correct_option": "A",
+    "explanation": "BigQuery is a managed analytics platform supporting SQL-based analysis at scale.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-GCPCDL-005",
+    "exam_code": "GCP-CDL",
+    "subject": "Storage",
+    "question": "Which Google Cloud service provides object storage in buckets?",
+    "options": [
+      "Cloud Storage",
+      "Cloud SQL",
+      "Cloud Functions",
+      "VPC"
+    ],
+    "correct_option": "A",
+    "explanation": "Cloud Storage stores objects in buckets and supports access and lifecycle policies.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-GCPCDL-006",
+    "exam_code": "GCP-CDL",
+    "subject": "Operations",
+    "question": "Which service collects telemetry and supports alerts for Google Cloud workloads?",
+    "options": [
+      "Cloud Monitoring",
+      "Cloud Build",
+      "Artifact Registry",
+      "Cloud DNS"
+    ],
+    "correct_option": "A",
+    "explanation": "Cloud Monitoring provides metrics, dashboards, alerting and observability integrations.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-GCPCDL-007",
+    "exam_code": "GCP-CDL",
+    "subject": "Networking",
+    "question": "Which resource defines a logically isolated network for Google Cloud instances?",
+    "options": [
+      "VPC network",
+      "Cloud Scheduler job",
+      "Billing budget",
+      "Cloud Storage bucket"
+    ],
+    "correct_option": "A",
+    "explanation": "A Virtual Private Cloud network provides logical network boundaries and routing for supported resources.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "EXP-GCPCDL-008",
+    "exam_code": "GCP-CDL",
+    "subject": "Pricing",
+    "question": "Why is a cloud billing budget useful?",
+    "options": [
+      "It automatically blocks all charges",
+      "It provides spending visibility and configurable alerts",
+      "It replaces IAM",
+      "It guarantees free usage"
+    ],
+    "correct_option": "B",
+    "explanation": "Billing budgets support thresholds and notifications but do not automatically cap all service consumption.",
+    "review_status": "needs_review"
   }
 ]

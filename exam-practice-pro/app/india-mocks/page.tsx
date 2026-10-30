@@ -46,7 +46,7 @@ function Catalogue() {
     if (!tests) return [];
     if (filter === 'all') return tests;
     if (filter === 'topic') return tests.filter((t) => t.kind === 'topic');
-    return tests.filter((t) => t.kind === 'mock' && t.exam === filter);
+    return tests.filter((t) => t.exam === filter);
   }, [tests, filter]);
 
   const setFilter = (id: string) => router.replace(id === 'all' ? '/india-mocks' : `/india-mocks?exam=${encodeURIComponent(id)}`, { scroll: false });

@@ -1,0 +1,440 @@
+{
+  "railways-rrb": [
+    {
+      "question": "A train covers 360 kilometres in 6 hours without stops. What is its average speed?",
+      "options": [
+        "50 km/h",
+        "55 km/h",
+        "60 km/h",
+        "65 km/h"
+      ],
+      "answer": 2,
+      "explanation": "Average speed equals distance divided by time: 360 ÷ 6 = 60 kilometres per hour.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "A passenger train leaves at 09:45 and arrives at 13:20. How long was the journey?",
+      "options": [
+        "3 hours 15 minutes",
+        "3 hours 25 minutes",
+        "3 hours 35 minutes",
+        "3 hours 45 minutes"
+      ],
+      "answer": 2,
+      "explanation": "From 09:45 to 12:45 is three hours; the remaining interval to 13:20 is 35 minutes.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "What does a red signal normally instruct a train driver to do?",
+      "options": [
+        "Increase speed",
+        "Stop",
+        "Sound the horn continuously",
+        "Change tracks"
+      ],
+      "answer": 1,
+      "explanation": "A red railway signal indicates danger and instructs a driver not to pass without specific authorization.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which device is generally used to change a train from one railway track to another at a junction?",
+      "options": [
+        "Railway switch or points",
+        "Pantograph",
+        "Axle box",
+        "Buffer"
+      ],
+      "answer": 0,
+      "explanation": "Points, also called a railway switch, guide wheel flanges from one route to another.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "A 150 m train crosses a 250 m platform in 20 seconds. What is its speed?",
+      "options": [
+        "54 km/h",
+        "60 km/h",
+        "72 km/h",
+        "90 km/h"
+      ],
+      "answer": 2,
+      "explanation": "The train travels its own length plus the platform length, 400 m in 20 seconds: 20 m/s or 72 km/h.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "How many wheels does a conventional four-axle railway coach have?",
+      "options": [
+        "4",
+        "6",
+        "8",
+        "10"
+      ],
+      "answer": 2,
+      "explanation": "Each of four axles carries two wheels, giving eight wheels in total.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "A station has 5 platforms, and each accommodates 2 trains per hour. What is the maximum theoretical total per hour?",
+      "options": [
+        "5",
+        "7",
+        "10",
+        "12"
+      ],
+      "answer": 2,
+      "explanation": "With independent platforms and no other constraints, 5 multiplied by 2 yields 10 trains per hour.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which instrument measures electric current in an electrical circuit?",
+      "options": [
+        "Voltmeter",
+        "Ammeter",
+        "Barometer",
+        "Thermometer"
+      ],
+      "answer": 1,
+      "explanation": "An ammeter is connected to measure current, expressed in amperes.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "What is 40 percent of 350 tickets?",
+      "options": [
+        "120",
+        "130",
+        "140",
+        "150"
+      ],
+      "answer": 2,
+      "explanation": "Forty percent of 350 equals 0.4 times 350, which is 140 tickets.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "In a railway timetable, 18:30 in 24-hour format corresponds to which 12-hour time?",
+      "options": [
+        "6:30 AM",
+        "8:30 PM",
+        "6:30 PM",
+        "7:30 PM"
+      ],
+      "answer": 2,
+      "explanation": "Subtract 12 from the hour 18 to obtain 6, so 18:30 is 6:30 PM.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "A freight train travels 90 km at 45 km/h. How long does it take?",
+      "options": [
+        "1 hour",
+        "2 hours",
+        "2.5 hours",
+        "3 hours"
+      ],
+      "answer": 1,
+      "explanation": "Travel time equals distance divided by speed: 90 ÷ 45 = 2 hours.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which direction lies directly opposite north-east?",
+      "options": [
+        "North-west",
+        "South-east",
+        "South-west",
+        "East"
+      ],
+      "answer": 2,
+      "explanation": "South-west is 180 degrees opposite north-east on the compass.",
+      "difficulty": "Moderate"
+    }
+  ],
+  "banking-ibps": [
+    {
+      "question": "A depositor invests ₹12,000 at 5% simple interest for 2 years. What interest is earned?",
+      "options": [
+        "₹1,000",
+        "₹1,200",
+        "₹1,500",
+        "₹2,000"
+      ],
+      "answer": 1,
+      "explanation": "Simple interest equals 12,000 times 5 times 2 divided by 100, or ₹1,200.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "If a bank's savings interest rate is 4% annually, how much one-year simple interest does ₹5,000 earn?",
+      "options": [
+        "₹150",
+        "₹200",
+        "₹250",
+        "₹300"
+      ],
+      "answer": 1,
+      "explanation": "Four percent of ₹5,000 equals ₹200 for one year under simple interest.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "What does KYC primarily stand for in banking compliance?",
+      "options": [
+        "Know Your Customer",
+        "Keep Your Currency",
+        "Key Yield Calculation",
+        "Knowledge Yearly Credit"
+      ],
+      "answer": 0,
+      "explanation": "Know Your Customer describes identity verification and due-diligence processes for financial customers.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "A cash counter starts with ₹50,000, receives ₹18,000 and pays ₹23,000. What is the closing balance?",
+      "options": [
+        "₹43,000",
+        "₹45,000",
+        "₹47,000",
+        "₹49,000"
+      ],
+      "answer": 1,
+      "explanation": "Closing cash is 50,000 + 18,000 − 23,000 = ₹45,000.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which account type is commonly designed for frequent business transactions?",
+      "options": [
+        "Current account",
+        "Fixed deposit",
+        "Recurring deposit",
+        "Public provident fund"
+      ],
+      "answer": 0,
+      "explanation": "Current accounts are generally intended for frequent transactions in business operations.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "A borrower repays ₹8,400 on a ₹8,000 one-year loan. What simple annual interest rate was charged?",
+      "options": [
+        "4%",
+        "5%",
+        "6%",
+        "8%"
+      ],
+      "answer": 1,
+      "explanation": "Interest equals ₹400; divide by principal ₹8,000 and multiply by 100 to obtain 5%.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "What is the main purpose of two-factor authentication in digital banking?",
+      "options": [
+        "Speed up statements",
+        "Add an independent login verification factor",
+        "Remove transaction logs",
+        "Reduce branch opening hours"
+      ],
+      "answer": 1,
+      "explanation": "Two-factor authentication requires evidence from different authentication factors to strengthen account access.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "A cheque returned because the account has insufficient balance is commonly called what?",
+      "options": [
+        "Crossed cheque",
+        "Dishonoured cheque",
+        "Traveller's cheque",
+        "Demand draft"
+      ],
+      "answer": 1,
+      "explanation": "A cheque unpaid by the bank for insufficient funds is dishonoured; other reasons can also cause dishonour.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which metric is calculated as non-performing loans divided by gross advances?",
+      "options": [
+        "Gross NPA ratio",
+        "Price-earnings ratio",
+        "Operating margin",
+        "Current ratio"
+      ],
+      "answer": 0,
+      "explanation": "The gross NPA ratio compares gross non-performing assets with total gross advances.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "A bank sells foreign currency at ₹84 per unit. How much do 50 units cost before fees?",
+      "options": [
+        "₹4,000",
+        "₹4,100",
+        "₹4,200",
+        "₹4,300"
+      ],
+      "answer": 2,
+      "explanation": "Multiply the unit rate ₹84 by 50 foreign-currency units, yielding ₹4,200.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which payment system acronym in India expands to National Electronic Funds Transfer?",
+      "options": [
+        "NEFT",
+        "RTGS",
+        "IMPS",
+        "UPI"
+      ],
+      "answer": 0,
+      "explanation": "NEFT stands for National Electronic Funds Transfer, a domestic electronic transfer system.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "A deposit grows from ₹20,000 to ₹22,000. What percentage increase occurred?",
+      "options": [
+        "8%",
+        "9%",
+        "10%",
+        "12%"
+      ],
+      "answer": 2,
+      "explanation": "The gain is ₹2,000, which is 2,000/20,000×100=10%.",
+      "difficulty": "Moderate"
+    }
+  ],
+  "upsc-gs": [
+    {
+      "question": "Which part of India's Constitution contains the Directive Principles of State Policy?",
+      "options": [
+        "Part II",
+        "Part III",
+        "Part IV",
+        "Part V"
+      ],
+      "answer": 2,
+      "explanation": "The Directive Principles of State Policy appear in Part IV of the Indian Constitution.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "The Western Ghats run mainly parallel to which Indian coastline?",
+      "options": [
+        "Eastern coast",
+        "Western coast",
+        "Northern coastline",
+        "Andaman coastline"
+      ],
+      "answer": 1,
+      "explanation": "The Western Ghats extend close to India's western coast, roughly parallel to the Arabian Sea.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which constitutional body conducts elections to Parliament in India?",
+      "options": [
+        "Finance Commission",
+        "Election Commission of India",
+        "Union Public Service Commission",
+        "NITI Aayog"
+      ],
+      "answer": 1,
+      "explanation": "The Election Commission of India is the constitutional authority for national and state legislative elections.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which process converts atmospheric nitrogen into forms usable by plants?",
+      "options": [
+        "Nitrogen fixation",
+        "Photosynthesis",
+        "Transpiration",
+        "Denitrification"
+      ],
+      "answer": 0,
+      "explanation": "Nitrogen fixation converts atmospheric N₂ into biologically usable nitrogen compounds.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which historical inscription is associated with Emperor Ashoka?",
+      "options": [
+        "Rock Edicts",
+        "Allahabad Pillar inscription of Samudragupta",
+        "Aihole inscription",
+        "Hathigumpha inscription"
+      ],
+      "answer": 0,
+      "explanation": "Ashoka issued numerous rock and pillar edicts conveying policies and ethical teachings.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which ocean current is generally warm?",
+      "options": [
+        "Labrador Current",
+        "Canary Current",
+        "Gulf Stream",
+        "Peru Current"
+      ],
+      "answer": 2,
+      "explanation": "The Gulf Stream carries relatively warm water northeastward across the North Atlantic.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "What does fiscal deficit broadly represent in a government budget?",
+      "options": [
+        "All tax receipts",
+        "Total expenditure less total receipts excluding borrowings",
+        "Total exports minus imports",
+        "Currency in circulation"
+      ],
+      "answer": 1,
+      "explanation": "Fiscal deficit is total expenditure minus revenue and non-debt capital receipts; it indicates borrowing requirements.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which gas is chiefly responsible for ozone depletion under the Montreal Protocol's controlled substances?",
+      "options": [
+        "Nitrogen",
+        "CFCs",
+        "Oxygen",
+        "Argon"
+      ],
+      "answer": 1,
+      "explanation": "Chlorofluorocarbons release chlorine in the stratosphere, catalyzing ozone destruction.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which Indian institution publishes the Consumer Price Index for All India on a regular basis?",
+      "options": [
+        "National Statistical Office",
+        "Supreme Court",
+        "Election Commission",
+        "Comptroller and Auditor General"
+      ],
+      "answer": 0,
+      "explanation": "The National Statistical Office, under MoSPI, compiles and publishes India's consumer price indices.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "An ecosystem's primary producers generally obtain energy from which source?",
+      "options": [
+        "Other animals",
+        "Sunlight",
+        "Fossil fuels",
+        "Soil minerals alone"
+      ],
+      "answer": 1,
+      "explanation": "Photosynthetic primary producers capture sunlight and convert it to stored chemical energy.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "The phrase 'separation of powers' refers primarily to what?",
+      "options": [
+        "Division among legislature, executive and judiciary",
+        "Division between cities and villages",
+        "Allocation of income taxes",
+        "Division between oceans"
+      ],
+      "answer": 0,
+      "explanation": "Separation of powers describes allocation of governing functions across legislative, executive and judicial institutions.",
+      "difficulty": "Moderate"
+    },
+    {
+      "question": "Which river flows into the Bay of Bengal?",
+      "options": [
+        "Narmada",
+        "Tapi",
+        "Mahanadi",
+        "Luni"
+      ],
+      "answer": 2,
+      "explanation": "The Mahanadi flows eastward and empties into the Bay of Bengal, primarily via Odisha.",
+      "difficulty": "Moderate"
+    }
+  ]
+}

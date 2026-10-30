@@ -11,6 +11,7 @@ export const IT_CERTS = [
   { id: 'az-900', code: 'AZ-900', name: 'Microsoft AZ-900' },
   { id: 'aws-cloud-practitioner', code: 'AWS-CLF-C02', name: 'AWS Cloud Practitioner' },
   { id: 'comptia-a-plus', code: 'CompTIA-A+', name: 'CompTIA A+' },
+  { id: 'google-cloud-digital-leader', code: 'GCP-CDL', name: 'Google Cloud Digital Leader' },
 ] as const;
 
 const LETTERS = ['A', 'B', 'C', 'D'];
