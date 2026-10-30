@@ -47,7 +47,9 @@ test('pipeline routes have human-auth and staging-only read-only previews',()=>{
  assert.match(routes,/router\.post\('\/content-pipeline\/preview',requireHumanReviewer/);
  assert.match(routes,/router\.get\('\/content-pipeline\/dashboard',requireHumanReviewer/);
  assert.match(service,/gate\.enabled\(\)/);
- assert.doesNotMatch(service,/INSERT INTO|UPDATE mock_|DELETE FROM/);
+ assert.match(service,/VALUES\(\$1,\$2,\$3,false\)/);
+ assert.match(service,/50,false\)/);
+ assert.doesNotMatch(service,/UPDATE mock_tests SET active|UPDATE mock_topics SET active|DELETE FROM/);
 });
 
 test('draft creation is refused when staging feature gate is disabled',async()=>{
