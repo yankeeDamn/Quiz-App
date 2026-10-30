@@ -8,6 +8,7 @@ import { admin, type AdminTest, type AdminTopic, type TestSection } from '@/lib/
 import { Field, Notice, card, input } from '@/components/admin/ui';
 import { MockReview } from '@/components/admin/mock-review';
 import { MockReleaseReadiness } from '@/components/admin/mock-release-readiness';
+import { BetaInvitePanel } from '@/components/admin/beta-invite-panel';
 
 interface Draft {
   id: string;
@@ -137,6 +138,7 @@ export function TestsTab() {
         </div>
       </section>
 
+      {draftTestingEnabled && <BetaInvitePanel />}
       {readinessId && <MockReleaseReadiness key={readinessId} testId={readinessId} onClose={()=>setReadinessId(null)} />}
       {reviewId && <MockReview key={reviewId} testId={reviewId} onClose={()=>setReviewId(null)} />}
 
