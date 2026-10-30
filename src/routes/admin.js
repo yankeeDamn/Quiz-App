@@ -19,6 +19,7 @@ const betaFeedback = require('../services/beta-feedback.service');
 const { isFullCglMock } = require('../services/ssc-full-mock-classifier');
 const accommodations = require('../services/ssc-accommodations.service');
 const importer = require('../services/question-import');
+const cglPipeline = require('../services/ssc-content-pipeline.service');
 const { PAID_PLANS, MAX_MONTHS, isPlanActive } = require('../services/plan.service');
 
 const EMAIL_OPTS = { gmail_remove_dots: false, gmail_remove_subaddress: false, gmail_convert_googlemaildotcom: false };
@@ -301,6 +302,18 @@ router.get('/beta/feedback',requireHumanReviewer,wrap(async(req,res)=>ok(res,awa
 router.put('/beta/feedback/:id/status',requireHumanReviewer,wrap(async(req,res)=>ok(res,await betaFeedback.status(req.params.id,req.body?.status))));
 router.get('/beta/audit',requireHumanReviewer,wrap(async(req,res)=>ok(res,await betaFeedback.audit())));
 router.get('/beta/release-signoff/:testId',requireHumanReviewer,wrap(async(req,res)=>ok(res,await betaFeedback.release(req.params.testId))));
+// Staging-only, human admin validation and explicit inactive draft creation.
+router.post('/content-pipeline/preview',requireHumanReviewer,wrap(async(req,res)=>{
+ return ok(res,await cglPipeline.preview(req.body?.number,req.body?.questions));
+}));
+router.post('/content-pipeline/stage-draft',requireHumanReviewer,wrap(async(req,res)=>{
+ if(req.body?.confirmDraftOnly!==true)return bad(res,'Explicit draft-only confirmation required.',400);
+ return ok(res,await cglPipeline.stage(req.body?.number,req.body?.questions));
+}));
+router.get('/content-pipeline/dashboard',requireHumanReviewer,wrap(async(req,res)=>{
+ return ok(res,await cglPipeline.dashboard());
+}));
+
 // ── Mock tests ─────────────────────────────────────────
 
 router.get('/tests', wrap(async (_req, res) => ok(res, { tests: await content.listTests() })));
