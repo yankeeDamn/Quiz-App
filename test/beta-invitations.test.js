@@ -26,7 +26,7 @@ test('staging gate cannot be enabled with production origin or environment',asyn
 });
 test('create validates email and bounded expiry, stores only code hash',async()=>{
  const written=[];
- db.query=async(sql,params)=>{written.push({sql,params});return {rowCount:1,rows:[]};};
+ db.query=async(sql,params)=>{written.push({sql,params});return {rowCount:1,rows:[{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'}]};};
  await assert.rejects(invitations.create('not-an-email',24,'reviewer@example.test'),e=>e.statusCode===400);
  await assert.rejects(invitations.create('student@example.test',200,'reviewer@example.test'),e=>e.statusCode===400);
  const invitation=await invitations.create('Student@Example.Test',48,'reviewer@example.test');
