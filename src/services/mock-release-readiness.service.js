@@ -15,6 +15,22 @@ async function report(testId){
  const hindi={verified:reviews.hindiVerified,required:reviews.hindiRequired};
  const stale=reviews.entries.filter(e=>e.stale).length;
  const missing=Math.max(0,reviews.expected-reviews.actual);
+ // Show exactly which section still needs human review, without exposing
+ // question text, answer keys, reviewer identities or generated Hindi drafts.
+ const byTopic=new Map();
+ for(const entry of reviews.entries){
+  const id=String(entry.topicId||'unknown');
+  if(!byTopic.has(id))byTopic.set(id,{topicId:id,questions:0,academicApproved:0,hindiRequired:0,hindiVerified:0,stale:0});
+  const group=byTopic.get(id);
+  group.questions++;
+  if(entry.academicStatus==='approved'&&!entry.stale)group.academicApproved++;
+  if(entry.hindiRequired){
+   group.hindiRequired++;
+   if(entry.hindiStatus==='verified'&&!entry.stale)group.hindiVerified++;
+  }
+  if(entry.stale)group.stale++;
+ }
+ const sections=[...byTopic.values()].sort((a,b)=>a.topicId.localeCompare(b.topicId));
  const editorialReady=reviews.ready&&reviews.expected===100&&reviews.hindiRequired===75&&stale===0;
  const checks=[
   {id:'bank',label:'All 100 configured question records present',passed:reviews.actual===100&&reviews.expected===100},
@@ -25,7 +41,7 @@ async function report(testId){
  ];
  return {
   testId,name:definition.name,draft:!definition.active,academic,hindi,
-  questions:{expected:reviews.expected,actual:reviews.actual,missing,stale},
+  questions:{expected:reviews.expected,actual:reviews.actual,missing,stale},sections,
   editorialReady,technicalReady:checks.every(c=>c.passed),
   // Human beta and security signoffs cannot be inferred from database rows.
   humanSignoffRequired:true,publicationPerformed:false,
