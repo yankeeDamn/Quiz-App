@@ -16,10 +16,10 @@ async function create(email,hours,by){
   throw fail('Valid verified email required.',400);
  if(!Number.isInteger(hours)||hours<1||hours>168)throw fail('Expiry must be 1–168 hours.',400);
  const token=crypto.randomBytes(32).toString('hex');
- await db.query(`INSERT INTO exam_beta_invitations(test_id,email,token_hash,expires_at,created_by)
-  VALUES($1,$2,$3,NOW()+($4*INTERVAL '1 hour'),$5)`,
+ const inserted=await db.query(`INSERT INTO exam_beta_invitations(test_id,email,token_hash,expires_at,created_by)
+  VALUES($1,$2,$3,NOW()+($4*INTERVAL '1 hour'),$5) RETURNING id`,
  [TEST_ID,normalized,digest(token),hours,by]);
- return {invitationCode:token,expiresInHours:hours,testId:TEST_ID,email:normalized};
+ return {invitationId:inserted.rows[0].id,invitationCode:token,expiresInHours:hours,testId:TEST_ID,email:normalized};
 }
 async function redeem(user,code){
  ensureStaging();
