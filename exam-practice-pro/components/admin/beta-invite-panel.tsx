@@ -6,13 +6,14 @@ export function BetaInvitePanel(){
  const [email,setEmail]=useState('');
  const [hours,setHours]=useState(48);
  const [code,setCode]=useState('');
+ const [invitationId,setInvitationId]=useState('');
  const [message,setMessage]=useState('');
  const [working,setWorking]=useState(false);
  const create=async(e:React.FormEvent)=>{
   e.preventDefault();setWorking(true);setCode('');setMessage('');
-  const result=await admin<{invitationCode:string;email:string;expiresInHours:number}>('/beta/invitations','POST',{email,hours});
+  const result=await admin<{invitationId:string;invitationCode:string;email:string;expiresInHours:number}>('/beta/invitations','POST',{email,hours});
   setWorking(false);
-  if(result.ok){setCode(result.data.invitationCode);setMessage('Created for '+result.data.email+'. Copy and share privately; this code is shown once.');}
+  if(result.ok){setInvitationId(result.data.invitationId);setCode(result.data.invitationCode);setMessage('Created for '+result.data.email+'. Copy and share privately; this code is shown once.');}
   else setMessage(result.message);
  };
  return <section className="space-y-3 rounded-xl border p-5" aria-label="Staging beta invitations">
@@ -27,8 +28,15 @@ export function BetaInvitePanel(){
   {code&&<div className="space-y-2 rounded border p-3">
    <label className="block text-xs font-medium">One-time display — private code</label>
    <code className="block break-all text-xs">{code}</code>
+   <p className="text-xs">Invitation ID (for revocation): <code>{invitationId}</code></p>
    <button type="button" className="rounded border px-3 py-2 text-sm" onClick={()=>void navigator.clipboard.writeText(code)}>Copy code</button>
    <p className="text-xs">Invitee signs in at /exampro/beta/mock-01 and redeems this code.</p>
+   <button type="button" className="rounded border px-3 py-2 text-sm" onClick={async()=>{
+    if(!window.confirm('Revoke this invitation immediately?'))return;
+    const result=await admin('/beta/invitations/'+encodeURIComponent(invitationId)+'/revoke','POST');
+    setMessage(result.ok?'Invitation revoked.':'Unable to revoke: '+result.message);
+    if(result.ok){setCode('');setInvitationId('');}
+   }}>Revoke this invitation</button>
   </div>}
  </section>;
 }
