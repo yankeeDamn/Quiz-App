@@ -301,6 +301,10 @@ router.post('/beta/invitations/:id/revoke',requireHumanReviewer,wrap(async(req,r
 router.post('/content-pipeline/preview',requireHumanReviewer,wrap(async(req,res)=>{
  return ok(res,await cglPipeline.preview(req.body?.number,req.body?.questions));
 }));
+router.post('/content-pipeline/stage-draft',requireHumanReviewer,wrap(async(req,res)=>{
+ if(req.body?.confirmDraftOnly!==true)return bad(res,'Explicit draft-only confirmation required.',400);
+ return ok(res,await cglPipeline.stage(req.body?.number,req.body?.questions));
+}));
 router.get('/content-pipeline/dashboard',requireHumanReviewer,wrap(async(req,res)=>{
  return ok(res,await cglPipeline.dashboard());
 }));
