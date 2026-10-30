@@ -3,6 +3,7 @@ const {Router}=require('express');
 const {authenticateNextAuth}=require('../middleware/nextauth');
 const invitations=require('../services/beta-invitations.service');
 const exams=require('../services/exam-attempts.service');
+const feedback=require('../services/beta-feedback.service');
 const router=Router();
 const wrap=fn=>(req,res,next)=>Promise.resolve(fn(req,res)).catch(next);
 const ok=(res,data)=>res.json({success:true,data});
@@ -36,4 +37,5 @@ router.post('/attempts/:id/submit',wrap(async(req,res)=>{
  await getScoped(req);
  return ok(res,{attempt:await exams.save(req.user.id,req.params.id,req.body?.responses,true,true)});
 }));
+router.post('/feedback',wrap(async(req,res)=>ok(res,await feedback.submit(req.user,req.body))));
 module.exports=router;

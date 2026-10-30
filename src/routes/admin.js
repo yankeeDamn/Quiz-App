@@ -15,6 +15,7 @@ const draftGate = require('../services/draft-testing-gate');
 const quality = require('../services/mock-quality.service');
 const releaseReadiness = require('../services/mock-release-readiness.service');
 const betaInvitations = require('../services/beta-invitations.service');
+const betaFeedback = require('../services/beta-feedback.service');
 const { isFullCglMock } = require('../services/ssc-full-mock-classifier');
 const accommodations = require('../services/ssc-accommodations.service');
 const importer = require('../services/question-import');
@@ -297,7 +298,11 @@ router.post('/beta/invitations/:id/revoke',requireHumanReviewer,wrap(async(req,r
  return ok(res,await betaInvitations.revoke(req.params.id));
 }));
 
-// Staging, signed-in human admin only. These endpoints never write to DB.
+router.get('/beta/feedback',requireHumanReviewer,wrap(async(req,res)=>ok(res,await betaFeedback.list())));
+router.put('/beta/feedback/:id/status',requireHumanReviewer,wrap(async(req,res)=>ok(res,await betaFeedback.status(req.params.id,req.body?.status))));
+router.get('/beta/audit',requireHumanReviewer,wrap(async(req,res)=>ok(res,await betaFeedback.audit())));
+router.get('/beta/release-signoff/:testId',requireHumanReviewer,wrap(async(req,res)=>ok(res,await betaFeedback.release(req.params.testId))));
+// Staging-only, human admin validation and explicit inactive draft creation.
 router.post('/content-pipeline/preview',requireHumanReviewer,wrap(async(req,res)=>{
  return ok(res,await cglPipeline.preview(req.body?.number,req.body?.questions));
 }));

@@ -10,6 +10,7 @@ import { MockReview } from '@/components/admin/mock-review';
 import { MockReleaseReadiness } from '@/components/admin/mock-release-readiness';
 import { BetaInvitePanel } from '@/components/admin/beta-invite-panel';
 import { CglContentPipeline } from '@/components/admin/cgl-content-pipeline';
+import { BetaFeedbackDashboard } from '@/components/admin/beta-feedback-dashboard';
 
 interface Draft {
   id: string;
@@ -141,6 +142,7 @@ export function TestsTab() {
 
       {draftTestingEnabled && <CglContentPipeline />}
       {draftTestingEnabled && <BetaInvitePanel />}
+      {draftTestingEnabled && <BetaFeedbackDashboard />}
       {readinessId && <MockReleaseReadiness key={readinessId} testId={readinessId} onClose={()=>setReadinessId(null)} />}
       {reviewId && <MockReview key={reviewId} testId={reviewId} onClose={()=>setReviewId(null)} />}
 
