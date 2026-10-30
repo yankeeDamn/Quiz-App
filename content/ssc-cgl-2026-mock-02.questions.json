@@ -327,15 +327,15 @@
       "difficulty": "Moderate"
     },
     {
-      "question": "Which is the longest river entirely within India?",
+      "question": "Near which location in Maharashtra does the Godavari River originate?",
       "options": [
-        "Ganga",
-        "Brahmaputra",
-        "Godavari",
-        "Indus"
+        "Trimbakeshwar near Nashik",
+        "Mahabaleshwar near Satara",
+        "Amarkantak in Madhya Pradesh",
+        "Bhimashankar near Pune"
       ],
-      "answer": 2,
-      "explanation": "The Godavari is commonly identified as India's longest river flowing entirely within the country's territory.",
+      "answer": 0,
+      "explanation": "The Godavari rises near Trimbakeshwar in the Brahmagiri hills, close to Nashik in Maharashtra.",
       "difficulty": "Moderate"
     },
     {
