@@ -47,6 +47,7 @@ export function Header() {
           lang={language}>
             {t('quizzes')}
           </Link>
+          <Link href="/government-jobs" className="rounded-lg px-1 py-2 text-sm font-semibold text-indigo-700 transition-colors hover:text-indigo-900 dark:text-indigo-300">{t('govtJobs')}</Link>
           <Link href="/certifications" className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300"> {t('certifications')}</Link>
           <Link
             href="/india-mocks"
@@ -182,6 +183,7 @@ export function Header() {
                   ['/', 'quizzes'],
                   ['/exampro', 'examHall'],
                   ['/certifications', 'certifications'],
+                  ['/government-jobs', 'govtJobs'] as const,
                   ['/india-mocks', 'indiaMocks'],
                   ['/dashboard', 'dashboard'],
                   ['/institutes', 'institutes'],
