@@ -27,6 +27,7 @@ import {
 import { CodeExample, LessonMarkdown } from "./lesson-content";
 import { EbookShare } from "./ebook-share";
 import { EbookStudio } from "./ebook-studio";
+import { AttachedPdf, EbookPrintView } from "./ebook-pdf";
 import { EbookAssessment } from "./ebook-assessment";
 function ConceptCheck({
   chapter,
@@ -112,6 +113,7 @@ export function EbookReader(props: {
   slug: string;
   initialChapter?: string;
   resumeId?: string;
+  initialView?: string;
 }) {
   const { data: session } = useSession();
   const identity = session?.user?.email?.toLowerCase() || "guest";
@@ -127,13 +129,16 @@ function ReaderSession({
   slug,
   initialChapter,
   resumeId,
+  initialView,
   identity,
 }: {
   slug: string;
   initialChapter?: string;
   resumeId?: string;
+  initialView?: string;
   identity: string;
 }) {
+  const [view, setView] = useState(initialView || "interactive");
   const fallback = starterEbook(slug);
   const [book, setBook] = useState<EbookTrack | null>(fallback || null),
     [loading, setLoading] = useState(true),
@@ -323,6 +328,20 @@ function ReaderSession({
       </main>
     );
   if (!chapter) return null;
+  if (view === "pdf" || view === "cheatsheet")
+    return (
+      <main className="ebook-print-root mx-auto w-full max-w-4xl flex-1 p-6">
+        {book.allowPdfDownload === false && !book.permissions?.canEdit ? (
+          <p>Printing is disabled for this track.</p>
+        ) : (
+          <EbookPrintView
+            book={book}
+            cheatsheet={view === "cheatsheet"}
+            autoPrint={!loading}
+          />
+        )}
+      </main>
+    );
   return (
     <main className="w-full min-w-0 flex-1 bg-muted/15">
       <div className="mx-auto grid max-w-[1600px] min-w-0 xl:grid-cols-[230px_minmax(0,1fr)_210px]">
@@ -408,123 +427,174 @@ function ReaderSession({
           </div>
         </aside>
         <article className="min-w-0 bg-background px-5 py-8 sm:px-10 lg:px-14">
-          <nav
-            aria-label="Breadcrumb"
-            className="mb-7 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground"
-          >
-            <Link href="/certifications">Build your IT career</Link>
-            <span>›</span>
-            <Link href="/certifications?tab=start-learning">
-              Start Learning
-            </Link>
-            <span>›</span>
-            <span>{book.category}</span>
-            <span>› Chapter {index + 1}</span>
-          </nav>
-          {error && (
-            <p
-              role="status"
-              className="mb-6 rounded-xl border border-amber-300 p-4 text-xs leading-6"
+          <div className="mb-6 flex flex-wrap gap-2 ebook-print-tools">
+            <button
+              type="button"
+              className="rounded-lg border p-3 text-xs font-semibold"
+              onClick={() => setView("interactive")}
             >
-              {error}
-            </p>
-          )}
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">
-              Chapter {index + 1} of {book.chapters.length}
-            </p>
-            <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Clock3 className="h-3.5 w-3.5" />
-              {chapter.durationMinutes} min read
-            </span>
-          </div>
-          <h1
-            ref={titleRef}
-            tabIndex={-1}
-            className="mt-4 text-3xl font-bold leading-tight tracking-tight focus:outline-none sm:text-4xl"
-          >
-            {chapter.title}
-          </h1>
-          <p className="mt-4 border-b pb-7 text-base leading-8 text-muted-foreground">
-            {chapter.summary}
-          </p>
-          <div className="mt-6">
-            <LessonMarkdown content={chapter.contentMarkdown} />
-            {chapter.codeSnippet && (
-              <CodeExample key={chapter.id} {...chapter.codeSnippet} />
+              Interactive Tutorial Mode
+            </button>
+            {book.pdfUrl && (
+              <button
+                type="button"
+                className="rounded-lg border p-3 text-xs font-semibold"
+                onClick={() => setView("attached")}
+              >
+                PDF Ebook Viewer
+              </button>
             )}
-          </div>
-          <section className="mt-8 rounded-2xl border border-indigo-200 bg-indigo-50/60 p-6 dark:border-indigo-900 dark:bg-indigo-950/25">
-            <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">
-              Interview cheat-sheet
-            </p>
-            <h2 className="mt-2 text-xl font-bold">Key takeaways</h2>
-            <ul className="mt-4 space-y-3">
-              {chapter.keyTakeaways.map((tip, ti) => (
-                <li
-                  key={ti}
-                  className="flex items-start gap-3 text-sm leading-7"
+            {book.allowPdfDownload !== false && (
+              <>
+                <a
+                  className="rounded-lg border p-3 text-xs font-semibold"
+                  href={`/certifications/learn/${book.slug}?view=pdf`}
                 >
-                  <CheckCircle2 className="mt-1.5 h-4 w-4 shrink-0 text-indigo-600" />
-                  {tip}
-                </li>
-              ))}
-            </ul>
-          </section>
-          <ConceptCheck
-            key={chapter.id}
-            chapter={chapter}
-            complete={progress.completed.includes(chapter.id)}
-            onComplete={() => {
-              saveProgress({
-                ...progress,
-                completed: [...new Set([...progress.completed, chapter.id])],
-              });
-              if (index < book.chapters.length - 1) navigate(index + 1);
-              else setExam(true);
-            }}
-          />
-          <p role="status" className="mt-4 text-xs text-muted-foreground">
-            {status}
-          </p>
-          <div className="mt-6 flex justify-between gap-3">
+                  Download / Print PDF
+                </a>
+                {book.isCheatSheet && (
+                  <a
+                    className="rounded-lg border p-3 text-xs font-semibold"
+                    href={`/certifications/learn/${book.slug}?view=cheatsheet`}
+                  >
+                    2-page cheat-sheet
+                  </a>
+                )}
+              </>
+            )}
             <button
               type="button"
-              disabled={index === 0}
-              onClick={() => navigate(index - 1)}
-              className="min-h-10 text-sm font-semibold disabled:opacity-30"
+              className="rounded-lg border p-3 text-xs font-semibold"
+              onClick={() => setExam(true)}
             >
-              ← Previous chapter
-            </button>
-            <button
-              type="button"
-              disabled={index === book.chapters.length - 1}
-              onClick={() => navigate(index + 1)}
-              className="min-h-10 text-sm font-semibold disabled:opacity-30"
-            >
-              Next chapter →
+              Take Certification Exam
             </button>
           </div>
-          {!!book.references?.length && (
-            <details className="mt-8 rounded-xl border p-4">
-              <summary className="cursor-pointer text-xs font-semibold">
-                Official documentation for further study
-              </summary>
-              <ul className="mt-3 space-y-2">
-                {book.references.map((link) => (
-                  <li key={link}>
-                    <a
-                      href={link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="break-all text-xs text-indigo-600 underline dark:text-indigo-300"
+          {view === "attached" && book.pdfUrl ? (
+            <AttachedPdf book={book} />
+          ) : (
+            <>
+              <nav
+                aria-label="Breadcrumb"
+                className="mb-7 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground"
+              >
+                <Link href="/certifications">Build your IT career</Link>
+                <span>›</span>
+                <Link href="/certifications?tab=start-learning">
+                  Start Learning
+                </Link>
+                <span>›</span>
+                <span>{book.category}</span>
+                <span>› Chapter {index + 1}</span>
+              </nav>
+              {error && (
+                <p
+                  role="status"
+                  className="mb-6 rounded-xl border border-amber-300 p-4 text-xs leading-6"
+                >
+                  {error}
+                </p>
+              )}
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">
+                  Chapter {index + 1} of {book.chapters.length}
+                </p>
+                <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Clock3 className="h-3.5 w-3.5" />
+                  {chapter.durationMinutes} min read
+                </span>
+              </div>
+              <h1
+                ref={titleRef}
+                tabIndex={-1}
+                className="mt-4 text-3xl font-bold leading-tight tracking-tight focus:outline-none sm:text-4xl"
+              >
+                {chapter.title}
+              </h1>
+              <p className="mt-4 border-b pb-7 text-base leading-8 text-muted-foreground">
+                {chapter.summary}
+              </p>
+              <div className="mt-6">
+                <LessonMarkdown content={chapter.contentMarkdown} />
+                {chapter.codeSnippet && (
+                  <CodeExample key={chapter.id} {...chapter.codeSnippet} />
+                )}
+              </div>
+              <section className="mt-8 rounded-2xl border border-indigo-200 bg-indigo-50/60 p-6 dark:border-indigo-900 dark:bg-indigo-950/25">
+                <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">
+                  Interview cheat-sheet
+                </p>
+                <h2 className="mt-2 text-xl font-bold">Key takeaways</h2>
+                <ul className="mt-4 space-y-3">
+                  {chapter.keyTakeaways.map((tip, ti) => (
+                    <li
+                      key={ti}
+                      className="flex items-start gap-3 text-sm leading-7"
                     >
-                      {link}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </details>
+                      <CheckCircle2 className="mt-1.5 h-4 w-4 shrink-0 text-indigo-600" />
+                      {tip}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+              <ConceptCheck
+                key={chapter.id}
+                chapter={chapter}
+                complete={progress.completed.includes(chapter.id)}
+                onComplete={() => {
+                  saveProgress({
+                    ...progress,
+                    completed: [
+                      ...new Set([...progress.completed, chapter.id]),
+                    ],
+                  });
+                  if (index < book.chapters.length - 1) navigate(index + 1);
+                  else setExam(true);
+                }}
+              />
+              <p role="status" className="mt-4 text-xs text-muted-foreground">
+                {status}
+              </p>
+              <div className="mt-6 flex justify-between gap-3">
+                <button
+                  type="button"
+                  disabled={index === 0}
+                  onClick={() => navigate(index - 1)}
+                  className="min-h-10 text-sm font-semibold disabled:opacity-30"
+                >
+                  ← Previous chapter
+                </button>
+                <button
+                  type="button"
+                  disabled={index === book.chapters.length - 1}
+                  onClick={() => navigate(index + 1)}
+                  className="min-h-10 text-sm font-semibold disabled:opacity-30"
+                >
+                  Next chapter →
+                </button>
+              </div>
+              {!!book.references?.length && (
+                <details className="mt-8 rounded-xl border p-4">
+                  <summary className="cursor-pointer text-xs font-semibold">
+                    Official documentation for further study
+                  </summary>
+                  <ul className="mt-3 space-y-2">
+                    {book.references.map((link) => (
+                      <li key={link}>
+                        <a
+                          href={link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="break-all text-xs text-indigo-600 underline dark:text-indigo-300"
+                        >
+                          {link}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
+            </>
           )}
         </article>
         <aside className="min-w-0 border-t bg-card xl:border-l xl:border-t-0">

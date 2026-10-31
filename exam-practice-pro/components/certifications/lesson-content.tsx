@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Check, Copy, Terminal } from "lucide-react";
 function inline(value: string) {
-  return value.split(/(`[^`]+`)/g).map((part, index) =>
+  return value.split(/(`[^`]+`|\*\*[^*]+\*\*)/g).map((part, index) =>
     part.startsWith("`") ? (
       <code
         key={index}
@@ -10,6 +10,8 @@ function inline(value: string) {
       >
         {part.slice(1, -1)}
       </code>
+    ) : part.startsWith("**") ? (
+      <strong key={index}>{part.slice(2, -2)}</strong>
     ) : (
       part
     ),
@@ -135,6 +137,53 @@ export function LessonMarkdown({ content }: { content: string }) {
               .split(/\n\s*\n/)
               .filter(Boolean)
               .map((paragraph, pi) => {
+                if (paragraph.startsWith("> "))
+                  return (
+                    <aside
+                      key={pi}
+                      className="rounded-xl border-l-4 border-indigo-500 bg-indigo-50/50 p-4 text-sm dark:bg-indigo-950/30"
+                    >
+                      {inline(paragraph.replace(/^> /gm, ""))}
+                    </aside>
+                  );
+                if (paragraph.trim().startsWith("|")) {
+                  const rows = paragraph
+                    .trim()
+                    .split("\n")
+                    .filter((line) => !/^\|[\s:|-]+\|$/.test(line));
+                  const cells = (line: string) =>
+                    line
+                      .trim()
+                      .replace(/^\||\|$/g, "")
+                      .split(/\|(?=(?:[^`]*`[^`]*`)*[^`]*$)/)
+                      .map((v) => v.trim());
+                  return (
+                    <div key={pi} className="overflow-x-auto">
+                      <table className="w-full border-collapse text-left text-sm">
+                        <thead>
+                          <tr>
+                            {cells(rows[0]).map((cell, i) => (
+                              <th key={i} className="border bg-muted p-3">
+                                {inline(cell)}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {rows.slice(1).map((row, i) => (
+                            <tr key={i}>
+                              {cells(row).map((cell, j) => (
+                                <td key={j} className="border p-3 align-top">
+                                  {inline(cell)}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
+                }
                 if (paragraph.startsWith("### "))
                   return (
                     <h3

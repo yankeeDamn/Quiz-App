@@ -66,11 +66,11 @@ test("seed migration is idempotent and reader APIs strip answer keys and owner c
   await seedEbooks(db);
   assert.equal(
     (await db.query("SELECT count(*)::int AS n FROM ebooks")).rows[0].n,
-    3,
+    10,
   );
   const list = await call("/ebooks");
   assert.equal(list.status, 200);
-  assert.equal(list.json.data.ebooks.length, 3);
+  assert.equal(list.json.data.ebooks.length, 10);
   assert.equal(list.json.data.ebooks[0].chapters, undefined);
   const read = await call("/ebooks/python-mastery");
   assert.equal(read.status, 200);
@@ -419,4 +419,165 @@ test("private certificates cannot be published, seed fallbacks cannot be restric
     (await call("/ebooks/restricted-learning", "owner")).status,
     404,
   );
+});
+
+test("PDF uploads persist, require revisions, and recheck reader/editor access on every retrieval", async () => {
+  const slug = "private-pdf-track";
+  let current = (
+    await call("/admin/ebooks", "owner", "POST", { ...book(), slug })
+  ).json.data.ebook;
+  const bytes = Buffer.from("%PDF-1.4\n% test-only fixture\n%%EOF");
+  const upload = async (who, body = bytes, revision = current.revision) => {
+    const response = await fetch(
+      base +
+        "/api/v1/admin/ebooks/" +
+        slug +
+        "/pdf?filename=study.pdf&revision=" +
+        revision,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/pdf",
+          ...(who ? { Authorization: "Bearer " + token(who) } : {}),
+        },
+        body,
+      },
+    );
+    return { status: response.status, json: await response.json() };
+  };
+  const get = async (who, download = "") =>
+    fetch(base + "/api/v1/ebooks/" + slug + "/pdf" + download, {
+      headers: who ? { Authorization: "Bearer " + token(who) } : {},
+    });
+  assert.equal((await upload()).status, 401);
+  assert.equal((await upload("reader")).status, 404);
+  assert.equal((await upload("owner", Buffer.from("not a pdf"))).status, 400);
+  const saved = await upload("owner");
+  assert.equal(saved.status, 200);
+  assert.equal(saved.json.data.ebook.revision, current.revision + 1);
+  assert.equal((await upload("owner")).status, 409);
+  current = saved.json.data.ebook;
+  assert.equal((await get()).status, 404);
+  assert.equal((await get("reader")).status, 404);
+  let response = await get("owner");
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get("content-type"), /application\/pdf/);
+  assert.match(response.headers.get("cache-control"), /private/);
+  assert.deepEqual(Buffer.from(await response.arrayBuffer()), bytes);
+  current = (
+    await call("/admin/ebooks/" + slug, "owner", "PUT", {
+      ...current,
+      visibility: "invite_only",
+      allowPdfDownload: false,
+    })
+  ).json.data.ebook;
+  assert.equal((await get("reader")).status, 403);
+  for (const who of ["reader", "editor"])
+    assert.equal(
+      (
+        await call(
+          "/admin/ebooks/" + slug + "/approve-access",
+          "owner",
+          "POST",
+          {
+            email: users[who],
+            role: who === "editor" ? "editor" : "reader",
+            status: "approved",
+          },
+        )
+      ).status,
+      200,
+    );
+  assert.equal((await get("reader")).status, 200);
+  assert.equal((await get("reader", "?download=1")).status, 403);
+  assert.equal((await upload("reader")).status, 403);
+  let edited = await upload("editor");
+  assert.equal(edited.status, 200);
+  current = edited.json.data.ebook;
+  await call("/admin/ebooks/" + slug + "/approve-access", "owner", "POST", {
+    email: users.editor,
+    role: "editor",
+    status: "revoked",
+  });
+  assert.equal((await get("editor")).status, 403);
+  assert.equal((await upload("editor")).status, 403);
+  const tooLarge = await upload(
+    "owner",
+    Buffer.concat([bytes, Buffer.alloc(3 * 1024 * 1024)]),
+  );
+  assert.equal(tooLarge.status, 413);
+  const detached = await call("/admin/ebooks/" + slug, "owner", "PUT", {
+    ...current,
+    pdfUrl: "",
+    pdfFileName: "",
+  });
+  assert.equal(detached.status, 200);
+  assert.equal((await get("owner")).status, 404);
+});
+test("configured exam scoring survives later edits and API recreation", async () => {
+  const slug = "configured-score-track";
+  let current = (
+    await call("/admin/ebooks", "owner", "POST", {
+      ...book(),
+      slug,
+      passPercent: 80,
+      marksPerCorrect: 2,
+      negativeMarks: 0.25,
+      finalExamQuestions: seeds[0].finalExamQuestions
+        .slice(0, 5)
+        .map((q, i) => ({ ...q, domain: i < 3 ? "Core" : "Application" })),
+    })
+  ).json.data.ebook;
+  const started = await call(
+    "/ebooks/" + slug + "/attempts",
+    "owner",
+    "POST",
+    {},
+  );
+  assert.equal(started.status, 200);
+  const attempt = started.json.data.attempt;
+  assert.equal(attempt.negativeMarks, 0.25);
+  assert.equal(attempt.passPercent, 80);
+  assert.equal(attempt.marksPerCorrect, 2);
+  assert.equal(
+    (
+      await call("/admin/ebooks/" + slug, "owner", "PUT", {
+        ...current,
+        passPercent: 20,
+        marksPerCorrect: 1,
+      })
+    ).status,
+    200,
+  );
+  const answers = Object.fromEntries(
+    current.finalExamQuestions.map((q, i) => [
+      q.id,
+      i === 4 ? (q.answer + 1) % 4 : q.answer,
+    ]),
+  );
+  const submitted = await call(
+    "/ebooks/attempts/" + attempt.id + "/submit",
+    "owner",
+    "POST",
+    { answers },
+  );
+  assert.equal(submitted.status, 200);
+  assert.equal(submitted.json.data.attempt.result.percentage, 77.5);
+  assert.equal(submitted.json.data.attempt.result.passed, false);
+  assert.equal(submitted.json.data.attempt.result.maxScore, 10);
+  assert.equal(submitted.json.data.attempt.result.domains.length, 2);
+  const service = require("../src/services/ebooks.service").createEbooksService(
+    db,
+  );
+  const row = (
+    await db.query("SELECT user_id FROM ebook_attempts WHERE id=$1", [
+      attempt.id,
+    ])
+  ).rows[0];
+  const persisted = await service.attempt(attempt.id, {
+    id: row.user_id,
+    email: users.owner,
+  });
+  assert.equal(persisted.result.passPercent, 80);
+  assert.equal(persisted.result.percentage, 77.5);
 });
