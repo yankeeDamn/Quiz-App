@@ -838,5 +838,485 @@
     "correct_option": "B",
     "explanation": "Billing budgets support thresholds and notifications but do not automatically cap all service consumption.",
     "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-AZ900-001",
+    "exam_code": "AZ-900",
+    "subject": "Cloud Concepts",
+    "question": "Which cloud characteristic allows resources to grow or shrink based on demand?",
+    "options": [
+      "Elasticity",
+      "Data residency",
+      "Encryption at rest",
+      "Resource locking"
+    ],
+    "correct_option": "A",
+    "explanation": "Elasticity is the ability to adjust provisioned capacity as demand changes.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-AZ900-002",
+    "exam_code": "AZ-900",
+    "subject": "Cloud Concepts",
+    "question": "Who normally manages the physical datacenter hardware in Azure public cloud?",
+    "options": [
+      "Cloud customer",
+      "Microsoft",
+      "Application developer",
+      "End user"
+    ],
+    "correct_option": "B",
+    "explanation": "Microsoft operates the underlying facilities and physical infrastructure in its Azure public cloud.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-AZ900-003",
+    "exam_code": "AZ-900",
+    "subject": "Networking",
+    "question": "Which Azure offering creates a private dedicated connectivity path to Microsoft cloud networks?",
+    "options": [
+      "ExpressRoute",
+      "Azure Monitor",
+      "Blob versioning",
+      "Azure Policy"
+    ],
+    "correct_option": "A",
+    "explanation": "ExpressRoute connects on-premises networks with Microsoft cloud infrastructure through private connectivity.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-AZ900-004",
+    "exam_code": "AZ-900",
+    "subject": "Storage",
+    "question": "Which Azure Storage redundancy option replicates data synchronously across availability zones in a region?",
+    "options": [
+      "LRS",
+      "ZRS",
+      "GRS",
+      "RA-GRS"
+    ],
+    "correct_option": "B",
+    "explanation": "Zone-redundant storage maintains synchronous copies across availability zones in one region.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-AZ900-005",
+    "exam_code": "AZ-900",
+    "subject": "Management",
+    "question": "What is Azure Resource Manager used for?",
+    "options": [
+      "Managing deployment and lifecycle of Azure resources",
+      "Issuing SSL certificates only",
+      "Replacing database engines",
+      "Monitoring office printers"
+    ],
+    "correct_option": "A",
+    "explanation": "Azure Resource Manager is the control-plane layer for deploying, organizing and managing Azure resources.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-AZ900-006",
+    "exam_code": "AZ-900",
+    "subject": "Security",
+    "question": "What is the purpose of Azure role-based access control?",
+    "options": [
+      "Control user and workload permissions on Azure resources",
+      "Automatically patch every VM",
+      "Choose storage replication tiers",
+      "Configure DNS caching"
+    ],
+    "correct_option": "A",
+    "explanation": "Azure RBAC grants scoped permissions based on assigned roles and identities.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-AZ900-007",
+    "exam_code": "AZ-900",
+    "subject": "Monitoring",
+    "question": "Which Azure service provides metrics, logs and alerts for resources?",
+    "options": [
+      "Azure Monitor",
+      "Azure Files",
+      "Azure Bastion",
+      "Azure Virtual Desktop"
+    ],
+    "correct_option": "A",
+    "explanation": "Azure Monitor collects and analyzes telemetry and supports alerting and observability.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-AZ900-008",
+    "exam_code": "AZ-900",
+    "subject": "Governance",
+    "question": "What does an Azure resource lock marked CanNotDelete do?",
+    "options": [
+      "Blocks deletion but allows permitted changes",
+      "Encrypts all network traffic",
+      "Prevents every read request",
+      "Disables billing"
+    ],
+    "correct_option": "A",
+    "explanation": "A CanNotDelete lock prevents deletion of the resource while other permitted management operations can remain possible.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-AZ900-009",
+    "exam_code": "AZ-900",
+    "subject": "Identity",
+    "question": "What does MFA add to an authentication process?",
+    "options": [
+      "An additional verification factor",
+      "A public IP address",
+      "A cloud service tier",
+      "A backup schedule"
+    ],
+    "correct_option": "A",
+    "explanation": "Multifactor authentication uses more than one category of evidence to verify a sign-in.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-AZ900-010",
+    "exam_code": "AZ-900",
+    "subject": "Resilience",
+    "question": "What are Azure availability zones?",
+    "options": [
+      "Separate physical locations within an Azure region",
+      "Two copies of a local folder",
+      "Independent Microsoft 365 tenants",
+      "Storage billing categories"
+    ],
+    "correct_option": "A",
+    "explanation": "Availability zones are distinct physical locations within a region with independent power, cooling and networking.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-AWSCLFC02-001",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Cloud Concepts",
+    "question": "Which AWS Cloud benefit allows capacity to adjust as workload demand varies?",
+    "options": [
+      "Elasticity",
+      "Fixed capacity",
+      "Manual paper backups",
+      "Guaranteed zero latency"
+    ],
+    "correct_option": "A",
+    "explanation": "Elasticity helps match compute and other cloud resources to changing workload demands.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-AWSCLFC02-002",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Security",
+    "question": "Under the AWS shared responsibility model, who configures permissions for their IAM users?",
+    "options": [
+      "AWS customer",
+      "AWS datacenter staff only",
+      "Public internet provider",
+      "AWS training team"
+    ],
+    "correct_option": "A",
+    "explanation": "Customers manage identities and permissions in their AWS accounts, while AWS protects underlying cloud infrastructure.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-AWSCLFC02-003",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Compute",
+    "question": "Which AWS service provides resizable virtual servers?",
+    "options": [
+      "Amazon EC2",
+      "Amazon S3",
+      "Amazon Route 53",
+      "AWS Artifact"
+    ],
+    "correct_option": "A",
+    "explanation": "Amazon EC2 offers virtual machine instances whose configurations and capacity can be adjusted.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-AWSCLFC02-004",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Billing",
+    "question": "What can AWS Budgets do?",
+    "options": [
+      "Notify when defined cost or usage thresholds are crossed",
+      "Guarantee cloud spending stops",
+      "Replace IAM roles",
+      "Encrypt all backups"
+    ],
+    "correct_option": "A",
+    "explanation": "AWS Budgets can track spending and usage and send notifications at configured thresholds.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-AWSCLFC02-005",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Networking",
+    "question": "Which AWS service provides managed DNS?",
+    "options": [
+      "Amazon Route 53",
+      "Amazon EFS",
+      "AWS Glue",
+      "Amazon Inspector"
+    ],
+    "correct_option": "A",
+    "explanation": "Amazon Route 53 supplies scalable domain name system functions and routing policies.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-AWSCLFC02-006",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Storage",
+    "question": "Which storage class is intended for infrequently accessed archived data with retrieval tradeoffs?",
+    "options": [
+      "S3 Glacier Flexible Retrieval",
+      "EC2 instance store",
+      "Amazon ElastiCache",
+      "AWS CloudTrail"
+    ],
+    "correct_option": "A",
+    "explanation": "S3 Glacier Flexible Retrieval targets archival storage where retrieval timing and cost tradeoffs are acceptable.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-AWSCLFC02-007",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Security",
+    "question": "Which AWS service helps evaluate configurations against rules over time?",
+    "options": [
+      "AWS Config",
+      "Amazon Polly",
+      "Amazon Connect",
+      "AWS Snowball"
+    ],
+    "correct_option": "A",
+    "explanation": "AWS Config tracks resource configurations and can evaluate them against compliance rules.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-AWSCLFC02-008",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Operations",
+    "question": "Which AWS offering assists with infrastructure deployment through templates?",
+    "options": [
+      "AWS CloudFormation",
+      "Amazon Translate",
+      "AWS WAF",
+      "Amazon QuickSight"
+    ],
+    "correct_option": "A",
+    "explanation": "AWS CloudFormation provisions and manages supported AWS resources using declarative templates.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-AWSCLFC02-009",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Reliability",
+    "question": "Why deploy applications across multiple Availability Zones?",
+    "options": [
+      "Reduce exposure to an individual zone failure",
+      "Remove all software bugs",
+      "Disable monitoring costs",
+      "Guarantee infinite bandwidth"
+    ],
+    "correct_option": "A",
+    "explanation": "Multiple Availability Zones provide fault isolation that can improve application availability.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-AWSCLFC02-010",
+    "exam_code": "AWS-CLF-C02",
+    "subject": "Support",
+    "question": "Which AWS service provides recommendations about service limits, cost and security posture?",
+    "options": [
+      "AWS Trusted Advisor",
+      "Amazon EBS",
+      "AWS Lambda",
+      "Amazon SQS"
+    ],
+    "correct_option": "A",
+    "explanation": "Trusted Advisor provides best-practice checks and recommendations, with availability depending on support entitlements.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-LINUXLFCS-001",
+    "exam_code": "LINUX-LFCS",
+    "subject": "Essential Commands",
+    "question": "Which command prints the current working directory?",
+    "options": [
+      "pwd",
+      "whoami",
+      "touch",
+      "hostname"
+    ],
+    "correct_option": "A",
+    "explanation": "The pwd utility outputs the current working directory path.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-LINUXLFCS-002",
+    "exam_code": "LINUX-LFCS",
+    "subject": "Essential Commands",
+    "question": "Which command searches recursively for a text pattern in files?",
+    "options": [
+      "grep -R",
+      "chmod -R",
+      "df -h",
+      "ip addr"
+    ],
+    "correct_option": "A",
+    "explanation": "The grep -R option recursively examines files under a directory for matching text.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-LINUXLFCS-003",
+    "exam_code": "LINUX-LFCS",
+    "subject": "Users and Groups",
+    "question": "Which command commonly adds a new local Linux user on many distributions?",
+    "options": [
+      "useradd",
+      "userdel",
+      "usermod -L",
+      "passwd -S"
+    ],
+    "correct_option": "A",
+    "explanation": "The useradd command creates a user account, although higher-level alternatives differ by distribution.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-LINUXLFCS-004",
+    "exam_code": "LINUX-LFCS",
+    "subject": "Users and Groups",
+    "question": "What does chmod 640 file.txt typically allow?",
+    "options": [
+      "Owner read/write, group read, others none",
+      "Everyone read/write",
+      "Owner execute only",
+      "Group full access"
+    ],
+    "correct_option": "A",
+    "explanation": "Mode 640 sets owner read/write, group read and no permissions for others.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-LINUXLFCS-005",
+    "exam_code": "LINUX-LFCS",
+    "subject": "Networking",
+    "question": "Which command displays addresses assigned to network interfaces on Linux?",
+    "options": [
+      "ip address show",
+      "lsblk",
+      "free -m",
+      "journalctl -b"
+    ],
+    "correct_option": "A",
+    "explanation": "The ip address show command lists address information for network interfaces.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-LINUXLFCS-006",
+    "exam_code": "LINUX-LFCS",
+    "subject": "Networking",
+    "question": "Which tool establishes encrypted remote shell sessions?",
+    "options": [
+      "SSH",
+      "FTP",
+      "Telnet",
+      "TFTP"
+    ],
+    "correct_option": "A",
+    "explanation": "The Secure Shell protocol provides authenticated, encrypted remote terminal communication.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-LINUXLFCS-007",
+    "exam_code": "LINUX-LFCS",
+    "subject": "Operations Deployment",
+    "question": "Which systemd command shows whether a service is running?",
+    "options": [
+      "systemctl status",
+      "mkdir -p",
+      "umask",
+      "fdisk -l"
+    ],
+    "correct_option": "A",
+    "explanation": "systemctl status displays a unit's state and recent logs where available.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-LINUXLFCS-008",
+    "exam_code": "LINUX-LFCS",
+    "subject": "Operations Deployment",
+    "question": "Which command lists scheduled cron jobs for the current user?",
+    "options": [
+      "crontab -l",
+      "lsmod",
+      "mount -a",
+      "du -sh"
+    ],
+    "correct_option": "A",
+    "explanation": "crontab -l lists the current user's cron table on systems where cron is installed.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-LINUXLFCS-009",
+    "exam_code": "LINUX-LFCS",
+    "subject": "Storage",
+    "question": "Which command reports free disk space on mounted file systems?",
+    "options": [
+      "df -h",
+      "du -a",
+      "ps aux",
+      "uname -r"
+    ],
+    "correct_option": "A",
+    "explanation": "df -h reports filesystem capacity and available space in human-readable units.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-LINUXLFCS-010",
+    "exam_code": "LINUX-LFCS",
+    "subject": "Storage",
+    "question": "Which technology can flexibly allocate storage using physical and logical volumes?",
+    "options": [
+      "LVM",
+      "DNS",
+      "NTP",
+      "PAM"
+    ],
+    "correct_option": "A",
+    "explanation": "Logical Volume Manager combines physical storage into volume groups and allocates logical volumes.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-LINUXLFCS-011",
+    "exam_code": "LINUX-LFCS",
+    "subject": "Operations Deployment",
+    "question": "Which command displays recent systemd journal entries for the current boot?",
+    "options": [
+      "journalctl -b",
+      "ip route add",
+      "passwd -l",
+      "tar -xf"
+    ],
+    "correct_option": "A",
+    "explanation": "journalctl -b filters journal entries for the current boot by default.",
+    "review_status": "needs_review"
+  },
+  {
+    "id": "PR63-LINUXLFCS-012",
+    "exam_code": "LINUX-LFCS",
+    "subject": "Security",
+    "question": "Which Linux mechanism enforces mandatory access control through security labels and policies?",
+    "options": [
+      "SELinux",
+      "Cron",
+      "Swap",
+      "Syslog"
+    ],
+    "correct_option": "A",
+    "explanation": "SELinux applies mandatory access-control rules using labels and policy decisions.",
+    "review_status": "needs_review"
   }
 ]
