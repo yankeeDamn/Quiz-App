@@ -9,6 +9,8 @@ import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
 import { WhatsAppButton } from '@/components/mocks/whatsapp-button';
 import { usePlan } from '@/hooks/use-plan';
+import { CashfreeSandboxCheckout } from '@/components/payments/cashfree-sandbox-checkout';
+const sandboxCheckout=process.env.NEXT_PUBLIC_CASHFREE_SANDBOX_CHECKOUT==='true';
 import { PLANS, formatWhatsappNumber, inr, planMessage, planPrice, whatsappLink, type Plan } from '@/lib/plans';
 
 const STEPS: [string, string][] = [
@@ -42,9 +44,10 @@ export default function PricingPage() {
         <p className="text-sm font-semibold text-blue-700 dark:text-blue-400">Pricing</p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">Start free. Upgrade when you are ready.</h1>
         <p className="mt-3 max-w-2xl text-muted-foreground">
-          Free covers daily practice. Pro opens every full mock. Pay through WhatsApp and we unlock your plan by hand.
+          Free covers daily practice. Pro opens every full mock. Pay through WhatsApp and we unlock your plan by hand. On the staging site, signed-in learners can also test the Cashfree sandbox checkout.
         </p>
 
+        {sandboxCheckout && <p className="mt-3 rounded border border-amber-400 p-3 text-sm">Cashfree sandbox testing is available on staging only. This is not live billing.</p>}
         {plan.active && (
           <div className="mt-6 rounded-xl border border-emerald-600 bg-emerald-50 p-4 dark:bg-emerald-950/40" role="status">
             <p className="font-semibold">Your {plan.plan === 'institute' ? 'Institute' : 'Pro'} plan is active.</p>
@@ -166,6 +169,8 @@ function PlanCard({ plan, yearly, email, name, current }: { plan: Plan; yearly: 
         <Button variant="outline" asChild>
           <Link href="/india-mocks">Start free</Link>
         </Button>
+      ) : sandboxCheckout && plan.id==='pro' && email ? (
+        <CashfreeSandboxCheckout period={yearly?'yearly':'monthly'}/>
       ) : current ? (
         <Button variant="outline" disabled>
           Your current plan
