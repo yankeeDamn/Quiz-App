@@ -12,32 +12,26 @@ function createRouters(books = service, identity = authenticateNextAuth) {
       await fn(req, res);
     } catch (error) {
       if (error.code === "23505")
-        return res
-          .status(409)
-          .json({
-            success: false,
-            error: {
-              code: "EBOOK_CONFLICT",
-              message: "This ebook slug is already in use.",
-            },
-          });
+        return res.status(409).json({
+          success: false,
+          error: {
+            code: "EBOOK_CONFLICT",
+            message: "This ebook slug is already in use.",
+          },
+        });
       if (error.code === "42P01")
-        return res
-          .status(503)
-          .json({
-            success: false,
-            error: {
-              code: "EBOOK_SETUP_REQUIRED",
-              message: "The ebook database migration has not been applied yet.",
-            },
-          });
+        return res.status(503).json({
+          success: false,
+          error: {
+            code: "EBOOK_SETUP_REQUIRED",
+            message: "The ebook database migration has not been applied yet.",
+          },
+        });
       if (error.statusCode)
-        return res
-          .status(error.statusCode)
-          .json({
-            success: false,
-            error: { code: error.code, message: error.message },
-          });
+        return res.status(error.statusCode).json({
+          success: false,
+          error: { code: error.code, message: error.message },
+        });
       next(error);
     }
   };
@@ -102,6 +96,37 @@ function createRouters(books = service, identity = authenticateNextAuth) {
     "/",
     optional,
     wrap(async (req, res) => ok(res, { ebooks: await books.list(req.user) })),
+  );
+  router.get(
+    "/:slug/pdf",
+    optional,
+    wrap(async (req, res) => {
+      const asset = await books.pdf(
+        req.params.slug,
+        req.user,
+        req.query.download === "1",
+      );
+      res.type("application/pdf");
+      res.set(
+        "Content-Disposition",
+        `${req.query.download === "1" ? "attachment" : "inline"}; filename*=UTF-8''${encodeURIComponent(asset.filename)}`,
+      );
+      res.send(asset.bytes);
+    }),
+  );
+  adminRouter.post(
+    "/:slug/pdf",
+    wrap(async (req, res) =>
+      ok(res, {
+        ebook: await books.uploadPdf(
+          req.params.slug,
+          req.user,
+          req.body,
+          req.query.filename,
+          req.query.revision,
+        ),
+      }),
+    ),
   );
   router.get(
     "/:slug/practice",

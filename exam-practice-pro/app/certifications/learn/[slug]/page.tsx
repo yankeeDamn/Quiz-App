@@ -13,7 +13,7 @@ export default async function LearnPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ chapter?: string; attempt?: string }>;
+  searchParams: Promise<{ chapter?: string; attempt?: string; view?: string }>;
 }) {
   const { slug } = await params,
     query = await searchParams;
@@ -24,6 +24,7 @@ export default async function LearnPage({
         slug={slug}
         initialChapter={query.chapter}
         resumeId={query.attempt}
+        initialView={query.view}
       />
       <Footer />
     </>

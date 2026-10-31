@@ -29,7 +29,7 @@ export const API_BASE_URL = candidateApi.endsWith('/') ? candidateApi.slice(0, -
  * Get a fresh backend access token from the NextAuth bridge route.
  * Caches the token for 50 minutes (tokens are valid for 1 hour).
  */
-async function getBackendToken(signal?: AbortSignal): Promise<string | null> {
+export async function getBackendToken(signal?: AbortSignal): Promise<string | null> {
   try {
     const res = await fetch('/api/auth/backend-token', {
       method: 'POST',

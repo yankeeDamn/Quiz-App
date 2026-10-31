@@ -2,6 +2,17 @@
 const database = require("../config/database");
 const config = require("../config");
 const seeds = require("../../content/ebooks-starter.json");
+const CATEGORIES = [
+  "Python",
+  "AI with Copilot",
+  "Python & Cheatcodes",
+  "Machine Learning",
+  "LLMs & Hugging Face",
+  "GitHub Copilot (GH-300)",
+  "Endpoint Admin (MD-102)",
+  "Java",
+  "Cloud & DevOps",
+];
 const SEEDS = new Set(seeds.map((book) => book.slug));
 const SLUG = /^[a-z0-9][a-z0-9-]{1,59}$/;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -46,6 +57,9 @@ function question(raw, id) {
     fail("Answer must be an option index from 0 to 3.");
   return {
     id,
+    ...(raw.domain
+      ? { domain: text(raw.domain, 1, 180, "Question domain") }
+      : {}),
     question: text(raw.question, 5, 3000, "Question"),
     options: raw.options.map((option) => text(option, 1, 1000, "Option")),
     answer: raw.answer,
@@ -61,13 +75,15 @@ function validateBook(raw, slug) {
     fail("Use a slug of 2–60 lowercase letters, digits and dashes.");
   if (!["admin_only", "invite_only", "public"].includes(raw.visibility))
     fail("Unknown visibility.");
+  if (!CATEGORIES.includes(raw.category)) fail("Unknown category.");
   if (
-    !["Python", "AI with Copilot", "Java", "Cloud & DevOps"].includes(
-      raw.category,
-    )
+    ![
+      "Beginner to Pro",
+      "Intermediate",
+      "Advanced",
+      "Certification Cram",
+    ].includes(raw.level)
   )
-    fail("Unknown category.");
-  if (!["Beginner to Pro", "Intermediate", "Advanced"].includes(raw.level))
     fail("Unknown level.");
   if (
     !Array.isArray(raw.chapters) ||
@@ -107,9 +123,14 @@ function validateBook(raw, slug) {
     let codeSnippet;
     if (chapter.codeSnippet) {
       if (
-        !["python", "java", "typescript", "bash", "json"].includes(
-          chapter.codeSnippet.language,
-        )
+        ![
+          "python",
+          "java",
+          "typescript",
+          "bash",
+          "powershell",
+          "json",
+        ].includes(chapter.codeSnippet.language)
       )
         fail("Unsupported snippet language.");
       codeSnippet = {
@@ -152,7 +173,55 @@ function validateBook(raw, slug) {
     : "";
   if (linkedMockTestId && !SLUG.test(linkedMockTestId))
     fail("Invalid linked test ID.");
+  const passPercent = raw.passPercent ?? 70,
+    marksPerCorrect = raw.marksPerCorrect ?? 1,
+    negativeMarks = raw.negativeMarks ?? 0;
+  if (
+    !Number.isFinite(passPercent) ||
+    passPercent < 1 ||
+    passPercent > 100 ||
+    !Number.isFinite(marksPerCorrect) ||
+    marksPerCorrect <= 0 ||
+    marksPerCorrect > 10 ||
+    ![0, 0.25].includes(negativeMarks)
+  )
+    fail("Invalid pass percentage or marking settings.");
+  if (
+    raw.allowPdfDownload !== undefined &&
+    typeof raw.allowPdfDownload !== "boolean"
+  )
+    fail("PDF download setting must be boolean.");
+  let pdfUrl = raw.pdfUrl || "";
+  if (pdfUrl && pdfUrl !== `/api/v1/ebooks/${slug}/pdf`) {
+    let url;
+    try {
+      url = new URL(pdfUrl);
+    } catch {
+      fail("Use an HTTPS PDF URL.");
+    }
+    if (
+      url.protocol !== "https:" ||
+      url.username ||
+      url.password ||
+      !url.pathname.toLowerCase().endsWith(".pdf")
+    )
+      fail("Use an HTTPS link ending in .pdf without embedded credentials.");
+    if (raw.visibility !== "public")
+      fail(
+        "Restricted books require an authenticated PDF upload. Remove the external PDF before restricting visibility.",
+      );
+    pdfUrl = url.href;
+  }
   return {
+    passPercent,
+    marksPerCorrect,
+    negativeMarks,
+    allowPdfDownload: raw.allowPdfDownload !== false,
+    isCheatSheet: raw.isCheatSheet === true,
+    pdfUrl,
+    pdfFileName: text(raw.pdfFileName || "", 0, 180, "PDF filename"),
+    examBadgeCode: text(raw.examBadgeCode || "", 0, 40, "Badge code"),
+    version: text(raw.version || "1.0", 1, 40, "Version"),
     slug,
     title: text(raw.title, 3, 180, "Title"),
     subtitle: text(raw.subtitle, 3, 1000, "Summary"),
@@ -188,8 +257,12 @@ function grade(snapshot, answers, negativeMarks) {
     return { ...q, selected };
   });
   const total = review.length,
-    score = Math.max(0, correct - wrong * Number(negativeMarks));
-  const percentage = Math.round((score / total) * 10000) / 100;
+    score = Math.max(
+      0,
+      correct * (snapshot.marksPerCorrect ?? 1) - wrong * Number(negativeMarks),
+    );
+  const maxScore = total * (snapshot.marksPerCorrect ?? 1);
+  const percentage = Math.round((score / maxScore) * 10000) / 100;
   return {
     score,
     total,
@@ -197,7 +270,18 @@ function grade(snapshot, answers, negativeMarks) {
     wrong,
     unanswered: total - correct - wrong,
     percentage,
-    passed: percentage >= 70,
+    passed: percentage >= (snapshot.passPercent ?? 70),
+    maxScore,
+    passPercent: snapshot.passPercent ?? 70,
+    domains: [...new Set(review.map((q) => q.domain).filter(Boolean))].map(
+      (domain) => ({
+        domain,
+        total: review.filter((q) => q.domain === domain).length,
+        correct: review.filter(
+          (q) => q.domain === domain && q.selected === q.answer,
+        ).length,
+      }),
+    ),
     review,
   };
 }
@@ -370,6 +454,65 @@ function createEbooksService(db = database, clock = Date.now) {
       [slug],
     );
   }
+  async function uploadPdf(slug, user, bytes, name, revision) {
+    if (
+      !Buffer.isBuffer(bytes) ||
+      bytes.length > 3 * 1024 * 1024 ||
+      bytes.length < 8 ||
+      bytes.subarray(0, 5).toString() !== "%PDF-"
+    )
+      fail("Upload a PDF file of at most 3 MiB.");
+    const filename = text(name || "ebook.pdf", 1, 180, "PDF filename").replace(
+      /[^a-zA-Z0-9._ -]/g,
+      "_",
+    );
+    return transaction(async (client) => {
+      const { row, rights } = await read(slug, user, client, true);
+      if (!rights.canEdit)
+        fail("Editing is not approved for this account.", 403);
+      if (Number(revision) !== row.revision)
+        fail(
+          "The ebook changed; reload before uploading.",
+          409,
+          "EBOOK_CONFLICT",
+        );
+      await client.query(
+        `INSERT INTO ebook_pdf_assets(slug,filename,bytes) VALUES($1,$2,$3) ON CONFLICT(slug) DO UPDATE SET filename=$2,bytes=$3,updated_at=NOW()`,
+        [slug, filename, bytes],
+      );
+      const doc = {
+        ...row.document,
+        pdfUrl: `/api/v1/ebooks/${slug}/pdf`,
+        pdfFileName: filename,
+      };
+      const saved = (
+        await client.query(
+          "UPDATE ebooks SET document=$2,revision=revision+1,updated_at=NOW() WHERE slug=$1 RETURNING *",
+          [slug, JSON.stringify(doc)],
+        )
+      ).rows[0];
+      return present(saved, rights);
+    });
+  }
+  async function pdf(slug, user, download = false) {
+    const { row } = await read(slug, user);
+    if (
+      download &&
+      row.document.allowPdfDownload === false &&
+      !isOwnerAdmin(user)
+    )
+      fail("PDF downloading is disabled for this track.", 403);
+    if (row.document.pdfUrl !== `/api/v1/ebooks/${slug}/pdf`)
+      fail("No uploaded PDF is attached.", 404);
+    const asset = (
+      await db.query(
+        "SELECT filename,bytes FROM ebook_pdf_assets WHERE slug=$1",
+        [slug],
+      )
+    ).rows[0];
+    if (!asset) fail("No uploaded PDF is attached.", 404);
+    return asset;
+  }
   async function requestAccess(slug, user, note) {
     if (!SLUG.test(slug)) fail("Ebook not found", 404);
     const book = (
@@ -449,6 +592,8 @@ function createEbooksService(db = database, clock = Date.now) {
       submittedAt: row.submitted_at,
       serverNow: new Date(clock()).toISOString(),
       negativeMarks: Number(row.negative_marks),
+      passPercent: doc.passPercent ?? 70,
+      marksPerCorrect: doc.marksPerCorrect ?? 1,
       answers: row.answers,
       result: row.result,
       questions: doc.finalExamQuestions.map(
@@ -473,7 +618,11 @@ function createEbooksService(db = database, clock = Date.now) {
             slug,
             user.id,
             JSON.stringify(row.document),
-            raw.negativeMarking ? 0.25 : 0,
+            raw.negativeMarking === undefined
+              ? (row.document.negativeMarks ?? 0)
+              : raw.negativeMarking
+                ? 0.25
+                : 0,
             expires,
           ],
         )
@@ -593,6 +742,8 @@ function createEbooksService(db = database, clock = Date.now) {
     save,
     practice,
     archive,
+    uploadPdf,
+    pdf,
     requestAccess,
     accessQueue,
     approve,

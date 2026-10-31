@@ -2,7 +2,20 @@ import { api } from "./api";
 import type { MockTest } from "./mocks";
 
 export type EbookVisibility = "admin_only" | "invite_only" | "public";
+export const EBOOK_CATEGORIES = [
+  "Python",
+  "AI with Copilot",
+  "Python & Cheatcodes",
+  "Machine Learning",
+  "LLMs & Hugging Face",
+  "GitHub Copilot (GH-300)",
+  "Endpoint Admin (MD-102)",
+  "Java",
+  "Cloud & DevOps",
+] as const;
+export type EbookCategory = (typeof EBOOK_CATEGORIES)[number];
 export type EbookQuestion = {
+  domain?: string;
   id?: string;
   question: string;
   options: string[];
@@ -17,7 +30,7 @@ export interface EbookChapter {
   summary: string;
   contentMarkdown: string;
   codeSnippet?: {
-    language: "python" | "java" | "typescript" | "bash" | "json";
+    language: "python" | "java" | "typescript" | "bash" | "powershell" | "json";
     code: string;
     expectedOutput: string;
   };
@@ -33,9 +46,18 @@ export interface EbookTrack {
   slug: string;
   title: string;
   subtitle: string;
-  category: "Python" | "AI with Copilot" | "Java" | "Cloud & DevOps";
-  level: "Beginner to Pro" | "Intermediate" | "Advanced";
+  category: EbookCategory;
+  level: "Beginner to Pro" | "Intermediate" | "Advanced" | "Certification Cram";
   visibility: EbookVisibility;
+  allowPdfDownload?: boolean;
+  pdfUrl?: string;
+  pdfFileName?: string;
+  isCheatSheet?: boolean;
+  examBadgeCode?: string;
+  version?: string;
+  passPercent?: number;
+  marksPerCorrect?: number;
+  negativeMarks?: number;
   chapters: EbookChapter[];
   finalExamQuestions?: EbookQuestion[];
   linkedMockTestId?: string;
@@ -74,10 +96,15 @@ export interface EbookExam {
   expiresAt: string;
   serverNow: string;
   submittedAt: string | null;
+  passPercent?: number;
+  marksPerCorrect?: number;
   negativeMarks: number;
   questions: Array<{ id: string; question: string; options: string[] }>;
   answers: Record<string, number>;
   result: {
+    maxScore?: number;
+    passPercent?: number;
+    domains?: Array<{ domain: string; correct: number; total: number }>;
     score: number;
     total: number;
     percentage: number;
@@ -184,8 +211,8 @@ export function practiceTest(
     level: book.level,
     minutes: book.examMinutes,
     questionCount: questions.length,
-    marksPerCorrect: 1,
-    negativeMarks: 0,
+    marksPerCorrect: book.marksPerCorrect ?? 1,
+    negativeMarks: book.negativeMarks ?? 0,
     sections: [{ name: "Ebook practice", from: 0, to: questions.length }],
     questions: questions.map((q, index) => ({
       ...q,

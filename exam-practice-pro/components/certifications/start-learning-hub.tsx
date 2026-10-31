@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { STARTER_EBOOKS } from "@/lib/ebooks-seed";
 import {
+  EBOOK_CATEGORIES,
   ebookApi,
   readProgress,
   summarize,
@@ -22,15 +23,14 @@ import {
 import { EbookShare } from "./ebook-share";
 import { EbookStudio } from "./ebook-studio";
 const STARTERS = STARTER_EBOOKS.map(summarize);
-const FILTERS = [
-  "All Tracks",
-  "Python",
-  "AI & Copilot",
-  "Java",
-  "Cloud & DevOps",
-];
+const FILTERS = ["All Tracks", ...EBOOK_CATEGORIES];
 const covers: Record<string, string> = {
   Python: "from-emerald-600 to-teal-800",
+  "Python & Cheatcodes": "from-teal-600 to-cyan-900",
+  "Machine Learning": "from-blue-600 to-indigo-900",
+  "LLMs & Hugging Face": "from-amber-600 to-orange-900",
+  "GitHub Copilot (GH-300)": "from-violet-600 to-fuchsia-900",
+  "Endpoint Admin (MD-102)": "from-sky-600 to-blue-900",
   "AI with Copilot": "from-violet-600 to-indigo-900",
   Java: "from-orange-600 to-rose-800",
   "Cloud & DevOps": "from-sky-600 to-indigo-800",
@@ -89,7 +89,7 @@ export function StartLearningHub() {
       (category === "All Tracks" ||
         book.category ===
           (category === "AI & Copilot" ? "AI with Copilot" : category)) &&
-      `${book.title} ${book.subtitle} ${book.category}`
+      `${book.title} ${book.slug} ${book.subtitle} ${book.category}`
         .toLowerCase()
         .includes(search.toLowerCase()),
   );
@@ -185,6 +185,11 @@ export function StartLearningHub() {
             <div className="flex flex-1 flex-col p-6">
               <div className="flex flex-wrap gap-2 text-[11px] font-semibold text-indigo-700 dark:text-indigo-300">
                 <span>{book.level}</span>
+                {book.examBadgeCode && (
+                  <span className="rounded bg-indigo-50 px-2 dark:bg-indigo-950">
+                    {book.examBadgeCode}
+                  </span>
+                )}
                 {book.visibility !== "public" && (
                   <span className="rounded bg-amber-100 px-2 text-amber-900">
                     {book.visibility === "admin_only"
@@ -209,6 +214,16 @@ export function StartLearningHub() {
                   {book.durationMinutes} min
                 </span>
               </div>
+              {book.allowPdfDownload !== false && (
+                <Link
+                  href={`/certifications/learn/${book.slug}?view=pdf`}
+                  className="mt-4 text-xs font-semibold text-indigo-600 dark:text-indigo-300"
+                >
+                  {book.isCheatSheet
+                    ? "Printable ebook + cheat-sheet ↗"
+                    : "Printable PDF edition ↗"}
+                </Link>
+              )}
               <div className="mt-5">
                 <div className="mb-2 flex justify-between text-xs">
                   <span className="text-muted-foreground">

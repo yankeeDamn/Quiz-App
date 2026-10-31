@@ -41,3 +41,10 @@ CREATE TABLE IF NOT EXISTS ebook_attempts (
   shared BOOLEAN NOT NULL DEFAULT FALSE
 );
 CREATE INDEX IF NOT EXISTS ebook_attempts_user ON ebook_attempts(user_id,started_at DESC);
+
+CREATE TABLE IF NOT EXISTS ebook_pdf_assets (
+  slug VARCHAR(60) PRIMARY KEY REFERENCES ebooks(slug),
+  filename VARCHAR(180) NOT NULL,
+  bytes BYTEA NOT NULL CHECK (octet_length(bytes) <= 3145728),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

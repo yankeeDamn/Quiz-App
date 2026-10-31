@@ -28,7 +28,7 @@ export function EbookAssessment({
     [practice, setPractice] = useState<EbookQuestion[] | null>(null),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
-    [negative, setNegative] = useState(false),
+    [negative, setNegative] = useState((book.negativeMarks ?? 0) > 0),
     [index, setIndex] = useState(0),
     [remaining, setRemaining] = useState(0),
     [answers, setAnswers] = useState<Record<string, number>>({}),
@@ -217,9 +217,10 @@ export function EbookAssessment({
               The final exam has{" "}
               {book.questionCount || book.finalExamQuestions?.length || 15}{" "}
               questions and a {book.examMinutes}-minute server timer. Passing
-              requires 70%. Signed-in results are saved to your dashboard. This
-              is an ExamPro skill assessment, not a vendor certification or
-              proctored credential.
+              requires {book.passPercent ?? 70}%. Each correct answer earns{" "}
+              {book.marksPerCorrect ?? 1} mark(s). Signed-in results are saved
+              to your dashboard. This is an ExamPro skill assessment, not a
+              vendor certification or proctored credential.
             </p>
             <label className="flex items-center gap-3 rounded-xl border p-4 text-sm">
               <input
@@ -299,7 +300,7 @@ export function EbookAssessment({
                 Server-graded result saved to your account.{" "}
                 {result.passed
                   ? "Recognizes completion of this ExamPro assessment; not an accredited or vendor-issued qualification."
-                  : "A score of 70% is required to pass. Review explanations and try again."}
+                  : `A score of ${attempt.passPercent ?? 70}% is required to pass. Review explanations and try again.`}
               </p>
               <Link
                 href="/dashboard"
@@ -369,6 +370,24 @@ export function EbookAssessment({
                   </div>
                 )}
               </div>
+            )}
+            {!!result.domains?.length && (
+              <section className="rounded-xl border p-5">
+                <h3 className="font-bold">Domain breakdown</h3>
+                <div className="mt-3 space-y-3">
+                  {result.domains.map((d) => (
+                    <div
+                      key={d.domain}
+                      className="flex justify-between gap-4 text-sm"
+                    >
+                      <span>{d.domain}</span>
+                      <strong className="shrink-0">
+                        {d.correct} / {d.total}
+                      </strong>
+                    </div>
+                  ))}
+                </div>
+              </section>
             )}
             <div className="space-y-4">
               <h3 className="text-xl font-bold">Answer explanations</h3>
