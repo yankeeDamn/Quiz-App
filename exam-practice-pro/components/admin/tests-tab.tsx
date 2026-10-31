@@ -10,6 +10,7 @@ import { MockReview } from '@/components/admin/mock-review';
 import { MockReleaseReadiness } from '@/components/admin/mock-release-readiness';
 import { MockComparisonAudit } from '@/components/admin/mock-comparison-audit';
 import { BetaInvitePanel } from '@/components/admin/beta-invite-panel';
+import { CashfreeSandboxAudit } from '@/components/admin/cashfree-sandbox-audit';
 import { CglContentPipeline } from '@/components/admin/cgl-content-pipeline';
 import { BetaFeedbackDashboard } from '@/components/admin/beta-feedback-dashboard';
 
@@ -143,6 +144,7 @@ export function TestsTab() {
 
       {draftTestingEnabled && <MockComparisonAudit />}
       {draftTestingEnabled && <CglContentPipeline />}
+      {draftTestingEnabled && <CashfreeSandboxAudit />}
       {draftTestingEnabled && <BetaInvitePanel />}
       {draftTestingEnabled && <BetaFeedbackDashboard />}
       {readinessId && <MockReleaseReadiness key={readinessId} testId={readinessId} onClose={()=>setReadinessId(null)} />}
