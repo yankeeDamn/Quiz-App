@@ -67,7 +67,7 @@ interface ApiOptions {
 export async function api<T = unknown>(
   path: string,
   options: ApiOptions = {}
-): Promise<{ success: boolean; data?: T; error?: { message: string; code?: string } }> {
+): Promise<{ success: boolean; data?: T; error?: { message: string; code?: string; status?: number } }> {
   const { method = 'GET', body, public: isPublic = false, optionalAuth = false } = options;
 
   const headers: Record<string, string> = {
@@ -94,7 +94,7 @@ export async function api<T = unknown>(
   }); } catch { return {success:false,error:{code:'API_UNAVAILABLE',message:'ExamPro API unavailable. Check the Render service and NEXT_PUBLIC_API_URL.'}}; }
   let json;
   try { json = await res.json(); } catch { return {success:false,error:{code:'INVALID_API_RESPONSE',message:'The configured API returned a non-JSON response. Check which service runs on Render.'}}; }
-  if (!res.ok && json.success === undefined) return {success:false,error:{code:'API_ERROR',message:'API request failed ('+res.status+')'}};
+  if (!res.ok) return {success:false,error:{...json.error,status:res.status,message:json.error?.message||'API request failed ('+res.status+')'}};
   return json;
 }
 

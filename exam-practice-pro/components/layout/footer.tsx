@@ -26,10 +26,10 @@ export function Footer() {
               href="/"
               className="transition-colors hover:text-foreground"
             >
-              Quizzes
+              Home
             </Link>
             <Link href="/government-jobs" className="transition-colors hover:text-foreground">Govt Jobs</Link>
-            <Link href="/certifications" className="transition-colors hover:text-foreground">Certifications</Link>
+            <Link href="/certifications" className="transition-colors hover:text-foreground">Build your IT career</Link>
             
             <Link
               href="/dashboard"
@@ -41,7 +41,7 @@ export function Footer() {
               href="/india-mocks"
               className="transition-colors hover:text-foreground"
             >
-              India Mocks
+              Govt Mocks Exam
             </Link>
             <Link href="/privacy" className="transition-colors hover:text-foreground">Privacy</Link>
             <Link href="/terms" className="transition-colors hover:text-foreground">Terms</Link>

@@ -1,21 +1,13 @@
 'use client';
-import {useCallback,useEffect,useMemo,useState} from 'react';
+import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import {ArrowUpRight,BriefcaseBusiness,CalendarDays,Clock3,RefreshCw,Search} from 'lucide-react';
 import {Header} from '@/components/layout/header';
 import {Footer} from '@/components/layout/footer';
 import {api} from '@/lib/api';
+import {checkedAt, jobsErrorMessage, type GovernmentJobsResponse, type RecruitmentPortal} from '@/lib/government-jobs';
 
-type Status='open'|'upcoming';
-type Job={
- id:string;title:string;organisation:string;category:string;status:Status;
- applicationDeadline:string|null;noticeDate:string|null;method:string;source:string;
- sourceUrl:string;applicationUrl:string|null;notice:string;
-};
-type Portal={name:string;category:string;url:string;description:string};
-type Source={id:string;name:string;url:string;status:'ok'|'stale'|'unavailable';checkedAt:string|null};
-type JobResponse={jobs:Job[];portals:Portal[];sources:Source[];updatedAt:string;disclaimer:string};
 const CATEGORY=['All','SSC','UPSC','Railways','Banking','General'] as const;
-const OFFICIAL_PORTALS:Portal[]=[
+const OFFICIAL_PORTALS:RecruitmentPortal[]=[
  {name:'Employment News',category:'General',url:'https://employmentnews.gov.in/newemp/AllJobs.aspx?k=All',description:'Official central-government recruitment listings'},
  {name:'SSC',category:'SSC',url:'https://ssc.gov.in/',description:'SSC notifications and recruitment calendar'},
  {name:'UPSC',category:'UPSC',url:'https://cms.upsc.gov.in/examination-calendar/',description:'Forthcoming competitive examinations'},
@@ -24,18 +16,22 @@ const OFFICIAL_PORTALS:Portal[]=[
  {name:'Railway Recruitment Boards',category:'Railways',url:'https://www.rrbcdg.gov.in/',description:'RRB central notices and application updates'},
 ];
 const date=(iso:string|null)=>iso?new Date(iso+'T12:00:00Z').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric',timeZone:'Asia/Kolkata'}):'Not announced';
-const checked=(iso:string|null)=>iso?new Date(iso).toLocaleString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'2-digit',timeZone:'Asia/Kolkata'}):'Unavailable';
 export default function GovernmentJobsPage(){
- const [feed,setFeed]=useState<JobResponse|null>(null);
+ const [feed,setFeed]=useState<GovernmentJobsResponse|null>(null);
  const [error,setError]=useState('');
  const [loading,setLoading]=useState(true);
  const [filter,setFilter]=useState<string>('All');
  const [status,setStatus]=useState<string>('all');
  const [search,setSearch]=useState('');
+ const inFlight=useRef(false);
  const refresh=useCallback(async()=>{
-  const r=await api<JobResponse>('/api/v1/government-jobs',{public:true});
-  if(r.success&&r.data){setFeed(r.data);setError('');}else setError(r.error?.message||'Could not reach the official-notice index.');
-  setLoading(false);
+  if(inFlight.current)return;
+  inFlight.current=true;
+  setLoading(true);
+  try{
+   const r=await api<GovernmentJobsResponse>('/api/v1/government-jobs',{public:true});
+   if(r.success&&r.data){setFeed(r.data);setError('');}else setError(jobsErrorMessage(r.error));
+  }finally{inFlight.current=false;setLoading(false);}
  },[]);
  useEffect(()=>{
   void refresh();
@@ -62,7 +58,7 @@ export default function GovernmentJobsPage(){
     <h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-5xl">Government Jobs & Upcoming Exams</h1>
     <p className="mt-4 max-w-3xl text-muted-foreground">Browse recruitment notices indexed from official government sources, watch for upcoming exams, and verify every application deadline with the issuing authority.</p>
     <div className="mt-5 flex flex-wrap gap-3 text-sm">
-     <span className="inline-flex items-center gap-2 rounded-full border bg-background px-3 py-2"><RefreshCw className="h-4 w-4"/> Automatically checks sources about every 30 minutes</span>
+     <span className="inline-flex items-center gap-2 rounded-full border bg-background px-3 py-2"><RefreshCw className="h-4 w-4"/> Rechecks sources on visits after 30 minutes</span>
      <span className="inline-flex items-center gap-2 rounded-full border bg-background px-3 py-2"><CalendarDays className="h-4 w-4"/> Expired application deadlines hidden</span>
      <span className="inline-flex items-center gap-2 rounded-full border bg-background px-3 py-2">No account or Pro plan required</span>
     </div>
@@ -78,7 +74,7 @@ export default function GovernmentJobsPage(){
      <select className="min-h-11 rounded-xl border bg-card px-3 text-sm" aria-label="Filter notice status" value={status} onChange={e=>setStatus(e.target.value)}>
       <option value="all">All notices</option><option value="open">Applications with future closing dates</option><option value="upcoming">Upcoming / notification pending</option>
      </select>
-     <button type="button" onClick={()=>{setLoading(true);void refresh();}} disabled={loading} className="inline-flex min-h-11 items-center gap-2 rounded-xl border px-4 text-sm font-medium hover:bg-muted disabled:opacity-50">
+     <button type="button" onClick={()=>void refresh()} disabled={loading} className="inline-flex min-h-11 items-center gap-2 rounded-xl border px-4 text-sm font-medium hover:bg-muted disabled:opacity-50">
       <RefreshCw className={`h-4 w-4 ${loading?'animate-spin':''}`}/> Check updates
      </button>
     </div>
@@ -91,15 +87,18 @@ export default function GovernmentJobsPage(){
      </div>
      {feed&&<p className="text-xs text-muted-foreground">{healthy}/{feed.sources.length} sources checked successfully</p>}
     </div>
-    {feed?.sources&&<div className="flex flex-wrap gap-2">{feed.sources.map(s=><div key={s.id} className="rounded-lg border px-3 py-2 text-xs">
-      <span className="font-semibold">{s.name}</span> · <span className={s.status==='ok'?'text-emerald-700 dark:text-emerald-400':'text-amber-700 dark:text-amber-400'}>{s.status==='ok'?'Updated':s.status==='stale'?'Older cached data':'Currently unavailable'}</span>
-      <span className="block text-muted-foreground">Last successful check: {checked(s.checkedAt)}</span>
+    {feed?.sources&&<div className="grid gap-3 sm:grid-cols-2">{feed.sources.map(s=><div key={s.id} className="rounded-xl border bg-card p-4 text-xs">
+      <a href={s.url} target="_blank" rel="noopener noreferrer" className="font-semibold underline underline-offset-4">{s.name}</a> · <span className={s.status==='ok'?'text-emerald-700 dark:text-emerald-400':'text-amber-700 dark:text-amber-400'}>{s.status==='ok'?'Source checked':s.status==='stale'?'Older cached data':'Currently unavailable'}</span>
+      <p className="mt-2 leading-5 text-muted-foreground">{s.message}</p>
+      <span className="mt-2 block text-muted-foreground">Last successful check: {checkedAt(s.checkedAt)}</span>
+      {s.status!=='ok'&&s.lastAttemptAt&&<span className="mt-1 block text-muted-foreground">Last attempted: {checkedAt(s.lastAttemptAt)}</span>}
      </div>)}</div>}
-    {error&&<p role="alert" className="rounded-xl border border-amber-400 p-4 text-sm">Live source check unavailable: {error}. Use the verified official portal links below.</p>}
+    {error&&<p role="alert" className="rounded-xl border border-amber-400 bg-amber-50/50 p-4 text-sm dark:bg-amber-950/20">{error}</p>}
     {loading&&!feed&&<p className="rounded-xl border p-5 text-muted-foreground">Checking official recruitment websites… On a sleeping Render instance the first request can take longer.</p>}
-    {!loading&&records.length===0&&<div className="rounded-xl border bg-card p-6 text-sm">
-      <p className="font-semibold">No currently verified notices match these filters.</p>
-      <p className="mt-2 text-muted-foreground">This may mean no unexpired jobs are listed, the official site has not published new notices, or a source is unavailable. We never invent deadlines or label expired jobs as open. Check the official portals below.</p>
+    {!loading&&feed&&records.length===0&&<div className="rounded-xl border bg-card p-6 text-sm">
+      <p className="font-semibold">{feed.jobs.length>0?'No notices match your filters.':healthy===0?'Official sources are temporarily unavailable.':'No open notices from the checked sources.'}</p>
+      <p className="mt-2 text-muted-foreground">{feed.jobs.length>0?'Try another category or clear your search. SSC, Banking and Railways currently have direct official portal links below; automatic indexing covers Employment News and UPSC.':healthy===0?'The list could not be verified. Use the official portal links below while the source checks recover.':'Expired deadlines are hidden. This does not mean there are no government vacancies elsewhere. Check source health above and the official portals below.'}</p>
+      {(filter!=='All'||status!=='all'||search)&&<button type="button" onClick={()=>{setFilter('All');setStatus('all');setSearch('');}} className="mt-3 min-h-10 rounded-lg border px-3 font-semibold hover:bg-muted">Clear filters</button>}
      </div>}
     <div className="grid gap-4 md:grid-cols-2">
      {records.map(j=><article key={j.id} className="flex flex-col justify-between rounded-2xl border bg-card p-5 shadow-sm">
