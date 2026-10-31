@@ -222,6 +222,8 @@ async function migrate() {
     await client.query(fs.readFileSync(path.join(__dirname, 'practice-overrides.sql'), 'utf8'));
     const competitive = await seedCompetitiveContent(client);
     console.log(`📚 Competitive bank staged: ${competitive.questions} questions, ${competitive.mocks} draft quizzes. Review and publish in /admin.`);
+    await client.query(fs.readFileSync(path.join(__dirname, 'ebooks-schema.sql'), 'utf8'));
+    await require('./seed-ebooks').seedEbooks(client);
     await client.query('COMMIT');
     console.log('✅ Migrations complete.');
   } catch (err) {

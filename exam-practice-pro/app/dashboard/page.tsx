@@ -1,5 +1,6 @@
 'use client';
 
+import { EbookResults } from '@/components/certifications/ebook-results';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { api } from '@/lib/api';
@@ -85,6 +86,7 @@ export default function DashboardPage() {
             {cloudError&&<p role="alert" className="mt-3 text-sm text-red-600">{cloudError}</p>}
             <ul className="mt-3 divide-y">{cloud.map(item=><li key={item.id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm"><span><strong>{item.title}</strong><span className="ml-2 text-muted-foreground">{item.submittedAt?'Submitted':'In progress'}</span></span><span>{item.result?`${item.result.score}/${item.result.total} (${item.result.percentage}%)`:''} <Link className="ml-2 underline" href={`/dashboard/attempts/${item.id}`}>{item.submittedAt?'Review':'Resume / inspect'}</Link></span></li>)}</ul>
           </section>
+          <EbookResults />
           {!hasActivity ? (
             /* Empty State */
             <motion.div
