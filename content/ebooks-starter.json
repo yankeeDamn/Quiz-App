@@ -1,0 +1,1239 @@
+[
+  {
+    "slug": "python-mastery",
+    "title": "Python 3: Zero to Production Engineering",
+    "subtitle": "From object references to tested APIs and safe IT automation.",
+    "category": "Python",
+    "level": "Beginner to Pro",
+    "visibility": "public",
+    "ownerEmail": "",
+    "chapters": [
+      {
+        "id": "python-model",
+        "order": 0,
+        "title": "Python syntax, variables & the memory model",
+        "durationMinutes": 20,
+        "summary": "Understand names, objects, mutability and predictable functions.",
+        "contentMarkdown": "## Names refer to objects\nPython assignment binds a name to an object. It does not automatically copy the object. When two names point at one list, a mutation through either name changes the same list. Rebinding a name points it elsewhere. This distinction explains many production bugs in configuration and request handling.\n\n## Build a mental trace\nBefore running the example, draw the names and the lists they reference. A slice makes a shallow copy: its outer list is separate, but nested mutable objects can still be shared. Use a deliberate deep copy only when nested independence is required.\n\n## Defaults and input boundaries\nFunction default arguments are evaluated when the function is defined. Use `None` as a sentinel when each invocation needs a fresh list. At an API boundary, convert and validate external values instead of assuming every input is an integer. Handle a specific exception and return a useful error; swallowing every exception can hide a broken dependency.\n\n## Engineering exercise\nWrite a function that accepts an optional list of ticket IDs and returns a new list containing one additional ID. Verify that the caller's list is unchanged. Then test an empty list, repeated calls, and an invalid input. Document whether the function mutates its arguments.",
+        "codeSnippet": {
+          "language": "python",
+          "code": "tickets = [\"INC-1\"]\nshared = tickets\nseparate = tickets.copy()\nshared.append(\"INC-2\")\nprint(len(tickets), len(separate))",
+          "expectedOutput": "2 1"
+        },
+        "keyTakeaways": [
+          "Assignment binds names; it does not clone objects.",
+          "A shallow copy still shares nested objects.",
+          "Use None for a fresh mutable default."
+        ],
+        "conceptChecks": [
+          {
+            "question": "What does a = b do when b is a list?",
+            "options": [
+              "Copies every element deeply",
+              "Binds a to the same list",
+              "Makes b immutable",
+              "Serializes the list"
+            ],
+            "answer": 1,
+            "explanation": "Assignment shares the reference; it is not a copy."
+          },
+          {
+            "question": "Which default avoids sharing a list between calls?",
+            "options": [
+              "items=[]",
+              "items=list()",
+              "items=None, then allocate inside",
+              "items={}"
+            ],
+            "answer": 2,
+            "explanation": "Allocate a new list in the function when the argument is None."
+          }
+        ]
+      },
+      {
+        "id": "python-collections",
+        "order": 1,
+        "title": "Data structures & comprehensions",
+        "durationMinutes": 20,
+        "summary": "Choose structures by the operations your application needs.",
+        "contentMarkdown": "## Match the structure to the job\nUse a list for an ordered sequence, a dictionary for key-to-value lookups, and a set for membership and deduplication. A tuple can represent a fixed group of values, but a tuple containing a list is not deeply immutable. Dictionary keys must be hashable; a mutable list cannot be a dictionary key.\n\n## Transform data clearly\nA comprehension is useful when the transformation and filter fit in one readable expression. Separate validation, network I/O and exception handling into named functions. A clever nested comprehension can obscure which records were rejected and why.\n\n## Preserve meaning while deduplicating\nA set removes duplicates but does not promise an application-specific order. If first-seen order matters, maintain an output list and a seen set, or use dictionary insertion order deliberately. Never rely on incidental iteration order for deterministic test expectations.\n\n## Engineering exercise\nGiven incident dictionaries with an ID, priority and owner, build an owner-to-open-count index. Reject records missing required keys, preserve the original data, and test repeated owners. Discuss the memory trade-off between building a complete list and processing an iterator one record at a time.",
+        "codeSnippet": {
+          "language": "python",
+          "code": "tickets = [{\"team\": \"EUC\"}, {\"team\": \"Cloud\"}, {\"team\": \"EUC\"}]\ncounts = {}\nfor ticket in tickets:\n    team = ticket[\"team\"]\n    counts[team] = counts.get(team, 0) + 1\nprint(counts[\"EUC\"])",
+          "expectedOutput": "2"
+        },
+        "keyTakeaways": [
+          "Use a dict for indexed lookup and a set for membership.",
+          "Keep comprehensions short enough to review.",
+          "Choose explicit ordering when order matters."
+        ],
+        "conceptChecks": [
+          {
+            "question": "Which structure directly models unique ticket IDs?",
+            "options": [
+              "set",
+              "float",
+              "bytes only",
+              "nested function"
+            ],
+            "answer": 0,
+            "explanation": "A set represents distinct hashable values."
+          },
+          {
+            "question": "What does counts.get(key, 0) provide?",
+            "options": [
+              "A database lock",
+              "A default for a missing key",
+              "A deep copy",
+              "A sorted dictionary"
+            ],
+            "answer": 1,
+            "explanation": "dict.get returns the supplied default when the key is absent."
+          }
+        ]
+      },
+      {
+        "id": "python-functions",
+        "order": 2,
+        "title": "Functions, decorators, generators & AsyncIO",
+        "durationMinutes": 20,
+        "summary": "Separate pure transformations from asynchronous I/O.",
+        "contentMarkdown": "## Small functions have clear contracts\nA useful function states its input, output, mutation behavior and failure modes. Keep a pure transformation separate from file or network access so it can be tested without an external service. A decorator wraps a callable; preserve metadata with `functools.wraps` when building one.\n\n## Streams and suspension\nA generator yields values on demand rather than constructing a complete result list. This reduces peak memory when the consumer processes values incrementally. It does not make CPU work parallel. Exhausted generators cannot simply be replayed without creating a new iterator.\n\n## Cooperative concurrency\nAn async function returns a coroutine until awaited or scheduled. Tasks cooperate at suspension points. Blocking I/O inside the event loop can stall unrelated tasks; use an async client or move suitable blocking work off the loop. Add timeouts, cancellation handling and concurrency bounds before calling many external systems.\n\n## Engineering exercise\nDesign a bounded incident-enrichment worker. Keep ID normalization synchronous and pure, fetch metadata asynchronously, and return a per-item success or error. Define what happens when one dependency times out. Avoid launching thousands of unbounded tasks merely because the API is asynchronous.",
+        "codeSnippet": {
+          "language": "python",
+          "code": "import asyncio\n\nasync def label(value):\n    await asyncio.sleep(0)\n    return value.upper()\n\nasync def main():\n    results = await asyncio.gather(label(\"euc\"), label(\"cloud\"))\n    print(\", \".join(results))\n\nasyncio.run(main())",
+          "expectedOutput": "EUC, CLOUD"
+        },
+        "keyTakeaways": [
+          "Await or schedule coroutines deliberately.",
+          "Generators are lazy, not automatically parallel.",
+          "Bound concurrency and define cancellation behavior."
+        ],
+        "conceptChecks": [
+          {
+            "question": "What can stall an AsyncIO event loop?",
+            "options": [
+              "Awaiting a nonblocking client",
+              "Calling blocking I/O directly in a coroutine",
+              "Creating a pure helper",
+              "Using a tuple"
+            ],
+            "answer": 1,
+            "explanation": "Blocking work prevents other tasks from running on that loop."
+          },
+          {
+            "question": "What does yield enable?",
+            "options": [
+              "Lazy generation of values",
+              "Automatic database transactions",
+              "Deep copying all values",
+              "Implicit authentication"
+            ],
+            "answer": 0,
+            "explanation": "A generator yields values incrementally to its consumer."
+          }
+        ]
+      },
+      {
+        "id": "python-packaging",
+        "order": 3,
+        "title": "OOP, type hints & packaging",
+        "durationMinutes": 20,
+        "summary": "Make code understandable to humans, tools and deployment systems.",
+        "contentMarkdown": "## Model behavior, not just containers\nA class is useful when state and behavior belong together. Composition often produces a simpler design than a deep inheritance tree: inject a notification client into a ticket service instead of inheriting networking behavior. Dataclasses reduce boilerplate for plain data while explicit methods protect invariants.\n\n## Types are a contract, not a security boundary\nType hints help static analysis and editors, but normal Python execution does not enforce them automatically. Validate untrusted JSON at runtime. Use a small protocol or interface boundary so a test double can replace a network client without importing the real service.\n\n## Reproducible delivery\nUse a virtual environment and project metadata such as `pyproject.toml`. Separate runtime dependencies from development tooling. Pin or lock the dependency set used by deployment, record the supported Python version, and build in CI. Do not commit API keys or depend on an import that works only because your terminal happens to be in the source folder.\n\n## Engineering exercise\nPackage a ticket normalization module with one public function and tests. Install it into a clean environment, import it from outside its repository directory, and run the tests. This exposes accidental reliance on local paths.",
+        "codeSnippet": {
+          "language": "python",
+          "code": "from dataclasses import dataclass\n\n@dataclass(frozen=True)\nclass Ticket:\n    id: str\n    priority: int\n\nticket = Ticket(\"INC-9\", 2)\nprint(f\"{ticket.id}: P{ticket.priority}\")",
+          "expectedOutput": "INC-9: P2"
+        },
+        "keyTakeaways": [
+          "Type hints do not replace runtime validation.",
+          "Prefer composition for replaceable dependencies.",
+          "Test installation in a clean environment."
+        ],
+        "conceptChecks": [
+          {
+            "question": "Do type hints alone validate incoming JSON at runtime?",
+            "options": [
+              "Always",
+              "Only for lists",
+              "No",
+              "Only in production"
+            ],
+            "answer": 2,
+            "explanation": "Static annotations are not automatic runtime validation."
+          },
+          {
+            "question": "Why inject a client into a service?",
+            "options": [
+              "To expose its secret",
+              "To replace it in tests",
+              "To skip authorization",
+              "To disable timeouts"
+            ],
+            "answer": 1,
+            "explanation": "Dependency injection makes boundaries replaceable and testable."
+          }
+        ]
+      },
+      {
+        "id": "python-production",
+        "order": 4,
+        "title": "FastAPI, pytest & safe automation",
+        "durationMinutes": 20,
+        "summary": "Ship a small API with validation, tests and operational limits.",
+        "contentMarkdown": "## Separate the HTTP boundary\nFastAPI can validate request models and generate an API schema. Keep business logic outside route handlers: the route should translate a validated request into a service call and map expected failures into useful responses. Authentication establishes identity; authorization decides whether that identity can act on a particular ticket.\n\n## Test behavior at the boundary\nUse pytest assertions for both happy paths and failures. Include missing fields, invalid values, unauthorized users and dependency timeouts. A test that repeats the implementation's calculation can miss the same bug. Prefer independently chosen examples with explicit expected results.\n\n## Treat automation as a transaction\nAn IT automation endpoint should define an idempotency key, audit event and approval rule before changing external state. Retrying a request must not repeatedly disable an account or extend a subscription. Use dry-run previews and least-privilege credentials. Background work needs bounded retries and a way to inspect failure.\n\n## Production exercise\nDesign a ticket-priority endpoint with a documented schema, one pure decision function and an injected repository. Add a health endpoint that does not expose credentials, configure request timeouts, and test that an unauthorized user cannot modify another team's ticket.",
+        "codeSnippet": {
+          "language": "python",
+          "code": "def priority(age_hours: int) -> str:\n    if age_hours < 0:\n        raise ValueError(\"age must be non-negative\")\n    return \"high\" if age_hours >= 24 else \"normal\"\n\nassert priority(24) == \"high\"\nprint(priority(3))",
+          "expectedOutput": "normal"
+        },
+        "keyTakeaways": [
+          "Test authorization and failure paths as well as successful responses.",
+          "Use idempotency for retried side effects.",
+          "Validate requests before calling business logic."
+        ],
+        "conceptChecks": [
+          {
+            "question": "Which test best checks a security boundary?",
+            "options": [
+              "The button color is blue",
+              "Another team cannot update this ticket",
+              "The loop runs once",
+              "The variable has a short name"
+            ],
+            "answer": 1,
+            "explanation": "Authorization tests must verify forbidden cross-scope actions."
+          },
+          {
+            "question": "Why use an idempotency key?",
+            "options": [
+              "To repeat every side effect",
+              "To identify and safely deduplicate retries",
+              "To remove authentication",
+              "To make secrets public"
+            ],
+            "answer": 1,
+            "explanation": "The server recognizes the same operation across retries."
+          }
+        ]
+      }
+    ],
+    "linkedMockTestId": "",
+    "examId": "ebook-exam-python",
+    "examMinutes": 20,
+    "finalExamQuestions": [
+      {
+        "question": "What does a = b do when b is a list?",
+        "options": [
+          "Copies every element deeply",
+          "Binds a to the same list",
+          "Makes b immutable",
+          "Serializes the list"
+        ],
+        "answer": 1,
+        "explanation": "Assignment shares the reference; it is not a copy.",
+        "id": "python-mastery-q1"
+      },
+      {
+        "question": "Which default avoids sharing a list between calls?",
+        "options": [
+          "items=[]",
+          "items=list()",
+          "items=None, then allocate inside",
+          "items={}"
+        ],
+        "answer": 2,
+        "explanation": "Allocate a new list in the function when the argument is None.",
+        "id": "python-mastery-q2"
+      },
+      {
+        "question": "Which structure directly models unique ticket IDs?",
+        "options": [
+          "set",
+          "float",
+          "bytes only",
+          "nested function"
+        ],
+        "answer": 0,
+        "explanation": "A set represents distinct hashable values.",
+        "id": "python-mastery-q3"
+      },
+      {
+        "question": "What does counts.get(key, 0) provide?",
+        "options": [
+          "A database lock",
+          "A default for a missing key",
+          "A deep copy",
+          "A sorted dictionary"
+        ],
+        "answer": 1,
+        "explanation": "dict.get returns the supplied default when the key is absent.",
+        "id": "python-mastery-q4"
+      },
+      {
+        "question": "What can stall an AsyncIO event loop?",
+        "options": [
+          "Awaiting a nonblocking client",
+          "Calling blocking I/O directly in a coroutine",
+          "Creating a pure helper",
+          "Using a tuple"
+        ],
+        "answer": 1,
+        "explanation": "Blocking work prevents other tasks from running on that loop.",
+        "id": "python-mastery-q5"
+      },
+      {
+        "question": "What does yield enable?",
+        "options": [
+          "Lazy generation of values",
+          "Automatic database transactions",
+          "Deep copying all values",
+          "Implicit authentication"
+        ],
+        "answer": 0,
+        "explanation": "A generator yields values incrementally to its consumer.",
+        "id": "python-mastery-q6"
+      },
+      {
+        "question": "Do type hints alone validate incoming JSON at runtime?",
+        "options": [
+          "Always",
+          "Only for lists",
+          "No",
+          "Only in production"
+        ],
+        "answer": 2,
+        "explanation": "Static annotations are not automatic runtime validation.",
+        "id": "python-mastery-q7"
+      },
+      {
+        "question": "Why inject a client into a service?",
+        "options": [
+          "To expose its secret",
+          "To replace it in tests",
+          "To skip authorization",
+          "To disable timeouts"
+        ],
+        "answer": 1,
+        "explanation": "Dependency injection makes boundaries replaceable and testable.",
+        "id": "python-mastery-q8"
+      },
+      {
+        "question": "Which test best checks a security boundary?",
+        "options": [
+          "The button color is blue",
+          "Another team cannot update this ticket",
+          "The loop runs once",
+          "The variable has a short name"
+        ],
+        "answer": 1,
+        "explanation": "Authorization tests must verify forbidden cross-scope actions.",
+        "id": "python-mastery-q9"
+      },
+      {
+        "question": "Why use an idempotency key?",
+        "options": [
+          "To repeat every side effect",
+          "To identify and safely deduplicate retries",
+          "To remove authentication",
+          "To make secrets public"
+        ],
+        "answer": 1,
+        "explanation": "The server recognizes the same operation across retries.",
+        "id": "python-mastery-q10"
+      },
+      {
+        "question": "What is printed by list(range(3))?",
+        "options": [
+          "[1, 2, 3]",
+          "[0, 1, 2]",
+          "[0, 1, 2, 3]",
+          "3"
+        ],
+        "answer": 1,
+        "explanation": "range(3) starts at zero and excludes three.",
+        "id": "python-mastery-q11"
+      },
+      {
+        "question": "What does len({1, 1, 2}) return?",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "An exception"
+        ],
+        "answer": 1,
+        "explanation": "A set contains distinct elements.",
+        "id": "python-mastery-q12"
+      },
+      {
+        "question": "What does a shallow copy of a nested list preserve?",
+        "options": [
+          "Shared references to nested mutable objects",
+          "An independent deep object graph",
+          "Only integer values",
+          "No references"
+        ],
+        "answer": 0,
+        "explanation": "Only the outer container is copied.",
+        "id": "python-mastery-q13"
+      },
+      {
+        "question": "Which failure should a negative ticket age cause?",
+        "options": [
+          "Silently classify it as old",
+          "A documented validation error",
+          "An authentication bypass",
+          "An infinite retry"
+        ],
+        "answer": 1,
+        "explanation": "Invalid domain input needs explicit validation.",
+        "id": "python-mastery-q14"
+      },
+      {
+        "question": "What should a production network call have?",
+        "options": [
+          "No upper bound",
+          "A timeout and a defined failure policy",
+          "A client-visible secret",
+          "Unlimited concurrency"
+        ],
+        "answer": 1,
+        "explanation": "Timeouts and failure handling bound impact.",
+        "id": "python-mastery-q15"
+      }
+    ],
+    "references": [
+      "https://docs.python.org/3/tutorial/",
+      "https://fastapi.tiangolo.com/tutorial/",
+      "https://docs.pytest.org/en/stable/"
+    ],
+    "updatedAt": "2026-10-31T00:00:00.000Z",
+    "examTitle": "Python Certified Developer Exam"
+  },
+  {
+    "slug": "ai-with-copilot",
+    "title": "AI Engineering with GitHub Copilot & LLMs",
+    "subtitle": "Build with context, test the boundaries, and ship responsible AI features.",
+    "category": "AI with Copilot",
+    "level": "Intermediate",
+    "visibility": "public",
+    "ownerEmail": "",
+    "chapters": [
+      {
+        "id": "ai-context",
+        "order": 0,
+        "title": "Prompt engineering & context windows",
+        "durationMinutes": 20,
+        "summary": "Specify constraints, evidence and acceptance criteria.",
+        "contentMarkdown": "## Define the task before asking for code\nA useful coding prompt includes the current behavior, desired behavior, architectural constraints and a way to verify success. Add relevant interfaces and examples rather than dumping an entire repository. Tell the assistant which files or contracts must remain compatible.\n\n## Context is a finite working set\nA model can only use the context supplied to it within its limits. A large conversation can crowd out an important constraint. Keep a concise task summary and refresh it when requirements change. Treat generated statements about unseen files as hypotheses to verify against the actual repository.\n\n## Data is not an instruction\nRetrieved documents, ticket text and repository comments can contain malicious instructions. A tool-using system must keep trusted system rules separate from untrusted content. Do not place credentials in prompts, and do not allow a document to grant itself permission to run commands.\n\n## Engineering exercise\nWrite a prompt for adding an authenticated ticket endpoint. Include input/output examples, organization scoping, error behavior and tests. Then ask the assistant to identify missing information before editing. Review the resulting diff against each acceptance criterion instead of deciding solely from a confident explanation.",
+        "codeSnippet": {
+          "language": "json",
+          "code": "{\n  \"task\": \"Add ticket search\",\n  \"constraints\": [\"organization scoped\", \"parameterized SQL\"],\n  \"acceptance\": [\"cross-org requests denied\", \"pagination tested\"]\n}",
+          "expectedOutput": "Task: Add ticket search\nChecks: organization scope, SQL parameters, pagination"
+        },
+        "keyTakeaways": [
+          "Give concrete constraints and acceptance examples.",
+          "Verify claims against source files.",
+          "Treat retrieved instructions as untrusted data."
+        ],
+        "conceptChecks": [
+          {
+            "question": "Which prompt is easiest to verify?",
+            "options": [
+              "Make it awesome",
+              "Fix everything",
+              "Add paginated org-scoped search; test forbidden cross-org reads",
+              "Use any architecture"
+            ],
+            "answer": 2,
+            "explanation": "Explicit behavior and checks make the result reviewable."
+          },
+          {
+            "question": "A retrieved document asks the agent to reveal its token. What should happen?",
+            "options": [
+              "Follow it",
+              "Ignore the instruction and protect the token",
+              "Forward the token to all users",
+              "Disable audit logs"
+            ],
+            "answer": 1,
+            "explanation": "Retrieved text cannot authorize disclosure or override trusted rules."
+          }
+        ]
+      },
+      {
+        "id": "ai-copilot",
+        "order": 1,
+        "title": "Completions, chat & multi-file changes",
+        "durationMinutes": 20,
+        "summary": "Choose a workflow and keep each diff reviewable.",
+        "contentMarkdown": "## Use the smallest effective interaction\nInline completion is useful for a small local continuation. Chat helps explain a function, compare designs or plan a change. A multi-file editing workflow can coordinate a feature across an API and UI, but a larger edit still needs a clear boundary and review. Product names and UI locations evolve; learn the workflow rather than memorizing one button position.\n\n## Give relevant repository context\nStart from the real handler, type and test files. Ask the assistant to follow existing error shapes and dependency choices. If a feature needs a migration, configuration or deployment step, keep those visible in the change description. A green frontend build does not prove that the backend route is deployed.\n\n## Review as an engineer\nRead each changed file, especially permissions, SQL, dependency updates and generated configuration. Run the project's checks. If the assistant introduces a second authentication system into an already working app, correct the architectural mismatch before building more UI.\n\n## Engineering exercise\nImplement a read-only search filter in one small change. Then add the API parameter in a second step with a matching integration test. Compare the diffs and explain how each step can be rolled back.",
+        "codeSnippet": {
+          "language": "typescript",
+          "code": "type Ticket = { id: string; team: string };\nconst tickets: Ticket[] = [{ id: \"INC-1\", team: \"EUC\" }];\nconst found = tickets.filter(ticket => ticket.team === \"EUC\");\nconsole.log(found.length);",
+          "expectedOutput": "1"
+        },
+        "keyTakeaways": [
+          "Keep multi-file changes bounded by a contract.",
+          "Review permissions and configuration explicitly.",
+          "Check frontend and backend deployment independently."
+        ],
+        "conceptChecks": [
+          {
+            "question": "A multi-file edit compiles. What is still needed?",
+            "options": [
+              "Nothing",
+              "Review the diff and run behavior/security checks",
+              "Delete existing tests",
+              "Trust all generated defaults"
+            ],
+            "answer": 1,
+            "explanation": "Compilation checks types and syntax, not every behavioral or access rule."
+          },
+          {
+            "question": "Which context is most useful for an API change?",
+            "options": [
+              "An unrelated screenshot",
+              "The handler, request types and relevant tests",
+              "A secret key",
+              "Only a marketing slogan"
+            ],
+            "answer": 1,
+            "explanation": "Related source contracts guide a compatible implementation."
+          }
+        ]
+      },
+      {
+        "id": "ai-tests",
+        "order": 2,
+        "title": "AI-assisted tests, refactoring & security review",
+        "durationMinutes": 20,
+        "summary": "Use independent expectations and adversarial cases.",
+        "contentMarkdown": "## Ask for tests that can fail meaningfully\nA useful test describes externally observable behavior. Provide cases with independent expected results, including invalid input and unauthorized callers. Generated tests can accidentally repeat the same mistake as generated code, so choose examples yourself and inspect what the assertions actually prove.\n\n## Refactor behind a stable contract\nCapture current behavior before moving responsibilities. Small extractions make it easier to distinguish a behavior change from a mechanical reorganization. Avoid combining a broad rename, a dependency upgrade and a security change in one opaque patch.\n\n## Security review is more than pattern matching\nAsk where identity comes from, where access is checked, and whether one user's identifiers can reach another user's data. Trace the full path from request to database. Parameterized SQL addresses injection in values, but it does not automatically add tenant scoping or validate which columns a user may update.\n\n## Engineering exercise\nGive an assistant a route that updates a ticket by ID alone. Ask it to propose an authorization regression test first. Then require a scoped lookup and test that both unknown IDs and forbidden IDs return an appropriate non-leaking response.",
+        "codeSnippet": {
+          "language": "typescript",
+          "code": "function canEdit(ownerId: string, actorId: string): boolean {\n  return ownerId === actorId;\n}\nconsole.log(canEdit(\"team-a\", \"team-b\"));",
+          "expectedOutput": "false"
+        },
+        "keyTakeaways": [
+          "Test denial paths and cross-account identifiers.",
+          "Parameterized values do not replace authorization.",
+          "Refactor in steps with a stable contract."
+        ],
+        "conceptChecks": [
+          {
+            "question": "What can a generated test accidentally do?",
+            "options": [
+              "Share the implementation bug",
+              "Guarantee security automatically",
+              "Replace review entirely",
+              "Prove all deployments healthy"
+            ],
+            "answer": 0,
+            "explanation": "A mirrored algorithm can produce the same wrong result in code and test."
+          },
+          {
+            "question": "Parameterized SQL alone prevents which problem?",
+            "options": [
+              "Every authorization bug",
+              "Injection through parameter values",
+              "All outages",
+              "Every race condition"
+            ],
+            "answer": 1,
+            "explanation": "Parameterized values prevent value interpolation; scope still needs explicit checks."
+          }
+        ]
+      },
+      {
+        "id": "ai-rag",
+        "order": 3,
+        "title": "RAG pipelines & agentic workflows",
+        "durationMinutes": 20,
+        "summary": "Retrieve permitted evidence before generating answers.",
+        "contentMarkdown": "## Retrieval adds evidence, not certainty\nA retrieval-augmented generation pipeline chunks documents, indexes them, retrieves candidates and sends selected passages to a model. Store document identifiers and version metadata so an answer can cite the material it actually used. Similarity ranking does not prove that a passage is accurate or applicable.\n\n## Apply access rules before context assembly\nScope retrieval to the caller's permitted organization and documents. Filtering only after generation is too late: restricted content has already reached the model. Avoid mixing private and public caches, and include identity or policy scope in cache keys.\n\n## Agents need bounded authority\nAn agent can select tools and iterate, but each tool must verify its own authorization. Limit the number of steps, cost and time. For actions such as changing an account or sending a message, provide a reviewable preview and an approval boundary. A natural-language suggestion should not silently become a privileged command.\n\n## Engineering exercise\nSketch a knowledge search endpoint. Include document-level permissions, a retrieval limit, citations, and an explicit no-evidence response. Test a user asking for a document they cannot read and a retrieved passage containing an instruction to ignore the access policy.",
+        "codeSnippet": {
+          "language": "json",
+          "code": "{\n  \"retrieval\": {\"organizationId\": \"org-7\", \"limit\": 4},\n  \"answerPolicy\": \"cite permitted evidence or state insufficient evidence\",\n  \"tools\": {\"maxSteps\": 3, \"mutationsRequireApproval\": true}\n}",
+          "expectedOutput": "Retrieve permitted documents → assemble context → cite evidence"
+        },
+        "keyTakeaways": [
+          "Enforce document permissions before retrieval reaches the model.",
+          "Preserve citations and document versions.",
+          "Bound tool authority, cost and iteration."
+        ],
+        "conceptChecks": [
+          {
+            "question": "When should document permissions be enforced?",
+            "options": [
+              "After sharing the answer",
+              "Before retrieved content enters model context",
+              "Only on the home page",
+              "Never for vector search"
+            ],
+            "answer": 1,
+            "explanation": "Retrieval is itself a data-access boundary."
+          },
+          {
+            "question": "A high similarity score proves what?",
+            "options": [
+              "The content is always true",
+              "Only that the configured similarity function ranked it highly",
+              "The user can edit the document",
+              "A vendor endorsed the answer"
+            ],
+            "answer": 1,
+            "explanation": "Ranking is not an accuracy or authorization guarantee."
+          }
+        ]
+      },
+      {
+        "id": "ai-shipping",
+        "order": 4,
+        "title": "Ship SaaS features with an AI pair programmer",
+        "durationMinutes": 20,
+        "summary": "Turn a request into a tested, observable release.",
+        "contentMarkdown": "## Work from a vertical slice\nA small feature that spans sign-in, authorization, persistence and UI is more useful than several disconnected mock screens. Define the data contract first, then implement one complete user journey. Keep the existing app's database, authentication provider and deployment layout unless the task explicitly requires a migration.\n\n## Control cost and failure\nPut model calls behind a server boundary with timeouts, request limits and a budget. Keep provider keys out of browser bundles. A graceful fallback should preserve truthful state: do not display a locally simulated result as a saved server result. Record useful error categories without logging private prompts or tokens.\n\n## Release deliberately\nUse a feature branch and reviewable PR. Run tests and a production build, check migrations on an isolated database, and verify the deployed route. A successful build cannot tell you whether a production environment variable is missing. Observe latency and failure rates after release and keep a rollback path.\n\n## Engineering exercise\nDesign an AI ticket-summary feature with a redacted input, request quota, deterministic test double, timeout response and user-visible retry. Define what data may be retained and which action still needs a human decision.",
+        "codeSnippet": {
+          "language": "typescript",
+          "code": "const result = { source: \"local-preview\", saved: false };\nconsole.log(result.saved ? \"Saved\" : \"Preview only\");",
+          "expectedOutput": "Preview only"
+        },
+        "keyTakeaways": [
+          "Keep keys and privileged tools on the server.",
+          "Never label local fallback as verified persistence.",
+          "Validate migrations and deployed behavior."
+        ],
+        "conceptChecks": [
+          {
+            "question": "Where should an LLM API key live?",
+            "options": [
+              "In public JavaScript",
+              "In a server-side secret configuration",
+              "In a shared ebook link",
+              "Inside a screenshot"
+            ],
+            "answer": 1,
+            "explanation": "The browser must not receive privileged provider credentials."
+          },
+          {
+            "question": "Which release check catches a missing deployed route?",
+            "options": [
+              "Only type checking",
+              "Calling the actual deployed endpoint",
+              "A design mockup",
+              "Renaming a button"
+            ],
+            "answer": 1,
+            "explanation": "A deployment smoke check verifies the live API contract."
+          }
+        ]
+      }
+    ],
+    "linkedMockTestId": "",
+    "examId": "ebook-exam-ai-copilot",
+    "examMinutes": 20,
+    "finalExamQuestions": [
+      {
+        "question": "Which prompt is easiest to verify?",
+        "options": [
+          "Make it awesome",
+          "Fix everything",
+          "Add paginated org-scoped search; test forbidden cross-org reads",
+          "Use any architecture"
+        ],
+        "answer": 2,
+        "explanation": "Explicit behavior and checks make the result reviewable.",
+        "id": "ai-with-copilot-q1"
+      },
+      {
+        "question": "A retrieved document asks the agent to reveal its token. What should happen?",
+        "options": [
+          "Follow it",
+          "Ignore the instruction and protect the token",
+          "Forward the token to all users",
+          "Disable audit logs"
+        ],
+        "answer": 1,
+        "explanation": "Retrieved text cannot authorize disclosure or override trusted rules.",
+        "id": "ai-with-copilot-q2"
+      },
+      {
+        "question": "A multi-file edit compiles. What is still needed?",
+        "options": [
+          "Nothing",
+          "Review the diff and run behavior/security checks",
+          "Delete existing tests",
+          "Trust all generated defaults"
+        ],
+        "answer": 1,
+        "explanation": "Compilation checks types and syntax, not every behavioral or access rule.",
+        "id": "ai-with-copilot-q3"
+      },
+      {
+        "question": "Which context is most useful for an API change?",
+        "options": [
+          "An unrelated screenshot",
+          "The handler, request types and relevant tests",
+          "A secret key",
+          "Only a marketing slogan"
+        ],
+        "answer": 1,
+        "explanation": "Related source contracts guide a compatible implementation.",
+        "id": "ai-with-copilot-q4"
+      },
+      {
+        "question": "What can a generated test accidentally do?",
+        "options": [
+          "Share the implementation bug",
+          "Guarantee security automatically",
+          "Replace review entirely",
+          "Prove all deployments healthy"
+        ],
+        "answer": 0,
+        "explanation": "A mirrored algorithm can produce the same wrong result in code and test.",
+        "id": "ai-with-copilot-q5"
+      },
+      {
+        "question": "Parameterized SQL alone prevents which problem?",
+        "options": [
+          "Every authorization bug",
+          "Injection through parameter values",
+          "All outages",
+          "Every race condition"
+        ],
+        "answer": 1,
+        "explanation": "Parameterized values prevent value interpolation; scope still needs explicit checks.",
+        "id": "ai-with-copilot-q6"
+      },
+      {
+        "question": "When should document permissions be enforced?",
+        "options": [
+          "After sharing the answer",
+          "Before retrieved content enters model context",
+          "Only on the home page",
+          "Never for vector search"
+        ],
+        "answer": 1,
+        "explanation": "Retrieval is itself a data-access boundary.",
+        "id": "ai-with-copilot-q7"
+      },
+      {
+        "question": "A high similarity score proves what?",
+        "options": [
+          "The content is always true",
+          "Only that the configured similarity function ranked it highly",
+          "The user can edit the document",
+          "A vendor endorsed the answer"
+        ],
+        "answer": 1,
+        "explanation": "Ranking is not an accuracy or authorization guarantee.",
+        "id": "ai-with-copilot-q8"
+      },
+      {
+        "question": "Where should an LLM API key live?",
+        "options": [
+          "In public JavaScript",
+          "In a server-side secret configuration",
+          "In a shared ebook link",
+          "Inside a screenshot"
+        ],
+        "answer": 1,
+        "explanation": "The browser must not receive privileged provider credentials.",
+        "id": "ai-with-copilot-q9"
+      },
+      {
+        "question": "Which release check catches a missing deployed route?",
+        "options": [
+          "Only type checking",
+          "Calling the actual deployed endpoint",
+          "A design mockup",
+          "Renaming a button"
+        ],
+        "answer": 1,
+        "explanation": "A deployment smoke check verifies the live API contract.",
+        "id": "ai-with-copilot-q10"
+      },
+      {
+        "question": "Which cache key is safest for private RAG results?",
+        "options": [
+          "The prompt alone",
+          "A key including the authorized data scope and version",
+          "The public site name",
+          "A random shared global variable"
+        ],
+        "answer": 1,
+        "explanation": "Private cache entries must not cross authorization scopes.",
+        "id": "ai-with-copilot-q11"
+      },
+      {
+        "question": "What should happen if retrieval finds no relevant permitted evidence?",
+        "options": [
+          "Invent a citation",
+          "State that evidence is insufficient",
+          "Reveal restricted passages",
+          "Disable retrieval permissions"
+        ],
+        "answer": 1,
+        "explanation": "An honest no-evidence response is preferable to fabricated support.",
+        "id": "ai-with-copilot-q12"
+      },
+      {
+        "question": "Why use a deterministic model test double?",
+        "options": [
+          "To avoid testing behavior",
+          "To test application paths without unstable external generation",
+          "To publish secret prompts",
+          "To prove the live model never fails"
+        ],
+        "answer": 1,
+        "explanation": "A controlled substitute makes boundary tests repeatable.",
+        "id": "ai-with-copilot-q13"
+      },
+      {
+        "question": "What should precede a privileged agent action?",
+        "options": [
+          "An unreviewed generated shell command",
+          "Authorization and a concrete approval step when required",
+          "A larger temperature",
+          "A longer context window only"
+        ],
+        "answer": 1,
+        "explanation": "A model suggestion cannot grant tool authority.",
+        "id": "ai-with-copilot-q14"
+      },
+      {
+        "question": "A fallback result is computed locally. Which label is accurate?",
+        "options": [
+          "Verified server certificate",
+          "Saved across devices",
+          "Local practice preview",
+          "Paid official credential"
+        ],
+        "answer": 2,
+        "explanation": "Local output must not claim server verification or persistence.",
+        "id": "ai-with-copilot-q15"
+      }
+    ],
+    "references": [
+      "https://docs.github.com/en/copilot/concepts/prompting-and-context/prompt-engineering"
+    ],
+    "updatedAt": "2026-10-31T00:00:00.000Z",
+    "examTitle": "AI with Copilot Practitioner Exam"
+  },
+  {
+    "slug": "java-enterprise",
+    "title": "Modern Java 21 & Spring Boot Architecture",
+    "subtitle": "Model domains, manage concurrency and secure enterprise APIs.",
+    "category": "Java",
+    "level": "Intermediate",
+    "visibility": "public",
+    "ownerEmail": "",
+    "chapters": [
+      {
+        "id": "java-language",
+        "order": 0,
+        "title": "JVM, records, sealed types & pattern matching",
+        "durationMinutes": 20,
+        "summary": "Model domain values and handle explicit alternatives.",
+        "contentMarkdown": "## Separate language and runtime concepts\nJava source is compiled to bytecode that runs on a JVM. Runtime optimization and garbage collection help execute programs, but they do not remove the need to profile allocation and latency. A memory leak can still occur when a long-lived reference retains objects the application no longer needs.\n\n## Model data deliberately\nA record provides a concise data carrier with component accessors and generated value-oriented methods. Its components are final references, not a guarantee of deep immutability. Defensively copy a mutable collection when your API requires an immutable snapshot.\n\n## Make alternatives explicit\nA sealed type constrains its permitted direct implementations. Pattern matching can make handling alternatives clearer. In Java 21, record patterns and pattern matching for switch are permanent features; do not assume every feature demonstrated in a preview article is enabled in a normal Java 21 build.\n\n## Engineering exercise\nModel a ticket lookup result as found or missing. Handle both states explicitly and test the missing branch. Prefer a domain result over a magic string that callers must remember to compare.",
+        "codeSnippet": {
+          "language": "java",
+          "code": "record Ticket(String id, int priority) {}\n\npublic class Main {\n    public static void main(String[] args) {\n        Ticket ticket = new Ticket(\"INC-21\", 1);\n        System.out.println(ticket.id());\n    }\n}",
+          "expectedOutput": "INC-21"
+        },
+        "keyTakeaways": [
+          "Records are not automatically deeply immutable.",
+          "Sealed types make allowed alternatives explicit.",
+          "Distinguish Java 21 final features from previews."
+        ],
+        "conceptChecks": [
+          {
+            "question": "What is a record component containing a mutable list?",
+            "options": [
+              "Automatically a deep immutable copy",
+              "A final reference that may still refer to mutable data",
+              "Always null",
+              "A database transaction"
+            ],
+            "answer": 1,
+            "explanation": "The reference is final, but the referenced object can remain mutable."
+          },
+          {
+            "question": "What can retain otherwise unused objects?",
+            "options": [
+              "A long-lived reference",
+              "A local integer only",
+              "A closed comment",
+              "A package name"
+            ],
+            "answer": 0,
+            "explanation": "Objects reachable through retained references cannot be reclaimed merely because the app no longer wants them."
+          }
+        ]
+      },
+      {
+        "id": "java-streams",
+        "order": 1,
+        "title": "Collections, streams & lambda expressions",
+        "durationMinutes": 20,
+        "summary": "Build readable transformations without hidden mutation.",
+        "contentMarkdown": "## Choose collections by behavior\nA List represents a sequence, a Set represents distinct elements, and a Map associates keys with values. The interface does not by itself define thread safety. Document ordering and mutability in an API instead of relying on a particular implementation by accident.\n\n## Streams describe a pipeline\nIntermediate operations such as filter and map describe transformations. A terminal operation consumes the pipeline. Prefer stateless functions; mutating an external counter or collection inside a stream can make ordering and parallel execution surprising. A stream is not a reusable collection.\n\n## Parallel is not automatically faster\nParallel streams introduce scheduling and coordination costs. They are often a poor fit for blocking remote calls or operations requiring transaction context. Measure representative workloads and keep error handling explicit. A simple loop is a valid engineering choice when it communicates the operation better.\n\n## Engineering exercise\nTake a list of ticket priorities, retain urgent tickets and produce a new list. Verify the input is unchanged. Add duplicate values and explain whether they should be preserved or removed before choosing List or Set for the output.",
+        "codeSnippet": {
+          "language": "java",
+          "code": "import java.util.List;\n\npublic class Main {\n    public static void main(String[] args) {\n        var urgent = List.of(1, 3, 2, 1).stream()\n            .filter(priority -> priority == 1).toList();\n        System.out.println(urgent.size());\n    }\n}",
+          "expectedOutput": "2"
+        },
+        "keyTakeaways": [
+          "Streams need a terminal operation.",
+          "Avoid shared mutable state in stream operations.",
+          "Measure before enabling parallel execution."
+        ],
+        "conceptChecks": [
+          {
+            "question": "Which operation consumes a stream pipeline?",
+            "options": [
+              "map alone",
+              "filter alone",
+              "A terminal operation such as toList",
+              "Importing List"
+            ],
+            "answer": 2,
+            "explanation": "Intermediate operations describe work; a terminal operation consumes the stream."
+          },
+          {
+            "question": "Are all List implementations thread-safe?",
+            "options": [
+              "Yes",
+              "No",
+              "Only when the variable uses var",
+              "Only with lambdas"
+            ],
+            "answer": 1,
+            "explanation": "The List interface does not guarantee thread safety."
+          }
+        ]
+      },
+      {
+        "id": "java-concurrency",
+        "order": 2,
+        "title": "Virtual threads & CompletableFuture",
+        "durationMinutes": 20,
+        "summary": "Use concurrency to wait efficiently without overwhelming dependencies.",
+        "contentMarkdown": "## Waiting is different from computing\nVirtual threads in Java 21 make a thread-per-task style economical for many blocking workloads. They do not turn CPU-bound work into unlimited parallel processing. CPU capacity, database connections and remote-service rate limits still constrain throughput.\n\n## Protect scarce resources\nUse a semaphore or another admission-control mechanism to limit simultaneous calls to a database or vendor API. Creating more waiting tasks than a dependency can serve increases latency and memory pressure. Set timeouts and decide how cancellation propagates.\n\n## Compose asynchronous work deliberately\nCompletableFuture supports result composition and error handling. Distinguish thenApply, which maps a result, from thenCompose, which flattens a future-returning operation. Know which executor executes a stage, especially if it blocks. Always define a failure path rather than calling join at an arbitrary request boundary without a timeout strategy.\n\n## Engineering exercise\nBuild a small fan-out service that queries two dependencies. Specify a concurrency limit, per-call timeout and partial-failure policy. Test that exceeding the limit queues or rejects work predictably instead of opening unbounded connections.",
+        "codeSnippet": {
+          "language": "java",
+          "code": "import java.util.concurrent.Executors;\n\npublic class Main {\n    public static void main(String[] args) throws Exception {\n        try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {\n            var future = executor.submit(() -> \"ticket-ready\");\n            System.out.println(future.get());\n        }\n    }\n}",
+          "expectedOutput": "ticket-ready"
+        },
+        "keyTakeaways": [
+          "Virtual threads do not create more CPU or database capacity.",
+          "Use admission control for scarce dependencies.",
+          "Define timeout, executor and failure behavior."
+        ],
+        "conceptChecks": [
+          {
+            "question": "Which workload often benefits from virtual threads?",
+            "options": [
+              "Many tasks waiting on blocking I/O",
+              "Unlimited CPU calculations",
+              "Removing all resource limits",
+              "Compiling without a JDK"
+            ],
+            "answer": 0,
+            "explanation": "Virtual threads are useful for high concurrency involving waiting."
+          },
+          {
+            "question": "Which method flattens a stage that returns another future?",
+            "options": [
+              "thenCompose",
+              "toString",
+              "hashCode",
+              "peek"
+            ],
+            "answer": 0,
+            "explanation": "thenCompose composes a future-returning asynchronous step."
+          }
+        ]
+      },
+      {
+        "id": "java-spring",
+        "order": 3,
+        "title": "Spring Boot 3, dependency injection & persistence",
+        "durationMinutes": 20,
+        "summary": "Keep controllers, domain services and repositories distinct.",
+        "contentMarkdown": "## Follow a clear request path\nA controller receives an HTTP request and translates it to a service operation. The service owns business rules, while repositories handle persistence. Constructor injection makes dependencies explicit and permits focused tests. Avoid coupling a domain decision to servlet request objects when a plain input object would suffice.\n\n## Transactions protect a unit of work\nA transaction boundary should surround the business operation that must succeed or fail together. Know how your framework applies transaction proxies; an internal self-call may not pass through the same interceptor. Do not assume that annotating an arbitrary private helper makes every caller transactional.\n\n## JPA is not a query optimizer\nEntity navigation can cause many additional queries, especially when serializing a collection of lazily loaded relationships. Inspect query counts and use explicit fetching or projections for the view you need. Do not serialize every entity field directly to clients, particularly credentials or internal authorization data.\n\n## Engineering exercise\nDesign an assignment operation that validates the caller, checks a ticket's current state and records an audit event within one transaction. Return a DTO with only the allowed fields and test a concurrent reassignment.",
+        "codeSnippet": {
+          "language": "java",
+          "code": "interface TicketRepository { long countOpen(); }\n\nclass TicketService {\n    private final TicketRepository repository;\n    TicketService(TicketRepository repository) { this.repository = repository; }\n    long openCount() { return repository.countOpen(); }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        var service = new TicketService(() -> 7L);\n        System.out.println(service.openCount());\n    }\n}",
+          "expectedOutput": "7"
+        },
+        "keyTakeaways": [
+          "Constructor injection makes dependencies explicit.",
+          "Use DTOs instead of exposing entire entities.",
+          "Measure query counts to catch N+1 behavior."
+        ],
+        "conceptChecks": [
+          {
+            "question": "Which layer usually owns a business transaction?",
+            "options": [
+              "A CSS selector",
+              "The service operation",
+              "The favicon",
+              "The public API key"
+            ],
+            "answer": 1,
+            "explanation": "The transaction should enclose the business unit of work."
+          },
+          {
+            "question": "What is a common N+1 symptom?",
+            "options": [
+              "One query for each related row after the initial list query",
+              "One static HTML page",
+              "A single arithmetic operation",
+              "A compiler warning only"
+            ],
+            "answer": 0,
+            "explanation": "Lazy relationship access can produce an additional query per item."
+          }
+        ]
+      },
+      {
+        "id": "java-security",
+        "order": 4,
+        "title": "JWT/OAuth2 security & Docker deployment",
+        "durationMinutes": 20,
+        "summary": "Authorize each operation and make the runtime reproducible.",
+        "contentMarkdown": "## Verify tokens before trusting claims\nA bearer token is a credential. Validate the signature with trusted keys and check the issuer, audience and expiry expected by the service. Decoding a token without verification does not establish identity. OAuth2 access and OpenID Connect identity concepts serve different purposes; use the appropriate token at each boundary.\n\n## Authorization belongs beside the resource\nAfter authenticating the caller, check tenant and role permissions for the requested entity. A valid token does not grant access to every ticket. Do not accept a role, owner ID or approved-email list supplied by the browser as proof of privilege.\n\n## Build a constrained runtime\nUse a repeatable image build and run the application with the least privileges it needs. Inject secrets at runtime, configure health checks, and define graceful shutdown. Containers do not automatically validate configuration or guarantee isolation from every dependency. Scan dependencies and test the image's actual startup command.\n\n## Engineering exercise\nTrace a request from gateway to controller to a tenant-scoped repository query. Define what the API returns for expired credentials, a forbidden tenant and a missing resource. Then document how to roll back a deployment without rolling back unrelated data.",
+        "codeSnippet": {
+          "language": "java",
+          "code": "import java.util.Set;\n\npublic class Main {\n    public static void main(String[] args) {\n        var allowedTenants = Set.of(\"org-a\", \"org-b\");\n        System.out.println(allowedTenants.contains(\"org-c\"));\n    }\n}",
+          "expectedOutput": "false"
+        },
+        "keyTakeaways": [
+          "Verify token signatures and expected claims.",
+          "Scope resource reads and writes to permitted tenants.",
+          "Inject secrets at runtime and test container startup."
+        ],
+        "conceptChecks": [
+          {
+            "question": "Is decoding a JWT enough to trust its claims?",
+            "options": [
+              "Yes",
+              "No; verify its signature and expected claims",
+              "Only if its payload looks correct",
+              "Only when sent from a browser"
+            ],
+            "answer": 1,
+            "explanation": "Unverified claims can be forged."
+          },
+          {
+            "question": "What must happen after authentication?",
+            "options": [
+              "Grant all tenants automatically",
+              "Authorize access to the requested resource",
+              "Expose database credentials",
+              "Disable expiry checks"
+            ],
+            "answer": 1,
+            "explanation": "Identity and resource authorization are separate checks."
+          }
+        ]
+      }
+    ],
+    "linkedMockTestId": "",
+    "examId": "ebook-exam-java",
+    "examMinutes": 20,
+    "finalExamQuestions": [
+      {
+        "question": "What is a record component containing a mutable list?",
+        "options": [
+          "Automatically a deep immutable copy",
+          "A final reference that may still refer to mutable data",
+          "Always null",
+          "A database transaction"
+        ],
+        "answer": 1,
+        "explanation": "The reference is final, but the referenced object can remain mutable.",
+        "id": "java-enterprise-q1"
+      },
+      {
+        "question": "What can retain otherwise unused objects?",
+        "options": [
+          "A long-lived reference",
+          "A local integer only",
+          "A closed comment",
+          "A package name"
+        ],
+        "answer": 0,
+        "explanation": "Objects reachable through retained references cannot be reclaimed merely because the app no longer wants them.",
+        "id": "java-enterprise-q2"
+      },
+      {
+        "question": "Which operation consumes a stream pipeline?",
+        "options": [
+          "map alone",
+          "filter alone",
+          "A terminal operation such as toList",
+          "Importing List"
+        ],
+        "answer": 2,
+        "explanation": "Intermediate operations describe work; a terminal operation consumes the stream.",
+        "id": "java-enterprise-q3"
+      },
+      {
+        "question": "Are all List implementations thread-safe?",
+        "options": [
+          "Yes",
+          "No",
+          "Only when the variable uses var",
+          "Only with lambdas"
+        ],
+        "answer": 1,
+        "explanation": "The List interface does not guarantee thread safety.",
+        "id": "java-enterprise-q4"
+      },
+      {
+        "question": "Which workload often benefits from virtual threads?",
+        "options": [
+          "Many tasks waiting on blocking I/O",
+          "Unlimited CPU calculations",
+          "Removing all resource limits",
+          "Compiling without a JDK"
+        ],
+        "answer": 0,
+        "explanation": "Virtual threads are useful for high concurrency involving waiting.",
+        "id": "java-enterprise-q5"
+      },
+      {
+        "question": "Which method flattens a stage that returns another future?",
+        "options": [
+          "thenCompose",
+          "toString",
+          "hashCode",
+          "peek"
+        ],
+        "answer": 0,
+        "explanation": "thenCompose composes a future-returning asynchronous step.",
+        "id": "java-enterprise-q6"
+      },
+      {
+        "question": "Which layer usually owns a business transaction?",
+        "options": [
+          "A CSS selector",
+          "The service operation",
+          "The favicon",
+          "The public API key"
+        ],
+        "answer": 1,
+        "explanation": "The transaction should enclose the business unit of work.",
+        "id": "java-enterprise-q7"
+      },
+      {
+        "question": "What is a common N+1 symptom?",
+        "options": [
+          "One query for each related row after the initial list query",
+          "One static HTML page",
+          "A single arithmetic operation",
+          "A compiler warning only"
+        ],
+        "answer": 0,
+        "explanation": "Lazy relationship access can produce an additional query per item.",
+        "id": "java-enterprise-q8"
+      },
+      {
+        "question": "Is decoding a JWT enough to trust its claims?",
+        "options": [
+          "Yes",
+          "No; verify its signature and expected claims",
+          "Only if its payload looks correct",
+          "Only when sent from a browser"
+        ],
+        "answer": 1,
+        "explanation": "Unverified claims can be forged.",
+        "id": "java-enterprise-q9"
+      },
+      {
+        "question": "What must happen after authentication?",
+        "options": [
+          "Grant all tenants automatically",
+          "Authorize access to the requested resource",
+          "Expose database credentials",
+          "Disable expiry checks"
+        ],
+        "answer": 1,
+        "explanation": "Identity and resource authorization are separate checks.",
+        "id": "java-enterprise-q10"
+      },
+      {
+        "question": "What does a Map represent?",
+        "options": [
+          "Only sequential integers",
+          "Key-to-value associations",
+          "A database transaction",
+          "A JVM process"
+        ],
+        "answer": 1,
+        "explanation": "Map associates keys with values.",
+        "id": "java-enterprise-q11"
+      },
+      {
+        "question": "What is a typical purpose of a semaphore around remote calls?",
+        "options": [
+          "Limit concurrent use of a scarce dependency",
+          "Validate JWT signatures",
+          "Compile code",
+          "Make every call instantaneous"
+        ],
+        "answer": 0,
+        "explanation": "Admission control protects downstream capacity.",
+        "id": "java-enterprise-q12"
+      },
+      {
+        "question": "What should an API DTO exclude?",
+        "options": [
+          "Every allowed display field",
+          "Secrets and unauthorized internal fields",
+          "All strings",
+          "All dates"
+        ],
+        "answer": 1,
+        "explanation": "Return only data permitted by the API contract.",
+        "id": "java-enterprise-q13"
+      },
+      {
+        "question": "What is safer for deployment secrets?",
+        "options": [
+          "Embedding them in image layers",
+          "Runtime secret injection",
+          "A public Git commit",
+          "A browser bundle"
+        ],
+        "answer": 1,
+        "explanation": "Secrets should not be baked into distributable artifacts.",
+        "id": "java-enterprise-q14"
+      },
+      {
+        "question": "Which check detects a broken Docker entrypoint?",
+        "options": [
+          "A successful source rename",
+          "Starting the built image and checking health",
+          "Only reading the image tag",
+          "A stream filter"
+        ],
+        "answer": 1,
+        "explanation": "A runtime smoke check verifies the actual startup command.",
+        "id": "java-enterprise-q15"
+      }
+    ],
+    "references": [
+      "https://docs.oracle.com/en/java/javase/21/language/",
+      "https://openjdk.org/jeps/444",
+      "https://docs.spring.io/spring-boot/3.5/"
+    ],
+    "updatedAt": "2026-10-31T00:00:00.000Z",
+    "examTitle": "Java Enterprise Developer Exam"
+  }
+]

@@ -23,6 +23,8 @@ router.use('/mocks', mocksRoutes);
 router.use('/exampro', examproFeatures);
 router.use('/practice', practiceRoutes);
 router.use('/exam-attempts', examAttemptRoutes);
+router.use('/ebooks', require('./ebooks').router);
+router.use('/admin/ebooks', require('./ebooks').adminRouter);
 router.use('/admin', adminRoutes);
 router.use('/beta', betaRoutes);
 router.use('/cashfree', cashfreeRoutes);

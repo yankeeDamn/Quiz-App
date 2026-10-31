@@ -73,6 +73,42 @@ jobs:
           AUTH_SECRET: ci-test-auth-secret
           NEXT_PUBLIC_API_URL: http://localhost:3001
 
+  ebooks-postgres:
+    name: Ebook permissions, migrations and grading (PostgreSQL)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: ebook-ci-only
+          POSTGRES_DB: ebook_tests
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres:ebook-ci-only@localhost:5432/ebook_tests
+      EBOOK_TEST_DATABASE_URL: postgresql://postgres:ebook-ci-only@localhost:5432/ebook_tests
+      AUTH_SECRET: ebook-integration-only-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Apply additive migrations twice
+        run: |
+          npm run db:migrate
+          npm run db:migrate
+      - name: Test real OAuth middleware, ACLs and persisted results
+        run: node --test test/ebooks-postgres.integration.js
+
   # ── Docker Build ──────────────────────────────
   docker:
     name: Docker Build

@@ -29,10 +29,11 @@ export const API_BASE_URL = candidateApi.endsWith('/') ? candidateApi.slice(0, -
  * Get a fresh backend access token from the NextAuth bridge route.
  * Caches the token for 50 minutes (tokens are valid for 1 hour).
  */
-async function getBackendToken(): Promise<string | null> {
+async function getBackendToken(signal?: AbortSignal): Promise<string | null> {
   try {
     const res = await fetch('/api/auth/backend-token', {
       method: 'POST',
+      signal,
       headers: { 'Content-Type': 'application/json' },
     });
 
@@ -53,6 +54,7 @@ export function clearTokenCache(): void {
 }
 
 interface ApiOptions {
+  signal?: AbortSignal;
   method?: string;
   body?: unknown;
   /** Skip authentication (for public endpoints). */
@@ -68,14 +70,14 @@ export async function api<T = unknown>(
   path: string,
   options: ApiOptions = {}
 ): Promise<{ success: boolean; data?: T; error?: { message: string; code?: string; status?: number } }> {
-  const { method = 'GET', body, public: isPublic = false, optionalAuth = false } = options;
+  const { method = 'GET', body, public: isPublic = false, optionalAuth = false, signal } = options;
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
 
   if (!isPublic) {
-    const token = await getBackendToken();
+    const token = await getBackendToken(signal);
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     } else if (!optionalAuth) {
@@ -91,6 +93,7 @@ export async function api<T = unknown>(
     headers,
     body: body ? JSON.stringify(body) : undefined,
     cache: 'no-store',
+    signal,
   }); } catch { return {success:false,error:{code:'API_UNAVAILABLE',message:'ExamPro API unavailable. Check the Render service and NEXT_PUBLIC_API_URL.'}}; }
   let json;
   try { json = await res.json(); } catch { return {success:false,error:{code:'INVALID_API_RESPONSE',message:'The configured API returned a non-JSON response. Check which service runs on Render.'}}; }
