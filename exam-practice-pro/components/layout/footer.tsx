@@ -28,6 +28,7 @@ export function Footer() {
             >
               Quizzes
             </Link>
+            <Link href="/government-jobs" className="transition-colors hover:text-foreground">Govt Jobs</Link>
             <Link href="/certifications" className="transition-colors hover:text-foreground">Certifications</Link>
             
             <Link
