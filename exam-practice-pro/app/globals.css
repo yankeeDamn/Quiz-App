@@ -282,11 +282,11 @@ html[data-exampro-lang="hi"] body { font-family: var(--font-hindi), var(--font-i
 .ebook-print .print-chapter { margin: 2rem 0; }
 .ebook-print .cheat-page { break-after: page; }
 @media print {
- @page { size: A4; margin: 18mm 16mm; @bottom-center { content: "ExamPro · " counter(page); font-size: 9pt; } }
- body:has(.ebook-print) header:not(.ebook-print header), body:has(.ebook-print) footer:not(.ebook-print footer), body:has(.ebook-print) [data-whatsapp], a[aria-label="Chat on WhatsApp"] { display:none!important; }
+ @page exampro-ebook { size: A4; margin: 18mm 16mm; @bottom-center { content: "ExamPro · " counter(page); font-size: 9pt; } }
+ body:has(.ebook-print) header:not(.ebook-print header), body:has(.ebook-print) footer:not(.ebook-print footer), body:has(.ebook-print) [data-whatsapp], body:has(.ebook-print) a[aria-label="Chat on WhatsApp"] { display:none!important; }
  body:has(.ebook-print) > * { background:white!important; }
  body:has(.ebook-print) button, body:has(.ebook-print) iframe, .ebook-print-tools { display:none!important; }
- .ebook-print-root { max-width:none!important; padding:0!important; }
+ .ebook-print-root { page:exampro-ebook; max-width:none!important; padding:0!important; }
  .ebook-print, .ebook-print * { color:#111!important; background:white!important; box-shadow:none!important; }
  .ebook-print pre { white-space:pre-wrap!important; overflow:visible!important; font-size:9pt!important; line-height:1.45!important; }
  .ebook-print table { font-size:9pt!important; break-inside:auto; } .ebook-print tr { break-inside:avoid; }

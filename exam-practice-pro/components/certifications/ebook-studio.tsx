@@ -120,14 +120,14 @@ export function EbookStudio({
         "Switch ebook? Unsaved edits can be saved as a local draft first.",
       )
     )
-      return;
+      return false;
     setSelected(slug);
     setChapterIndex(0);
     setMessage("");
     if (!slug) {
       setBook(newBook());
       setBulk("");
-      return;
+      return true;
     }
     setBusy(true);
     const result = await ebookApi<{ ebook: EbookTrack }>(`/ebooks/${slug}`);
@@ -135,9 +135,11 @@ export function EbookStudio({
     if (result.data) {
       setBook(result.data.ebook);
       setBulk(toBulk(result.data.ebook));
+      return true;
     } else {
       setBook(null);
       setMessage(result.error?.message || "Could not open ebook.");
+      return false;
     }
   };
   const change = (patch: Partial<EbookTrack>) =>
@@ -330,7 +332,9 @@ export function EbookStudio({
                 onSaved();
               }}
               onSelect={(slug, next) => {
-                void load(slug).then(() => setTab(next));
+                void load(slug).then((loaded) => {
+                  if (loaded) setTab(next);
+                });
               }}
               onClone={(source) => {
                 setBook({
@@ -356,6 +360,7 @@ export function EbookStudio({
                 className="min-h-11 rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white"
                 onClick={() => {
                   setBook(newBook());
+                  setChapterIndex(0);
                   setSelected("");
                   setBulk("");
                   setTab("content");
