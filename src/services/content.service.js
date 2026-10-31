@@ -368,7 +368,11 @@ class ContentService {
         ORDER BY g.granted_at DESC LIMIT $1`,
       [limit]
     );
-    return rows;
+    return rows.map(row => {
+      const {classify}=require('./manual-grants.service');
+      const details=classify(row.note);
+      return {...row,source:details.source,note:details.note};
+    });
   }
 
   async searchUsers(q) {

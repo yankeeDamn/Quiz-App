@@ -10,7 +10,8 @@ export interface AdminTest {
   level: string; tier: 'free' | 'premium'; passPercent: number; sections: TestSection[]; active: boolean; questionCount?: number;
 }
 export interface AdminUser { email: string; name: string | null; plan: string; plan_expires_at: string | null; planActive: boolean }
-export interface AdminGrant { plan: string; months: number; amount_inr: number | null; note: string | null; expires_at: string; granted_at: string; email: string }
+export interface AdminGrant { plan: string; months: number; amount_inr: number | null; note: string | null; expires_at: string; granted_at: string; email: string; source: 'cashfree_sandbox' | 'manual' | 'legacy_manual' }
+export interface GrantPreview { email: string; plan: string; planExpiresAt: string | null; active: boolean; recentCashfree: boolean; recentGrants: Array<{source:AdminGrant['source'];note:string;grantedAt:string;expiresAt:string}> }
 
 export type Call<T> = { ok: true; data: T } | { ok: false; message: string; status?: number };
 
