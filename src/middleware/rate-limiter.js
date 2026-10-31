@@ -14,6 +14,7 @@ const logger = require('../utils/logger');
  */
 function shouldSkipGeneralRateLimit(req) {
   const path = String(req.originalUrl || '').split('?')[0];
+  if(path==='/api/v1/cashfree/webhook')return true; // valid signed gateway retries must reach handler
   return /^\/api\/v1\/health(?:\/ready)?\/?$/.test(path) ||
     /^\/api\/v1\/admin(?:\/|$)/.test(path) ||
     // OAuth-protected translations have their own stricter per-user limiter;
