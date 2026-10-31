@@ -18,6 +18,7 @@ const mockAudit = require('../services/mock01-02-audit.service');
 const betaInvitations = require('../services/beta-invitations.service');
 const betaFeedback = require('../services/beta-feedback.service');
 const cashfreeSandbox = require('../services/cashfree-sandbox.service');
+const manualGrants = require('../services/manual-grants.service');
 const { isFullCglMock } = require('../services/ssc-full-mock-classifier');
 const accommodations = require('../services/ssc-accommodations.service');
 const importer = require('../services/question-import');
@@ -137,21 +138,32 @@ router.get('/user', [query('email').isEmail().normalizeEmail(EMAIL_OPTS)], valid
 
 router.get('/grants', wrap(async (_req, res) => ok(res, { grants: await content.recentGrants() })));
 
+// Read-only preflight: shows the current expiry and any recent Cashfree grant.
+// Human OAuth administrator required; never use the API automation key for financial approvals.
+router.get('/grant-preview',requireHumanReviewer,
+ [query('email').isEmail().normalizeEmail(EMAIL_OPTS)],validate,
+ wrap(async(req,res)=>ok(res,await manualGrants.preview(req.query.email))));
+
 router.post(
   '/grant',
+  requireHumanReviewer,
   [
     body('email').isEmail().normalizeEmail(EMAIL_OPTS),
     body('plan').isIn(PAID_PLANS),
     body('months').isInt({ min: 1, max: MAX_MONTHS }).toInt(),
-    body('amountInr').optional({ values: 'falsy' }).isInt({ min: 0 }).toInt(),
-    body('note').optional().isString().isLength({ max: 255 }),
+    body('amountInr').isInt({ min: 0, max: 10000000 }).toInt(),
+    body('reason').isIn(['manual_payment','complimentary']),
+    body('note').isString().trim().isLength({ min: 8, max: 170 }),
+    body('requestId').isUUID(),
+    body('expectedExpiresAt').custom(v=>v===null || (typeof v==='string' && Number.isFinite(Date.parse(v)))),
+    body('acknowledgeActivePlan').isBoolean(),
+    body('acknowledgeRecentCashfree').isBoolean(),
   ],
   validate,
   wrap(async (req, res) => {
-    const { email, plan, months, amountInr, note } = req.body;
-    const user = await userService.grantPlan({ email, plan, months, amountInr, note });
-    logger.info({ email, plan, months, by: req.admin.via }, 'Plan granted');
-    ok(res, present(user));
+    const result=await manualGrants.grant(req.body);
+    logger.info({ email:result.email,plan:result.plan,duplicate:result.duplicate,by:req.admin.email },'Reviewed manual plan grant');
+    return ok(res,result);
   })
 );
 
