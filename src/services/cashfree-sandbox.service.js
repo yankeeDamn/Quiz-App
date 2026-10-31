@@ -2,7 +2,7 @@
 const crypto=require('node:crypto');
 const db=require('../config/database');
 const gate=require('./draft-testing-gate');
-const {nextExpiry}=require('./plan.service');
+const {nextExpiry,isPlanActive}=require('./plan.service');
 const FRONTEND='https://exampro-staging-ui.vercel.app';
 const API_PROD='https://quiz-app-regd.onrender.com';
 const API_VERSION='2025-01-01';
@@ -48,6 +48,7 @@ function verifySignature(raw,signature,timestamp){
 async function create(user,period,phone){
  guard();
  if(!user?.id||!user.email)throw fail('Verified sign-in required.',401);
+ if(isPlanActive('institute'===user.plan?'institute':'free',user.planExpiresAt))throw fail('Institute members cannot purchase an individual Pro renewal.',409);
  const p=price(period);
  if(typeof phone!=='string'||!/^[6-9][0-9]{9}$/.test(phone))throw fail('Valid Indian mobile number required.');
  const id='cf_sbx_'+crypto.randomUUID().replace(/-/g,'');
@@ -97,12 +98,16 @@ async function processWebhook(raw,signature,timestamp){
   if(verifiedPaid&&local.status!=='paid'){
    const user=await client.query('SELECT id,plan,plan_expires_at FROM users WHERE id=$1 FOR UPDATE',[local.user_id]);
    if(!user.rowCount)throw fail('Payment user missing.',409);
+   if(isPlanActive(user.rows[0].plan,user.rows[0].plan_expires_at)&&user.rows[0].plan==='institute'){
+    outcome='manual_review_institute_conflict';
+   }else{
    const expires=nextExpiry(user.rows[0].plan_expires_at,local.months);
    await client.query(`UPDATE cashfree_sandbox_orders SET status='paid',cf_payment_id=$2,paid_at=NOW(),granted_at=NOW() WHERE id=$1`,[id,String(payment.cf_payment_id)]);
    await client.query(`UPDATE users SET plan='pro',plan_expires_at=$2,payment_status='paid',updated_at=NOW() WHERE id=$1`,[local.user_id,expires]);
    await client.query(`INSERT INTO plan_grants(user_id,plan,months,amount_inr,note,expires_at)
       VALUES($1,'pro',$2,$3,$4,$5)`,[local.user_id,local.months,local.amount_inr,'Cashfree sandbox '+id,expires]);
    outcome='granted';
+   }
   }else if(local.status==='paid')outcome='already_paid';
   await client.query(`INSERT INTO cashfree_sandbox_webhook_events(fingerprint,order_id,event_type,outcome)
    VALUES($1,$2,$3,$4)`,[fp,id,type.slice(0,80),outcome]);
