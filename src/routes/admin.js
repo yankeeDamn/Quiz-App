@@ -320,6 +320,10 @@ router.get('/content-pipeline/dashboard',requireHumanReviewer,wrap(async(req,res
  return ok(res,await cglPipeline.dashboard());
 }));
 
+router.get('/cashfree/sandbox-audit',requireHumanReviewer,wrap(async(req,res)=>{
+ return ok(res,await cashfreeSandbox.audit());
+}));
+
 // ── Mock tests ─────────────────────────────────────────
 
 router.get('/tests', wrap(async (_req, res) => ok(res, { tests: await content.listTests() })));
