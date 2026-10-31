@@ -72,8 +72,8 @@ test('reviewed complimentary access never claims a payment was received',async()
  assert.equal(dbFake.counters().inserts,1);
  await assert.rejects(grants.grant({...base,reason:'complimentary',amountInr:199}),/complimentary access must have amount zero/);
 });
-test('a reviewed manual grant requires source evidence, existing account and human OAuth admin route',()=>{
- assert.throws(()=>grants.grant({...base,reason:'manual_payment',amountInr:0}),/positive amount/);
+test('a reviewed manual grant requires source evidence and human OAuth admin route',async()=>{
+ await assert.rejects(grants.grant({...base,reason:'manual_payment',amountInr:0}),/positive amount/);
  const routes=fs.readFileSync(path.join(__dirname,'../src/routes/admin.js'),'utf8');
  assert.match(routes,/router\.get\('\/grant-preview',requireHumanReviewer/);
  assert.match(routes,/\s+'\/grant',\s+requireHumanReviewer/);
