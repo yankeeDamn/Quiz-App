@@ -450,7 +450,7 @@ test("PDF uploads persist, require revisions, and recheck reader/editor access o
       headers: who ? { Authorization: "Bearer " + token(who) } : {},
     });
   assert.equal((await upload()).status, 401);
-  assert.equal((await upload("reader")).status, 403);
+  assert.equal((await upload("reader")).status, 404);
   assert.equal((await upload("owner", Buffer.from("not a pdf"))).status, 400);
   const saved = await upload("owner");
   assert.equal(saved.status, 200);
