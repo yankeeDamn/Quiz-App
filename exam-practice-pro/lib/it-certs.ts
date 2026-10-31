@@ -12,6 +12,7 @@ export const IT_CERTS = [
   { id: 'aws-cloud-practitioner', code: 'AWS-CLF-C02', name: 'AWS Cloud Practitioner' },
   { id: 'comptia-a-plus', code: 'CompTIA-A+', name: 'CompTIA A+' },
   { id: 'google-cloud-digital-leader', code: 'GCP-CDL', name: 'Google Cloud Digital Leader' },
+  { id: 'linux-lfcs', code: 'LINUX-LFCS', name: 'Linux System Administration Fundamentals (LFCS-aligned practice)' },
 ] as const;
 
 const LETTERS = ['A', 'B', 'C', 'D'];
