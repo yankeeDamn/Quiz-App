@@ -12,6 +12,7 @@ const MAX_STALE_MS=6*60*60*1000;
 const MAX_BYTES=1024*1024;
 const cache=new Map();
 const pending=new Map();
+const failureUntil=new Map();
 const SOURCES=Object.freeze([
  {id:'employment-news',label:'Employment News (Govt. of India)',url:EMPLOYMENT_URL,type:'vacancies'},
  {id:'upsc',label:'UPSC Forthcoming Examinations',url:UPSC_URL,type:'upcoming'},
@@ -98,7 +99,12 @@ async function fetchText(url){
  const timeout=setTimeout(()=>controller.abort(),8000);
  try{
   const res=await fetch(url,{signal:controller.signal,headers:{Accept:'text/html','User-Agent':'ExamProJobsIndexer/1.0 (+https://quiz-app-virid-zeta-41.vercel.app/government-jobs)'},redirect:'follow'});
-  if(!res.ok||!res.url.startsWith(new URL(url).origin+'/'))throw Error('Government source unavailable');
+  const finalUrl=new URL(res.url);
+  const originalHost=new URL(url).hostname;
+  const allowedHosts=originalHost==='employmentnews.gov.in'
+   ?['employmentnews.gov.in','www.employmentnews.gov.in']:[originalHost];
+  if(!res.ok||finalUrl.protocol!=='https:'||!allowedHosts.includes(finalUrl.hostname))
+   throw Error('Government source unavailable');
   if(Number(res.headers.get('content-length')||0)>MAX_BYTES)throw Error('Government response too large');
   const reader=res.body?.getReader();
   if(!reader)throw Error('Empty source body');
@@ -116,6 +122,10 @@ async function refresh(source,now=new Date()){
  const previous=cache.get(source.id);
  if(previous && now.getTime()-previous.checkedAt<TTL_MS)return previous;
  if(pending.has(source.id))return pending.get(source.id);
+ if((failureUntil.get(source.id)||0)>Date.now()){
+  if(previous && Date.now()-previous.checkedAt<MAX_STALE_MS)return {...previous,health:'stale'};
+  return {items:[],checkedAt:null,health:'unavailable'};
+ }
  const task=(async()=>{
   try{
    const html=await fetchText(source.url);
@@ -123,8 +133,10 @@ async function refresh(source,now=new Date()){
    // A parser mismatch is not a verified empty result; preserve last known data within bounded TTL.
    if(items.length===0)throw Error('No reliable records parsed from official source');
    const result={items,checkedAt:Date.now(),health:'ok'};
+   failureUntil.delete(source.id);
    cache.set(source.id,result);return result;
   }catch{
+   failureUntil.set(source.id,Date.now()+5*60*1000);
    if(previous && now.getTime()-previous.checkedAt<MAX_STALE_MS)
     return {...previous,health:'stale'};
    return {items:[],checkedAt:null,health:'unavailable'};
