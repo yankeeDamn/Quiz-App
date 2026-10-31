@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
 import { useSession, signOut } from 'next-auth/react';
-import { GraduationCap, Moon, Sun, LayoutDashboard, Menu, LogIn, LogOut, User } from 'lucide-react';
+import { GraduationCap, Moon, Sun, Menu, LogIn, LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -40,7 +40,7 @@ export function Header() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav lang={language} aria-label="Primary navigation" className="hidden 2xl:flex items-center gap-4">
+        <nav lang={language} aria-label="Primary navigation" className="hidden 2xl:flex items-center gap-3 whitespace-nowrap">
           <Link
             href="/"
             className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300"
@@ -81,19 +81,6 @@ export function Header() {
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-2">
-          {/* Dashboard Button (Desktop) */}
-          <Button
-            variant="ghost"
-            size="sm"
-            asChild
-            className="hidden 2xl:flex"
-          >
-            <Link href="/dashboard">
-              <LayoutDashboard className="mr-2 h-4 w-4" />
-              {t('dashboard')}
-            </Link>
-          </Button>
-
           {/* Language selection persists across ExamPro and the exam hall. */}
           <LanguageSwitcher small />
 

@@ -1,5 +1,7 @@
 import { api } from '@/lib/api';
 
+export type AdminSection = 'overview' | 'questions' | 'tests' | 'practice' | 'plans';
+
 export interface AdminTopic { id: string; name: string; category: string; active: boolean; total: number; live: number }
 export interface AdminQuestion { id: string; position: number; question: string; options: string[]; answer: number; explanation: string; difficulty: string; active: boolean }
 export interface QuestionInput { question: string; options: string[]; answer: number; explanation: string; difficulty?: string }
@@ -20,7 +22,7 @@ export async function admin<T = unknown>(path: string, method = 'GET', body?: un
   try {
     const res = await api<T>(`/api/v1/admin${path}`, { method, body });
     if (res.success) return { ok: true, data: res.data as T };
-    return { ok: false, message: res.error?.message || 'Something went wrong' };
+    return { ok: false, message: res.error?.message || 'Something went wrong', status: res.error?.status };
   } catch {
     return { ok: false, message: 'Cannot reach the ExamPro API. Verify its address and deployment status.' };
   }

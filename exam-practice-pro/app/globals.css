@@ -260,3 +260,20 @@
 /* Script-sensitive fonts are loaded locally through next/font, never browser CDNs. */
 html[data-exampro-lang="bn"] body { font-family: var(--font-bangla), var(--font-inter), sans-serif; }
 html[data-exampro-lang="hi"] body { font-family: var(--font-hindi), var(--font-inter), sans-serif; }
+
+/* Administration uses the same controls with more room for editing and review. */
+@layer components {
+  .ep-admin table thead th {
+    padding: 0.85rem 0.75rem;
+    background: var(--muted);
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  .ep-admin table tbody td { padding: 1rem 0.75rem; }
+  .ep-admin table tbody tr:hover { background: color-mix(in oklch, var(--muted) 45%, transparent); }
+  .ep-admin summary { padding-block: 0.6rem; }
+  .ep-admin input[type='checkbox'], .ep-admin input[type='radio'] { accent-color: #4f46e5; }
+  .ep-admin :is(input, select, textarea, button, summary):focus-visible { outline: 2px solid #818cf8; outline-offset: 3px; }
+  .ep-admin table { min-width: 36rem; }
+}
