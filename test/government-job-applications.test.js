@@ -9,7 +9,6 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const http = require('node:http');
 const express = require('express');
-const { SignJWT } = require('jose');
 const db = require('../src/config/database');
 const { errorHandler } = require('../src/middleware/error-handler');
 const router = require('../src/routes/government-job-applications');
@@ -74,6 +73,7 @@ function stubDatabase() {
   };
 }
 async function token(email, verified = true) {
+  const { SignJWT } = await import('jose');
   return new SignJWT({ email, emailVerified: verified, provider: 'google', name: 'Tester', image: null })
     .setProtectedHeader({ alg: 'HS256' }).setSubject('issuer-sub').setIssuedAt().setExpirationTime('30m')
     .sign(new TextEncoder().encode(process.env.AUTH_SECRET));
