@@ -35,8 +35,11 @@ export function CashfreeSandboxCheckout({period}:{period:'monthly'|'yearly'}){
     :'We could not verify this order. Check payment history or contact support.');
    void refresh();
   };
-  if(/^[A-Za-z0-9_]+$/.test(orderId))void reconcile(0);
-  window.history.replaceState(null,'',window.location.pathname);
+  if(/^[A-Za-z0-9_]+$/.test(orderId)){
+   void reconcile(0).then(()=>{
+    if(!cancelled)window.history.replaceState(null,'',window.location.pathname);
+   });
+  }else window.history.replaceState(null,'',window.location.pathname);
   return()=>{cancelled=true;};
  },[]);
  const start=async()=>{
