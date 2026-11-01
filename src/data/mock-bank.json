@@ -1394,7 +1394,7 @@
  "mocks": [
   {
    "id": "ssc1",
-   "name": "SSC CGL Tier-I Mock 1",
+   "name": "SSC CGL Tier-I Mini Mock 1",
    "exam": "SSC",
    "minutes": 30,
    "marksPerCorrect": 2,
@@ -1471,7 +1471,7 @@
   },
   {
    "id": "ssc2",
-   "name": "SSC CGL Tier-I Mock 2",
+   "name": "SSC CGL Tier-I Mini Mock 2",
    "exam": "SSC",
    "minutes": 30,
    "marksPerCorrect": 2,

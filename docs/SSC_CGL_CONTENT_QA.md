@@ -1,7 +1,7 @@
 # SSC CGL Tier-I: 10 complete, original mocks — editorial acceptance
 
 ## Do not call practice sets "full mocks"
-The production database currently has 621 question rows and 31 mock-test records, including 20 unpublished **25-question** practice sets spread across competitive subjects. There are only 2 published SSC CGL-labelled mock-test definitions, and neither inventory count alone proves a standards-compliant 100-question paper.
+The production database currently has 621 question rows and 31 mock-test records, including 20 unpublished **25-question** practice sets spread across competitive subjects. There are only 2 published SSC CGL-labelled mock-test definitions, and neither inventory count alone proves a standards-compliant 100-question paper. The two live 33-question papers are labelled **"SSC CGL Tier-I Mini Mock 1/2"** (30 minutes) in `src/data/mock-bank.json` so learners are never told they are official-pattern full papers.
 
 ## Goal and evidence
 Produce **10 independent, fully reviewed Tier-I mocks**, each with 100 original questions, 25 each:
@@ -10,7 +10,7 @@ Produce **10 independent, fully reviewed Tier-I mocks**, each with 100 original 
 - Quantitative Aptitude
 - English Comprehension
 
-The official **SSC CGL 2026 Tier-I notification, section 13.8**, specifies **+2 per correct, -0.50 per incorrect, 60 minutes total with a 15-minute timer for EACH of the four subjects** (with extended timing rules for scribe-eligible candidates). Source: https://ssc.gov.in/api/attachment/uploads/masterData/NoticeBoards/Notice_of_adv_cgl_2025.pdf (PDF title identifies it as the 2026 notification). **The current ExamPro exam engine has only an overall deadline and does not implement locked 15-minute per-section timers. This is a launch blocker for advertising a 2026 exam-pattern-faithful full mock.** The audit checks question inventory, not timer UI compliance. This document is an editorial readiness standard, not a claim that the app already matches all official rules.
+The official **SSC CGL 2026 Tier-I notification, section 13.8**, specifies **+2 per correct, -0.50 per incorrect, 60 minutes total with a 15-minute timer for EACH of the four subjects** (with extended timing rules for scribe-eligible candidates: 20 minutes per section, 80 minutes total). Source: https://ssc.gov.in/api/attachment/uploads/masterData/NoticeBoards/Notice_of_adv_cgl_2026.pdf. Server-side locked 15-minute section timers (and the admin-approved 20-minute accommodation mode) were implemented in PR #44 and the quality/accessibility PR; see `docs/SSC_CGL_SECTION_TIMER_IMPLEMENTATION.md` and `docs/MOCK01_QUALITY_ACCESSIBILITY_REPORT.md`. The audit checks question inventory, not timer UI compliance. This document is an editorial readiness standard, not a claim that the app already matches all official rules.
 
 ## Publication gate for each mock
 1. Named reviewer records sources, syllabus coverage, and current official pattern. Do not copy copyrighted coaching question banks.
