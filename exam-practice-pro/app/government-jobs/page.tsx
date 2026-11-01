@@ -31,6 +31,8 @@ export default function GovernmentJobsPage(){
   try{
    const r=await api<GovernmentJobsResponse>('/api/v1/government-jobs',{public:true});
    if(r.success&&r.data){setFeed(r.data);setError('');}else setError(jobsErrorMessage(r.error));
+  }catch{
+   setError('Could not reach the official-notice index. Please try again; official recruitment portals are listed below.');
   }finally{inFlight.current=false;setLoading(false);}
  },[]);
  useEffect(()=>{
@@ -83,7 +85,7 @@ export default function GovernmentJobsPage(){
    <section className="space-y-3" aria-live="polite">
     <div className="flex flex-wrap items-end justify-between gap-3">
      <div><h2 className="text-xl font-bold">Latest official notices</h2>
-      <p className="text-sm text-muted-foreground">Indexed from Employment News and the UPSC forthcoming-examinations page. Not an application portal.</p>
+      <p className="text-sm text-muted-foreground">Automatic indexing currently covers Employment News and UPSC. SSC, Banking and Railways are linked below for direct checks; they are not yet indexed here. This is a best-effort list, not a complete government vacancy feed or an application portal.</p>
      </div>
      {feed&&<p className="text-xs text-muted-foreground">{healthy}/{feed.sources.length} sources checked successfully</p>}
     </div>
