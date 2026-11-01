@@ -26,4 +26,4 @@ Use anonymous aggregate counts for public claims. Do not share individual result
 5. Would you voluntarily pay for deeper analytics and more reviewed mocks? What is missing before that decision?
 
 ## Release decision
-Consider expanding only after ≥10 opt-in testers have used a complete mock, reported blockers are addressed, a reproducible content-QA procedure exists, and access/payment flows have been tested in Razorpay test mode. Keep institute dashboard on hold pending real individual demand.
+Consider expanding only after ≥10 opt-in testers have used a complete mock, reported blockers are addressed, a reproducible content-QA procedure exists, and access/payment flows have been tested in Cashfree Payments sandbox mode (Razorpay is superseded per the 27 Oct 2026 decision; see docs/PR64_CASHFREE_SANDBOX.md). Keep institute dashboard on hold pending real individual demand.

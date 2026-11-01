@@ -102,6 +102,28 @@ test('amount mismatch cannot grant or update payment to paid',async()=>{
  const outcome=await cashfree.processWebhook(raw,signature.signature,signature.timestamp);
  assert.equal(outcome.paid,false);assert.equal(grants,0);assert.equal(paid,false);
 });
+test('order status is user-scoped and rejects malformed or foreign order ids',async()=>{
+ gate.enabled=()=>true;
+ await assert.rejects(cashfree.orderStatus(user,'cf_sbx_not-an-order'),e=>e.statusCode===404);
+ await assert.rejects(cashfree.orderStatus(null,'cf_sbx_'+'3'.repeat(32)),e=>e.statusCode===404);
+ const known='cf_sbx_'+'3'.repeat(32);
+ db.query=async(sql,params)=>{
+  assert.ok(sql.includes('WHERE id=$1 AND user_id=$2'));
+  if(params[1]!==user.id||params[0]!==known)return {rowCount:0,rows:[]};
+  return {rowCount:1,rows:[{id:params[0],status:'paid',amount_inr:199,billing_period:'monthly',paid_at:new Date('2026-10-27T00:00:00Z')}]};
+ };
+ await assert.rejects(cashfree.orderStatus(user,'cf_sbx_'+'9'.repeat(32)),e=>e.statusCode===404);
+ const status=await cashfree.orderStatus(user,'cf_sbx_'+'3'.repeat(32));
+ assert.equal(status.paid,true);
+ assert.equal(status.status,'paid');
+ assert.equal(status.amountInr,199);
+});
+test('order status route requires authentication and stays read-only',()=>{
+ const routes=fs.readFileSync(path.resolve(__dirname,'../src/routes/cashfree.js'),'utf8');
+ assert.match(routes,/router\.get\('\/orders\/:orderId\/status'/);
+ assert.ok(routes.indexOf('router.use(authenticateNextAuth)')<routes.indexOf("/orders/:orderId/status"));
+ assert.match(routes,/cashfree\.orderStatus\(req\.user,req\.params\.orderId\)/);
+});
 test('unauthenticated webhook cannot bypass signature or local raw-byte verification',()=>{
  const app=fs.readFileSync(path.resolve(__dirname,'../src/app.js'),'utf8');
  const routes=fs.readFileSync(path.resolve(__dirname,'../src/routes/cashfree.js'),'utf8');

@@ -115,6 +115,16 @@ async function processWebhook(raw,signature,timestamp){
   return {duplicate:false,paid:outcome==='granted'||outcome==='already_paid'};
  }catch(e){await client.query('ROLLBACK').catch(()=>{});throw e;}finally{client.release();}
 }
+async function orderStatus(user,orderId){
+ guard();
+ if(!user?.id||!/^cf_sbx_[0-9a-f]{32}$/.test(String(orderId||'')))throw fail('Unknown sandbox order.',404);
+ const r=await db.query(`SELECT id,status,amount_inr,billing_period,paid_at
+  FROM cashfree_sandbox_orders WHERE id=$1 AND user_id=$2`,[orderId,user.id]);
+ if(!r.rowCount)throw fail('Unknown sandbox order.',404);
+ const row=r.rows[0];
+ return {orderId:row.id,status:row.status,paid:row.status==='paid',amountInr:row.amount_inr,
+  billingPeriod:row.billing_period,paidAt:row.paid_at};
+}
 async function history(user){
  guard();const r=await db.query(`SELECT id,billing_period,amount_inr,status,created_at,paid_at
  FROM cashfree_sandbox_orders WHERE user_id=$1 ORDER BY created_at DESC LIMIT 50`,[user.id]);
@@ -128,4 +138,4 @@ async function audit(){
    ORDER BY created_at DESC LIMIT 100`)]);
  return {orders:o.rows,events:e.rows};
 }
-module.exports={enabled,guard,price,verifySignature,create,processWebhook,history,audit};
+module.exports={enabled,guard,price,verifySignature,create,processWebhook,orderStatus,history,audit};
