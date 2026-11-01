@@ -11,7 +11,7 @@ After secure launch-readiness and a credible SSC CGL content set, recruit **10�
 ## Outreach message
 "Hi everyone — I'm testing ExamPro, a small independent SSC CGL mock-test platform. It has timed practice, question explanations and score history. I'm inviting 10–20 volunteers to try a free exam and give specific feedback on question quality, login and mobile experience. Please reply here or message me only if interested; I'll share the link and a short feedback form. This isn't an official SSC product."
 
-Post only with admin permission and within group rules. Use one main production domain, not competing Vercel/Render URLs. Invited testers redeem individual invitation codes (issued from the admin beta panel, staging only); no scraping or unsolicited bulk DMs.
+Post only with admin permission and within group rules. Use one main production domain, not competing Vercel/Render URLs. For this production cohort, manually share the published mock link with consenting learners; no scraping or unsolicited bulk DMs. Individual invitation codes and the admin beta panel are only for separate isolated-staging QA, not production recruitment.
 
 **Strict policy:** never scrape member lists or phone numbers, never send unsolicited bulk DMs, and invite only people who explicitly reply or opt in. If a group admin says no, do not post.
 
