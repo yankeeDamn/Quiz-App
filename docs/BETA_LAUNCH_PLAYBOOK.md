@@ -6,7 +6,7 @@ After secure launch-readiness and a credible SSC CGL content set, recruit **10�
 ## Pre-release gates (all must pass first)
 1. **Deployment:** canonical Vercel URL live with `/status` Ready; Google/GitHub sign-in, timed exam start, autosave and result storage verified on Android and desktop (issue #40).
 2. **Content:** at least one full-length 100-question SSC CGL mock published after `scripts/audit-ssc-cgl.js` passes and independent human review approves all 100 answers/explanations; sectional timing (4 × 15 min) and scribe/compensatory-time accommodation verified in staging QA (issue #36).
-3. **Payments:** Cashfree is the selected gateway (#39). Merchant onboarding and sandbox payment tests come later; do not claim Razorpay or Cashfree is already live. Manual admin plan grants remain the only working plan-activation path until sandbox passes.
+3. **Payments:** Cashfree is the selected gateway (#39). Merchant onboarding and sandbox payment tests come later; do not claim Razorpay or Cashfree is already live. Manual admin plan grants remain the only production plan-activation path until merchant approval, production credentials and a reviewed production integration are in place. Sandbox checkout and its automated plan grants are restricted to isolated staging; passing sandbox tests does not authorize live payments.
 
 ## Outreach message
 "Hi everyone — I'm testing ExamPro, a small independent SSC CGL mock-test platform. It has timed practice, question explanations and score history. I'm inviting 10–20 volunteers to try a free exam and give specific feedback on question quality, login and mobile experience. Please reply here or message me only if interested; I'll share the link and a short feedback form. This isn't an official SSC product."
