@@ -13,10 +13,10 @@
 3. Vercel: configure NEXT_PUBLIC_SITE_URL with your real canonical production origin; review /privacy, /terms, /refunds, /contact, /robots.txt and /sitemap.xml.
 4. Confirm /api/v1/admin/me returns 401 without credentials, 403 for a nonadmin OAuth account, and 200 for a configured owner; no browser links should expose /admin publicly.
 5. Render autoDeploy is **off**: after approved merge, manually deploy the matching main commit and verify /api/v1/health/ready, then test an exam, translation and sharing.
-6. Have a legal/compliance professional verify company identity, legal contact/merchant disclosures, payment practices and statutory obligations before enabling a live Razorpay checkout.
+6. Have a legal/compliance professional verify company identity, legal contact/merchant disclosures, payment practices and statutory obligations before enabling a live Cashfree checkout.
 
 ## Subsequent gated milestones
-- Razorpay: merchant credentials (server only), server-created orders, HMAC validation, webhook event idempotency, transactionally safe purchase and entitlement records, never client-trusted Pro unlock.
+- Cashfree: merchant credentials (server only), server-created orders, HMAC validation, webhook event idempotency, transactionally safe purchase and entitlement records, never client-trusted Pro unlock.
 - SSC CGL: ten high-quality full-length, distinct, syllabus- and pattern-reviewed mock exams. Existing 25-question draft practice sets are not full mocks. Validate each before activation.
 - Pro analytics: private server-side per-topic and per-section post-exam report, protected by active Pro entitlement; keep basic review freely available.
 - Beta: manually recruit opt-in learners within group rules and measure first exam completion, repeat usage and paid conversion. No unsolicited bulk messages.
