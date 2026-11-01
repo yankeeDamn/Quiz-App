@@ -19,4 +19,8 @@ router.post('/orders',wrap(async(req,res)=>{
  res.status(201).json({success:true,data:result});
 }));
 router.get('/orders',wrap(async(req,res)=>res.json({success:true,data:await cashfree.history(req.user)})));
+// Post-redirect reconciliation: the browser return is never proof of payment.
+router.get('/orders/:orderId/status',wrap(async(req,res)=>{
+ res.json({success:true,data:await cashfree.orderStatus(req.user,req.params.orderId)});
+}));
 module.exports=router;

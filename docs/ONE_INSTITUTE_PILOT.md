@@ -16,7 +16,7 @@ Adds PostgreSQL **schema only** for institutes, owner/teacher/student membership
 1. **Import and review:** authenticated institute creation/invitations, CSV upload from `content/it-certifications/starter-questions.csv`, validation, idempotent import and teacher approval.
 2. **Exam engine:** publish approved questions, batch assignment, time-limited student sessions, server-side grading, persistent attempts.
 3. **Rankings:** tenant/batch-scoped leaderboards, student results, teacher reports.
-4. **Billing:** Cashfree (India) or another approved provider, webhook verification, plan limits and an invoice/receipt workflow.
+4. **Billing:** Cashfree Payments (India; chosen 27 Oct 2026, replacing Razorpay) or another approved provider, webhook verification, plan limits and an invoice/receipt workflow.
 5. **Pilot:** one institute, 10–30 learners, two exams, one verified payment in test mode before any live charge.
 
 ## Setup (Windows PowerShell)

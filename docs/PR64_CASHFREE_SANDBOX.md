@@ -12,6 +12,7 @@
 - Fulfilment uses one PostgreSQL transaction with `SELECT ... FOR UPDATE`, paid-state guard, per-event unique fingerprint, one `plan_grants` row, updated `users.plan_expires_at` and payment status. Duplicate signed webhook deliveries cannot grant twice.
 - A refund, chargeback or reversal requires **manual reconciliation**; do not assume current code automatically revokes entitlement. Expand this before live payments.
 - Only human allowlisted Admin OAuth accounts can view private order/event audit; students see only their own order history. No admin action can mark an order paid.
+- After Cashfree redirects the browser back (`/pricing?cashfree_return=1&order_id=...`), the frontend reconciles via the authenticated `GET /api/v1/cashfree/orders/:orderId/status` endpoint (user-scoped, read-only) before showing any outcome. The browser return URL alone never unlocks Pro.
 
 ## Required staging setup (after PR security review)
 1. **Do not run any migrations on production.** On isolated staging Neon only, manually review and execute `src/db/cashfree-sandbox.sql`. Nothing in this PR runs that migration automatically.
