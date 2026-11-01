@@ -48,7 +48,7 @@ export const PLANS: Plan[] = [
     segment: 'learner',
     features: [
       'All 10 topic tests with instant answers',
-      '5 full mocks: SSC, Bank PO, RRB, UPSC and campus',
+      '5 mock tests: SSC mini mocks, Bank PO, RRB, UPSC and campus',
       'Certification quizzes and flashcards',
       'Bookmarks, notes and progress',
     ],
@@ -63,7 +63,7 @@ export const PLANS: Plan[] = [
     highlight: true,
     features: [
       'Everything in Free',
-      '6 more full mocks, including SSC Mock 2, Bank PO Mock 2 and Campus Test 3',
+      '6 more mock tests, including SSC CGL Mini Mock 2, Bank PO Mock 2 and Campus Test 3',
       'Section and time analysis',
       'WhatsApp doubt support from a mentor',
       'New full mocks added every month',
