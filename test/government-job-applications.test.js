@@ -4,6 +4,8 @@ process.env.NODE_ENV = 'test';
 process.env.AUTH_SECRET = 'tracker-test-auth-secret-minimum-32-bytes';
 process.env.DATABASE_URL = 'postgresql://example.invalid/not-used';
 process.env.GOVT_APPLICATION_ENCRYPTION_KEY = Buffer.alloc(32, 7).toString('base64');
+// jose v6 uses the Web Crypto global; Node 18 CI needs a test-only polyfill.
+globalThis.crypto ??= require('node:crypto').webcrypto;
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
