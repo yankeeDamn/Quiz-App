@@ -89,7 +89,7 @@ test('unpublication and loss of review immediately revoke public preview and ful
  questions[8].reviewed_at='2026-01-01';
 });
 test('command metrics and bulk preflight require a verified human admin',async()=>{
- for(const path of ['/admin/command-center','/admin/tests/publication-candidates']){
+ for(const path of ['/admin/command-center','/admin/catalogue','/admin/tests/publication-candidates','/admin/tests/paid-mock/publication-checklist']){
   assert.equal((await request(path)).status,401);
   assert.equal((await request(path,{key:true})).status,403);
   assert.equal((await request(path,{email:'student@example.test'})).status,403);
@@ -97,6 +97,14 @@ test('command metrics and bulk preflight require a verified human admin',async()
  const r=await request('/admin/command-center',{email:owner});assert.equal(r.status,200);noKeys(r.body);
  assert.equal(r.body.data.attempts.accuracy,62.5);assert.equal(r.body.data.plans.active,2);assert.equal(r.body.data.catalogue.pro,2);
  assert.match(r.headers.get('cache-control'),/private/);
+});
+test('admin live catalogue matches the public database catalogue, including topic tests and no protected payload',async()=>{
+ const publicList=await request('/mocks');
+ const adminList=await request('/admin/catalogue',{email:owner});
+ assert.equal(adminList.status,200);noContent(adminList.body);
+ assert.deepEqual(adminList.body.data.tests,publicList.body.data.tests);
+ assert.ok(adminList.body.data.tests.some(t=>t.kind==='topic'));
+ assert.ok(!adminList.body.data.tests.some(t=>t.id==='draft-mock'));
 });
 test('publication candidates report blockers without mutating content',async t=>{
  t.mock.method(content,'listTests',async()=>[{id:'ready',name:'Ready',active:false,exam:'Demo'},{id:'blocked',name:'Blocked',active:false,exam:'Demo'},{id:'live',active:true}]);

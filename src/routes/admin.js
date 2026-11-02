@@ -94,6 +94,7 @@ router.use((req, res, next) => {
 router.use(adminLimiter, requireAdmin);
 
 router.get('/me', (req, res) => ok(res, { via: req.admin.via, email: req.admin.email }));
+router.get('/catalogue', requireHumanReviewer, wrap(async(_req,res)=>ok(res,{tests:await require('../services/mocks.service').listMocks()})));
 router.get('/command-center', requireHumanReviewer, wrap(async(_req,res)=>ok(res,await require('../services/admin-command-center.service').metrics())));
 
 
@@ -362,6 +363,11 @@ router.delete('/tests/:id', requireHumanReviewer, wrap(async(req,res)=>{
   if(!SLUG.test(req.params.id))return bad(res,'Bad test id');
   const result=await content.deleteDraftTest(req.params.id);
   return result.ok?ok(res,{}):bad(res,result.error,result.status);
+}));
+
+router.get('/tests/:id/publication-checklist', requireHumanReviewer, wrap(async(req,res)=>{
+  if(!SLUG.test(req.params.id))return bad(res,'Bad test id');
+  return ok(res,await require('../services/mock-publication-diagnostics.service').report(req.params.id));
 }));
 
 router.get('/tests/:id/preview', wrap(async (req,res)=>{

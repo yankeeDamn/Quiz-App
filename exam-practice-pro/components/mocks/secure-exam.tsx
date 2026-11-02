@@ -48,6 +48,8 @@ export function SecureExam({testId,draftMode=false,betaMode=false}:{testId:strin
  const [responses,setResponses] = useState<Record<string,number>>({});
  const [busy,setBusy] = useState(false);
  const [error,setError] = useState('');
+ const [startErrorStatus,setStartErrorStatus]=useState<number|undefined>();
+ const [retry,setRetry]=useState(0);
  const [seconds,setSeconds] = useState(0);
  const [clockNow,setClockNow]=useState(()=>Date.now());
  const [announcement,setAnnouncement]=useState('');
@@ -87,7 +89,7 @@ export function SecureExam({testId,draftMode=false,betaMode=false}:{testId:strin
    void api<{attempt:Attempt}>(attemptStartUrl,{method:'POST',body:{testId}})
     .then(r=>{
       if(cancelled)return;
-      if(!r.success||!r.data)throw Error(r.error?.message||'Cannot start your exam');
+      if(!r.success||!r.data){setStartErrorStatus(r.error?.status);throw Error(r.error?.message||'Cannot start your exam');}
       setAttempt(r.data.attempt);
       setResponses(r.data.attempt.responses);
       latest.current=r.data.attempt.responses;
@@ -102,7 +104,7 @@ export function SecureExam({testId,draftMode=false,betaMode=false}:{testId:strin
       setSeconds(Math.max(0,Math.ceil((new Date(started.deadlineAt).getTime()-Date.now())/1000)));
     }).catch(e=>{if(!cancelled)setError(e instanceof Error?e.message:'Cannot start your exam')});
    return ()=>{cancelled=true};
- },[status,session?.user?.email,testId,attemptStartUrl,draftMode,betaMode]);
+ },[status,session?.user?.email,testId,attemptStartUrl,draftMode,betaMode,retry]);
 
  const submit = useCallback(async()=>{
    if(!attempt || attempt.submittedAt || submitLock.current)return;
@@ -161,7 +163,7 @@ export function SecureExam({testId,draftMode=false,betaMode=false}:{testId:strin
 
  if(status==='loading')return <p className="p-6" aria-busy="true">Checking sign-in…</p>;
  if(status!=='authenticated'||!session?.user?.email)return <section className="rounded-xl border p-6"><h1 className="text-xl font-bold">Sign in to take a scored exam</h1><p className="mt-2 text-sm text-muted-foreground">Guest practice is available, but scored exams require a verified Google or GitHub account to sync results across devices.</p><Button className="mt-4" asChild><Link href={`/auth/signin?callbackUrl=${encodeURIComponent((betaMode?'/exampro/beta/mock-01':(draftMode?'/admin/draft-test/':'/india-mocks/')+testId))}`}>Sign in</Link></Button></section>;
- if(error&&!attempt)return <div className="rounded-lg border p-5" role="alert">{error}<p className="mt-2 text-sm">Check that the API, Neon database and OAuth credentials are configured, then reload the page.</p></div>;
+ if(error&&!attempt)return <div className="space-y-3 rounded-lg border p-5" role="alert"><h1 className="font-semibold">{draftMode?'Private draft test could not start':'Exam could not start'}</h1><p>{error}</p><p className="text-sm text-muted-foreground">{draftMode&&startErrorStatus===409?'Open the mock’s Publication checklist in Admin to check source ranges, missing or retired questions. Private testing does not require source topics to be inactive and does not publish anything.':startErrorStatus===401||startErrorStatus===403?'Check that you are signed in with the account authorized for this exam.':startErrorStatus===404?'Return to the catalogue or Admin to check whether this test is available and private staging testing is enabled.':'Check the API connection and database availability, then try again.'}</p><div className="flex flex-wrap gap-2"><Button onClick={()=>{setError('');setStartErrorStatus(undefined);setRetry(n=>n+1);}}>Try again</Button>{draftMode&&<Button variant="outline" asChild><Link href="/admin">Back to Admin</Link></Button>}</div></div>;
  if(!attempt)return <p className="p-6" aria-busy="true">Starting or recovering your saved exam…</p>;
  if(attempt.submittedAt&&attempt.result)return <section className="space-y-6">
    <div className="rounded-xl border bg-card p-6"><h1 className="text-2xl font-bold">{attempt.title} — Result</h1><ContentReviewBadge underReview={attempt.test.underReview !== false}/><p className="mt-2 text-xl font-semibold">{attempt.result.score} / {attempt.result.total} marks ({attempt.result.percentage}%)</p><p>{attempt.result.passed?'Passed':'Not passed'} · {attempt.result.correct} correct · {attempt.result.incorrect} incorrect · {attempt.result.skipped} skipped</p><Button className="mt-4" asChild><Link href={draftMode?'/admin':betaMode?'/exampro/beta/mock-01':'/dashboard'}>{draftMode?'Return to Admin':betaMode?'Return to beta':'View dashboard'}</Link></Button></div>
