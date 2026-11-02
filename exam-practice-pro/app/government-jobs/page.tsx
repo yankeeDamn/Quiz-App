@@ -8,6 +8,7 @@ import {
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { RecruitmentNoticeCard } from '@/components/government-jobs/recruitment-notice-card';
+import { ApplicationTracker } from '@/components/government-jobs/application-tracker';
 import { api } from '@/lib/api';
 import { checkedAt, jobsErrorMessage, type GovernmentJobsResponse, type RecruitmentPortal } from '@/lib/government-jobs';
 
@@ -16,6 +17,7 @@ const TABS = [
   { id: 'notices', label: 'Latest Notices' },
   { id: 'upcoming', label: 'Upcoming Exams' },
   { id: 'portals', label: 'Official Portals' },
+  { id: 'applications', label: 'My Applications' },
 ] as const;
 type TabId = typeof TABS[number]['id'];
 const EMPTY_JOBS: GovernmentJobsResponse['jobs'] = [];
@@ -91,6 +93,7 @@ export default function GovernmentJobsPage() {
   const [filter, setFilter] = useState<string>('All');
   const [search, setSearch] = useState('');
   const [tab, setTab] = useState<TabId>('notices');
+  const [seedJob, setSeedJob] = useState<GovernmentJobsResponse['jobs'][number] | null>(null);
   const inFlight = useRef(false);
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
@@ -164,7 +167,7 @@ export default function GovernmentJobsPage() {
     setSearch('');
   }
 
-  const listIsEmpty = tab !== 'portals' && !loading && feed !== null && visibleJobs.length === 0;
+  const listIsEmpty = tab !== 'portals' && tab !== 'applications' && !loading && feed !== null && visibleJobs.length === 0;
   const noMatchingFilter = records.length === 0 && (search.length > 0 || filter !== 'All');
 
   return (
@@ -259,7 +262,9 @@ export default function GovernmentJobsPage() {
             tabIndex={0}
             className="min-h-48 pt-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            {tab === 'portals' ? (
+            {tab === 'applications' ? (
+              <ApplicationTracker seed={seedJob} onSeedConsumed={() => setSeedJob(null)} />
+            ) : tab === 'portals' ? (
               <div>
                 <div className="mb-5 max-w-3xl">
                   <h2 className="text-xl font-bold tracking-tight">Go directly to official recruitment portals</h2>
@@ -303,7 +308,7 @@ export default function GovernmentJobsPage() {
                 )}
                 {visibleJobs.length > 0 && (
                   <div className="grid gap-4 md:grid-cols-2">
-                    {visibleJobs.map((job) => <RecruitmentNoticeCard key={job.id} job={job} />)}
+                    {visibleJobs.map((job) => <RecruitmentNoticeCard key={job.id} job={job} onTrack={(selected) => { setSeedJob(selected); setTab('applications'); }} />)}
                   </div>
                 )}
                 {loading && feed && <p role="status" className="mb-3 text-sm text-muted-foreground">Checking official sources… Current notices remain available.</p>}

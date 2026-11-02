@@ -1,4 +1,4 @@
-import { ArrowUpRight, CalendarDays, Clock3 } from 'lucide-react';
+import { ArrowUpRight, CalendarDays, Clock3, ClipboardList } from 'lucide-react';
 import type { GovernmentJob } from '@/lib/government-jobs';
 
 function formatDate(value: string) {
@@ -10,7 +10,7 @@ function formatDate(value: string) {
   });
 }
 
-export function RecruitmentNoticeCard({ job }: { job: GovernmentJob }) {
+export function RecruitmentNoticeCard({ job, onTrack }: { job: GovernmentJob; onTrack?: (job: GovernmentJob) => void }) {
   return (
     <article className="flex h-full flex-col justify-between rounded-2xl border bg-card p-5 shadow-sm transition-shadow hover:shadow-md motion-reduce:transition-none sm:p-6">
       <div>
@@ -40,6 +40,7 @@ export function RecruitmentNoticeCard({ job }: { job: GovernmentJob }) {
         </div>
         <p className="mt-4 text-sm leading-6 text-muted-foreground">{job.notice}</p>
       </div>
+      <div className="mt-5 flex flex-wrap items-center gap-2">
       <a
         href={job.sourceUrl}
         target="_blank"
@@ -50,6 +51,13 @@ export function RecruitmentNoticeCard({ job }: { job: GovernmentJob }) {
         <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
         <span className="sr-only">(opens in a new tab)</span>
       </a>
+      {onTrack && (
+        <button type="button" onClick={() => onTrack(job)}
+          className="inline-flex min-h-11 items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <ClipboardList className="h-4 w-4" aria-hidden="true" /> Save tracker draft
+        </button>
+      )}
+      </div>
     </article>
   );
 }
