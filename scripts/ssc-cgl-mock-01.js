@@ -9,22 +9,24 @@ const path=require('node:path');
 const content=require('../src/services/content.service');
 const mocks=require('../src/services/mocks.service');
 const {eligible}=require('../src/services/ssc-section-timing');
-const ROOT=path.join(__dirname,'../content/ssc-cgl-2026/mock-01');
+const ROOT=process.env.PRIVATE_CONTENT_DIR && path.join(process.env.PRIVATE_CONTENT_DIR,'content/ssc-cgl-2026/mock-01');
 const HEAD=['question','option_a','option_b','option_c','option_d','correct_option','explanation','difficulty'];
 const ALPHABET='ABCD';
-const read=name=>JSON.parse(fs.readFileSync(path.join(ROOT,name),'utf8'));
+
 const quote=value=>'"'+String(value).replace(/"/g,'""')+'"';
 const normalized=s=>String(s).normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();
 const csvFor=rows=>[HEAD,...rows.map(q=>[q.question,...q.options,ALPHABET[q.answer],q.explanation,q.difficulty])]
   .map(row=>row.map(quote).join(',')).join('\r\n')+'\r\n';
 
-function validate({checkCsv=true}={}){
+function validate({checkCsv=true,root=ROOT,existingStarter,existingCompetitive}={}){
+ if(!root)throw Error('Set PRIVATE_CONTENT_DIR to an access-controlled source directory');
+ const read=name=>JSON.parse(fs.readFileSync(path.join(root,name),'utf8'));
  const manifest=read('manifest.json');
  const errors=[],mapped=[],allStems=new Set(),allQuestionRows=[];
  // Prevent exact repeats of stems already shipped in the starter and
  // competitive library. This cannot replace a human plagiarism review.
- const existingStarter=require('../src/data/mock-bank.json');
- const existingCompetitive=require('../src/data/competitive-questions-500.json');
+ existingStarter ||= require('../src/db/private-content').privateContent('src/data/mock-bank.json') || {topics:[]};
+ existingCompetitive ||= require('../src/db/private-content').privateContent('src/data/competitive-questions-500.json') || {questions:[]};
  const existingStems=new Set([
    ...existingStarter.topics.flatMap(t=>t.questions.map(q=>q.q)),
    ...existingCompetitive.questions.map(q=>q.q)
@@ -65,7 +67,7 @@ function validate({checkCsv=true}={}){
      questions:rows.map((q,position)=>({position,q:q.question,options:q.options,answer:q.answer,explanation:q.explanation}))});
    if(checkCsv&&rows.length===25){
      const expected=csvFor(rows);
-     const actual=fs.readFileSync(path.join(ROOT,topic.csv),'utf8');
+     const actual=fs.readFileSync(path.join(root,topic.csv),'utf8');
      if(actual!==expected)errors.push('CSV differs from canonical JSON: '+topic.csv);
    }
  }
@@ -76,7 +78,7 @@ function validate({checkCsv=true}={}){
  const testCheck=content.checkTest(manifest.mock,(manifest.topics||[]).map(t=>t.id));
  if(!testCheck.ok)errors.push('Mock fails admin validation: '+testCheck.error);
  const bank={topics:mapped,mocks:[manifest.mock]};
- const built=mocks.build(bank,{...manifest.mock,kind:'mock'});
+ const built=mocks.build(bank,{...manifest.mock,kind:'mock'},{privatePreview:true});
  if(!eligible(built))errors.push('Full mock does not activate SSC section-timing policy');
  if(built.questions.length!==100||built.sections.some(s=>s.to-s.from!==25))
    errors.push('Engine did not build all four 25-question sections');

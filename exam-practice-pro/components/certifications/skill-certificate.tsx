@@ -1,4 +1,5 @@
 "use client";
+import { ContentReviewBadge } from '@/components/shared/content-review';
 import { useEffect, useState } from "react";
 import { Award } from "lucide-react";
 import { ebookApi, type SkillCertificate as Certificate } from "@/lib/ebooks";
@@ -27,8 +28,9 @@ export function SkillCertificate({ id }: { id: string }) {
       <section className="rounded-3xl border border-indigo-200 bg-gradient-to-br from-indigo-50 via-background to-emerald-50 p-8 sm:p-12 dark:border-indigo-900 dark:from-indigo-950/30 dark:to-emerald-950/20">
         <Award className="h-14 w-14 text-indigo-600" />
         <h1 className="mt-6 text-2xl font-bold">
-          ExamPro Skill Completion Certificate
+          ExamPro Learning Practice Completion
         </h1>
+        <ContentReviewBadge/>
         {certificate ? (
           <>
             <p className="mt-6 text-3xl font-bold">{certificate.name}</p>

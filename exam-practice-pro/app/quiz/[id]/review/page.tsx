@@ -1,5 +1,6 @@
 'use client';
 
+import { ReportMistake } from '@/components/shared/content-review';
 import { useState, useMemo, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -292,7 +293,7 @@ export default function QuizReviewPage({ params }: PageProps) {
                         Explanation
                       </h4>
                       <p className="text-sm text-indigo-800 dark:text-indigo-200">
-                        {currentItem.question.explanation}
+                        {currentItem.question.explanation}<ReportMistake questionId={currentItem.question.id}/>
                       </p>
                     </div>
 

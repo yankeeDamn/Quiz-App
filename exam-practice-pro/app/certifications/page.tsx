@@ -1,3 +1,4 @@
+import { ContentReviewBadge } from '@/components/shared/content-review';
 import { Suspense } from "react";
 import { CertificationTabs } from "@/components/certifications/certification-tabs";
 import type { Metadata } from "next";
@@ -37,7 +38,7 @@ export default function CertificationsPage() {
                 >
                   <h2 className="text-lg font-semibold">{cert.name}</h2>
                   <p className="mt-2 text-sm text-muted-foreground">
-                    <CertificationPracticeCount id={cert.id} /> practice
+                    <ContentReviewBadge/><CertificationPracticeCount id={cert.id} /> practice
                     questions · explanations available
                   </p>
                   <Link

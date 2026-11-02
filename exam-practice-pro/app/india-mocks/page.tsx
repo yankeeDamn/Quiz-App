@@ -1,5 +1,6 @@
 'use client';
 
+import { ContentReviewBadge } from '@/components/shared/content-review';
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -60,7 +61,7 @@ function Catalogue() {
           <p className="ep-eyebrow">India exam practice</p>
       <h1 className="mt-3 text-3xl font-extrabold tracking-tight md:text-5xl">Mock tests for India&apos;s top exams</h1>
       <p className="mt-4 max-w-2xl text-muted-foreground">
-        Full mocks for SSC, Banking, Railways, UPSC and campus placements, plus short topic tests. Every question has an explanation, and any doubt can go straight to a mentor on WhatsApp.
+        Timed tests and short practice sets for SSC, Banking, Railways, UPSC and campus placements. Every question has an explanation, and any doubt can go straight to a mentor on WhatsApp.
       </p>
 
       <div className="mt-7 flex flex-wrap items-center gap-3">
@@ -118,7 +119,7 @@ function Catalogue() {
             return (
               <article key={t.id} className="ep-card flex h-full flex-col gap-3 rounded-2xl p-6">
                 <div className="flex items-start justify-between gap-2">
-                  <h2 className="text-lg font-semibold leading-snug">{t.name}</h2>
+                  <h2 className="text-lg font-semibold leading-snug">{t.name}</h2><ContentReviewBadge underReview={t.underReview !== false}/>
                   {t.tier === 'premium' ? (
                     <span className="inline-flex shrink-0 items-center gap-1 rounded bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-900 dark:bg-amber-950/50 dark:text-amber-300">
                       <Lock className="h-3 w-3" aria-hidden="true" />

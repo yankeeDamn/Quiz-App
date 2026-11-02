@@ -52,7 +52,7 @@ export function buildCertTest(id: string, overrides: PracticeOverride[] = [], ad
     id: cert.id,
     name: `${cert.name} Starter Practice`,
     exam: 'IT Certification',
-    kind: 'topic',
+    kind: 'topic', underReview:true,
     tier: 'free',
     level: 'Practice',
     minutes: 10,

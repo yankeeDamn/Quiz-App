@@ -29,7 +29,7 @@ const allQuestions = () => ids.flatMap(topic_id=>
   Array.from({length:25},(_,position)=>({
     topic_id,position,
     question: 'Verified question '+topic_id+' #'+position,
-    options:['A','B','C','D'],answer:1,explanation:'Verified explanation',
+    options:['A','B','C','D'],review_status:'published',reviewed_at:'2026-01-01',access_tier:'free',answer:1,explanation:'Verified explanation',
   }))
 );
 
@@ -90,7 +90,7 @@ test('a normal short practice mock remains publishable when content is complete'
  db.query=async sql=>{
    if(sql.includes('FROM mock_topics'))return {rows:[{id:'percent',name:'Percentages',category:'SSC',active:true}]};
    if(sql.includes('FROM mock_questions'))return {rows:Array.from({length:5},(_,position)=>({
-     topic_id:'percent',position,question:'Question '+position,options:['A','B','C','D'],answer:1,explanation:'Explanation',
+     topic_id:'percent',position,question:'Question '+position,options:['A','B','C','D'],review_status:'published',reviewed_at:'2026-01-01',access_tier:'free',answer:1,explanation:'Explanation',
    }))};
    throw Error('Unexpected SQL');
  };

@@ -95,6 +95,15 @@ router.use(adminLimiter, requireAdmin);
 
 router.get('/me', (req, res) => ok(res, { via: req.admin.via, email: req.admin.email }));
 
+router.get('/practice/library', wrap(async(_req,res)=>ok(res,{
+  overrides:await practiceOverrides.listOverrides({includeDrafts:true}),
+  additions:await practiceOverrides.listAdditions({includeDrafts:true}),
+})));
+router.post('/practice/:kind/:source/:id/review',requireHumanReviewer,wrap(async(req,res)=>{
+  await practiceOverrides.reviewPractice(req.params.kind,req.params.source,req.params.id,req.body?.status);
+  return ok(res,{});
+}));
+
 // Edits to the existing frontend-bundled free practice library.
 // Answers are already part of those client-side practice-only quizzes;
 // never use this endpoint for the server-scored mock-test bank.
@@ -232,6 +241,12 @@ router.put('/questions/:qid', wrap(async (req, res) => {
   const r = content.checkQuestion(req.body);
   if (!r.ok) return bad(res, r.error);
   return (await content.updateQuestion(req.params.qid, r.value)) ? ok(res, {}) : bad(res, 'Question not found', 404);
+}));
+
+router.post('/questions/:qid/review', requireHumanReviewer, wrap(async(req,res)=>{
+  if(!UUID.test(req.params.qid))return bad(res,'Bad question id');
+  const r=await content.reviewQuestion(req.params.qid,req.body?.status,req.body?.tier,req.admin.email);
+  return r.ok ? ok(res,{}) : bad(res,r.error,409);
 }));
 
 router.post('/questions/:qid/active', [body('active').isBoolean().toBoolean()], validate, wrap(async (req, res) => {

@@ -107,7 +107,7 @@ jobs:
           npm run db:migrate
           npm run db:migrate
       - name: Test real OAuth middleware, ACLs and persisted results
-        run: node --test test/ebooks-postgres.integration.js
+        run: node --test test/ebooks-postgres.integration.js test/content-review-postgres.integration.js
 
   # ── Docker Build ──────────────────────────────
   docker:

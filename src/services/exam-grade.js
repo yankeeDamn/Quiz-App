@@ -32,13 +32,14 @@ function grade(snapshot, responses) {
 
 function visibleAttempt(row) {
   const snapshot = row.snapshot;
-  const result = row.result || null;
+  const result = row.submitted_at ? row.result || null : null;
   return {
     id: row.id, testId: row.test_id, title: snapshot.name, startedAt: row.started_at,
     deadlineAt: row.deadline_at, submittedAt: row.submitted_at, responses: row.responses,
     test: {
       id: row.test_id, name: snapshot.name, minutes: snapshot.minutes, tier: snapshot.tier,
       marksPerCorrect: snapshot.marksPerCorrect, negativeMarks: snapshot.negativeMarks,
+      underReview: snapshot.underReview !== false,
       passPercent: snapshot.passPercent, sections: snapshot.sections,
       sectionTimingMinutes: snapshot.sectionTimingMinutes || null,
       questions: snapshot.questions.map((q) => ({ id: q.id, topic: q.topic, section: q.section, question: q.question, options: q.options, hindi: q.hindi || null })),

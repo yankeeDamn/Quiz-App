@@ -1,4 +1,5 @@
 "use client";
+import { ContentReviewBadge, ReportMistake } from '@/components/shared/content-review';
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
@@ -134,7 +135,7 @@ export function EbookAssessment({
     else
       setError(
         result.error?.message ||
-          "The verified exam requires an online API and verified sign-in.",
+          "The server-graded practice assessment requires an online API and verified sign-in.",
       );
     setBusy(false);
   };
@@ -209,7 +210,7 @@ export function EbookAssessment({
           </>
         ) : !attempt ? (
           <div className="mx-auto max-w-2xl space-y-5">
-            <Award className="h-10 w-10 text-indigo-600" />
+            <Award className="h-10 w-10 text-indigo-600" /><ContentReviewBadge/>
             <h3 className="text-2xl font-bold">
               Put your new skills to the test.
             </h3>
@@ -279,10 +280,10 @@ export function EbookAssessment({
             <div
               className={`rounded-2xl border p-6 sm:p-8 ${result.passed ? "border-emerald-300 bg-emerald-50/50 dark:bg-emerald-950/20" : "bg-muted/30"}`}
             >
-              <Award className="h-10 w-10 text-indigo-600" />
+              <Award className="h-10 w-10 text-indigo-600" /><ContentReviewBadge/>
               <p className="mt-4 text-xs font-bold uppercase tracking-widest">
                 {result.passed
-                  ? "ExamPro Skill Completion Certificate"
+                  ? "ExamPro Learning Practice Completion"
                   : "Assessment complete"}
               </p>
               <h3 className="mt-2 text-2xl font-bold">
@@ -404,7 +405,7 @@ export function EbookAssessment({
                     Correct: {q.options[q.answer]}
                   </p>
                   <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                    {q.explanation}
+                    {q.explanation}<ReportMistake questionId={`${book.slug}:${q.id}`}/>
                   </p>
                 </article>
               ))}

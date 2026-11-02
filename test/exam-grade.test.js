@@ -25,3 +25,11 @@ test('review stays hidden until submitted; test never leaks correct answer or ex
  const finished=visibleAttempt({...row,submitted_at:new Date(),result:grade(snapshot,{q1:1})});
  assert.equal(finished.result.review[0].correctAnswer,1);
 });
+
+
+test('an unsubmitted row cannot leak a prematurely populated result or extra answer aliases',()=>{
+ const row={id:'x',test_id:'test',snapshot:{...snapshot,questions:snapshot.questions.map(q=>({...q,correctAnswer:q.answer,secret:{answer:q.answer}}))},responses:{},submitted_at:null,result:grade(snapshot,{q1:1})};
+ const body=visibleAttempt(row);
+ assert.equal(body.result,null);
+ assert.doesNotMatch(JSON.stringify(body),/"(?:answer|correctAnswer|explanation|secret)"/);
+});

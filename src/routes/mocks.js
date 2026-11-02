@@ -10,6 +10,7 @@ const db = require('../config/database');
 const config = require('../config');
 
 const router = Router();
+router.use((_req,res,next)=>{res.set('Cache-Control','no-store');res.set('Vary','Authorization');next();});
 const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
 /**
@@ -33,7 +34,7 @@ router.get('/stats', wrap(async (_req, res) => {
   if (config.databaseUrl) {
     const { rows } = await db.query(`
       SELECT COUNT(*)::int AS total,
-        COUNT(*) FILTER (WHERE q.active AND t.active)::int AS available
+        COUNT(*) FILTER (WHERE q.active AND t.active AND q.review_status='published' AND q.access_tier='free')::int AS available
       FROM mock_questions q
       JOIN mock_topics t ON t.id = q.topic_id
     `);

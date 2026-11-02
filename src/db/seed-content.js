@@ -1,13 +1,14 @@
 'use strict';
 
-const starterBank = require('../data/mock-bank.json');
+const { privateContent } = require('./private-content');
 
 /**
- * Safely seed the existing ExamPro schema, without overwriting questions,
+ * Optionally seed private drafts into the existing ExamPro schema, without overwriting questions,
  * topics or tests edited by the owner. Running again repairs missing starter
  * rows (including interrupted first runs) and remains idempotent.
  */
-async function seedStarterContent(client, bank = starterBank) {
+async function seedStarterContent(client, bank = privateContent('src/data/mock-bank.json')) {
+  if (!bank) return { topics: 0, questions: 0, mocks: 0, skipped: true };
   if (!Array.isArray(bank.topics) || !Array.isArray(bank.mocks)) {
     throw new Error('Invalid starter question bank');
   }
@@ -19,7 +20,7 @@ async function seedStarterContent(client, bank = starterBank) {
 
   for (const topic of bank.topics) {
     await client.query(
-      'INSERT INTO mock_topics (id, name, category) VALUES ($1, $2, $3) ON CONFLICT (id) DO NOTHING',
+      'INSERT INTO mock_topics (id, name, category, active) VALUES ($1, $2, $3, FALSE) ON CONFLICT (id) DO NOTHING',
       [topic.id, topic.name, topic.category]
     );
     for (let position = 0; position < topic.questions.length; position++) {
@@ -39,8 +40,8 @@ async function seedStarterContent(client, bank = starterBank) {
 
   for (const mock of bank.mocks) {
     await client.query(
-      `INSERT INTO mock_tests (id, name, exam, minutes, marks_per_correct, negative_marks, level, tier, sections)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `INSERT INTO mock_tests (id, name, exam, minutes, marks_per_correct, negative_marks, level, tier, sections, active)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, FALSE)
        ON CONFLICT (id) DO NOTHING`,
       [mock.id, mock.name, mock.exam, mock.minutes, mock.marksPerCorrect,
         mock.negativeMarks, mock.level, mock.tier, JSON.stringify(mock.sections)]

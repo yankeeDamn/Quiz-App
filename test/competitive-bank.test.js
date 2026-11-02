@@ -1,18 +1,18 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const source = require('../src/data/competitive-questions-500.json');
+const source = require('./fixtures/content').competitive();
 const { GROUPS, makeCompetitiveBank, seedCompetitiveContent } = require('../src/db/seed-competitive');
 
 test('500 questions are split into four exam groups and twenty distinct 25-question mocks', () => {
-  const bank = makeCompetitiveBank();
+  const bank = makeCompetitiveBank(source);
   assert.equal(bank.topics.length, 4);
   assert.equal(bank.mocks.length, 20);
   assert.deepEqual(bank.topics.map(x => x.questions.length), [125, 125, 125, 125]);
   assert.equal(new Set(bank.topics.map(x => x.id)).size, 4);
   assert.equal(new Set(bank.mocks.map(x => x.id)).size, 20);
-  assert.equal(source.questions.filter(q => q.source).length, 30);
-  assert.equal(source.questions.filter(q => !q.source).length, 470);
+  assert.equal(source.questions.filter(q => q.source).length, 0);
+  assert.equal(source.questions.filter(q => !q.source).length, 500);
   const ids = new Set();
   for (const mock of bank.mocks) {
     assert.equal(mock.level, 'Practice');
@@ -43,7 +43,7 @@ test('500 questions are split into four exam groups and twenty distinct 25-quest
 test('seeding is additive, conflict safe, stages content inactive and never writes to old topics', async () => {
   const calls = [];
   const client = { query: async (sql, params) => { calls.push({sql, params}); return {rowCount: 1}; } };
-  const result = await seedCompetitiveContent(client);
+  const result = await seedCompetitiveContent(client, source);
   assert.deepEqual(result, {topics: 4, questions: 500, mocks: 20, drafts: true});
   assert.equal(calls.length, 28);
   assert.ok(calls.every(x => /ON CONFLICT/i.test(x.sql)));
@@ -61,7 +61,7 @@ test('seeding is additive, conflict safe, stages content inactive and never writ
     assert.equal(JSON.parse(call.params[1]).length, 125);
   }
   calls.length = 0;
-  await seedCompetitiveContent(client);
+  await seedCompetitiveContent(client, source);
   assert.equal(calls.length, 28, 're-run uses same guarded inserts');
 });
 

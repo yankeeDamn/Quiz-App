@@ -13,6 +13,20 @@ const assert = require('node:assert/strict');
 const http = require('node:http');
 const app = require('../src/app');
 
+// Exercise real HTTP/auth middleware against nonsensitive server-side fixtures.
+const mocks=require('../src/services/mocks.service');
+const bank=mocks.fromJson(require('./fixtures/content').starter());
+// Separate free and paid ranges for this route test; overlap isolation is tested separately.
+bank.mocks=bank.mocks.filter(m=>m.id==='ssc1'||m.id==='ssc2');
+bank.mocks[1].sections=[{name:'Paid fixture',parts:[{topic:'computer',from:0,to:2}]}];
+const list=()=>mocks.listFromBank(bank);
+mocks.listMocks=async()=>list();
+mocks.findMock=async id=>{
+ const def=mocks.allDefinitions(bank).find(d=>d.id===id);
+ const summary=list().find(t=>t.id===id);
+ return def&&summary?{tier:def.tier,summary,build:()=>mocks.build(bank,def)}:null;
+};
+
 let server;
 let base;
 
@@ -32,7 +46,8 @@ async function get(path, headers = {}) {
 test('catalogue is public', async () => {
   const { status, body } = await get('/api/v1/mocks');
   assert.equal(status, 200);
-  assert.equal(body.data.tests.length, 21);
+  assert.ok(body.data.tests.length>2);
+  assert.doesNotMatch(JSON.stringify(body), /"(?:question|options|answer|correctAnswer|explanation)"/);
 });
 
 test('a free scored mock opens for a guest but hides correct answers', async () => {

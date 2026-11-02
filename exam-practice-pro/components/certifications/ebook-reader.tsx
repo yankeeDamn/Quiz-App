@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect -- initialize account-scoped browser storage and refresh externally loaded data */
 "use client";
+import { ContentReviewBadge, ReportMistake } from '@/components/shared/content-review';
 import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -80,7 +81,7 @@ function ConceptCheck({
                 {choices[index] === question.answer
                   ? "Correct. "
                   : "Review this one. "}
-                {question.explanation}
+                {question.explanation}<ReportMistake questionId={`${chapter.id}:check-${index + 1}`}/>
               </p>
             )}
           </fieldset>
@@ -189,7 +190,7 @@ function ReaderSession({
         setCode(result.error?.code || "");
         setError(
           unavailable && fallback
-            ? "Reading the built-in public edition. Server saves, private books and verified assessments need the online API."
+            ? "Reading the built-in public edition. Server saves, private books and saved practice assessments need the online API."
             : result.error?.message || "Could not load this ebook.",
         );
       }
@@ -357,7 +358,7 @@ function ReaderSession({
             <p className="mt-4 text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">
               {book.category}
             </p>
-            <h2 className="mt-2 text-base font-bold leading-6">{book.title}</h2>
+            <h2 className="mt-2 text-base font-bold leading-6">{book.title}</h2><ContentReviewBadge/>
             <div className="my-5">
               <p className="mb-2 text-xs text-muted-foreground">
                 {completeCount} / {book.chapters.length} chapters completed ·{" "}

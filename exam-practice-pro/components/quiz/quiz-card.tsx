@@ -1,5 +1,6 @@
 'use client';
 
+import { ContentReviewBadge } from '@/components/shared/content-review';
 import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
@@ -12,7 +13,7 @@ import {
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { QuizMeta, Difficulty } from '@/lib/types';
+import { QuizMeta } from '@/lib/types';
 import { formatDuration, getDifficultyColor } from '@/lib/quiz-utils';
 
 interface QuizCardProps {
@@ -39,6 +40,7 @@ export function QuizCard({ quiz }: QuizCardProps) {
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 transition-opacity group-hover:opacity-100" />
 
         <CardHeader className="relative pb-2">
+          <ContentReviewBadge/>
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400">

@@ -2,7 +2,7 @@
 'use strict';
 /**
  * Read-only SSC CGL Tier-I content audit. Never publishes mocks or edits Neon.
- * With DATABASE_URL it checks the live DB; without it checks bundled starter data.
+ * With DATABASE_URL it checks the live DB; without it checks only the synthetic public demo.
  * The audit uses an explicit release checklist rather than counting draft practice sets as full mocks.
  *
  * Usage: node scripts/audit-ssc-cgl.js

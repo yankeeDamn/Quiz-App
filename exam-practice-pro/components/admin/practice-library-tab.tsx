@@ -8,7 +8,7 @@ import starter from '@/data/it-certification-questions.json';
 import { IT_CERTS } from '@/lib/it-certs';
 import type { Question } from '@/lib/types';
 import { admin } from '@/lib/admin';
-import { fetchPracticeLibrary, type PracticeOverride, type PracticeAddition } from '@/lib/practice-overrides';
+import { type PracticeOverride, type PracticeAddition } from '@/lib/practice-overrides';
 import { PracticeAddQuestion } from '@/components/admin/practice-add-question';
 import { Field, Notice, card, input } from '@/components/admin/ui';
 
@@ -64,7 +64,8 @@ export function PracticeLibraryTab() {
 
   useEffect(() => {
     let mounted = true;
-    fetchPracticeLibrary()
+    admin<{overrides:PracticeOverride[];additions:PracticeAddition[]}>('/practice/library')
+      .then(result=>{if(!result.ok)throw Error(result.message);return result.data;})
       .then(data => { if (mounted) { setOverrides(data.overrides); setAdditions(data.additions); } })
       .catch(e => { if (mounted) setMessage({kind:'error',text:String(e.message || e)}); })
       .finally(() => { if (mounted) setLoading(false); });
@@ -113,9 +114,17 @@ export function PracticeLibraryTab() {
         ...existing.filter(o => !(o.source === source && o.id === current.id)),
         {source,id:current.id,question:result.data.question},
       ]);
-      setMessage({kind:'ok',text:'Saved to Neon. New practice sessions will use the updated question.'});
+      setMessage({kind:'ok',text:'Saved to Neon as a draft. Review and publish below before learners receive the update.'});
     } finally { setSaving(false); }
   }
+
+  const savedItem=overrides.find(o=>o.source===source && o.id===questionId) || additions.find(a=>a.source===source && a.id===questionId);
+  const review = async(status:'reviewed'|'published')=>{
+    const kind=overrides.some(o=>o.source===source && o.id===questionId)?'override':'addition';
+    const r=await admin(`/practice/${kind}/${source}/${questionId}/review`,'POST',{status});
+    setMessage(r.ok?{kind:'ok',text:`Question ${status}.`}:{kind:'error',text:r.message});
+    if(r.ok){setOverrides(items=>items.map(x=>x.source===source&&x.id===questionId?{...x,reviewStatus:status}:x));setAdditions(items=>items.map(x=>x.source===source&&x.id===questionId?{...x,reviewStatus:status}:x));}
+  };
 
   return <div className="grid gap-5">
     <section className={card}>
@@ -130,6 +139,7 @@ export function PracticeLibraryTab() {
         will appear in every homepage quiz using that question ID. Existing attempts remain unchanged.
       </p>
     </section>
+    {savedItem && <div className={`${card} flex flex-wrap items-center gap-3`}><span>Status: {savedItem.reviewStatus || 'draft'}</span><Button variant="outline" onClick={()=>void review('reviewed')}>Mark reviewed</Button><Button disabled={savedItem.reviewStatus!=='reviewed'} onClick={()=>void review('published')}>Publish reviewed question</Button></div>}
     {message && <Notice kind={message.kind}>{message.text}</Notice>}
     <section className={card}>
       <div className="grid gap-4 sm:grid-cols-3">

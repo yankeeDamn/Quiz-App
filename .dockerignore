@@ -1,0 +1,8 @@
+.git
+node_modules
+exam-practice-pro/node_modules
+.private-content
+*.private-content.tar*
+.env
+.env.*
+!*.example

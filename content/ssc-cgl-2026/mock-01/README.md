@@ -1,3 +1,5 @@
+> Question JSON, CSV and answer-key audit trails now live only in the database/private authoring source. Set `PRIVATE_CONTENT_DIR` before running `node scripts/ssc-cgl-mock-01.js`. This public folder retains non-sensitive manifest metadata; no public draft payload is provided.
+
 # SSC CGL 2026 Tier-I · Original Practice Mock 01 (DRAFT)
 
 > **Status: DRAFT / UNREVIEWED / NOT PUBLISHED.** This is an independently authored practice mock, **not an official SSC question paper**. Human subject review and the secured full-length exam QA are mandatory before publication.
@@ -37,7 +39,7 @@ The PR adds draft content files and the small admin improvements needed to creat
 ## Academic QA follow-up (27 October 2026)
 
 - **All 100 questions were reviewed in an AI-assisted desk audit** covering calculation/logic, keyed answers, explanations, English grammar, topic breadth, and existing-bank similarities.
-- **20 questions were revised** for ambiguity, near-duplicate practice patterns, cleaner assumptions, and underrepresented syllabus topics. See [QUALITY_AUDIT.md](QUALITY_AUDIT.md) for the 100-row findings and [quality-review.json](quality-review.json) for machine-checked answer texts.
+- **20 questions were revised** for ambiguity, near-duplicate practice patterns, cleaner assumptions, and underrepresented syllabus topics. See the private `QUALITY_AUDIT.md` for the 100-row findings and private `quality-review.json` for machine-checked answer texts.
 - Syllabus gaps remain (illustrated reasoning, charts, cloze/longer reading comprehension, more representative current affairs). These are documented, not silently counted as complete.
 - This is **not human academic approval**; question metadata `reviewStatus: needs_human_review` and `manifest.publicationAllowed=false` deliberately remain unchanged. Standard candidate 15-minute sections do not cover the additional 20-minute eligible-scribe policy.
 - Originality audit found zero exact overlaps with 620 bundled previous practice stems. Similar concepts can still occur, and a deeper third-party originality review is required.

@@ -1,0 +1,25 @@
+{
+  "topics": [
+    {
+      "id": "demo",
+      "name": "Synthetic Demo Practice",
+      "category": "Demo",
+      "questions": [
+        {
+          "q": "Demo only: which option is labelled one?",
+          "options": [
+            "zero",
+            "one",
+            "two",
+            "three"
+          ],
+          "answer": 1,
+          "explanation": "This synthetic example selects the option labelled one.",
+          "reviewStatus": "published",
+          "accessTier": "free"
+        }
+      ]
+    }
+  ],
+  "mocks": []
+}

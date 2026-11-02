@@ -44,7 +44,7 @@ async function start(user, testId, adminDraft = false) {
     const effectiveMinutes = sectionMinutes === 20 ? 80 : loadedTest.minutes;
     const localizedTest = sscFullMock ? await quality.attachApprovedHindi(testId,loadedTest) : loadedTest;
     // Include stable text and key snapshot for reviews after edits or retirements.
-    const snapshot = { name: loadedTest.name, minutes: effectiveMinutes, tier: loadedTest.tier,
+    const snapshot = { underReview: loadedTest.underReview !== false, name: loadedTest.name, minutes: effectiveMinutes, tier: loadedTest.tier,
       marksPerCorrect: loadedTest.marksPerCorrect, negativeMarks: loadedTest.negativeMarks,
       passPercent: loadedTest.passPercent ?? 50, sections: localizedTest.sections, questions: localizedTest.questions,
       adminDraft: Boolean(adminDraft),

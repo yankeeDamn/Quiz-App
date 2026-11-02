@@ -3,7 +3,7 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const db=require('../src/config/database');
 const content=require('../src/services/content.service');
-const {validate}=require('../scripts/ssc-cgl-mock-01');
+const {validateMock01:validate}=require('./fixtures/content');
 
 test('inactive topics can be created safely by the existing admin service',async t=>{
  const queries=[];

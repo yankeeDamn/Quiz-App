@@ -733,7 +733,7 @@ function createEbooksService(db = database, clock = Date.now) {
       completedAt: row.submitted_at,
       name: row.name || "ExamPro learner",
       issuer: "ExamPro",
-      credential: "Skill Completion Certificate",
+      credential: "Learning Practice Completion",
     };
   }
   return {

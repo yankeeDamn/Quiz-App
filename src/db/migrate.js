@@ -214,12 +214,13 @@ async function migrate() {
     console.log('🔄 Running migrations…');
     await client.query('BEGIN');
     await client.query(MIGRATION_SQL);
-    const seeded = await seedStarterContent(client);
-    console.log(`🌱 Starter content checked: ${seeded.topics} topics, ${seeded.questions} questions, ${seeded.mocks} mocks.`);
     await client.query(fs.readFileSync(path.join(__dirname, 'pilot-schema.sql'), 'utf8'));
     await client.query(fs.readFileSync(path.join(__dirname, 'exampro-v2.sql'), 'utf8'));
     await client.query(fs.readFileSync(path.join(__dirname, 'mock01-quality-accessibility.sql'), 'utf8'));
     await client.query(fs.readFileSync(path.join(__dirname, 'practice-overrides.sql'), 'utf8'));
+    await client.query(fs.readFileSync(path.join(__dirname, 'question-review.sql'), 'utf8'));
+    const seeded = await seedStarterContent(client);
+    console.log(`🌱 Starter content checked: ${seeded.topics} topics, ${seeded.questions} questions, ${seeded.mocks} mocks.`);
     const competitive = await seedCompetitiveContent(client);
     console.log(`📚 Competitive bank staged: ${competitive.questions} questions, ${competitive.mocks} draft quizzes. Review and publish in /admin.`);
     await client.query(fs.readFileSync(path.join(__dirname, 'ebooks-schema.sql'), 'utf8'));

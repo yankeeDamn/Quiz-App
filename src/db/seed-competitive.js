@@ -8,7 +8,7 @@
  * and activate the topics and publish individual tests in /admin.
  * Existing content, edits, activation state and student attempts are untouched.
  */
-const source = require('../data/competitive-questions-500.json');
+const { privateContent } = require('./private-content');
 
 const GROUPS = [
   { exam: 'SSC General (CHSL / MTS)', id: 'comp-ssc-chsl-mts-2026', name: 'SSC CHSL / MTS (500-bank)', category: 'SSC', prefix: 'comp-ssc-general', label: 'SSC CHSL / MTS' },
@@ -17,7 +17,7 @@ const GROUPS = [
   { exam: 'Railway (RRB NTPC / Group D)', id: 'comp-railways-2026', name: 'RRB NTPC / Group D (500-bank)', category: 'Railways', prefix: 'comp-railways', label: 'RRB NTPC / Group D' },
 ];
 
-function makeCompetitiveBank(raw = source) {
+function makeCompetitiveBank(raw = privateContent('src/data/competitive-questions-500.json')) {
   if (!raw || !Array.isArray(raw.questions) || raw.questions.length !== 500) {
     throw new Error('Competitive bank must contain exactly 500 questions');
   }
@@ -83,7 +83,8 @@ function makeCompetitiveBank(raw = source) {
  * Run within the existing migration transaction, AFTER exampro-v2.sql
  * adds difficulty and pass_percent. Non-destructive and repeatable.
  */
-async function seedCompetitiveContent(client, input = source) {
+async function seedCompetitiveContent(client, input = privateContent('src/data/competitive-questions-500.json')) {
+  if (!input) return { topics: 0, questions: 0, mocks: 0, drafts: true, skipped: true };
   // Validate the *entire* bank before issuing any writes.
   const bank = makeCompetitiveBank(input);
   for (const topic of bank.topics) {

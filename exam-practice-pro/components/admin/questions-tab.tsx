@@ -70,11 +70,17 @@ export function QuestionsTab() {
       ? await admin(`/questions/${editing}`, 'PUT', draft)
       : await admin(`/topics/${topic}/questions`, 'POST', { questions: [draft] });
     if (r.ok) {
-      setMsg({ kind: 'ok', text: editing ? 'Question updated.' : 'Question added.' });
+      setMsg({ kind: 'ok', text: editing ? 'Question updated and returned to draft.' : 'Question added as a private draft.' });
       setDraft(EMPTY);
       setEditing(null);
       void refresh();
     } else setMsg({ kind: 'error', text: r.message });
+  };
+
+  const review = async (q:AdminQuestion,status:'draft'|'reviewed'|'published',tier=q.access_tier) => {
+    const r=await admin(`/questions/${q.id}/review`,'POST',{status,tier});
+    setMsg(r.ok?{kind:'ok',text:'Review status saved. Publishing requires human review; paid assignments never appear in free topic practice.'}:{kind:'error',text:r.message});
+    if(r.ok)void refresh();
   };
 
   const parsed = parseBulk(bulk);
@@ -113,10 +119,9 @@ export function QuestionsTab() {
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
       {topicsLoaded && !topics.some((t) => t.id.startsWith('comp-')) && (
         <Notice kind="error">
-          The 500-question competitive bank has not been imported into this API database yet.
-          The GitHub merge only added the source file. Check the existing Render backend build/deploy
-          logs and run <code>npm run db:migrate</code> against your existing Neon database;
-          then refresh this page. Do not create another database or import questions manually.
+          Private question banks are no longer bundled in this public repository. Existing database
+          questions are preserved. Import from an access-controlled source, review each question and
+          publish it before activating its test.
         </Notice>
       )}
 
@@ -209,7 +214,12 @@ export function QuestionsTab() {
                 {q.options.map((o, i) => <span key={i} className={i === q.answer ? 'font-semibold text-emerald-700 dark:text-emerald-400' : ''}>{LETTERS[i]}) {o}{'   '}</span>)}
               </p>
               <p className="text-xs text-muted-foreground">Why: {q.explanation}</p>
-              <div className="flex gap-3 text-sm">
+              <p className="text-xs font-semibold">{q.review_status} · {q.access_tier === 'premium' ? 'Pro only' : 'Free practice'}{!q.reviewed_at && ' · under review'}</p>
+              <div className="flex flex-wrap gap-3 text-sm">
+                <button className="underline" onClick={()=>void review(q,'reviewed')}>Mark reviewed</button>
+                <button className="underline" disabled={!q.reviewed_at} onClick={()=>void review(q,'published')}>Publish reviewed question</button>
+                <button className="underline" onClick={()=>void review(q,'draft')}>Return to draft</button>
+                <label>Access <select className={input} value={q.access_tier} onChange={e=>void review(q,'draft',e.target.value as 'free'|'premium')}><option value="premium">Pro only</option><option value="free">Free practice</option></select></label>
                 <button className="underline" onClick={() => { setEditing(q.id); setDraft({ question: q.question, options: q.options, answer: q.answer, explanation: q.explanation, difficulty:q.difficulty }); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Edit</button>
                 <button className="underline" onClick={() => void setActive(q.id, !q.active)}>{q.active ? 'Retire' : 'Bring back'}</button>
               </div>
