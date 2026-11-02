@@ -21,7 +21,18 @@ Opening questions from a mock or its checklist preserves the originating mock ID
 
 Mock status badges are read-only labels. The row now has an explicit **Publish mock** or **Unpublish mock** button. Publication still prompts for confirmation and rechecks the existing server gates. The checklist has a **Publish mock** action enabled only when its recorded checks pass. Full SSC academic/Hindi sign-off remains separate.
 
-Private previews and publication checklists open in dialogs instead of appearing out of sight below a long table. New/edit mock forms scroll into view and receive focus. Secondary duplicate/delete and SSC review tools remain under **More**.
+Private previews and publication checklists open in dialogs instead of appearing out of sight below a long table. New/edit mock forms scroll into view and receive focus.
+
+## Mock manager actions and discovery
+
+- The manager has two prominent actions per definition: **Check readiness** (or **View live test** for a live definition) and **Review questions**. A keyboard-accessible **More actions** menu contains settings, private preview, staging draft testing, duplication, publication, guarded deletion and the existing SSC release/academic tools. The menu uses a portal so table scrolling does not clip it.
+- **Check readiness → Publish mock** remains the recommended release path. Direct publication in the menu uses the same server gates. Tier changes, publication, unpublishing and deletion show an in-app confirmation with the mock name and consequences. Cancel performs no mutation.
+- Status tiles filter all definitions, live mocks, drafts or active-but-hidden definitions. Counts come from loaded definitions, not illustrative totals. The separate **Live Catalogue** view also includes generated topic tests and remains the exact database catalogue learners see.
+- Combine search (name, ID or exam), category, tier and status filters. Sort by name, configured question count or duration. Clear filters restores the full view. Pagination offers 10, 20 or 50 definitions per page; changing filters returns to page one.
+- Desktop supports list and card layouts. Narrow screens use cards with large touch targets, keeping actions reachable without sideways table scrolling. Light/dark styling follows the existing theme.
+- **Export CSV** downloads metadata for all matching definitions, across pages. It excludes question text, options, answer keys and explanations, and neutralizes formula-like text cells. Export does not change the database.
+- **Copy student link** is available only for live definitions. Preview and draft QA remain private and do not imply publication or question review.
+- **Check ready drafts** opens a read-only candidate list. Its explicit publish action submits only candidates already reported ready; each is checked again by the backend. Blocked drafts are never automatically reviewed or approved.
 
 ## API and concurrency
 
@@ -36,7 +47,7 @@ Admin question reads include an opaque `revision` derived from content, access, 
 - Full backend suite: **262 tests passing** locally, including transaction/revision checks and HTTP denials for the new command route.
 - Frontend TypeScript/build and changed-file ESLint are checked locally and in CI.
 - The frontend CI job installs a pinned, isolated Playwright browser tool under runner temporary storage, starts the production frontend locally, and runs `scripts/admin-workflow.browser.cjs` with intercepted identity/API fixtures.
-- Browser acceptance covers fresh acknowledgement per question, publish/next, cancel/confirm access changes, already-published state, pagination, topic-switch isolation, return-to-mock readiness, disabled premature publication and mobile width. Synthetic screenshots are retained as the `admin-workflow-ui` CI artifact for seven days. No external API, payment, OAuth provider or live database is contacted by that script.
+- Browser acceptance covers mock filters, sorting, pagination, CSV metadata export, action-menu links, preview, edit/duplicate forms, cancelled changes, confirmed tier changes, rejected publication and mobile cards. It also covers fresh acknowledgement per question, publish/next, cancel/confirm question access changes, already-published state, question pagination, topic-switch isolation, return-to-mock readiness and disabled premature publication. Synthetic desktop/mobile screenshots are retained as the `admin-workflow-ui` CI artifact for seven days. No external API, payment, OAuth provider or live database is contacted by that script.
 
 ## Staging acceptance after approval
 

@@ -2,8 +2,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
-import { ArrowRight, ChevronDown, ClipboardCheck, Eye, LoaderCircle, Pencil, ShieldCheck } from 'lucide-react';
+import { LoaderCircle } from 'lucide-react';
 import {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { admin, type AdminTest, type AdminTopic, type TestSection } from '@/lib/admin';
@@ -12,6 +11,7 @@ import { LiveCatalogue } from '@/components/admin/live-catalogue';
 import { PublicationChecklist } from '@/components/admin/publication-checklist';
 import { MockReview } from '@/components/admin/mock-review';
 import { MockReleaseReadiness } from '@/components/admin/mock-release-readiness';
+import { MockManager } from '@/components/admin/mock-manager';
 
 interface Draft {
   id: string;
@@ -32,14 +32,14 @@ const blank = (topic: string): Draft => ({
   sections: [{ name: '', parts: [{ topic, from: 0, to: 10 }] }], active: false,
 });
 
-const countOf = (t: AdminTest) => t.configuredQuestionCount ?? t.sections.reduce((n, s) => n + s.parts.reduce((m, p) => m + (p.to - p.from), 0), 0);
 const changed = () => window.dispatchEvent(new Event('exampro-catalogue-changed'));
 
 export function TestsTab({onEditQuestions,initialView='all',initialTestId=''}:{onEditQuestions?:(topic:string,testId?:string)=>void;initialView?:'all'|'live'|'hidden';initialTestId?:string}) {
   const [view,setView]=useState(initialView);
   const [checklistId,setChecklistId]=useState<string|null>(initialTestId||null);
-  const [search,setSearch]=useState(initialTestId);
-  const [category,setCategory]=useState('all');
+  const [loading,setLoading]=useState(true);
+  const [confirmation,setConfirmation]=useState<{test:AdminTest;change?:Partial<AdminTest>;remove?:boolean}|null>(null);
+  const mutationLock=useRef(false);
   const [busy,setBusy]=useState(false);
   const [bulk,setBulk]=useState<{id:string;name:string;ready:boolean;blocker:string|null}[]|null>(null);
   const [tests, setTests] = useState<AdminTest[]>([]);
@@ -55,10 +55,12 @@ export function TestsTab({onEditQuestions,initialView='all',initialTestId=''}:{o
   const [msg, setMsg] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
 
   const load = useCallback(async () => {
+    setLoading(true);
     const [t, p, status] = await Promise.all([admin<{ tests: AdminTest[] }>('/tests'), admin<{ topics: AdminTopic[] }>('/topics'), admin<{enabled:boolean}>('/draft-testing/status')]);
     setDraftTestingEnabled(status.ok && status.data.enabled);
     if (t.ok) setTests(t.data.tests); else setMsg({ kind: 'error', text: t.message });
     if (p.ok) setTopics(p.data.topics);
+    setLoading(false);
   }, []);
   useEffect(() => { void load(); }, [load]);
   const draftIdentity=draft?(editingId??'new'):null;
@@ -90,10 +92,6 @@ export function TestsTab({onEditQuestions,initialView='all',initialTestId=''}:{o
 
   const quick = async (t: AdminTest, change: Partial<AdminTest>) => {
     if(busy)return;
-    if (change.active === true && !t.active &&
-      !window.confirm('Publish "' + t.name + '" to learners? Source topics and every question must pass review.')) return;
-    if(change.active===false&&t.active&&!window.confirm('Unpublish this mock? It will disappear from the catalogue; existing saved attempts are preserved.'))return;
-    if (change.tier && !window.confirm(`Change "${t.name}" to ${change.tier==='free'?'Free':'Pro'}? Source question access and review checks still apply.`)) return;
     setBusy(true);setMsg(null);
     const r = await admin(`/tests/${t.id}`, 'PUT', { ...t, ...change });
     setBusy(false);
@@ -102,6 +100,7 @@ export function TestsTab({onEditQuestions,initialView='all',initialTestId=''}:{o
     else if(r.status===409)setChecklistId(t.id);
     await load();
   };
+  const askQuick=(t:AdminTest,change:Partial<AdminTest>)=>setConfirmation({test:t,change});
   const checkBulk=async()=>{
     setBusy(true);setMsg(null);
     const r=await admin<{candidates:{id:string;name:string;ready:boolean;blocker:string|null}[]}>('/tests/publication-candidates');
@@ -110,7 +109,8 @@ export function TestsTab({onEditQuestions,initialView='all',initialTestId=''}:{o
   };
   const publishReviewed=async()=>{
     const ready=bulk?.filter(t=>t.ready)??[];
-    if(!ready.length||!window.confirm(`Publish these ${ready.length} reviewed drafts?\n${ready.map(t=>t.name).join('\n')}`))return;
+    if(!ready.length||mutationLock.current)return;
+    mutationLock.current=true;
     setBusy(true);let published=0;const failed:string[]=[];
     for(const item of ready){
       const t=tests.find(t=>t.id===item.id);
@@ -118,14 +118,22 @@ export function TestsTab({onEditQuestions,initialView='all',initialTestId=''}:{o
       const r=await admin(`/tests/${t.id}`,'PUT',{...t,active:true});
       if(r.ok)published++;else failed.push(`${t.name}: ${r.message}`);
     }
-    setBusy(false);setBulk(null);changed();await load();
+    setBusy(false);setBulk(null);changed();await load();mutationLock.current=false;
     setMsg({kind:failed.length?'error':'ok',text:`${published} published. ${failed.length?failed.join('; '):'All selected drafts passed the server review gates.'}`});
   };
   const remove=async(t:AdminTest)=>{
-    if(!window.confirm(`Delete the draft definition "${t.name}"? Source questions are retained. Definitions with attempts or reserved shared paid questions cannot be deleted.`))return;
     setBusy(true);const r=await admin(`/tests/${t.id}`,'DELETE');setBusy(false);
     setMsg(r.ok?{kind:'ok',text:'Draft definition deleted; source questions retained.'}:{kind:'error',text:r.message});
     if(r.ok)changed();await load();
+  };
+  const confirmAction=async()=>{
+    if(!confirmation||mutationLock.current)return;
+    mutationLock.current=true;
+    try{
+      if(confirmation.remove)await remove(confirmation.test);
+      else if(confirmation.change)await quick(confirmation.test,confirmation.change);
+      setConfirmation(null);
+    }finally{mutationLock.current=false;}
   };
   const duplicate=(t:AdminTest)=>{
     setEditingId(null);setDraft({...t,id:'',name:`${t.name} (Copy)`.slice(0,120),active:false,
@@ -153,45 +161,18 @@ export function TestsTab({onEditQuestions,initialView='all',initialTestId=''}:{o
       <div role="group" aria-label="Admin mock views" className="flex flex-wrap gap-2">
         {([['all',`All mock definitions (${tests.length})`],['live','Live Catalogue'],['hidden',`Drafts / Hidden (${tests.filter(t=>!t.liveInCatalogue).length})`]] as const).map(([id,label])=><Button key={id} variant={view===id?'default':'outline'} aria-pressed={view===id} onClick={()=>setView(id)}>{label}</Button>)}
       </div>
-      {view==='live'?<LiveCatalogue definitions={tests} onEditQuestions={onEditQuestions}/>:<section className={card}>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-bold">Mocks &amp; Tests Manager</h2>
-          <div className="flex flex-wrap gap-2"><Button variant="outline" disabled={busy} onClick={()=>void checkBulk()}>Check ready drafts</Button><Button disabled={busy} onClick={() => { setEditingId(null); setDraft(blank(firstTopic)); }}>+ Create New Mock Test</Button></div>
-        </div>
-        <p className="mt-2 text-sm text-muted-foreground">Review questions, check source topics, then publish the complete mock. Draft testing stays private.</p>
-        <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">Publishing is separate from Test Draft: the backend blocks it until all referenced topics and question positions are active. Complete independent editorial and accessibility review before activating topics.</p>
-        {draftTestingEnabled && <p className="mt-2 rounded-lg border border-amber-400 p-3 text-xs" role="status">Staging draft exam QA is enabled for verified admins. Use <strong>Test Draft</strong> to start a private, server-timed exam without publishing topics or tests. Draft question counts are configured ranges; use Preview to verify active question rows.</p>}
-        <div className="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_200px]"><input className={input} aria-label="Search mock tests" placeholder="Search test name or ID…" value={search} onChange={e=>setSearch(e.target.value)}/><select className={input} aria-label="Filter mock test category" value={category} onChange={e=>setCategory(e.target.value)}><option value="all">All categories</option>{[...new Set(tests.map(t=>t.exam))].sort().map(exam=><option key={exam}>{exam}</option>)}</select></div>
-        {bulk&&<div className="mt-4 space-y-3 rounded-xl border bg-muted/30 p-4"><h3 className="font-bold">Review publication candidates</h3><p className="text-sm">{bulk.filter(t=>t.ready).length} ready of {bulk.length} drafts. Each will be checked again when published.</p><ul className="max-h-60 space-y-2 overflow-y-auto text-xs">{bulk.map(t=><li key={t.id}><strong>{t.name}</strong> · {t.ready?'Ready':t.blocker}</li>)}</ul><div className="flex flex-wrap gap-2"><Button disabled={busy||!bulk.some(t=>t.ready)} onClick={()=>void publishReviewed()}>{busy?'Publishing…':'Publish reviewed candidates'}</Button><Button variant="outline" disabled={busy} onClick={()=>setBulk(null)}>Cancel</Button></div></div>}
-        <div className="mt-5 overflow-x-auto rounded-xl border">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/50"><tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground"><th className="p-3">Test Name &amp; Exam</th><th className="p-3">Questions / Mins</th><th className="p-3">Current Tier</th><th className="p-3">Publish Status</th><th className="p-3">Sectional Timer</th><th className="p-3">Actions</th></tr></thead>
-            <tbody>
-              {tests.filter(t=>(view!=='hidden'||!t.liveInCatalogue)&&(category==='all'||t.exam===category)&&`${t.name} ${t.id}`.toLowerCase().includes(search.toLowerCase())).map((t) => (
-                <tr key={t.id} className="border-t align-top hover:bg-muted/20">
-                  <td className="min-w-52 p-3"><p className="font-semibold">{t.name}</p><span className="mt-1 block text-xs text-muted-foreground">{t.exam} · {t.id}</span>{t.hiddenReason&&<p className="mt-2 max-w-xs text-xs text-amber-700 dark:text-amber-300">{t.hiddenReason}</p>}</td>
-                  <td className="p-3 text-xs tabular-nums"><p className="whitespace-nowrap">{countOf(t)} Qs · {t.minutes} mins</p><p className="mt-1 text-muted-foreground">{t.questionCount??0} accessible</p></td>
-                  <td className="p-3"><button type="button" disabled={busy} className={`min-h-10 whitespace-nowrap rounded-full px-3 text-xs font-bold disabled:opacity-50 ${t.tier==='free'?'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200':'bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200'}`} onClick={() => void quick(t, { tier: t.tier === 'free' ? 'premium' : 'free' })} aria-label={`Change access for ${t.name}`}>{t.tier === 'free' ? '● Free' : '★ PRO'}</button></td>
-                  <td className="min-w-44 p-3"><span className={`inline-block whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold ${t.active&&t.liveInCatalogue?'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200':'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200'}`}>{t.active?(t.liveInCatalogue?'Published · Live':'Active · Hidden'):'Draft · Hidden'}</span><div className="mt-2"><Button type="button" size="sm" variant={t.active?'outline':'default'} disabled={busy} className="min-h-11" onClick={()=>void quick(t,{active:!t.active})}>{busy?<LoaderCircle className="h-4 w-4 animate-spin"/>:t.active?null:<ArrowRight className="h-4 w-4"/>}{t.active?'Unpublish mock':'Publish mock'}</Button></div></td>
-                  <td className="p-3"><span className="inline-block whitespace-nowrap rounded-lg bg-muted px-2 py-1.5 text-xs">{t.sectionTimingMinutes?`${t.sectionTimingMinutes}m Section Locks`:'Standard / pending validation'}</span></td>
-                  <td className="min-w-64 p-3"><div className="flex max-w-sm flex-wrap gap-2">
-                    <Button type="button" variant="outline" size="sm" className="min-h-11" disabled={busy} onClick={()=>setChecklistId(t.id)}><ClipboardCheck/>Check readiness</Button>
-                    <Button type="button" variant="outline" size="sm" className="min-h-11" disabled={busy} onClick={()=>onEditQuestions?.(t.sections[0]?.parts[0]?.topic??'',t.id)}><ShieldCheck/>Review questions</Button>
-                    {!t.active&&draftTestingEnabled&&<Button variant="outline" size="sm" className="min-h-11" asChild><Link href={`/admin/draft-test/${encodeURIComponent(t.id)}`}>Test draft</Link></Button>}
-                    <Button type="button" variant="ghost" size="sm" className="min-h-11" disabled={busy} onClick={()=>void showPreview(t)}><Eye/>Preview</Button>
-                    <Button type="button" variant="ghost" size="sm" className="min-h-11" disabled={busy} onClick={()=>edit(t)}><Pencil/>Edit mock</Button>
-                    <details className="relative"><summary className="flex min-h-11 cursor-pointer items-center gap-1 rounded-lg border px-3 text-xs font-semibold">More<ChevronDown className="h-3.5 w-3.5"/></summary><div className="absolute right-0 z-10 mt-2 grid min-w-52 gap-1 rounded-xl border bg-popover p-2 shadow-lg">{countOf(t)===100&&/ssc/i.test(t.exam)&&/cgl/i.test(t.name)&&<><Button variant="ghost" size="sm" onClick={()=>{setReadinessId(t.id);setReviewId(null);}}>SSC release report</Button><Button variant="ghost" size="sm" onClick={()=>{setReviewId(t.id);setReadinessId(null);}}>Academic / Hindi review</Button></>}<Button variant="ghost" size="sm" disabled={busy} onClick={()=>duplicate(t)}>Duplicate definition</Button><Button variant="ghost" size="sm" disabled={busy||t.active} className="text-red-700 dark:text-red-300" onClick={()=>void remove(t)}>Delete unused draft</Button></div></details>
-                  </div></td>
-                </tr>
-              ))}
-              {tests.length>0&&!tests.some(t=>(view!=='hidden'||!t.liveInCatalogue)&&(category==='all'||t.exam===category)&&`${t.name} ${t.id}`.toLowerCase().includes(search.toLowerCase()))&&<tr><td colSpan={6} className="p-5 text-muted-foreground">No tests match this search.</td></tr>}
-              {tests.length === 0 && <tr><td colSpan={6} className="p-5 text-muted-foreground">No mock tests loaded. Create a draft, or check any API error above.</td></tr>}
-            </tbody>
-          </table>
-        </div>
-      </section>}
+      {view==='live'?<LiveCatalogue definitions={tests} onEditQuestions={onEditQuestions}/>:<MockManager
+        tests={tests} hiddenOnly={view==='hidden'} busy={busy} loading={loading} draftTestingEnabled={draftTestingEnabled} initialSearch={initialTestId}
+        onCreate={()=>{setEditingId(null);setDraft(blank(firstTopic));}} onRefresh={()=>void load()} onCheckDrafts={()=>void checkBulk()}
+        onReadiness={t=>setChecklistId(t.id)} onQuestions={onEditQuestions?t=>onEditQuestions(t.sections[0]?.parts[0]?.topic??'',t.id):undefined}
+        onPreview={t=>void showPreview(t)} onEdit={edit} onTier={t=>askQuick(t,{tier:t.tier==='free'?'premium':'free'})}
+        onPublish={t=>askQuick(t,{active:!t.active})} onDuplicate={duplicate} onDelete={t=>setConfirmation({test:t,remove:true})}
+        onRelease={t=>{setReadinessId(t.id);setReviewId(null);}} onAcademic={t=>{setReviewId(t.id);setReadinessId(null);}}
+      />}
+      {bulk&&<Dialog open onOpenChange={open=>{if(!open&&!busy)setBulk(null);}}><DialogContent showCloseButton={!busy} className="max-h-[90dvh] overflow-y-auto rounded-3xl p-6 sm:max-w-2xl"><DialogHeader><DialogTitle>Review publication candidates</DialogTitle><DialogDescription>{bulk.filter(t=>t.ready).length} ready of {bulk.length} drafts. Publication does not perform human review. Only the ready definitions listed below will be submitted; the server checks each one again.</DialogDescription></DialogHeader><ul className="max-h-80 space-y-3 overflow-y-auto text-sm">{bulk.map(t=><li key={t.id} className="rounded-xl border p-3"><strong>{t.name}</strong><p className={`mt-1 text-xs ${t.ready?'text-emerald-700 dark:text-emerald-300':'text-muted-foreground'}`}>{t.ready?'Ready to publish':t.blocker||'Not ready'}</p></li>)}</ul><div className="flex flex-wrap justify-end gap-2"><Button variant="outline" disabled={busy} onClick={()=>setBulk(null)}>Cancel</Button><Button disabled={busy||!bulk.some(t=>t.ready)} onClick={()=>void publishReviewed()}>{busy?'Publishing…':'Publish reviewed candidates'}</Button></div></DialogContent></Dialog>}
+      {confirmation&&<Dialog open onOpenChange={open=>{if(!open&&!busy)setConfirmation(null);}}><DialogContent showCloseButton={!busy} className="rounded-3xl p-6 sm:max-w-lg"><DialogHeader><DialogTitle>{confirmation.remove?'Delete unused draft?':confirmation.change?.tier?'Change mock access?':confirmation.change?.active?'Publish this mock?':'Unpublish this mock?'}</DialogTitle><DialogDescription>{confirmation.test.name}</DialogDescription></DialogHeader><div className="rounded-xl border bg-muted/30 p-4 text-sm leading-relaxed">{confirmation.remove?'This removes the mock definition only. Source questions and existing attempts are retained. The server blocks deletion if the definition has attempts, is active or reserves shared paid questions.':confirmation.change?.tier?`The mock will use ${confirmation.change.tier==='free'?'Free':'Pro'} access. Source question access and review status are unchanged. Inaccessible or unreviewed source questions can keep this mock hidden.`:confirmation.change?.active?'The server will check all source topics, question positions, recorded reviews and required editorial sign-offs. Learners can see the mock only after all publication checks pass.':'This removes the mock from the learner catalogue. Source questions and saved attempts are preserved.'}</div><div className="flex flex-wrap justify-end gap-2"><Button variant="outline" disabled={busy} onClick={()=>setConfirmation(null)}>Cancel</Button><Button variant={confirmation.remove?'destructive':'default'} disabled={busy} onClick={()=>void confirmAction()}>{busy?<><LoaderCircle className="animate-spin"/>Saving…</>:confirmation.remove?'Delete draft':confirmation.change?.tier?'Confirm access change':confirmation.change?.active?'Confirm publication':'Unpublish mock'}</Button></div></DialogContent></Dialog>}
 
-      {checklistId&&<Dialog open onOpenChange={open=>{if(!open&&!busy)setChecklistId(null);}}><DialogContent showCloseButton={!busy} className="max-h-[90dvh] overflow-y-auto rounded-3xl p-1 sm:max-w-5xl"><DialogTitle className="sr-only">Mock publishing readiness</DialogTitle><DialogDescription className="sr-only">Review source questions and topic readiness before publishing.</DialogDescription><PublicationChecklist key={checklistId} testId={checklistId} onClose={()=>setChecklistId(null)} onEditQuestions={onEditQuestions} busy={busy} actionError={msg?.kind==='error'?msg.text:''} onPublish={id=>{const t=tests.find(t=>t.id===id);if(t)void quick(t,{active:true});}}/></DialogContent></Dialog>}
+      {checklistId&&<Dialog open onOpenChange={open=>{if(!open&&!busy)setChecklistId(null);}}><DialogContent showCloseButton={!busy} className="max-h-[90dvh] overflow-y-auto rounded-3xl p-1 sm:max-w-5xl"><DialogTitle className="sr-only">Mock publishing readiness</DialogTitle><DialogDescription className="sr-only">Review source questions and topic readiness before publishing.</DialogDescription><PublicationChecklist key={checklistId} testId={checklistId} onClose={()=>setChecklistId(null)} onEditQuestions={onEditQuestions} busy={busy} actionError={msg?.kind==='error'?msg.text:''} onPublish={id=>{const t=tests.find(t=>t.id===id);if(t)askQuick(t,{active:true});}}/></DialogContent></Dialog>}
       <div ref={secondaryPanel} className="scroll-mt-24"/>
       {readinessId && <MockReleaseReadiness key={readinessId} testId={readinessId} onClose={()=>setReadinessId(null)} />}
       {reviewId && <MockReview key={reviewId} testId={reviewId} onClose={()=>setReviewId(null)} />}
