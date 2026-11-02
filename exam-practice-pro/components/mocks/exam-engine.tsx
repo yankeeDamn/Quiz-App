@@ -532,7 +532,7 @@ function ResultView({
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8">
       <p className="text-sm font-semibold text-blue-700 dark:text-blue-400">{practice ? 'Practice summary' : 'Result'}</p>
-      <h1 className="mt-1 text-2xl font-bold">{test.name}</h1>
+      <h1 className="mt-1 text-2xl font-bold">{test.name}</h1><ContentReviewBadge underReview={test.underReview !== false}/>
       {test.id!=='custom-comp-practice' && <div className="mt-3"><ShareTestButtons testId={test.id} title={test.name} compact/></div>}
 
       <div className="mt-5 grid gap-4 rounded-xl border bg-card p-6 sm:grid-cols-[auto_1fr] sm:items-center">
