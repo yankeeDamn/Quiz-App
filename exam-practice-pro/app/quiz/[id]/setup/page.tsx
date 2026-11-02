@@ -1,5 +1,6 @@
 'use client';
 
+import { ContentReviewBadge } from '@/components/shared/content-review';
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -124,6 +125,7 @@ export default function QuizSetupPage({ params }: PageProps) {
             >
               <Card className="sticky top-24">
                 <CardHeader className="pb-4">
+                  <ContentReviewBadge/>
                   <div className="flex items-center gap-3 mb-2">
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400">
                       <GraduationCap className="h-6 w-6" />

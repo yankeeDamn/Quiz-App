@@ -185,6 +185,7 @@ export function StartLearningHub() {
               </div>
             </div>
             <div className="flex flex-1 flex-col p-6">
+              <ContentReviewBadge/>
               <div className="flex flex-wrap gap-2 text-[11px] font-semibold text-indigo-700 dark:text-indigo-300">
                 <span>{book.level}</span>
                 {book.examBadgeCode && (
