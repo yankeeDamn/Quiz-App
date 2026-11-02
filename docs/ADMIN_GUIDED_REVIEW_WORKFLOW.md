@@ -44,7 +44,7 @@ Admin question reads include an opaque `revision` derived from content, access, 
 
 ## Verification
 
-- Full backend suite: **262 tests passing** locally, including transaction/revision checks and HTTP denials for the new command route.
+- Full backend suite: **261 tests passing** locally (the former source-string confirmation check is now covered by browser interaction), including transaction/revision checks and HTTP denials for the new command route.
 - Frontend TypeScript/build and changed-file ESLint are checked locally and in CI.
 - The frontend CI job installs a pinned, isolated Playwright browser tool under runner temporary storage, starts the production frontend locally, and runs `scripts/admin-workflow.browser.cjs` with intercepted identity/API fixtures.
 - Browser acceptance covers mock filters, sorting, pagination, CSV metadata export, action-menu links, preview, edit/duplicate forms, cancelled changes, confirmed tier changes, rejected publication and mobile cards. It also covers fresh acknowledgement per question, publish/next, cancel/confirm question access changes, already-published state, question pagination, topic-switch isolation, return-to-mock readiness and disabled premature publication. Synthetic desktop/mobile screenshots are retained as the `admin-workflow-ui` CI artifact for seven days. No external API, payment, OAuth provider or live database is contacted by that script.

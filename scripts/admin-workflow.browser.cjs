@@ -149,6 +149,8 @@ async function intercept(route){
   await manager.getByRole('button',{name:'Check ready drafts',exact:true}).click();
   assert.equal(await page.getByRole('dialog').getByRole('button',{name:'Publish reviewed candidates',exact:true}).isDisabled(),true);
   await page.getByRole('dialog').getByRole('button',{name:'Cancel',exact:true}).click();
+  await manager.getByRole('button',{name:'Refresh',exact:true}).click();
+  await manager.getByText('13 of 13 definitions',{exact:true}).waitFor();
   await manager.scrollIntoViewIfNeeded();await page.screenshot({path:path.join(output,'mock-manager-desktop.png'),fullPage:true});
   await manager.getByRole('button',{name:'More actions for Synthetic Bank Mock',exact:true}).click();
   await page.screenshot({path:path.join(output,'mock-actions-menu.png'),fullPage:true});

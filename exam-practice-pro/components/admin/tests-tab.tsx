@@ -142,7 +142,10 @@ export function TestsTab({onEditQuestions,initialView='all',initialTestId=''}:{o
   };
 
   const showPreview = async(t:AdminTest)=>{
+    if(busy)return;
+    setBusy(true);
     const r=await admin<{name:string;minutes:number;questionCount:number;questions:{id:string;question:string}[]}>(`/tests/${t.id}/preview`);
+    setBusy(false);
     if(r.ok)setPreview(r.data);else setMsg({kind:'error',text:r.message});
   };
 
@@ -163,7 +166,7 @@ export function TestsTab({onEditQuestions,initialView='all',initialTestId=''}:{o
       </div>
       {view==='live'?<LiveCatalogue definitions={tests} onEditQuestions={onEditQuestions}/>:<MockManager
         tests={tests} hiddenOnly={view==='hidden'} busy={busy} loading={loading} draftTestingEnabled={draftTestingEnabled} initialSearch={initialTestId}
-        onCreate={()=>{setEditingId(null);setDraft(blank(firstTopic));}} onRefresh={()=>void load()} onCheckDrafts={()=>void checkBulk()}
+        onCreate={()=>{setEditingId(null);setDraft(blank(firstTopic));}} onRefresh={()=>{setMsg(null);void load();}} onCheckDrafts={()=>void checkBulk()}
         onReadiness={t=>setChecklistId(t.id)} onQuestions={onEditQuestions?t=>onEditQuestions(t.sections[0]?.parts[0]?.topic??'',t.id):undefined}
         onPreview={t=>void showPreview(t)} onEdit={edit} onTier={t=>askQuick(t,{tier:t.tier==='free'?'premium':'free'})}
         onPublish={t=>askQuick(t,{active:!t.active})} onDuplicate={duplicate} onDelete={t=>setConfirmation({test:t,remove:true})}

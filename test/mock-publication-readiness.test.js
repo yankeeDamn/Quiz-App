@@ -111,9 +111,5 @@ test('admin publish route invokes publication readiness instead of draft preview
  assert.doesNotMatch(update,/await content\.previewTest/);
 });
 
-test('admin UI requires explicit confirmation before publishing',()=>{
- const src=fs.readFileSync(path.resolve(__dirname,'../exam-practice-pro/components/admin/tests-tab.tsx'),'utf8');
- assert.match(src,/window\.confirm\('Publish this mock/);
- assert.match(src,/window\.confirm\('Publish "'/);
- assert.match(src,/Test Draft/);
-});
+// Mock publication confirmation is exercised in scripts/admin-workflow.browser.cjs:
+// cancelling performs no request, and confirmation still handles server review rejection.
