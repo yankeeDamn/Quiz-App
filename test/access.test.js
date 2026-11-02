@@ -16,6 +16,8 @@ const app = require('../src/app');
 // Exercise real HTTP/auth middleware against nonsensitive server-side fixtures.
 const mocks=require('../src/services/mocks.service');
 const bank=mocks.fromJson(require('./fixtures/content').starter());
+// This route fixture represents already-reviewed published content.
+bank.topics.forEach(t=>t.questions.forEach(q=>{q.reviewedAt='2026-01-01T00:00:00Z';}));
 // Separate free and paid ranges for this route test; overlap isolation is tested separately.
 bank.mocks=bank.mocks.filter(m=>m.id==='ssc1'||m.id==='ssc2');
 bank.mocks[1].sections=[{name:'Paid fixture',parts:[{topic:'computer',from:0,to:2}]}];

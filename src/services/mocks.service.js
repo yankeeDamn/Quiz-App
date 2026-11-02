@@ -3,6 +3,7 @@
 const config = require('../config');
 const db = require('../config/database');
 const jsonBank = require('../data/public-practice-sample.json');
+const isPaidTier = tier => tier === 'premium' || tier === 'pro';
 
 /** Protected content has no bundled fallback. Offline mode has synthetic public practice only. */
 function fromJson(source = jsonBank) {
@@ -83,9 +84,9 @@ function allDefinitions(bank) {
 // A paid definition may share a topic/range with free practice. Paid takes precedence.
 function publicQuestion(bank, topic, question, tier) {
   if (question.reviewStatus !== 'published') return false;
-  if (tier === 'premium') return true;
+  if (isPaidTier(tier)) return true;
   if (question.accessTier !== 'free') return false;
-  return !bank.mocks.some(m=>m.tier==='premium' && m.sections.some(s=>s.parts.some(p=>
+  return !bank.mocks.some(m=>isPaidTier(m.tier) && m.sections.some(s=>s.parts.some(p=>
     p.topic===topic.id && question.position>=p.from && question.position<p.to)));
 }
 function partQuestions(bank, part, tier) {
@@ -107,16 +108,31 @@ function summarise(bank, def) {
     name: def.name,
     exam: def.exam,
     kind: def.kind,
-    tier: def.tier,
+    tier: isPaidTier(def.tier) ? 'premium' : 'free',
+    isPro: isPaidTier(def.tier),
     level: def.level,
     minutes: def.minutes,
+    durationMinutes: def.minutes,
     questionCount: questionCount(bank, def),
     marksPerCorrect: def.marksPerCorrect,
     negativeMarks: def.negativeMarks,
     passPercent: def.passPercent ?? 50,
     sections: def.sections.map((s) => s.name),
     underReview: def.sections.some(s=>s.parts.some(p=>partQuestions(bank,p,def.tier).some(({q})=>!q.reviewedAt))),
+    previewQuestionCount: isPaidTier(def.tier) ? Math.min(5, questionCount(bank, def)) : 0,
+    sectionTimingMinutes: require('./ssc-section-timing').eligible(buildTimingShape(bank, def)) ? 15 : null,
   };
+}
+
+// The timing policy needs question IDs and section ranges, never answer keys.
+function buildTimingShape(bank, def) {
+  const questions = [];
+  const sections = def.sections.map((s, section) => {
+    const from = questions.length;
+    s.parts.forEach(p => partQuestions(bank,p,def.tier).forEach(({topic,q}) => questions.push({id:`${topic.id}:${q.position}`,section})));
+    return {name:s.name,from,to:questions.length};
+  });
+  return {...def,questions,sections};
 }
 
 /** Full test with questions, correct answers and explanations. */
@@ -147,7 +163,10 @@ function build(bank, def, { privatePreview = false } = {}) {
 function completeDefinition(bank, def) {
   if(def.kind==='topic')return questionCount(bank,def)>0;
   const expected=def.sections.reduce((n,s)=>n+s.parts.reduce((sum,p)=>sum+p.to-p.from,0),0);
-  return expected>0 && questionCount(bank,def)===expected;
+  const selected = def.sections.flatMap(s=>s.parts.flatMap(p=>partQuestions(bank,p,def.tier)));
+  return expected>0 && selected.length===expected &&
+    new Set(selected.map(({topic,q})=>`${topic.id}:${q.position}`)).size===expected &&
+    (!isPaidTier(def.tier) || selected.every(({q})=>q.reviewedAt));
 }
 function listFromBank(bank) {
   return allDefinitions(bank)
@@ -169,7 +188,14 @@ async function findMock(id) {
   if (!def || !completeDefinition(bank,def)) return null;
   const summary = summarise(bank, def);
   if (summary.questionCount === 0) return null;
-  return { summary, tier: def.tier, build: () => build(bank, def) };
+  return { summary, tier: summary.tier, build: () => build(bank, def) };
 }
 
-module.exports = { loadBank, invalidate, listMocks, findMock, listFromBank, build, allDefinitions, fromJson, publicQuestion, fromDatabase };
+/** A fixed, bounded public sample; no offset, section or count is client-controlled. */
+async function previewMock(id) {
+  const found = await findMock(id);
+  if (!found || !isPaidTier(found.tier) || found.summary.underReview) return null;
+  return {summary:found.summary, questions:found.build().questions.slice(0,5)};
+}
+
+module.exports = { loadBank, invalidate, listMocks, findMock, listFromBank, build, allDefinitions, fromJson, publicQuestion, fromDatabase, isPaidTier, previewMock };

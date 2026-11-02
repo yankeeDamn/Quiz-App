@@ -1,6 +1,7 @@
 'use client';
 import {useState} from 'react';
 import {admin} from '@/lib/admin';
+import {card} from './ui';
 type Feedback={id:string;category:string;severity:string;comment:string;status:string;created_at:string};
 type Event={action:string;created_at:string;invitation_id:string|null;actor_email:string|null};
 type Signoff={draft:boolean;academic:{approved:number;required:number};hindi:{verified:number;required:number};beta:{feedbackCount:number;openHighSeverity:number;auditEvents:number};releaseAuthorized:boolean;publicationBlocker:string|null};
@@ -21,7 +22,7 @@ export function BetaFeedbackDashboard(){
   const r=await admin('/beta/feedback/'+encodeURIComponent(id)+'/status','PUT',{status});
   if(r.ok)await refresh();else setError(r.message);
  };
- return <section className="space-y-3 rounded-xl border p-5" aria-label="Mock 01 beta release signoff">
+ return <section className={`${card} space-y-4`} aria-label="Mock 01 beta release signoff">
   <div className="flex items-center justify-between gap-2"><h2 className="text-lg font-bold">Beta feedback &amp; release sign-off</h2><button className="rounded border px-3 py-2 text-sm" onClick={()=>void refresh()} disabled={loading}>Load / refresh</button></div>
   <p className="text-xs text-muted-foreground">Staging only. No publish or approval action is available here.</p>
   {error&&<p role="alert">{error}</p>}

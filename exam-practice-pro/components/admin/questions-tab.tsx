@@ -10,16 +10,17 @@ import { CsvImport } from '@/components/admin/csv-import';
 const EMPTY: QuestionInput = { question: '', options: ['', '', '', ''], answer: 0, explanation: '', difficulty:'Moderate' };
 const BULK_HINT = 'question | option A | option B | option C | option D | right answer (A-D) | explanation';
 
-export function QuestionsTab() {
+export function QuestionsTab({initialTopic=''}:{initialTopic?:string}) {
   const [topics, setTopics] = useState<AdminTopic[]>([]);
   const [topicsLoaded, setTopicsLoaded] = useState(false);
-  const [topic, setTopic] = useState('');
+  const [topic, setTopic] = useState(initialTopic);
   const [questions, setQuestions] = useState<AdminQuestion[]>([]);
   const [msg, setMsg] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
   const [draft, setDraft] = useState<QuestionInput>(EMPTY);
   const [bulk, setBulk] = useState('');
   const [newTopic, setNewTopic] = useState({ id: '', name: '', category: '', active: false });
+  const [search,setSearch]=useState('');
   const [showInactive, setShowInactive] = useState(false);
   const [topicDetails,setTopicDetails] = useState({name:'',category:''});
 
@@ -112,7 +113,7 @@ export function QuestionsTab() {
   };
 
   const current = topics.find((t) => t.id === topic);
-  const shown = questions.filter((q) => showInactive || q.active);
+  const shown = questions.filter((q) => (showInactive || q.active) && `${q.question} ${q.explanation}`.toLowerCase().includes(search.toLowerCase()));
 
   return (
     <div className="grid gap-6">
@@ -203,6 +204,7 @@ export function QuestionsTab() {
       <section className={card}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-bold">Questions in this topic</h2>
+          <input className={`${input} max-w-md`} aria-label="Search questions in selected topic" placeholder="Search questions in this topic…" value={search} onChange={e=>setSearch(e.target.value)}/>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} /> Show retired</label>
         </div>
         <p className="mt-1 text-xs text-muted-foreground">Retiring hides a question from learners but keeps the numbering, so mock tests that use ranges do not shift.</p>

@@ -40,7 +40,7 @@ export function QuizCard({ quiz }: QuizCardProps) {
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 transition-opacity group-hover:opacity-100" />
 
         <CardHeader className="relative pb-2">
-          <ContentReviewBadge/>
+          <div className="flex flex-wrap items-center gap-2"><Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">Free Practice</Badge><ContentReviewBadge/></div>
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400">

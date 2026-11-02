@@ -35,7 +35,8 @@ function checkTest(input, topicIds) {
   const name = str(input && input.name);
   const exam = str(input && input.exam);
   const level = str(input && input.level) || 'Moderate';
-  const tier = str(input && input.tier) || 'free';
+  const rawTier = str(input && input.tier) || 'free';
+  const tier = rawTier === 'pro' ? 'premium' : rawTier;
   const minutes = Number(input && input.minutes);
   const marks = Number(input && input.marksPerCorrect);
   const negative = Number(input && input.negativeMarks);
@@ -343,7 +344,16 @@ class ContentService {
       active: r.active,
     }));
     const bank = await mocks.loadBank();
-    return result.map(t => ({...t, questionCount:mocks.build(bank,{...t,kind:'mock'}).questions.length}));
+    const catalogue = new Map(mocks.listFromBank(bank).map(t=>[t.id,t]));
+    return result.map(t => {
+      const questionCount = mocks.build(bank,{...t,kind:'mock'}).questions.length;
+      const configuredQuestionCount = t.sections.reduce((n,s)=>n+s.parts.reduce((v,p)=>v+p.to-p.from,0),0);
+      const live = catalogue.get(t.id);
+      return {...t, questionCount, configuredQuestionCount, liveInCatalogue:!!live,
+        sectionTimingMinutes:live?.sectionTimingMinutes || null,
+        hiddenReason:live ? null : !t.active ? 'Draft — publish after review.' :
+          `Hidden: ${questionCount}/${configuredQuestionCount} accessible questions. Check active topics, question review, access tiers and duplicate ranges.`};
+    });
   }
 
   async topicIds() {
@@ -375,6 +385,28 @@ class ContentService {
     );
     mocks.invalidate();
     return r.rowCount > 0;
+  }
+
+  async deleteDraftTest(id) {
+    const client = await db.getClient();
+    try {
+      await client.query('BEGIN');
+      const {rows} = await client.query('SELECT id, active, tier, sections FROM mock_tests WHERE id=$1 FOR UPDATE',[id]);
+      if (!rows.length) { await client.query('ROLLBACK'); return {ok:false,error:'Test not found',status:404}; }
+      const t = rows[0];
+      if (t.active) { await client.query('ROLLBACK'); return {ok:false,error:'Unpublish the test before deleting its definition.',status:409}; }
+      const attempts = await client.query('SELECT 1 FROM exam_attempts_v2 WHERE test_id = ANY($1::text[]) LIMIT 1',[[id,'draft-'+id]]);
+      if (attempts.rowCount) { await client.query('ROLLBACK'); return {ok:false,error:'This test has attempts. Keep its definition as a draft to preserve history.',status:409}; }
+      if (mocks.isPaidTier(t.tier)) {
+        const parts = t.sections.flatMap(s=>s.parts);
+        const q = await client.query("SELECT topic_id, position FROM mock_questions WHERE topic_id = ANY($1::text[]) AND access_tier='free'",[[...new Set(parts.map(p=>p.topic))]]);
+        if(q.rows.some(q=>parts.some(p=>p.topic===q.topic_id&&q.position>=p.from&&q.position<p.to))) {
+          await client.query('ROLLBACK'); return {ok:false,error:'This Pro definition reserves shared free-tier questions. Keep it hidden, or review and mark its source questions Pro before deleting.',status:409};
+        }
+      }
+      await client.query('DELETE FROM mock_tests WHERE id=$1',[id]);
+      await client.query('COMMIT'); mocks.invalidate(); return {ok:true};
+    } catch(e) { await client.query('ROLLBACK'); throw e; } finally { client.release(); }
   }
 
   // ── Plans ────────────────────────────────────────────

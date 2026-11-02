@@ -22,6 +22,7 @@ export function buildSeparatePractice(id:string):MockTest|null {
 export function separateSummaries():MockSummary[]{
  return EXAM_PRACTICE_PACKS.map(x=>{
   const t=buildSeparatePractice(x.id)!;
-  return {...t,sections:t.sections.map(s=>s.name)};
+  return {id:t.id,name:t.name,exam:t.exam,kind:t.kind,tier:t.tier,level:t.level,minutes:t.minutes,questionCount:t.questionCount,
+    marksPerCorrect:t.marksPerCorrect,negativeMarks:t.negativeMarks,underReview:t.underReview,sections:t.sections.map(s=>s.name)};
  });
 }

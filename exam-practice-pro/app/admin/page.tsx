@@ -4,10 +4,13 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-import { ArrowUpRight, BookOpen, BriefcaseBusiness, ChevronRight, CreditCard, FileQuestion, GraduationCap, LayoutDashboard, LoaderCircle, ShieldCheck } from 'lucide-react';
+import { ArrowUpRight, BriefcaseBusiness, ChevronRight, CreditCard, FileQuestion, GraduationCap, LoaderCircle, ShieldCheck } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
+import { CommandMetrics } from '@/components/admin/command-metrics';
+import { QaTab } from '@/components/admin/qa-tab';
+import { CashfreeSandboxAudit } from '@/components/admin/cashfree-sandbox-audit';
 import { AdminOverview } from '@/components/admin/overview';
 import { PlansTab } from '@/components/admin/plans-tab';
 import { QuestionsTab } from '@/components/admin/questions-tab';
@@ -16,11 +19,11 @@ import { PracticeLibraryTab } from '@/components/admin/practice-library-tab';
 import { admin, type AdminSection } from '@/lib/admin';
 
 const SECTIONS = [
-  { id: 'overview', label: 'Overview', icon: LayoutDashboard, description: 'Your content, publishing queue and service status at a glance.' },
-  { id: 'questions', label: 'Question bank', icon: FileQuestion, description: 'Create topics, import questions and refine explanations.' },
-  { id: 'tests', label: 'Mock tests', icon: GraduationCap, description: 'Build exams, review questions and manage publication.' },
-  { id: 'practice', label: 'Practice library', icon: BookOpen, description: 'Manage free quizzes and IT certification practice.' },
-  { id: 'plans', label: 'Plans & payments', icon: CreditCard, description: 'Review access, payment records and Pro plan grants.' },
+  { id: 'tests', label: 'Mocks & Tests Manager', icon: GraduationCap, description: 'Review, publish and manage Free and Pro mock tests.' },
+  { id: 'questions', label: 'Question Bank', icon: FileQuestion, description: 'Search topics, import questions and maintain the practice library.' },
+  { id: 'plans', label: 'User Plans & Manual Grants', icon: CreditCard, description: 'Review access and manage independently verified plan grants.' },
+  { id: 'payments', label: 'Cashfree Payment Audit', icon: CreditCard, description: 'Inspect sandbox orders and verified webhook activity.' },
+  { id: 'qa', label: 'Beta Learners & QA', icon: ShieldCheck, description: 'Staging invitations, feedback and release readiness.' },
 ] as const;
 
 type Gate = { state: 'loading' } | { state: 'signin' } | { state: 'denied' } | { state: 'error'; message: string } | { state: 'ok' };
@@ -28,10 +31,11 @@ type Gate = { state: 'loading' } | { state: 'signin' } | { state: 'denied' } | {
 export default function AdminPage() {
   const { data: session, status } = useSession();
   const [gate, setGate] = useState<Gate>({ state: 'loading' });
-  const [section, setSection] = useState<AdminSection>('overview');
+  const [section, setSection] = useState<AdminSection>('tests');
+  const [questionTopic,setQuestionTopic]=useState('');
   const [attempt, setAttempt] = useState(0);
   const heading = useRef<HTMLHeadingElement>(null);
-  const selected = SECTIONS.find((item) => item.id === section)!;
+  const selected = SECTIONS.find((item) => item.id === (section==='practice'?'questions':section)) ?? {label:'Overview', description:'Your content, publishing queue and service status at a glance.'};
   const account = session?.user?.email;
   const [authorizedAccount, setAuthorizedAccount] = useState<string | null>(null);
 
@@ -74,11 +78,11 @@ export default function AdminPage() {
           <div className="mx-auto grid w-full max-w-[1600px] min-w-0 lg:grid-cols-[240px_minmax(0,1fr)]">
             <aside className="min-w-0 border-b bg-card lg:border-b-0 lg:border-r">
               <div className="space-y-6 px-4 py-6 lg:sticky lg:top-20 lg:px-5 lg:py-8">
-                <div className="hidden px-3 lg:block"><p className="text-xs font-bold uppercase tracking-[0.18em] text-indigo-600 dark:text-indigo-300">ExamPro</p><p className="mt-1 text-lg font-bold tracking-tight">Admin workspace</p></div>
+                <div className="hidden px-3 lg:block"><p className="text-xs font-bold uppercase tracking-[0.18em] text-indigo-600 dark:text-indigo-300">ExamPro</p><p className="mt-1 text-lg font-bold tracking-tight">Command center</p></div>
                 <nav aria-label="Admin sections" className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible">
-                  {SECTIONS.map((item) => <button key={item.id} type="button" aria-current={section === item.id ? 'page' : undefined} aria-controls="admin-section" onClick={() => navigate(item.id)} className={`flex min-h-11 shrink-0 items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 ${section === item.id ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/20' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}><item.icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />{item.label}</button>)}
+                  {SECTIONS.map((item) => <button key={item.id} type="button" aria-current={(section === item.id || (section==='practice'&&item.id==='questions')) ? 'page' : undefined} aria-controls="admin-section" onClick={() => navigate(item.id)} className={`flex min-h-11 shrink-0 items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 ${(section === item.id || (section==='practice'&&item.id==='questions')) ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/20' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}><item.icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />{item.label}</button>)}
                 </nav>
-                <div className="hidden space-y-3 border-t px-3 pt-5 lg:block"><p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Quick links</p><Link href="/" className="flex min-h-10 items-center justify-between text-sm text-muted-foreground hover:text-indigo-600">View student site <ArrowUpRight className="h-4 w-4" /></Link><Link href="/government-jobs" className="flex min-h-10 items-center justify-between text-sm text-muted-foreground hover:text-indigo-600">Government jobs <BriefcaseBusiness className="h-4 w-4" /></Link></div>
+                <div className="hidden space-y-3 border-t px-3 pt-5 lg:block"><p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Quick links</p><button type="button" className="min-h-10 text-sm font-semibold text-indigo-600" onClick={()=>navigate('overview')}>Workspace overview</button><Link href="/certifications?tab=start-learning" className="flex min-h-10 items-center text-sm text-muted-foreground">Manage ebooks</Link><Link href="/" className="flex min-h-10 items-center justify-between text-sm text-muted-foreground hover:text-indigo-600">View student site <ArrowUpRight className="h-4 w-4" /></Link><Link href="/government-jobs" className="flex min-h-10 items-center justify-between text-sm text-muted-foreground hover:text-indigo-600">Government jobs <BriefcaseBusiness className="h-4 w-4" /></Link></div>
                 <div className="hidden rounded-2xl border bg-muted/30 p-4 lg:block"><ShieldCheck className="h-5 w-5 text-emerald-600" /><p className="mt-2 text-xs font-semibold">Verified administrator</p><p className="mt-1 break-all text-xs text-muted-foreground">{account}</p></div>
               </div>
             </aside>
@@ -87,11 +91,11 @@ export default function AdminPage() {
                 <div className="min-w-0"><p className="mb-3 flex items-center gap-2 text-xs font-medium text-muted-foreground">Workspace <ChevronRight className="h-3 w-3" /> {selected.label}</p><h1 ref={heading} tabIndex={-1} className="text-3xl font-bold tracking-tight focus:outline-none">{selected.label}</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{selected.description}</p></div>
                 <Button variant="outline" className="min-h-11 rounded-xl bg-card" asChild><Link href="/exampro">Open exam hall <ArrowUpRight /></Link></Button>
               </div>
-              <section id="admin-section" aria-label={selected.label} className="min-w-0">
+              <CommandMetrics onNavigate={navigate}/><section id="admin-section" aria-label={selected.label} className="min-w-0">
                 {section === 'overview' && <AdminOverview onNavigate={navigate} />}
-                {section === 'questions' && <QuestionsTab />}
-                {section === 'tests' && <TestsTab />}
-                {section === 'practice' && <PracticeLibraryTab />}
+                {(section === 'questions'||section === 'practice') && <div className="space-y-5"><div className="flex flex-wrap gap-2"><Button variant={section==='questions'?'default':'outline'} onClick={()=>navigate('questions')}>Database question bank</Button><Button variant={section==='practice'?'default':'outline'} onClick={()=>navigate('practice')}>Practice & IT library</Button></div>{section==='questions'?<QuestionsTab initialTopic={questionTopic}/>:<PracticeLibraryTab/>}</div>}
+                {section === 'tests' && <TestsTab onEditQuestions={topic=>{setQuestionTopic(topic);navigate('questions');}} />}
+                {section === 'payments' && <CashfreeSandboxAudit/>}{section === 'qa' && <QaTab/>}
                 {section === 'plans' && <PlansTab />}
               </section>
             </div>
