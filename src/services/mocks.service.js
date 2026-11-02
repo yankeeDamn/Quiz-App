@@ -8,7 +8,7 @@ const jsonBank = require('../data/public-practice-sample.json');
 function fromJson(source = jsonBank) {
   return {
     topics: source.topics.map(t => ({...t, questions:t.questions.map((q,position)=>({
-      position, reviewStatus:'published', accessTier:'free', reviewedAt:null, ...q,
+      position, reviewStatus:'draft', accessTier:'premium', reviewedAt:null, ...q,
     }))})),
     mocks: source.mocks.map(m => ({...m, active:m.active !== false})),
   };

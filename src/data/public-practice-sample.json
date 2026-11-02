@@ -14,7 +14,9 @@
             "three"
           ],
           "answer": 1,
-          "explanation": "This synthetic example selects the option labelled one."
+          "explanation": "This synthetic example selects the option labelled one.",
+          "reviewStatus": "published",
+          "accessTier": "free"
         }
       ]
     }

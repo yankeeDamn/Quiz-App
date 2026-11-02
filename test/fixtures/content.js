@@ -9,7 +9,7 @@ const question = (id, index = 0) => ({
 });
 function starter() {
   return {topics:structure.topics.map(({count,...t})=>({...t,
-    questions:Array.from({length:count},(_,i)=>{const q=question(t.id+'-'+i,i);return {q:q.question,options:q.options,answer:q.answer,explanation:q.explanation};}),
+    questions:Array.from({length:count},(_,i)=>{const q=question(t.id+'-'+i,i);return {q:q.question,options:q.options,answer:q.answer,explanation:q.explanation,reviewStatus:'published',accessTier:'free'};}),
   })),mocks:structuredClone(structure.mocks)};
 }
 function competitive() {

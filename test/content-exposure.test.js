@@ -109,3 +109,11 @@ test('review badges and report links have all three locales and contain the ques
  assert.match(links,/question ID \$\{questionId\}/);
  assert.doesNotMatch(links,/question\.question|question\.options|question\.answer/);
 });
+
+
+test('unmarked JSON input is draft by default, never automatically published',()=>{
+ const q=question('default-review');
+ const bank=mocks.fromJson({topics:[{id:'new',name:'New draft',category:'Demo',questions:[{q:q.question,options:q.options,answer:q.answer,explanation:q.explanation}]}],mocks:[]});
+ assert.equal(bank.topics[0].questions[0].reviewStatus,'draft');
+ assert.deepEqual(mocks.listFromBank(bank),[]);
+});
