@@ -80,7 +80,6 @@ Every detected answer-bearing path is listed below, including source-code fixtur
 | `test/ssc-content-pipeline.test.js` | 3 | Yes | Synthetic validation/security fixtures; no paid entitlement. Retain only nonsensitive examples. |
 | `exam-practice-pro/data/india-exams.ts` | 1 | No | Historical answer-key/compact-array candidate; inspect/remove with corresponding private draft source. |
 | `src/data/exam-catalog.js` | 1 | No | Historical answer-key/compact-array candidate; inspect/remove with corresponding private draft source. |
-
 | `content/ssc-cgl-2026/mock-01/quality-review.json` | 1 | Yes | See current inventory; duplicate private draft key or nonsensitive public example. |
 | `content/ssc-cgl-2026/mock-01/QUALITY_AUDIT.md` | Manual inspection | Yes | See current inventory; duplicate private draft key or nonsensitive public example. |
 | `exam-practice-pro/app/exampro/page.tsx` | Manual inspection | Yes | See current inventory; duplicate private draft key or nonsensitive public example. |
@@ -109,7 +108,9 @@ Use **database-only delivery** for paid/unpublished content and optional `PRIVAT
 ```bash
 git clone --mirror git@github.com:yankeeDamn/Quiz-App.git Quiz-App-clean.git
 cd Quiz-App-clean.git
-git filter-repo --invert-paths \
+# This historical inline-runner blob also embedded the starter bank.
+printf '%s\n' '3ee318facd0c5507bfc2d39842c7244cd1934e24' > ../exampro-protected-blobs.txt
+git filter-repo --strip-blobs-with-ids ../exampro-protected-blobs.txt --invert-paths \
   --path src/data/mock-bank.json \
   --path src/data/competitive-questions-500.json \
   --path content/ssc-cgl-2026-mock-02.questions.json \
@@ -128,7 +129,7 @@ git remote add origin git@github.com:yankeeDamn/Quiz-App.git
 git push --force --mirror origin
 ```
 
-Historical inline runner `exam-practice-pro/app/india-mocks/[id]/page.tsx` also contained keys. Removing that whole path would remove useful route history; extract the historical blob identified by the audit and use an audited `git filter-repo --blob-callback` or `--replace-text` rule to remove its literal bank while preserving the route. Do not guess a broad regex against executable source. Check all advertised feature branches and tags, not only main. Ask GitHub Support about cached PR refs and cached views where applicable.
+The blob list removes the known historical inline-runner bank in `exam-practice-pro/app/india-mocks/[id]/page.tsx` while leaving newer safe route versions. Inspect every rewritten branch: stripping a blob can remove that file in commits that still used the exposed version. Add any further exposed blob IDs found during owner review; do not guess a broad replacement regex against executable source. Check all advertised feature branches and tags, not only main. Ask GitHub Support about cached PR refs and cached views where applicable.
 
 **Already-cloned copies, forks, caches and downloaded bundles keep old content even after a rewrite.** Collaborators must reclone; do not merge old branches back. History cleanup is hygiene, not restored secrecy. No force-push, repository visibility change, production migration or merge was performed for this audit.
 
@@ -142,3 +143,5 @@ Historical inline runner `exam-practice-pro/app/india-mocks/[id]/page.tsx` also 
 - Existing intentionally public free learning banks stay available as practice with EN/Hindi/Bangla under-review badges. Ebook result wording says learning practice completion rather than claiming verified certification readiness. WhatsApp reports include stable question IDs; the application does not send question text automatically through these report links.
 
 Validation: root tests and production frontend build are run without DSNs. A disposable PostgreSQL CI test covers preserving rows, excluding shared paid/draft/retired content, default-draft imports and applying the migration twice. Staging remains unchanged until this PR is reviewed, merged and deployed by the owner; a local/PR preview can demonstrate the badge first.
+
+Final verification evidence: 233 root tests pass on Node 18/20/22 in CI after the WebCrypto compatibility fix. The disposable PostgreSQL job passed both full migrations twice and the isolated existing-data backfill test. The production Next.js build passed without DSNs. Browser QA of the local production build confirmed all three badge translations and a “Report a mistake” link with ID `AZ900-001` and no question text in that report URL. Vercel's PR preview built successfully but requires Vercel sign-in; no sign-in or staging mutation was performed. The retained public homepage/certification/separate/ebook banks have no exact normalized-stem overlaps with the historic paid starter ranges (this check is not a semantic duplicate or originality review).
