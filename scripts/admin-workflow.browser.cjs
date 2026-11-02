@@ -82,6 +82,7 @@ async function intercept(route){
   await context.route('**/*',intercept);
   const page=await context.newPage();page.on('pageerror',e=>browserErrors.push(e.message));
   await page.goto(origin+'/admin');
+  assert.equal(await page.getByRole('link',{name:'Chat on WhatsApp',exact:true}).count(),0,'floating support must not obscure admin actions');
   const manager=page.getByRole('region',{name:'Mock definitions manager',exact:true});
   await manager.getByText('13 of 13 definitions',{exact:true}).waitFor();
   assert.equal(await manager.getByRole('button',{name:'Next mock page',exact:true}).isDisabled(),false);
@@ -157,12 +158,15 @@ async function intercept(route){
   await manager.getByText('13 of 13 definitions',{exact:true}).waitFor();
   await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:path.join(output,'mock-manager-desktop.png'),fullPage:true});
   await manager.getByRole('button',{name:'More actions for Synthetic Bank Mock',exact:true}).click();
+  await page.getByRole('menuitem',{name:'Edit mock settings',exact:true}).waitFor();
   await page.screenshot({path:path.join(output,'mock-actions-menu.png'),fullPage:false});
   await page.keyboard.press('Escape');
   await page.setViewportSize({width:390,height:844});await page.evaluate(()=>document.documentElement.classList.add('dark'));
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),true,'mock manager must fit mobile width');
   await page.evaluate(()=>window.scrollTo(0,0));
   await page.screenshot({path:path.join(output,'mock-manager-mobile-dark.png'),fullPage:true});
+  await manager.getByRole('article',{name:'Mock Synthetic Bank Mock',exact:true}).scrollIntoViewIfNeeded();
+  await page.screenshot({path:path.join(output,'mock-manager-mobile-actions.png'),fullPage:false});
   await page.setViewportSize({width:1440,height:1100});await page.evaluate(()=>document.documentElement.classList.remove('dark'));
   await page.getByRole('button',{name:'Live Catalogue',exact:true}).click();
   const catalogue=page.getByRole('region',{name:'Live learner catalogue',exact:true});
@@ -215,6 +219,8 @@ async function intercept(route){
   await page.evaluate(()=>{document.documentElement.classList.add('dark');});
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),true,'question workspace must fit mobile width');
   await page.screenshot({path:path.join(output,'question-workspace-mobile-dark.png'),fullPage:true});
+  await page.goto(origin+'/contact');
+  await page.getByRole('link',{name:'Chat on WhatsApp',exact:true}).waitFor();
   assert.deepEqual(browserErrors,[],'No unhandled browser errors');
   console.log('Admin UI acceptance passed: mock filters, sorting, pagination, CSV export, action menu, preview, editing/duplication/cancel, tier confirmation, blocked publication, mobile cards; acknowledgement reset, review/publish, access cancel/confirm, pagination, topic isolation, mock return, publication guard and mobile width.');
  }catch(error){
