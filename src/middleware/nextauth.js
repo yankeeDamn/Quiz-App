@@ -1,5 +1,9 @@
 'use strict';
 
+// jose uses WebCrypto. Node 18 exposes it through node:crypto but not
+// consistently as a global; preserve the native global on newer runtimes.
+if (!globalThis.crypto) globalThis.crypto = require('node:crypto').webcrypto;
+
 const config = require('../config');
 const logger = require('../utils/logger');
 const db = require('../config/database');
