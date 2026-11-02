@@ -1,5 +1,6 @@
 'use client';
 
+import { ReportMistake } from '@/components/shared/content-review';
 import { useState, useEffect, useMemo, useCallback, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -270,7 +271,7 @@ export default function FlashcardsPage({ params }: PageProps) {
                                   Explanation
                                 </p>
                                 <p className="text-sm text-indigo-800 dark:text-indigo-200">
-                                  {currentCard.explanation}
+                                  {currentCard.explanation}<ReportMistake questionId={currentCard.id}/>
                                 </p>
                               </div>
                             </div>

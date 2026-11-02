@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect -- initialize account-scoped browser storage and refresh externally loaded data */
 "use client";
+import { ContentReviewBadge } from '@/components/shared/content-review';
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -101,6 +102,7 @@ export function StartLearningHub() {
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-300">
             Read. Build. Put it to the test.
           </p>
+          <ContentReviewBadge/>
           <h2 className="mt-2 text-3xl font-bold tracking-tight">
             Your next skill starts here.
           </h2>

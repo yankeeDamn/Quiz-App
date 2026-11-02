@@ -84,7 +84,7 @@ class ContentService {
     const { rows } = await db.query(
       `SELECT t.id, t.name, t.category, t.active,
               COUNT(q.id)::int AS total,
-              COUNT(q.id) FILTER (WHERE q.active)::int AS live
+              COUNT(q.id) FILTER (WHERE q.active AND q.review_status='published')::int AS live
          FROM mock_topics t LEFT JOIN mock_questions q ON q.topic_id = t.id
         GROUP BY t.id ORDER BY t.created_at, t.id`
     );
@@ -123,7 +123,7 @@ class ContentService {
   // ── Questions ────────────────────────────────────────
   async listQuestions(topicId) {
     const { rows } = await db.query(
-      `SELECT id, position, question, options, answer, explanation, difficulty, active
+      `SELECT id, position, question, options, answer, explanation, difficulty, active, review_status, reviewed_at, access_tier
          FROM mock_questions WHERE topic_id = $1 ORDER BY position`,
       [topicId]
     );
@@ -153,12 +153,24 @@ class ContentService {
 
   async updateQuestion(id, v) {
     const r = await db.query(
-      `UPDATE mock_questions SET question = $2, options = $3, answer = $4, explanation = $5, difficulty = $6, updated_at = NOW()
+      `UPDATE mock_questions SET question = $2, options = $3, answer = $4, explanation = $5, difficulty = $6, review_status = 'draft', reviewed_at = NULL, reviewed_by = NULL, updated_at = NOW()
         WHERE id = $1`,
       [id, v.question, JSON.stringify(v.options), v.answer, v.explanation, v.difficulty]
     );
     mocks.invalidate();
     return r.rowCount > 0;
+  }
+
+  async reviewQuestion(id, status, tier, actor) {
+    if(!['draft','reviewed','published'].includes(status) || !TIERS.includes(tier))
+      return fail('Choose draft, reviewed or published and free or premium.');
+    const r=await db.query(`UPDATE mock_questions SET review_status=$2, access_tier=$3,
+      reviewed_at=CASE WHEN $2='reviewed' THEN NOW() WHEN $2='draft' THEN NULL ELSE reviewed_at END,
+      reviewed_by=CASE WHEN $2='reviewed' THEN $4 WHEN $2='draft' THEN NULL ELSE reviewed_by END,
+      updated_at=NOW() WHERE id=$1 AND ($2!='published' OR (review_status IN ('reviewed','published') AND reviewed_at IS NOT NULL))`,
+      [id,status,tier,actor]);
+    mocks.invalidate();
+    return r.rowCount ? {ok:true} : fail('Review the current question before publishing.');
   }
 
   async setQuestionActive(id, active) {
@@ -177,7 +189,7 @@ class ContentService {
     const topicIds = [...new Set(definition.sections.flatMap(s=>s.parts.map(p=>p.topic)))];
     const [topics, questions] = await Promise.all([
       db.query('SELECT id, name, category FROM mock_topics WHERE id = ANY($1::text[])', [topicIds]),
-      db.query(`SELECT topic_id, position, question, options, answer, explanation
+      db.query(`SELECT topic_id, position, question, options, answer, explanation, review_status, reviewed_at, access_tier
          FROM mock_questions WHERE topic_id = ANY($1::text[]) AND active
          ORDER BY topic_id, position`, [topicIds]),
     ]);
@@ -187,7 +199,7 @@ class ContentService {
       if(t)t.questions.push({position:q.position,q:q.question,options:q.options,answer:q.answer,explanation:q.explanation});
     }
     const bank={topics:[...byTopic.values()],mocks:[]};
-    const built=mocks.build(bank,{...definition,kind:'mock'});
+    const built=mocks.build(bank,{...definition,kind:'mock'},{privatePreview:true});
     return {id:definition.id,name:definition.name,questionCount:built.questions.length,minutes:definition.minutes,
       questionIds:built.questions.map(q=>q.id),questions:built.questions.map(q=>({id:q.id,question:q.question,topic:q.topic}))};
   }
@@ -218,7 +230,7 @@ class ContentService {
     const ids = [...new Set(definition.sections.flatMap(s => s.parts.map(p => p.topic)))];
     const [topicRows, questionRows] = await Promise.all([
       db.query('SELECT id, name, category, active FROM mock_topics WHERE id = ANY($1::text[])', [ids]),
-      db.query(`SELECT topic_id, position, question, options, answer, explanation
+      db.query(`SELECT topic_id, position, question, options, answer, explanation, review_status, reviewed_at, access_tier
          FROM mock_questions WHERE topic_id = ANY($1::text[]) AND active
          ORDER BY topic_id, position`, [ids]),
     ]);
@@ -235,7 +247,7 @@ class ContentService {
     }
     const bank = { topics: [...byTopic.values()], mocks: [] };
     const expected = definition.sections.reduce((n,s) => n + s.parts.reduce((v,p) => v + p.to-p.from,0),0);
-    const test = mocks.build(bank,definition);
+    const test = mocks.build(bank,definition,{privatePreview:true});
     if (!expected || test.questions.length !== expected ||
         new Set(test.questions.map(q=>q.id)).size !== expected) {
       throw Object.assign(new Error('Draft contains missing or duplicate questions.'), { statusCode: 409 });
@@ -264,7 +276,7 @@ class ContentService {
     const topicIds = [...new Set(parts.map(p => p.topic))];
     const [topics, questions] = await Promise.all([
       db.query('SELECT id, name, category, active FROM mock_topics WHERE id = ANY($1::text[])', [topicIds]),
-      db.query(`SELECT topic_id, position, question, options, answer, explanation
+      db.query(`SELECT topic_id, position, question, options, answer, explanation, review_status, reviewed_at, access_tier
          FROM mock_questions WHERE topic_id = ANY($1::text[]) AND active ORDER BY topic_id, position`, [topicIds]),
     ]);
     if (topics.rows.length !== topicIds.length) {
@@ -273,6 +285,11 @@ class ContentService {
     if (topics.rows.some(t => !t.active)) {
       return fail('Publication blocked: all referenced topics must be reviewed and activated first. Use Test Draft for private QA.');
     }
+    const referenced=questions.rows.filter(q=>parts.some(p=>p.topic===q.topic_id && q.position>=p.from && q.position<p.to));
+    if(referenced.some(q=>q.review_status!=='published' || !q.reviewed_at))
+      return fail('Publication blocked: every question must be reviewed and published first.');
+    if(definition.tier==='free' && referenced.some(q=>q.access_tier!=='free'))
+      return fail('Publication blocked: a free test cannot include Pro-only questions.');
     const byTopic = new Map(topics.rows.map(t => [t.id, {...t, questions: []}]));
     for (const q of questions.rows) {
       byTopic.get(q.topic_id)?.questions.push({
@@ -292,7 +309,7 @@ class ContentService {
       return fail(`Publication blocked: ${available} of ${expected} configured active questions are available. Restore or replace missing positions before publishing.`);
     }
     const bank = {topics: [...byTopic.values()], mocks: []};
-    const built = mocks.build(bank, {...definition, kind: 'mock'});
+    const built = mocks.build(bank, {...definition, kind: 'mock'}, {privatePreview:true});
     if (built.questions.length !== expected || new Set(built.questions.map(q => q.id)).size !== expected) {
       return fail('Publication blocked: duplicate or missing question IDs.');
     }

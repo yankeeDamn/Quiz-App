@@ -1,3 +1,5 @@
+> Source CSV moved out of the public repository. Use `$PRIVATE_CONTENT_DIR/content/it-certifications/starter-questions.csv` from your access-controlled authoring source. The schema and validation workflow below still apply.
+
 # IT certification question bank — v1
 
 This folder contains **24 newly authored, introductory practice questions** in `starter-questions.csv`: eight each for AZ-900, AWS-CLF-C02 and CompTIA A+. They are **not official questions, exam dumps, or vendor-endorsed content**. All entries are marked `needs_review`; have a qualified reviewer verify technical accuracy and alignment to the **current** official exam objectives before publishing.

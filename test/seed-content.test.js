@@ -2,10 +2,10 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const bank = require('../src/data/mock-bank.json');
+const bank = require('./fixtures/content').starter();
 const { seedStarterContent } = require('../src/db/seed-content');
 
-test('official starter bank has 10 topics, 120 unique questions and 11 mocks', () => {
+test('synthetic starter fixture has 10 topics, 120 unique questions and 11 mocks', () => {
   assert.equal(bank.topics.length, 10);
   assert.equal(bank.topics.reduce((sum, topic) => sum + topic.questions.length, 0), 120);
   assert.equal(bank.mocks.length, 11);
@@ -18,14 +18,14 @@ test('re-running seed remains conflict-safe, repairs missing starter rows and pr
     queries.push({ sql, args });
     return { rows: [], rowCount: 1 };
   } };
-  const result = await seedStarterContent(client);
+  const result = await seedStarterContent(client, bank);
   assert.deepEqual(result, { topics: 10, questions: 120, mocks: 11 });
   assert.equal(queries.length, 10 + 120 + 11);
   assert.ok(queries.every(q => /ON CONFLICT/.test(q.sql)), 'All inserts must be idempotent');
   assert.ok(queries.every(q => !/DO UPDATE|DELETE|TRUNCATE/i.test(q.sql)), 'Never overwrite owner edits');
   assert.equal(queries.filter(q => q.sql.includes('INTO mock_questions')).length, 120);
   queries.length = 0;
-  await seedStarterContent(client);
+  await seedStarterContent(client, bank);
   assert.equal(queries.length, 141, 'Repeat runs also check all starter rows');
 });
 

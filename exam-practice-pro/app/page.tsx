@@ -1,5 +1,6 @@
 'use client';
 
+import { ContentReviewBadge } from '@/components/shared/content-review';
 import { useState, useMemo, useEffect } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Reveal } from '@/components/motion/reveal';
@@ -242,8 +243,9 @@ export default function HomePage() {
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="ep-eyebrow">INDIA EXAM PRACTICE</p>
+              <ContentReviewBadge/>
               <h2 id="india-mocks-heading" className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">Prepare for India&apos;s top exams</h2>
-              <p className="mt-2 text-muted-foreground">Full mocks with sections, timers and negative marking, plus short topic tests.</p>
+              <p className="mt-2 text-muted-foreground">Timed tests and short practice sets with sections, timers and answer explanations.</p>
             </div>
             <Link href="/india-mocks" className="font-semibold text-blue-700 hover:underline dark:text-blue-400">See all tests →</Link>
           </div>

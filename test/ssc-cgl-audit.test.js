@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const mocks = require('../src/services/mocks.service');
 const {auditBank}=require('../scripts/audit-ssc-cgl');
 test('does not misrepresent starter SSC mock papers as ten full mocks',()=>{
- const report=auditBank(mocks.fromJson());
+ const report=auditBank(mocks.fromJson(require('./fixtures/content').starter()));
  assert.equal(report.target,10);
  assert.equal(report.passes,false);
  assert.ok(report.ready<10);
@@ -16,7 +16,7 @@ test('an empty bank never claims successful mock readiness',()=>{
  assert.equal(report.totalCglCandidates,0);
 });
 test('live 33-question SSC CGL papers are labeled mini mocks, not official-pattern full papers',()=>{
- const bank=mocks.fromJson();
+ const bank=mocks.fromJson(require('./fixtures/content').starter());
  const names=Object.fromEntries(bank.mocks.filter(m=>['ssc1','ssc2'].includes(m.id)).map(m=>[m.id,m.name]));
  assert.match(names.ssc1,/mini mock/i);
  assert.match(names.ssc2,/mini mock/i);

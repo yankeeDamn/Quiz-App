@@ -1,12 +1,13 @@
 'use strict';
 const test=require('node:test');
 const assert=require('node:assert/strict');
-const {validate,csvFor,normalized}=require('../scripts/ssc-cgl-mock-01');
+const {csvFor,normalized}=require('../scripts/ssc-cgl-mock-01');
+const {validateMock01:validate}=require('./fixtures/content');
 const {inspect}=require('../src/services/question-import');
 const {grade,cleanResponses,visibleAttempt}=require('../src/services/exam-grade');
 const {eligible}=require('../src/services/ssc-section-timing');
 
-test('Mock 01 contains exactly 100 unique original draft stems and canonical admin CSV files',()=>{
+test('Mock 01 contains exactly 100 unique synthetic draft stems and canonical admin CSV files',()=>{
  const report=validate();
  assert.deepEqual(report.errors,[]);
  assert.equal(report.questionCount,100);
@@ -94,10 +95,10 @@ test('CSV export escapes punctuation and retains exact eight admin column header
 });
 
 
-test('all 100 individually reviewed answer texts still agree with the keyed CSV and JSON files',()=>{
+test('all 100 synthetic answer texts agree with the keyed CSV and JSON files',()=>{
  const fs=require('node:fs');
  const path=require('node:path');
- const base=path.resolve(__dirname,'../content/ssc-cgl-2026/mock-01');
+ const base=require('./fixtures/content').mock01Root();
  const audit=JSON.parse(fs.readFileSync(path.join(base,'quality-review.json'),'utf8'));
  assert.equal(audit.publicationApproved,false,'QA must not silently approve publication');
  assert.equal(audit.records.length,100);

@@ -90,3 +90,15 @@ test('expired attempt discards late answers, grading persisted progress only',as
  assert.equal(final.result.skipped,1);
  assert.equal(final.result.score,2);
 });
+
+
+test('recovery, autosave and resume keep all answer keys hidden until submission',async()=>{
+ row=null;await exams.start(alice,'fixture');
+ for(const view of [await exams.get(alice.id,id),await exams.save(alice.id,id,{'topic:0':1},false),await exams.start(alice,'fixture')]){
+  assert.equal(view.result,null);
+  assert.doesNotMatch(JSON.stringify(view),/"(?:answer|correctAnswer|explanation)"/);
+ }
+ const submitted=await exams.save(alice.id,id,{'topic:0':1},true);
+ assert.equal(submitted.result.review[0].correctAnswer,1);
+ assert.equal(submitted.result.review[0].explanation,'B is correct');
+});

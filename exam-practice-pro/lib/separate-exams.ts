@@ -15,7 +15,7 @@ export function buildSeparatePractice(id:string):MockTest|null {
   id:spec.id+':'+index,topic:spec.id,topicName:spec.name,section:0,
   question:row.question,options:row.options,answer:row.answer,explanation:row.explanation,
  }));
- return {id:spec.id,name:spec.name,exam:spec.exam,kind:'topic',tier:'free',level:'Practice',minutes:20,
+ return {id:spec.id,name:spec.name,exam:spec.exam,kind:'topic',underReview:true,tier:'free',level:'Practice',minutes:20,
   questionCount:questions.length,marksPerCorrect:1,negativeMarks:0,
   sections:[{name:spec.name,from:0,to:questions.length}],questions};
 }

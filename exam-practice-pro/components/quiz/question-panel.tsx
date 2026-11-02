@@ -6,6 +6,7 @@ import { AnswerOptions } from './answer-options';
 import { QuestionActions } from './question-actions';
 import { getDifficultyColor, getQuestionTypeLabel } from '@/lib/quiz-utils';
 import Image from 'next/image';
+import { ContentReviewBadge, ReportMistake } from '@/components/shared/content-review';
 
 interface QuestionPanelProps {
   question: Question;
@@ -32,6 +33,7 @@ export function QuestionPanel({
 }: QuestionPanelProps) {
   return (
     <div className="space-y-6">
+      <ContentReviewBadge/>
       {/* Question Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -81,6 +83,7 @@ export function QuestionPanel({
       </div>
 
       {/* Answer Options */}
+      {showFeedback && <ReportMistake questionId={question.id}/>}
       <AnswerOptions
         question={question}
         selectedAnswers={selectedAnswers}

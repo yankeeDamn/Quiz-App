@@ -1,9 +1,9 @@
 'use strict';
 const test=require('node:test');
 const assert=require('node:assert/strict');
-const bank=require('../content/ssc-cgl-2026-mock-02.questions.json');
-const existingStarter=require('../src/data/mock-bank.json');
-const existingCompetitive=require('../src/data/competitive-questions-500.json');
+const bank=require('./fixtures/content').mock02();
+const existingStarter=require('./fixtures/content').starter();
+const existingCompetitive=require('./fixtures/content').competitive();
 const pipeline=require('../src/services/ssc-content-pipeline.service');
 const contentService=require('../src/services/content.service');
 const {eligible}=require('../src/services/ssc-section-timing');
@@ -12,7 +12,7 @@ const existing=[
  ...existingStarter.topics.flatMap(t=>t.questions.map(q=>q.q||q.question)),
  ...existingCompetitive.questions.map(q=>q.q||q.question),
 ];
-test('Mock 02 is exactly four SSC sections of 25 original candidate questions',()=>{
+test('Mock 02 is exactly four SSC sections of 25 synthetic candidate questions',()=>{
  assert.deepEqual(Object.keys(bank),sections);
  assert.equal(sections.reduce((sum,s)=>sum+bank[s].length,0),100);
  assert.ok(sections.every(s=>bank[s].length===25));

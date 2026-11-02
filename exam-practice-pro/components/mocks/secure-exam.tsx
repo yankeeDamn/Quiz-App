@@ -1,5 +1,6 @@
 'use client';
 
+import { ContentReviewBadge, ReportMistake } from '@/components/shared/content-review';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { trackAttempt } from '@/lib/track';
@@ -14,7 +15,7 @@ type Review = {id:string;question:string;options:string[];selected:number;correc
 type Attempt = {
  newlyCreated?:boolean;id:string;testId:string;title:string;startedAt:string;deadlineAt:string;submittedAt:string|null;
  responses:Record<string,number>;
- test:{id:string;name:string;minutes:number;marksPerCorrect:number;negativeMarks:number;passPercent:number;questions:Question[];sections:{name:string;from:number;to:number}[];sectionTimingMinutes?:number|null};
+ test:{underReview?:boolean;id:string;name:string;minutes:number;marksPerCorrect:number;negativeMarks:number;passPercent:number;questions:Question[];sections:{name:string;from:number;to:number}[];sectionTimingMinutes?:number|null};
  result:null|{score:number;total:number;percentage:number;passed:boolean;correct:number;incorrect:number;skipped:number;review:Review[]}
 };
 
@@ -29,7 +30,7 @@ function TranslatedReview({q,index}:{q:Review;index:number}) {
   return <article className="rounded-lg border p-4">
     <h3 className="font-semibold">{index+1}. {question}</h3>
     <p className="mt-2 text-sm">Your choice: {q.selected===-1?'Skipped':options[q.selected]} · Correct: {options[q.correctAnswer]}</p>
-    <p className="mt-2 text-sm text-muted-foreground">{explanation}</p>
+    <p className="mt-2 text-sm text-muted-foreground">{explanation}</p><ReportMistake questionId={q.id}/>
     {language!=='en'&&<button type="button" onClick={()=>setExpanded(v=>!v)}
       className="mt-3 text-sm font-semibold text-indigo-700 underline dark:text-indigo-300">
       {expanded?'Show original English':'Translate this review'}
@@ -181,7 +182,7 @@ export function SecureExam({testId,draftMode=false,betaMode=false}:{testId:strin
    <a href="#exam-question" className="sr-only focus:not-sr-only focus:inline-block focus:rounded focus:bg-background focus:p-2 focus:underline">Skip to current question</a>
    <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announcement}</p>
    <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border bg-card p-4">
-     <div>{(draftMode||betaMode)&&<p className="text-xs font-bold uppercase tracking-wider text-amber-700">Private staging QA · unpublished draft</p>}<h1 className="text-xl font-bold">{attempt.title}</h1><p className="text-sm text-muted-foreground" aria-live="polite" aria-atomic="true">{Object.keys(responses).length}/{questions.length} answered · {saved?t('save'):t('saving')}</p>
+     <div>{(draftMode||betaMode)&&<p className="text-xs font-bold uppercase tracking-wider text-amber-700">Private staging QA · unpublished draft</p>}<h1 className="text-xl font-bold">{attempt.title}</h1><ContentReviewBadge underReview={attempt.test.underReview !== false}/><p className="text-sm text-muted-foreground" aria-live="polite" aria-atomic="true">{Object.keys(responses).length}/{questions.length} answered · {saved?t('save'):t('saving')}</p>
       {sectionMinutes!==null&&activeSection!==null&&<p className="mt-1 text-sm font-semibold text-indigo-700 dark:text-indigo-300">Section {Math.min(activeSection+1,4)} / 4 · {sectionMinutes} min per section · earlier sections locked</p>}</div>
      <div className="flex flex-wrap items-center gap-2">
       <LanguageSwitcher small/>{!draftMode&&<ShareTestButtons testId={testId} title={attempt.title} compact/>}

@@ -21,10 +21,8 @@ test('historic HTML no longer advertises fake institute domain or demo-only capt
     assert.equal(original.includes(phrase), false, phrase);
   }
   assert.match(original, /id="livePortalLink"/);
-  assert.match(original, /var publicPortalURL=/);
-  assert.match(original, /\/exampro\?institute=/);
-  assert.match(original, /'&brand='/);
-  assert.match(original, /encodeURIComponent\(JSON\.stringify\(/);
+  assert.match(original, /https:\/\/exampro-staging-ui\.vercel\.app\/exampro/);
+  assert.doesNotMatch(original, /var TOPICS=|var BANK=|correctAnswers|correct_option/);
 });
 
 test('live ExamPro editor uses real public branded link, not a fictitious tenant URL', () => {

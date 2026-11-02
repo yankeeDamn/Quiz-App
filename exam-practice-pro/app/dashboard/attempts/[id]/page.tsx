@@ -1,4 +1,5 @@
 'use client';
+import { ReportMistake } from '@/components/shared/content-review';
 import {useEffect,useState} from 'react';
 import {useParams} from 'next/navigation';
 import Link from 'next/link';
@@ -17,6 +18,6 @@ export default function ReviewPage(){
  {item&&!item.submittedAt&&<section className="rounded-xl border p-5"><h1 className="text-xl font-bold">Exam still in progress</h1><p>Your existing answers can be recovered on the exam page, subject to the server deadline.</p><Link className="mt-3 inline-block underline" href={`/india-mocks/${item.testId}`}>Return to exam</Link></section>}
  {item?.result&&<><h1 className="text-2xl font-bold">{item.title} — Saved result</h1><p className="text-xl font-semibold">{item.result.score} / {item.result.total} marks ({item.result.percentage}%) · {item.result.passed?'Passed':'Not passed'}</p>
  <ProAnalytics attemptId={id} />
- {item.result.review.map((q,i)=><article key={q.id} className="rounded-lg border bg-card p-4"><h2 className="font-semibold">{i+1}. {q.question}</h2><p className="mt-2 text-sm">Your choice: {q.selected===-1?'Skipped':q.options[q.selected]}; correct: {q.options[q.correctAnswer]}</p><p className="mt-2 text-sm text-muted-foreground">{q.explanation}</p></article>)}</>}
+ {item.result.review.map((q,i)=><article key={q.id} className="rounded-lg border bg-card p-4"><h2 className="font-semibold">{i+1}. {q.question}</h2><p className="mt-2 text-sm">Your choice: {q.selected===-1?'Skipped':q.options[q.selected]}; correct: {q.options[q.correctAnswer]}</p><p className="mt-2 text-sm text-muted-foreground">{q.explanation}</p><ReportMistake questionId={q.id}/></article>)}</>}
  </main><Footer/></>
 }

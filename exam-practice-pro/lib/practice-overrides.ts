@@ -2,6 +2,7 @@ import { api } from '@/lib/api';
 import type { Question, QuizMeta } from '@/lib/types';
 
 export interface PracticeOverride {
+  reviewStatus?: 'draft'|'reviewed'|'published';
   source: 'homepage' | 'certification';
   id: string;
   question: unknown;
@@ -9,6 +10,7 @@ export interface PracticeOverride {
 }
 
 export interface PracticeAddition {
+  reviewStatus?: 'draft'|'reviewed'|'published';
   source: 'homepage' | 'certification';
   groupId: string;
   id: string;

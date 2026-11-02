@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Validate the IT certification question CSV before human review/import.
 
-Usage: python scripts/validate_it_questions.py content/it-certifications/starter-questions.csv
+Usage: python scripts/validate_it_questions.py $PRIVATE_CONTENT_DIR/content/it-certifications/starter-questions.csv
 """
 import csv
 import sys

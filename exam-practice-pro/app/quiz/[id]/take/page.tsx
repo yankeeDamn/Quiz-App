@@ -1,5 +1,6 @@
 'use client';
 
+import { ReportMistake } from '@/components/shared/content-review';
 import { useState, useEffect, useCallback, useMemo, use, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -423,7 +424,7 @@ export default function QuizTakePage({ params }: PageProps) {
                           : '✗ Incorrect'}
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {currentQuestion.explanation}
+                        {currentQuestion.explanation}<ReportMistake questionId={currentQuestion.id}/>
                       </p>
                     </motion.div>
                   )}

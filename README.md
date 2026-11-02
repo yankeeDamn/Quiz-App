@@ -41,7 +41,9 @@ Open `/admin` on the site and sign in with Google or GitHub. Only emails listed 
 - **Mock tests:** create a test from topic ranges (for example Reasoning questions 0 to 6), set minutes and marks, make it free or Pro only, hide or show it, or edit it. A test is made automatically for every topic.
 - **Plans and payments:** unlock or end a plan, search users, see recent unlocks.
 
-Changes show on the site within 30 seconds. The first deploy copies the starter content from `src/data/mock-bank.json` into the database; after that the database is the source and the JSON file is only a starting copy.
+Paid and unpublished question banks are **database-only**; full banks are no longer bundled in this public repository. Existing database content is preserved. New imports default to draft. In `/admin` → Question bank, choose Free/Pro access, mark each question reviewed, then publish it. A topic/test active flag cannot bypass this gate. Public free legacy practice is labelled under review until independent review is recorded.
+
+Optional deployment seeding reads `PRIVATE_CONTENT_DIR` from a private checkout/artifact, preserving the original relative paths. Missing private seeds are skipped; new seeded topics/tests remain inactive and questions remain draft. Never copy private input into frontend assets or public CI artifacts. See [the exposure audit](docs/CONTENT_EXPOSURE_AUDIT.md) for all removed paths, remaining public free practice and required owner history-cleanup steps. Old public clones still retain exposed content.
 Admin requests are never counted against the normal rate limit; only failed attempts are limited.
 
 ## Taking a payment
@@ -94,6 +96,7 @@ Tests: `npm test` in the root runs the API tests. `npm run build` in `exam-pract
 | `ADMIN_API_KEY` | API | No | Optional 24+ character key for `curl`. Not needed for the admin page |
 | `NEXT_PUBLIC_API_URL` | Site | Yes | The API's URL |
 | `NEXT_PUBLIC_SENTRY_DSN` | Site | No — optional | Frontend, SSR and edge error monitoring; blank disables Sentry |
+| `PRIVATE_CONTENT_DIR` | API migration only | No — optional | Access-controlled seed source directory; absent means database-only, no full-bank fallback |
 | `SENTRY_DSN` | API | No — optional | Express error monitoring; blank disables Sentry |
 | `NEXTAUTH_URL` | Site | Yes | The site's own URL |
 | `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` | Site | For Google sign-in | |

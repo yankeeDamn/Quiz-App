@@ -1,8 +1,8 @@
 'use strict';
 const test=require('node:test');
 const assert=require('node:assert/strict');
-const starter=require('../src/data/mock-bank.json');
-const competitive=require('../src/data/competitive-questions-500.json');
+const starter=require('./fixtures/content').starter();
+const competitive=require('./fixtures/content').competitive();
 const packs=require('../content/separate-exam-practice-starter.json');
 const certs=require('../exam-practice-pro/data/it-certification-questions.json');
 const {checkQuestion}=require('../src/services/content.service');

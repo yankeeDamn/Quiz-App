@@ -27,8 +27,9 @@ Fetched all advertised branches and tags and unshallowed the repository. Examine
 | `content/ssc-cgl-2026/mock-01/quantitative-aptitude.csv` | 25 (CSV duplicates JSON) | Unpublished draft; not automatically Pro | manifest publicationAllowed=false, active=false, needs_human_review; manual admin import. | Remove private draft source; retain metadata/review tooling. |
 | `content/ssc-cgl-2026/mock-01/reasoning.json` | 25 (CSV duplicates JSON) | Unpublished draft; not automatically Pro | manifest publicationAllowed=false, active=false, needs_human_review; manual admin import. | Remove private draft source; retain metadata/review tooling. |
 | `content/ssc-cgl-2026/mock-01/reasoning.csv` | 25 (CSV duplicates JSON) | Unpublished draft; not automatically Pro | manifest publicationAllowed=false, active=false, needs_human_review; manual admin import. | Remove private draft source; retain metadata/review tooling. |
-
 | `content/ssc-cgl-2026/mock-01/quality-review.json` | 100 answer letters/texts and rationales | Unpublished draft answer-key duplicate | AI desk audit, publicationApproved=false; not teacher approval. | Remove with private draft sources. |
+| `content/ssc-cgl-2026/mock-01/QUALITY_AUDIT.md` | 100 keyed answers/rationales | Unpublished draft key duplicate | Manual follow-up inspection found a human-readable answer-key trail. | Remove with private authoring sources. |
+| `exam-practice-pro/app/exampro/page.tsx` | 1 inline demonstration | Public free arithmetic sample | Landing-page example explains the selected correct choice; not an exam bank. | Keep nonsensitive public demo. |
 
 ## Historical paths and versions
 
@@ -77,9 +78,14 @@ Every detected answer-bearing path is listed below, including source-code fixtur
 | `test/separate-exam-and-cert-banks.test.js` | 2 | Yes | Synthetic validation/security fixtures; no paid entitlement. Retain only nonsensitive examples. |
 | `test/ssc-cgl-mock-01.test.js` | 3 | Yes | Synthetic validation/security fixtures; no paid entitlement. Retain only nonsensitive examples. |
 | `test/ssc-content-pipeline.test.js` | 3 | Yes | Synthetic validation/security fixtures; no paid entitlement. Retain only nonsensitive examples. |
-
 | `exam-practice-pro/data/india-exams.ts` | 1 | No | Historical answer-key/compact-array candidate; inspect/remove with corresponding private draft source. |
 | `src/data/exam-catalog.js` | 1 | No | Historical answer-key/compact-array candidate; inspect/remove with corresponding private draft source. |
+
+| `content/ssc-cgl-2026/mock-01/quality-review.json` | 1 | Yes | See current inventory; duplicate private draft key or nonsensitive public example. |
+| `content/ssc-cgl-2026/mock-01/QUALITY_AUDIT.md` | Manual inspection | Yes | See current inventory; duplicate private draft key or nonsensitive public example. |
+| `exam-practice-pro/app/exampro/page.tsx` | Manual inspection | Yes | See current inventory; duplicate private draft key or nonsensitive public example. |
+
+Supplemental manual inspection found the duplicate SSC desk-review trails above and the one-question landing-page demonstration. They are included explicitly even where the initial literal-object scan did not match their format. The original audit commits precede remediation; this supplement records follow-up discoveries.
 
 ## Findings
 
@@ -108,6 +114,8 @@ git filter-repo --invert-paths \
   --path src/data/competitive-questions-500.json \
   --path content/ssc-cgl-2026-mock-02.questions.json \
   --path content/ssc-cgl-2026/mock-01/quality-review.json \
+  --path content/ssc-cgl-2026/mock-01/QUALITY_AUDIT.md \
+  --path exam-practice-pro/data/india-exams.ts --path src/data/exam-catalog.js \
   --path content/ssc-cgl-2026/mock-01/english.json --path content/ssc-cgl-2026/mock-01/english.csv \
   --path content/ssc-cgl-2026/mock-01/general-awareness.json --path content/ssc-cgl-2026/mock-01/general-awareness.csv \
   --path content/ssc-cgl-2026/mock-01/quantitative-aptitude.json --path content/ssc-cgl-2026/mock-01/quantitative-aptitude.csv \
@@ -123,3 +131,14 @@ git push --force --mirror origin
 Historical inline runner `exam-practice-pro/app/india-mocks/[id]/page.tsx` also contained keys. Removing that whole path would remove useful route history; extract the historical blob identified by the audit and use an audited `git filter-repo --blob-callback` or `--replace-text` rule to remove its literal bank while preserving the route. Do not guess a broad regex against executable source. Check all advertised feature branches and tags, not only main. Ask GitHub Support about cached PR refs and cached views where applicable.
 
 **Already-cloned copies, forks, caches and downloaded bundles keep old content even after a rewrite.** Collaborators must reclone; do not merge old branches back. History cleanup is hygiene, not restored secrecy. No force-push, repository visibility change, production migration or merge was performed for this audit.
+
+## Implemented remediation and rollout impact
+
+- Removed the complete mixed 120-question starter, 500-question draft bank, both 100-question draft paper sources and duplicate SSC CSV/JSON/desk-review keys, plus the unreviewed 24-question CSV. Replaced the legacy HTML bank with a portal link. No private repository was created and no live database row was changed. A local ignored `.private-content/` copy preserves source during implementation; it is **not durable hosting**. The database remains the deployed source. The owner must preserve private source separately before cleanup.
+- Tests generate synthetic questions from a tiny template and nonsensitive structural metadata. Runtime offline mode contains one explicitly synthetic free demo; it never falls back to paid/draft source. Private input is read only by migration/authoring scripts with `PRIVATE_CONTENT_DIR`, never by the public content service. New private seeds remain inactive drafts.
+- `question-review.sql` adds draft/reviewed/published state, review identity/time and Free/Pro question access. Its one-time backfill only publishes currently active free topic practice not referenced by any paid definition. It preserves all question text and answer rows. With the unedited historic starter, **34** rows qualify (28 free-only plus 6 topic-only); the 86 paid/shared rows remain draft. Actual deployed counts can differ after owner edits.
+- Public builders exclude draft/reviewed-only rows, free practice rejects paid range assignments (even inactive paid definitions), and any incomplete configured mock is withheld as a whole. **Some existing free/paid mock definitions will disappear from the catalogue until the owner reviews and publishes every configured question.** It never silently turns a full paper into a shorter one.
+- Human OAuth admins can mark a question reviewed, choose access and publish; content edits reset approval to draft. Public legacy-practice overrides/additions also require a separate review/publish step. Existing SSC academic/Hindi/full-paper release gates remain mandatory. API keys cannot claim human review. Publication changes are read on every request, across API instances.
+- Existing intentionally public free learning banks stay available as practice with EN/Hindi/Bangla under-review badges. Ebook result wording says learning practice completion rather than claiming verified certification readiness. WhatsApp reports include stable question IDs; the application does not send question text automatically through these report links.
+
+Validation: root tests and production frontend build are run without DSNs. A disposable PostgreSQL CI test covers preserving rows, excluding shared paid/draft/retired content, default-draft imports and applying the migration twice. Staging remains unchanged until this PR is reviewed, merged and deployed by the owner; a local/PR preview can demonstrate the badge first.

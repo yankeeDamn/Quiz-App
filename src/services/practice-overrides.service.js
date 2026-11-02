@@ -73,9 +73,9 @@ function validatePracticeOverride(source, id, question) {
   };
 }
 
-async function listOverrides() {
+async function listOverrides({ includeDrafts = false } = {}) {
   const { rows } = await db.query(
-    'SELECT source, question_id AS id, content AS question, updated_at AS "updatedAt" FROM practice_question_overrides ORDER BY source, question_id'
+    `SELECT source, question_id AS id, content AS question, review_status AS "reviewStatus", updated_at AS "updatedAt" FROM practice_question_overrides ${includeDrafts ? '' : "WHERE review_status='published'"} ORDER BY source, question_id`
   );
   return rows;
 }
@@ -86,7 +86,7 @@ async function saveOverride(source, id, question) {
     `INSERT INTO practice_question_overrides (source, question_id, content)
      VALUES ($1, $2, $3::jsonb)
      ON CONFLICT (source, question_id) DO UPDATE SET
-       content = EXCLUDED.content, updated_at = NOW()`,
+       content = EXCLUDED.content, review_status = 'draft', updated_at = NOW()`,
     [source, id, JSON.stringify(checked)]
   );
   return checked;
@@ -103,10 +103,10 @@ function makeAddition(source, groupId, body, id = 'extra-' + randomUUID()) {
   return { source, groupId, id, question };
 }
 
-async function listAdditions() {
+async function listAdditions({ includeDrafts = false } = {}) {
   const { rows } = await db.query(
-    `SELECT source, group_id AS "groupId", question_id AS id, content AS question
-       FROM practice_question_additions ORDER BY created_at, question_id`
+    `SELECT source, group_id AS "groupId", question_id AS id, content AS question, review_status AS "reviewStatus"
+       FROM practice_question_additions ${includeDrafts ? '' : "WHERE review_status='published'"} ORDER BY created_at, question_id`
   );
   return rows;
 }
@@ -121,6 +121,16 @@ async function addQuestion(source, groupId, body) {
   return item;
 }
 
-module.exports = { validatePracticeOverride, listOverrides, saveOverride,
+async function reviewPractice(kind, source, id, status) {
+  if(!VALID_SOURCE.has(source) || !ID.test(id) || !['draft','reviewed','published'].includes(status))
+    throw Object.assign(new Error('Invalid practice review'),{statusCode:400});
+  const table=kind==='override'?'practice_question_overrides':kind==='addition'?'practice_question_additions':null;
+  if(!table)throw Object.assign(new Error('Invalid practice kind'),{statusCode:400});
+  const result=await db.query(`UPDATE ${table} SET review_status=$3
+    WHERE source=$1 AND question_id=$2 AND ($3!='published' OR review_status IN ('reviewed','published'))`,[source,id,status]);
+  if(!result.rowCount)throw Object.assign(new Error('Review this practice question before publishing.'),{statusCode:409});
+}
+
+module.exports = { reviewPractice, validatePracticeOverride, listOverrides, saveOverride,
   makeAddition, listAdditions, addQuestion };
 

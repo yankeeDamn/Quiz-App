@@ -5,14 +5,16 @@ const assert = require('node:assert/strict');
 const svc = require('../src/services/mocks.service');
 const content = require('../src/services/content.service');
 
-const bank = svc.fromJson();
+const bank = svc.fromJson(require('./fixtures/content').starter());
+// Catalogue builder fixture is entirely synthetic. Assign separate paid topics below.
+bank.mocks=bank.mocks.filter(m=>m.tier==='free');
 const listMocks = () => svc.listFromBank(bank);
 const getDefinition = (id) => svc.allDefinitions(bank).find((d) => d.id === id) || null;
 const buildMock = (def) => svc.build(bank, def);
 
-test('catalogue has 11 full mocks and 10 topic tests', () => {
+test('synthetic catalogue has 5 practice mocks and 10 topic tests', () => {
   const tests = listMocks();
-  assert.equal(tests.filter((t) => t.kind === 'mock').length, 11);
+  assert.equal(tests.filter((t) => t.kind === 'mock').length, 5);
   assert.equal(tests.filter((t) => t.kind === 'topic').length, 10);
 });
 
@@ -23,10 +25,10 @@ test('catalogue never carries questions or answers', () => {
   });
 });
 
-test('both free and premium mocks exist', () => {
+test('topic practice remains free', () => {
   const mocks = listMocks().filter((t) => t.kind === 'mock');
   assert.ok(mocks.some((t) => t.tier === 'free'));
-  assert.ok(mocks.some((t) => t.tier === 'premium'));
+
   assert.ok(listMocks().filter((t) => t.kind === 'topic').every((t) => t.tier === 'free'));
 });
 

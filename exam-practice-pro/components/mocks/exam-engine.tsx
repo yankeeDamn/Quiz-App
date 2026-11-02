@@ -1,5 +1,6 @@
 'use client';
 
+import { ContentReviewBadge, ReportMistake } from '@/components/shared/content-review';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { track } from '@/lib/track';
@@ -200,7 +201,7 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
       {/* Top bar */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3">
         <div className="min-w-0">
-          <h1 className="truncate text-lg font-bold">{test.name}</h1>
+          <h1 className="truncate text-lg font-bold">{test.name}</h1><ContentReviewBadge underReview={test.underReview !== false}/>
           <p className="text-xs text-muted-foreground">
             {practice ? 'Practice mode · answers show after each question' : `+${test.marksPerCorrect} per correct · ${negativeLabel(test.negativeMarks)}`}
           </p>
@@ -311,7 +312,7 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
               <p className="font-semibold">
                 {item.order[picked] === q.answer ? 'Correct.' : `Not quite. The answer is ${LETTERS[item.order.indexOf(q.answer)]}.`}
               </p>
-              <p className="mt-1 text-sm">{translated.texts[1+q.options.length]||q.explanation}</p>
+              <p className="mt-1 text-sm">{translated.texts[1+q.options.length]||q.explanation}</p><ReportMistake questionId={q.id}/>
               <DoubtButton test={test} item={item} index={current} picked={picked} />
             </div>
           )}
@@ -680,6 +681,7 @@ function ResultView({
               </ol>
               <div className="mt-3 rounded-lg bg-muted/60 p-3 text-sm">
                 <b>Why:</b> {q.explanation}
+                <br/><ReportMistake questionId={q.id}/>
               </div>
               <DoubtButton test={test} item={item} index={i} picked={picked} />
             </article>

@@ -4,6 +4,7 @@ import { buildSeparatePractice, separateSummaries } from '@/lib/separate-exams';
 import { fetchPracticeLibrary } from '@/lib/practice-overrides';
 
 export interface MockSummary {
+  underReview?: boolean;
   id: string;
   name: string;
   exam: string;
@@ -18,6 +19,8 @@ export interface MockSummary {
 }
 
 export interface MockQuestion {
+  reviewStatus?: 'draft' | 'reviewed' | 'published';
+  reviewedAt?: string | null;
   id: string;
   topic: string;
   topicName: string;
