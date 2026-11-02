@@ -18,7 +18,7 @@ Fetched all advertised branches and tags and unshallowed the repository. Examine
 | `exam-practice-pro/data/quizzes.ts` | 33 | Intentionally public free homepage practice | Client-side free quiz bank; no Pro test linkage. Answer keys are intentionally public practice feedback. | Keep explicitly free; under-review badge. |
 | `content/separate-exam-practice-starter.json` | 36 | Intentionally public free introductory practice | separate-exams.ts bundles these into practice-only tests; timed mock mode blocked. | Keep free practice only; under-review badge. |
 | `content/ebooks-starter.json` | 250 (150 final + 100 chapter checks) | Intentionally public free starter learning content; not an official certification | Public starter tracks imported by frontend and seed-ebooks; custom private ebooks live in DB under RBAC. No Pro mock mappings in seeds. | Keep public learning practice; disclose under-review status, do not claim verified exam readiness. |
-| `exampro/index.html` | 14 inline numeric keys (legacy) | Legacy public demo; tier is not enforced by static HTML | Independent legacy JS bank; cannot make paid claims or enforce entitlement in client HTML. | Remove legacy bundled bank with retired demo; route users to supported app. |
+| `exampro/index.html` | 120 compact array records (legacy starter copy) | Mixed legacy starter copy; tier is not enforced by static HTML | Independent legacy JS bank; cannot make paid claims or enforce entitlement in client HTML. | Remove legacy bundled bank with retired demo; route users to supported app. |
 | `content/ssc-cgl-2026/mock-01/english.json` | 25 (CSV duplicates JSON) | Unpublished draft; not automatically Pro | manifest publicationAllowed=false, active=false, needs_human_review; manual admin import. | Remove private draft source; retain metadata/review tooling. |
 | `content/ssc-cgl-2026/mock-01/english.csv` | 25 (CSV duplicates JSON) | Unpublished draft; not automatically Pro | manifest publicationAllowed=false, active=false, needs_human_review; manual admin import. | Remove private draft source; retain metadata/review tooling. |
 | `content/ssc-cgl-2026/mock-01/general-awareness.json` | 25 (CSV duplicates JSON) | Unpublished draft; not automatically Pro | manifest publicationAllowed=false, active=false, needs_human_review; manual admin import. | Remove private draft source; retain metadata/review tooling. |
@@ -27,6 +27,8 @@ Fetched all advertised branches and tags and unshallowed the repository. Examine
 | `content/ssc-cgl-2026/mock-01/quantitative-aptitude.csv` | 25 (CSV duplicates JSON) | Unpublished draft; not automatically Pro | manifest publicationAllowed=false, active=false, needs_human_review; manual admin import. | Remove private draft source; retain metadata/review tooling. |
 | `content/ssc-cgl-2026/mock-01/reasoning.json` | 25 (CSV duplicates JSON) | Unpublished draft; not automatically Pro | manifest publicationAllowed=false, active=false, needs_human_review; manual admin import. | Remove private draft source; retain metadata/review tooling. |
 | `content/ssc-cgl-2026/mock-01/reasoning.csv` | 25 (CSV duplicates JSON) | Unpublished draft; not automatically Pro | manifest publicationAllowed=false, active=false, needs_human_review; manual admin import. | Remove private draft source; retain metadata/review tooling. |
+
+| `content/ssc-cgl-2026/mock-01/quality-review.json` | 100 answer letters/texts and rationales | Unpublished draft answer-key duplicate | AI desk audit, publicationApproved=false; not teacher approval. | Remove with private draft sources. |
 
 ## Historical paths and versions
 
@@ -76,6 +78,9 @@ Every detected answer-bearing path is listed below, including source-code fixtur
 | `test/ssc-cgl-mock-01.test.js` | 3 | Yes | Synthetic validation/security fixtures; no paid entitlement. Retain only nonsensitive examples. |
 | `test/ssc-content-pipeline.test.js` | 3 | Yes | Synthetic validation/security fixtures; no paid entitlement. Retain only nonsensitive examples. |
 
+| `exam-practice-pro/data/india-exams.ts` | 1 | No | Historical answer-key/compact-array candidate; inspect/remove with corresponding private draft source. |
+| `src/data/exam-catalog.js` | 1 | No | Historical answer-key/compact-array candidate; inspect/remove with corresponding private draft source. |
+
 ## Findings
 
 1. **Pro bypass:** the admin “Pro plan only” flag is `mock_tests.tier`, not a property of question rows. `mocks.service.topicDefinitions()` creates free topic tests for every active topic. `/mocks/:id/practice` returns keys for those topics. Test-level denial alone therefore does not protect the 44 Pro-only or 42 shared starter questions.
@@ -102,6 +107,7 @@ git filter-repo --invert-paths \
   --path src/data/mock-bank.json \
   --path src/data/competitive-questions-500.json \
   --path content/ssc-cgl-2026-mock-02.questions.json \
+  --path content/ssc-cgl-2026/mock-01/quality-review.json \
   --path content/ssc-cgl-2026/mock-01/english.json --path content/ssc-cgl-2026/mock-01/english.csv \
   --path content/ssc-cgl-2026/mock-01/general-awareness.json --path content/ssc-cgl-2026/mock-01/general-awareness.csv \
   --path content/ssc-cgl-2026/mock-01/quantitative-aptitude.json --path content/ssc-cgl-2026/mock-01/quantitative-aptitude.csv \
