@@ -42,6 +42,7 @@ async function intercept(route){
    if(body.active&&!checklist().canPublish)return reply({success:false,error:{message:'Publication blocked: source questions need review.'}},409);
    Object.assign(fixtureMock,body);return reply({success:true,data:{test:fixtureMock}});
   }
+  if(p==='/admin/catalogue')return reply({success:true,data:{tests:[{...liveMock,kind:'mock',isPro:false}]}});
   if(p==='/admin/topics')return reply({success:true,data:{topics:topicRows()}});
   if(p==='/admin/draft-testing/status')return reply({success:true,data:{enabled:true}});
   if(p==='/admin/tests/bank1/publication-checklist')return reply({success:true,data:checklist()});
@@ -95,6 +96,9 @@ async function intercept(route){
   await manager.getByLabel('Filter mock status',{exact:true}).selectOption('live');
   await manager.getByRole('link',{name:'View live test',exact:true}).waitFor();
   assert.equal(await manager.getByRole('link',{name:'View live test',exact:true}).getAttribute('href'),'/india-mocks/live-synthetic?mode=test');
+  await manager.getByRole('button',{name:'More actions for Live Synthetic SSC',exact:true}).click();
+  await page.getByRole('menuitem',{name:'Copy student link',exact:true}).click();
+  await manager.getByText(/Student link copied|Could not copy the link/).waitFor();
   await manager.getByRole('button',{name:'Clear filters',exact:true}).click();
   await manager.getByLabel('Sort mock tests',{exact:true}).selectOption('duration');
   const firstRow=manager.getByRole('row').nth(1);await firstRow.getByText('Training Draft 9',{exact:true}).waitFor();
@@ -129,7 +133,7 @@ async function intercept(route){
   await page.getByRole('dialog').getByRole('button',{name:'Cancel',exact:true}).click();
   assert.equal(mockCalls.length,0,'cancelled access confirmation must not save');
   await manager.getByRole('button',{name:'Change access for Synthetic Bank Mock',exact:true}).click();
-  await page.getByRole('dialog').getByRole('button',{name:'Confirm access change',exact:true}).click();
+  await page.getByRole('dialog').getByRole('button',{name:'Confirm access change',exact:true}).evaluate(button=>{button.click();button.click();});
   await page.getByRole('dialog').waitFor({state:'hidden'});
   assert.equal(mockCalls.length,1);assert.equal(mockCalls[0].tier,'free');assert.equal(fixtureMock.active,false);
   await manager.getByRole('button',{name:'Change access for Synthetic Bank Mock',exact:true}).click();
@@ -151,14 +155,20 @@ async function intercept(route){
   await page.getByRole('dialog').getByRole('button',{name:'Cancel',exact:true}).click();
   await manager.getByRole('button',{name:'Refresh',exact:true}).click();
   await manager.getByText('13 of 13 definitions',{exact:true}).waitFor();
-  await manager.scrollIntoViewIfNeeded();await page.screenshot({path:path.join(output,'mock-manager-desktop.png'),fullPage:true});
+  await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:path.join(output,'mock-manager-desktop.png'),fullPage:true});
   await manager.getByRole('button',{name:'More actions for Synthetic Bank Mock',exact:true}).click();
-  await page.screenshot({path:path.join(output,'mock-actions-menu.png'),fullPage:true});
+  await page.screenshot({path:path.join(output,'mock-actions-menu.png'),fullPage:false});
   await page.keyboard.press('Escape');
   await page.setViewportSize({width:390,height:844});await page.evaluate(()=>document.documentElement.classList.add('dark'));
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),true,'mock manager must fit mobile width');
+  await page.evaluate(()=>window.scrollTo(0,0));
   await page.screenshot({path:path.join(output,'mock-manager-mobile-dark.png'),fullPage:true});
   await page.setViewportSize({width:1440,height:1100});await page.evaluate(()=>document.documentElement.classList.remove('dark'));
+  await page.getByRole('button',{name:'Live Catalogue',exact:true}).click();
+  const catalogue=page.getByRole('region',{name:'Live learner catalogue',exact:true});
+  await catalogue.getByRole('link',{name:'View test',exact:true}).waitFor();
+  assert.equal(await catalogue.getByRole('link',{name:'View test',exact:true}).getAttribute('href'),'/india-mocks/live-synthetic?mode=test');
+  await page.getByRole('button',{name:'All mock definitions (13)',exact:true}).click();
   await manager.getByRole('textbox',{name:'Search mock tests',exact:true}).fill('bank1');
   await page.getByRole('button',{name:'Review questions',exact:true}).click();
   await page.getByRole('heading',{name:'Computer Training',exact:true}).waitFor();
