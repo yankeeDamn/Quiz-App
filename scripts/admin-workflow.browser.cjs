@@ -156,17 +156,17 @@ async function intercept(route){
   await page.getByRole('dialog').getByRole('button',{name:'Cancel',exact:true}).click();
   await manager.getByRole('button',{name:'Refresh',exact:true}).click();
   await manager.getByText('13 of 13 definitions',{exact:true}).waitFor();
-  await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:path.join(output,'mock-manager-desktop.png'),fullPage:true});
+  await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({animations:'disabled',path:path.join(output,'mock-manager-desktop.png'),fullPage:true});
   await manager.getByRole('button',{name:'More actions for Synthetic Bank Mock',exact:true}).click();
   await page.getByRole('menuitem',{name:'Edit mock settings',exact:true}).waitFor();
-  await page.screenshot({path:path.join(output,'mock-actions-menu.png'),fullPage:false});
+  await page.screenshot({animations:'disabled',path:path.join(output,'mock-actions-menu.png'),fullPage:false});
   await page.keyboard.press('Escape');
   await page.setViewportSize({width:390,height:844});await page.evaluate(()=>document.documentElement.classList.add('dark'));
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),true,'mock manager must fit mobile width');
   await page.evaluate(()=>window.scrollTo(0,0));
-  await page.screenshot({path:path.join(output,'mock-manager-mobile-dark.png'),fullPage:true});
+  await page.screenshot({animations:'disabled',path:path.join(output,'mock-manager-mobile-dark.png'),fullPage:true});
   await manager.getByRole('article',{name:'Mock Synthetic Bank Mock',exact:true}).scrollIntoViewIfNeeded();
-  await page.screenshot({path:path.join(output,'mock-manager-mobile-actions.png'),fullPage:false});
+  await page.screenshot({animations:'disabled',path:path.join(output,'mock-manager-mobile-actions.png'),fullPage:false});
   await page.setViewportSize({width:1440,height:1100});await page.evaluate(()=>document.documentElement.classList.remove('dark'));
   await page.getByRole('button',{name:'Live Catalogue',exact:true}).click();
   const catalogue=page.getByRole('region',{name:'Live learner catalogue',exact:true});
@@ -181,12 +181,12 @@ async function intercept(route){
   await card0.getByRole('button',{name:'Review & publish',exact:true}).waitFor();
   assert.equal(await card1.getByRole('button',{name:'Published',exact:true}).isDisabled(),true);
   assert.equal(await page.getByRole('button',{name:'Publish mock',exact:true}).count(),0);
-  await page.screenshot({path:path.join(output,'question-workspace-desktop.png'),fullPage:true});
+  await page.screenshot({animations:'disabled',path:path.join(output,'question-workspace-desktop.png'),fullPage:true});
   await card0.getByRole('button',{name:'Review & publish',exact:true}).click();
   let dialog=page.getByRole('dialog');
   assert.equal(await dialog.getByRole('button',{name:'Review & publish',exact:true}).isDisabled(),true);
   await dialog.getByRole('checkbox').check();
-  await page.screenshot({path:path.join(output,'review-confirmation.png'),fullPage:true});
+  await page.screenshot({animations:'disabled',path:path.join(output,'review-confirmation.png'),fullPage:true});
   await dialog.getByRole('button',{name:'Publish & review next →',exact:true}).click();
   await dialog.getByText('Synthetic training question 2: select the first label.',{exact:true}).waitFor();
   assert.equal(await dialog.getByRole('checkbox').isChecked(),false,'next question needs a fresh acknowledgement');
@@ -218,13 +218,13 @@ async function intercept(route){
   await page.setViewportSize({width:390,height:844});
   await page.evaluate(()=>{document.documentElement.classList.add('dark');});
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),true,'question workspace must fit mobile width');
-  await page.screenshot({path:path.join(output,'question-workspace-mobile-dark.png'),fullPage:true});
+  await page.screenshot({animations:'disabled',path:path.join(output,'question-workspace-mobile-dark.png'),fullPage:true});
   await page.goto(origin+'/contact');
   await page.getByRole('link',{name:'Chat on WhatsApp',exact:true}).waitFor();
   assert.deepEqual(browserErrors,[],'No unhandled browser errors');
   console.log('Admin UI acceptance passed: mock filters, sorting, pagination, CSV export, action menu, preview, editing/duplication/cancel, tier confirmation, blocked publication, mobile cards; acknowledgement reset, review/publish, access cancel/confirm, pagination, topic isolation, mock return, publication guard and mobile width.');
  }catch(error){
-  if(browser){for(const c of browser.contexts())for(const p of c.pages())await p.screenshot({path:path.join(output,'failure.png'),fullPage:true}).catch(()=>{});}
+  if(browser){for(const c of browser.contexts())for(const p of c.pages())await p.screenshot({animations:'disabled',path:path.join(output,'failure.png'),fullPage:true}).catch(()=>{});}
   console.error(error);console.error(serverLogs);process.exitCode=1;
  }finally{
   if(browser)await browser.close();if(server)server.kill('SIGTERM');

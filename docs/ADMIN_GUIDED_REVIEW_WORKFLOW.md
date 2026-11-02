@@ -19,7 +19,7 @@ This patch replaces the dense text-link actions shown in the owner's screenshot 
 
 Opening questions from a mock or its checklist preserves the originating mock ID. **Back to this mock** / **Continue to mock publishing** returns to that mock's refreshed checklist.
 
-Mock status badges are read-only labels. The row now has an explicit **Publish mock** or **Unpublish mock** button. Publication still prompts for confirmation and rechecks the existing server gates. The checklist has a **Publish mock** action enabled only when its recorded checks pass. Full SSC academic/Hindi sign-off remains separate.
+Mock status badges are read-only labels. Each row has an explicit **Publish mock** or **Unpublish mock** action in its **More actions** menu. Publication still prompts for confirmation and rechecks the existing server gates. The checklist has a **Publish mock** action enabled only when its recorded checks pass. Full SSC academic/Hindi sign-off remains separate.
 
 Private previews and publication checklists open in dialogs instead of appearing out of sight below a long table. New/edit mock forms scroll into view and receive focus.
 
