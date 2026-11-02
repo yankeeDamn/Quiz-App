@@ -1,6 +1,7 @@
 'use client';
 
 import { MessageCircle } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { whatsappLink } from '@/lib/plans';
 
 interface Props {
@@ -33,8 +34,10 @@ export function WhatsAppButton({ text, label = 'Chat on WhatsApp', variant = 'so
   );
 }
 
-/** Floating button shown on every page. */
+/** Admin actions need an unobstructed workspace; its footer retains the support link. */
 export function FloatingWhatsApp() {
+  const pathname = usePathname();
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) return null;
   return (
     <a
       href={whatsappLink('Hi, I have a question about Exam Practice Pro.')}

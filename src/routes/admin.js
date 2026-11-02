@@ -246,6 +246,11 @@ router.put('/questions/:qid', wrap(async (req, res) => {
   return (await content.updateQuestion(req.params.qid, r.value)) ? ok(res, {}) : bad(res, 'Question not found', 404);
 }));
 
+router.post('/questions/:qid/workflow', requireHumanReviewer, wrap(async(req,res)=>{
+  if(!UUID.test(req.params.qid))return bad(res,'Bad question id');
+  return ok(res,await require('../services/question-workflow.service').apply(req.params.qid,req.body,req.admin.email));
+}));
+
 router.post('/questions/:qid/review', requireHumanReviewer, wrap(async(req,res)=>{
   if(!UUID.test(req.params.qid))return bad(res,'Bad question id');
   const r=await content.reviewQuestion(req.params.qid,req.body?.status,req.body?.tier,req.admin.email);

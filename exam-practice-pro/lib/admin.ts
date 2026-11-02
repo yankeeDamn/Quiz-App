@@ -3,7 +3,7 @@ import { api } from '@/lib/api';
 export type AdminSection = 'overview' | 'catalogue' | 'questions' | 'tests' | 'practice' | 'plans' | 'payments' | 'qa';
 
 export interface AdminTopic { id: string; name: string; category: string; active: boolean; total: number; live: number }
-export interface AdminQuestion { review_status: 'draft'|'reviewed'|'published'; reviewed_at: string|null; access_tier: 'free'|'premium'; id: string; position: number; question: string; options: string[]; answer: number; explanation: string; difficulty: string; active: boolean }
+export interface AdminQuestion { revision?:string; review_status: 'draft'|'reviewed'|'published'; reviewed_at: string|null; access_tier: 'free'|'premium'; id: string; position: number; question: string; options: string[]; answer: number; explanation: string; difficulty: string; active: boolean }
 export interface QuestionInput { question: string; options: string[]; answer: number; explanation: string; difficulty?: string }
 export interface TestPart { topic: string; from: number; to: number }
 export interface TestSection { name: string; parts: TestPart[] }
