@@ -73,6 +73,26 @@ jobs:
           AUTH_SECRET: ci-test-auth-secret
           NEXT_PUBLIC_API_URL: http://localhost:3001
 
+      - name: Install isolated UI acceptance browser
+        run: |
+          npm install --prefix "$RUNNER_TEMP/exampro-ui-tools" --no-package-lock --no-save playwright@1.62.1
+          "$RUNNER_TEMP/exampro-ui-tools/node_modules/.bin/playwright" install --with-deps chromium
+
+      - name: Test mocked admin review and publishing workflow
+        run: node scripts/admin-workflow.browser.cjs
+        env:
+          PLAYWRIGHT_MODULE: ${{ runner.temp }}/exampro-ui-tools/node_modules/playwright
+          ADMIN_UI_ARTIFACT_DIR: ${{ github.workspace }}/test-results/admin-workflow
+
+      - name: Upload synthetic admin UI screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-workflow-ui
+          path: test-results/admin-workflow
+          if-no-files-found: ignore
+          retention-days: 7
+
   ebooks-postgres:
     name: Ebook permissions, migrations and grading (PostgreSQL)
     runs-on: ubuntu-latest
@@ -107,7 +127,7 @@ jobs:
           npm run db:migrate
           npm run db:migrate
       - name: Test real OAuth middleware, ACLs and persisted results
-        run: node --test test/ebooks-postgres.integration.js test/content-review-postgres.integration.js
+        run: node --test test/ebooks-postgres.integration.js test/content-review-postgres.integration.js test/question-workflow-postgres.integration.js
 
   # ── Docker Build ──────────────────────────────
   docker:

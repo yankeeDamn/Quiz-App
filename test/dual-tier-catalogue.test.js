@@ -98,6 +98,12 @@ test('command metrics and bulk preflight require a verified human admin',async()
  assert.equal(r.body.data.attempts.accuracy,62.5);assert.equal(r.body.data.plans.active,2);assert.equal(r.body.data.catalogue.pro,2);
  assert.match(r.headers.get('cache-control'),/private/);
 });
+test('question workflow rejects guests, ordinary accounts and API keys before any mutation',async()=>{
+ const path='/admin/questions/11111111-1111-4111-8111-111111111111/workflow';
+ assert.equal((await request(path,{method:'POST',body:{}})).status,401);
+ assert.equal((await request(path,{method:'POST',key:true,body:{}})).status,403);
+ assert.equal((await request(path,{method:'POST',email:'student@example.test',body:{}})).status,403);
+});
 test('admin live catalogue matches the public database catalogue, including topic tests and no protected payload',async()=>{
  const publicList=await request('/mocks');
  const adminList=await request('/admin/catalogue',{email:owner});

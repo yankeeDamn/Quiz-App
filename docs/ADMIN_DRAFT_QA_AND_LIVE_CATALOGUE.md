@@ -18,10 +18,10 @@
 
 1. Open its **Publication checklist** and use **Open questions** for each source topic.
 2. Confirm the intended source question access (Free or Pro only) *before* reviewing. Changing access or editing question content returns that question to draft. Changing shared question access can affect other tests using it, so keep shared content assignments intentional.
-3. Independently verify every configured question, answer and explanation. Click **Mark reviewed**, then **Publish reviewed question**. These actions require a verified human admin; private QA never substitutes for review.
+3. Independently verify every configured question, answer and explanation. Use **Review & publish**, verify the displayed question and explicitly acknowledge the review. **Mark reviewed only** and the later **Publish reviewed question** action remain available. These actions require a verified human admin; private QA never substitutes for review.
 4. Restore missing/retired source positions or correct the mock’s ranges. Activate source topics only when their public content is ready. Do not deactivate shared live topics to make Test Draft work.
 5. Full SSC CGL mocks also retain their academic/Hindi approval and exam-pattern gates.
-6. Return to the mock, set **PRO**, click **Draft · Hidden**, and explicitly confirm publication. Reopen the checklist if the server rejects it. A successful flag change alone is not enough: verify **Published · Live** and its entry in **Live Catalogue**.
+6. Return to the mock, set **PRO**, click **Publish mock**, and explicitly confirm publication. Reopen the checklist if the server rejects it. A successful flag change alone is not enough: verify **Published · Live** and its entry in **Live Catalogue**.
 
 ## Staging verification after review and approval
 

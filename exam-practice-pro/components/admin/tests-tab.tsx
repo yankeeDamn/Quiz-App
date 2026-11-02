@@ -1,8 +1,10 @@
 /* eslint-disable react-hooks/set-state-in-effect -- these effects load data from the API when the page opens */
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { ArrowRight, ChevronDown, ClipboardCheck, Eye, LoaderCircle, Pencil, ShieldCheck } from 'lucide-react';
+import {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { admin, type AdminTest, type AdminTopic, type TestSection } from '@/lib/admin';
 import { Field, Notice, card, input } from '@/components/admin/ui';
@@ -33,16 +35,18 @@ const blank = (topic: string): Draft => ({
 const countOf = (t: AdminTest) => t.configuredQuestionCount ?? t.sections.reduce((n, s) => n + s.parts.reduce((m, p) => m + (p.to - p.from), 0), 0);
 const changed = () => window.dispatchEvent(new Event('exampro-catalogue-changed'));
 
-export function TestsTab({onEditQuestions,initialView='all'}:{onEditQuestions?:(topic:string)=>void;initialView?:'all'|'live'|'hidden'}) {
+export function TestsTab({onEditQuestions,initialView='all',initialTestId=''}:{onEditQuestions?:(topic:string,testId?:string)=>void;initialView?:'all'|'live'|'hidden';initialTestId?:string}) {
   const [view,setView]=useState(initialView);
-  const [checklistId,setChecklistId]=useState<string|null>(null);
-  const [search,setSearch]=useState('');
+  const [checklistId,setChecklistId]=useState<string|null>(initialTestId||null);
+  const [search,setSearch]=useState(initialTestId);
   const [category,setCategory]=useState('all');
   const [busy,setBusy]=useState(false);
   const [bulk,setBulk]=useState<{id:string;name:string;ready:boolean;blocker:string|null}[]|null>(null);
   const [tests, setTests] = useState<AdminTest[]>([]);
   const [topics, setTopics] = useState<AdminTopic[]>([]);
   const [draftTestingEnabled,setDraftTestingEnabled] = useState(false);
+  const editorHeading=useRef<HTMLHeadingElement>(null);
+  const secondaryPanel=useRef<HTMLDivElement>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [reviewId,setReviewId] = useState<string|null>(null);
@@ -57,6 +61,9 @@ export function TestsTab({onEditQuestions,initialView='all'}:{onEditQuestions?:(
     if (p.ok) setTopics(p.data.topics);
   }, []);
   useEffect(() => { void load(); }, [load]);
+  const draftIdentity=draft?(editingId??'new'):null;
+  useEffect(()=>{if(draftIdentity!==null)requestAnimationFrame(()=>{editorHeading.current?.scrollIntoView({behavior:'smooth',block:'start'});editorHeading.current?.focus({preventScroll:true});});},[draftIdentity]);
+  useEffect(()=>{if(reviewId||readinessId)requestAnimationFrame(()=>secondaryPanel.current?.scrollIntoView({behavior:'smooth',block:'start'}));},[reviewId,readinessId]);
 
   const toBody = (d: Draft) => ({
     id: d.id, name: d.name, exam: d.exam, level: d.level, tier: d.tier, minutes: Number(d.minutes),
@@ -85,12 +92,13 @@ export function TestsTab({onEditQuestions,initialView='all'}:{onEditQuestions?:(
     if(busy)return;
     if (change.active === true && !t.active &&
       !window.confirm('Publish "' + t.name + '" to learners? Source topics and every question must pass review.')) return;
+    if(change.active===false&&t.active&&!window.confirm('Unpublish this mock? It will disappear from the catalogue; existing saved attempts are preserved.'))return;
     if (change.tier && !window.confirm(`Change "${t.name}" to ${change.tier==='free'?'Free':'Pro'}? Source question access and review checks still apply.`)) return;
     setBusy(true);setMsg(null);
     const r = await admin(`/tests/${t.id}`, 'PUT', { ...t, ...change });
     setBusy(false);
     setMsg(r.ok?{kind:'ok',text:'Test updated. Catalogue pages refresh on focus or within 30 seconds.'}:{kind:'error',text:r.message});
-    if(r.ok)changed();
+    if(r.ok){changed();if(change.active!==undefined)setChecklistId(null);}
     else if(r.status===409)setChecklistId(t.id);
     await load();
   };
@@ -148,9 +156,9 @@ export function TestsTab({onEditQuestions,initialView='all'}:{onEditQuestions?:(
       {view==='live'?<LiveCatalogue definitions={tests} onEditQuestions={onEditQuestions}/>:<section className={card}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-bold">Mocks &amp; Tests Manager</h2>
-          <div className="flex flex-wrap gap-2"><Button variant="outline" disabled={busy} onClick={()=>void checkBulk()}>Publish All Reviewed Drafts</Button><Button disabled={busy} onClick={() => { setEditingId(null); setDraft(blank(firstTopic)); }}>+ Create New Mock Test</Button></div>
+          <div className="flex flex-wrap gap-2"><Button variant="outline" disabled={busy} onClick={()=>void checkBulk()}>Check ready drafts</Button><Button disabled={busy} onClick={() => { setEditingId(null); setDraft(blank(firstTopic)); }}>+ Create New Mock Test</Button></div>
         </div>
-        <p className="mt-1 text-xs text-muted-foreground">Topic tests are made automatically for every topic with questions, and are always free.</p>
+        <p className="mt-2 text-sm text-muted-foreground">Review questions, check source topics, then publish the complete mock. Draft testing stays private.</p>
         <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">Publishing is separate from Test Draft: the backend blocks it until all referenced topics and question positions are active. Complete independent editorial and accessibility review before activating topics.</p>
         {draftTestingEnabled && <p className="mt-2 rounded-lg border border-amber-400 p-3 text-xs" role="status">Staging draft exam QA is enabled for verified admins. Use <strong>Test Draft</strong> to start a private, server-timed exam without publishing topics or tests. Draft question counts are configured ranges; use Preview to verify active question rows.</p>}
         <div className="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_200px]"><input className={input} aria-label="Search mock tests" placeholder="Search test name or ID…" value={search} onChange={e=>setSearch(e.target.value)}/><select className={input} aria-label="Filter mock test category" value={category} onChange={e=>setCategory(e.target.value)}><option value="all">All categories</option>{[...new Set(tests.map(t=>t.exam))].sort().map(exam=><option key={exam}>{exam}</option>)}</select></div>
@@ -164,18 +172,15 @@ export function TestsTab({onEditQuestions,initialView='all'}:{onEditQuestions?:(
                   <td className="min-w-52 p-3"><p className="font-semibold">{t.name}</p><span className="mt-1 block text-xs text-muted-foreground">{t.exam} · {t.id}</span>{t.hiddenReason&&<p className="mt-2 max-w-xs text-xs text-amber-700 dark:text-amber-300">{t.hiddenReason}</p>}</td>
                   <td className="p-3 text-xs tabular-nums"><p className="whitespace-nowrap">{countOf(t)} Qs · {t.minutes} mins</p><p className="mt-1 text-muted-foreground">{t.questionCount??0} accessible</p></td>
                   <td className="p-3"><button type="button" disabled={busy} className={`min-h-10 whitespace-nowrap rounded-full px-3 text-xs font-bold disabled:opacity-50 ${t.tier==='free'?'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200':'bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200'}`} onClick={() => void quick(t, { tier: t.tier === 'free' ? 'premium' : 'free' })} aria-label={`Change access for ${t.name}`}>{t.tier === 'free' ? '● Free' : '★ PRO'}</button></td>
-                  <td className="p-3"><button type="button" disabled={busy} className={`min-h-10 whitespace-nowrap rounded-full border px-3 text-xs font-semibold disabled:opacity-50 ${t.active&&t.liveInCatalogue?'border-emerald-300 text-emerald-700 dark:text-emerald-300':'border-amber-300 text-amber-800 dark:text-amber-300'}`} onClick={() => void quick(t, { active: !t.active })} aria-label={`Publish or unpublish ${t.name}`}>{t.active?(t.liveInCatalogue?'Published · Live':'Active · Hidden'):'Draft · Hidden'}</button></td>
+                  <td className="min-w-44 p-3"><span className={`inline-block whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold ${t.active&&t.liveInCatalogue?'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200':'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200'}`}>{t.active?(t.liveInCatalogue?'Published · Live':'Active · Hidden'):'Draft · Hidden'}</span><div className="mt-2"><Button type="button" size="sm" variant={t.active?'outline':'default'} disabled={busy} className="min-h-11" onClick={()=>void quick(t,{active:!t.active})}>{busy?<LoaderCircle className="h-4 w-4 animate-spin"/>:t.active?null:<ArrowRight className="h-4 w-4"/>}{t.active?'Unpublish mock':'Publish mock'}</Button></div></td>
                   <td className="p-3"><span className="inline-block whitespace-nowrap rounded-lg bg-muted px-2 py-1.5 text-xs">{t.sectionTimingMinutes?`${t.sectionTimingMinutes}m Section Locks`:'Standard / pending validation'}</span></td>
-                  <td className="min-w-60 p-3"><div className="flex max-w-xs flex-wrap gap-x-3 gap-y-2 text-xs">
-                    {!t.active && draftTestingEnabled && <Link className="min-h-8 font-semibold text-indigo-700 underline dark:text-indigo-300" href={`/admin/draft-test/${encodeURIComponent(t.id)}`}>Test Draft</Link>}
-                    {countOf(t)===100&&/ssc/i.test(t.exam)&&/cgl/i.test(t.name)&&<button type="button" className="min-h-8 underline" onClick={() => {setReadinessId(t.id);setReviewId(null);setPreview(null)}}>Release readiness</button>}
-                    <button type="button" className="min-h-8 font-semibold text-indigo-700 underline dark:text-indigo-300" onClick={()=>setChecklistId(t.id)}>Publication checklist</button>
-                    <button type="button" className="min-h-8 underline" onClick={() => onEditQuestions?.(t.sections[0]?.parts[0]?.topic??'')}>Edit Questions</button>
-                    {countOf(t)===100&&/ssc/i.test(t.exam)&&/cgl/i.test(t.name)&&<button type="button" className="min-h-8 underline" onClick={() => {setReviewId(t.id);setReadinessId(null);setPreview(null)}}>Academic Review</button>}
-                    <button type="button" className="min-h-8 underline" onClick={() => void showPreview(t)}>Preview Test</button>
-                    <button type="button" className="min-h-8 underline" onClick={() => edit(t)}>Edit</button>
-                    <button type="button" className="min-h-8 underline" disabled={busy} onClick={() => duplicate(t)}>Duplicate</button>
-                    <button type="button" className="min-h-8 text-red-700 underline disabled:opacity-40 dark:text-red-300" disabled={busy||t.active} onClick={()=>void remove(t)}>Delete</button>
+                  <td className="min-w-64 p-3"><div className="flex max-w-sm flex-wrap gap-2">
+                    <Button type="button" variant="outline" size="sm" className="min-h-11" disabled={busy} onClick={()=>setChecklistId(t.id)}><ClipboardCheck/>Check readiness</Button>
+                    <Button type="button" variant="outline" size="sm" className="min-h-11" disabled={busy} onClick={()=>onEditQuestions?.(t.sections[0]?.parts[0]?.topic??'',t.id)}><ShieldCheck/>Review questions</Button>
+                    {!t.active&&draftTestingEnabled&&<Button variant="outline" size="sm" className="min-h-11" asChild><Link href={`/admin/draft-test/${encodeURIComponent(t.id)}`}>Test draft</Link></Button>}
+                    <Button type="button" variant="ghost" size="sm" className="min-h-11" disabled={busy} onClick={()=>void showPreview(t)}><Eye/>Preview</Button>
+                    <Button type="button" variant="ghost" size="sm" className="min-h-11" disabled={busy} onClick={()=>edit(t)}><Pencil/>Edit mock</Button>
+                    <details className="relative"><summary className="flex min-h-11 cursor-pointer items-center gap-1 rounded-lg border px-3 text-xs font-semibold">More<ChevronDown className="h-3.5 w-3.5"/></summary><div className="absolute right-0 z-10 mt-2 grid min-w-52 gap-1 rounded-xl border bg-popover p-2 shadow-lg">{countOf(t)===100&&/ssc/i.test(t.exam)&&/cgl/i.test(t.name)&&<><Button variant="ghost" size="sm" onClick={()=>{setReadinessId(t.id);setReviewId(null);}}>SSC release report</Button><Button variant="ghost" size="sm" onClick={()=>{setReviewId(t.id);setReadinessId(null);}}>Academic / Hindi review</Button></>}<Button variant="ghost" size="sm" disabled={busy} onClick={()=>duplicate(t)}>Duplicate definition</Button><Button variant="ghost" size="sm" disabled={busy||t.active} className="text-red-700 dark:text-red-300" onClick={()=>void remove(t)}>Delete unused draft</Button></div></details>
                   </div></td>
                 </tr>
               ))}
@@ -186,15 +191,16 @@ export function TestsTab({onEditQuestions,initialView='all'}:{onEditQuestions?:(
         </div>
       </section>}
 
-      {checklistId&&<PublicationChecklist key={checklistId} testId={checklistId} onClose={()=>setChecklistId(null)} onEditQuestions={onEditQuestions}/>}
+      {checklistId&&<Dialog open onOpenChange={open=>{if(!open&&!busy)setChecklistId(null);}}><DialogContent showCloseButton={!busy} className="max-h-[90dvh] overflow-y-auto rounded-3xl p-1 sm:max-w-5xl"><DialogTitle className="sr-only">Mock publishing readiness</DialogTitle><DialogDescription className="sr-only">Review source questions and topic readiness before publishing.</DialogDescription><PublicationChecklist key={checklistId} testId={checklistId} onClose={()=>setChecklistId(null)} onEditQuestions={onEditQuestions} busy={busy} actionError={msg?.kind==='error'?msg.text:''} onPublish={id=>{const t=tests.find(t=>t.id===id);if(t)void quick(t,{active:true});}}/></DialogContent></Dialog>}
+      <div ref={secondaryPanel} className="scroll-mt-24"/>
       {readinessId && <MockReleaseReadiness key={readinessId} testId={readinessId} onClose={()=>setReadinessId(null)} />}
       {reviewId && <MockReview key={reviewId} testId={reviewId} onClose={()=>setReviewId(null)} />}
 
-      {preview && <section className={card}><h2 className="text-lg font-semibold">Preview: {preview.name}</h2><p className="text-sm text-muted-foreground">{preview.questionCount} active questions · {preview.minutes} minutes. Only published tests appear in the student catalogue.</p><ol className="mt-3 list-inside list-decimal space-y-1 text-sm">{preview.questions.slice(0,30).map(q=><li key={q.id}>{q.question}</li>)}</ol><Button className="mt-4" variant="outline" onClick={()=>setPreview(null)}>Close preview</Button></section>}
+      {preview&&<Dialog open onOpenChange={open=>{if(!open)setPreview(null);}}><DialogContent className="max-h-[90dvh] overflow-y-auto rounded-3xl p-6 sm:max-w-2xl"><DialogHeader><DialogTitle>Preview: {preview.name}</DialogTitle><DialogDescription>{preview.questionCount} active source questions · {preview.minutes} minutes. Private preview does not publish this mock.</DialogDescription></DialogHeader><ol className="list-inside list-decimal space-y-3 text-sm">{preview.questions.slice(0,30).map(q=><li key={q.id}>{q.question}</li>)}</ol>{preview.questionCount>30&&<p className="text-xs text-muted-foreground">Showing the first 30 question stems. Use Test draft for a complete private run.</p>}<Button variant="outline" onClick={()=>setPreview(null)}>Close preview</Button></DialogContent></Dialog>}
 
       {draft && (
         <form onSubmit={save} className={`${card} grid gap-4`}>
-          <h2 className="text-lg font-bold">{editingId ? `Edit ${editingId}` : 'New mock test'}</h2>
+          <h2 ref={editorHeading} tabIndex={-1} className="scroll-mt-24 text-lg font-bold focus:outline-none">{editingId ? `Edit ${editingId}` : 'New mock test'}</h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {!editingId && <Field label="Id" hint="Lower case, dashes, for example ssc3"><input className={input} required value={draft.id} onChange={(e) => setDraft({ ...draft, id: e.target.value })} /></Field>}
             <Field label="Name"><input className={input} required value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} /></Field>

@@ -33,6 +33,8 @@ export default function AdminPage() {
   const [gate, setGate] = useState<Gate>({ state: 'loading' });
   const [section, setSection] = useState<AdminSection>('tests');
   const [questionTopic,setQuestionTopic]=useState('');
+  const [questionMock,setQuestionMock]=useState<string|undefined>();
+  const [focusedMock,setFocusedMock]=useState('');
   const [attempt, setAttempt] = useState(0);
   const heading = useRef<HTMLHeadingElement>(null);
   const selected = SECTIONS.find((item) => item.id === (section==='practice'?'questions':section==='catalogue'?'tests':section)) ?? {label:'Overview', description:'Your content, publishing queue and service status at a glance.'};
@@ -56,7 +58,7 @@ export default function AdminPage() {
   }, [status, session?.user, account, attempt]);
 
   const authorized = status === 'authenticated' && !!account && authorizedAccount === account && gate.state === 'ok';
-  const navigate = (next: AdminSection) => { setSection(next); requestAnimationFrame(() => heading.current?.focus()); };
+  const navigate = (next: AdminSection,focusMock='') => { if(next==='tests')setFocusedMock(focusMock);setSection(next); requestAnimationFrame(() => heading.current?.focus()); };
 
   return (
     <>
@@ -93,8 +95,8 @@ export default function AdminPage() {
               </div>
               <CommandMetrics onNavigate={navigate}/><section id="admin-section" aria-label={selected.label} className="min-w-0">
                 {section === 'overview' && <AdminOverview onNavigate={navigate} />}
-                {(section === 'questions'||section === 'practice') && <div className="space-y-5"><div className="flex flex-wrap gap-2"><Button variant={section==='questions'?'default':'outline'} onClick={()=>navigate('questions')}>Database question bank</Button><Button variant={section==='practice'?'default':'outline'} onClick={()=>navigate('practice')}>Practice & IT library</Button></div>{section==='questions'?<QuestionsTab initialTopic={questionTopic}/>:<PracticeLibraryTab/>}</div>}
-                {(section === 'tests'||section==='catalogue') && <TestsTab key={section} initialView={section==='catalogue'?'live':'all'} onEditQuestions={topic=>{setQuestionTopic(topic);navigate('questions');}} />}
+                {(section === 'questions'||section === 'practice') && <div className="space-y-5"><div className="flex flex-wrap gap-2"><Button variant={section==='questions'?'default':'outline'} onClick={()=>navigate('questions')}>Database question bank</Button><Button variant={section==='practice'?'default':'outline'} onClick={()=>navigate('practice')}>Practice & IT library</Button></div>{section==='questions'?<QuestionsTab initialTopic={questionTopic} mockId={questionMock} onBackToMocks={()=>navigate('tests',questionMock??'')}/>:<PracticeLibraryTab/>}</div>}
+                {(section === 'tests'||section==='catalogue') && <TestsTab key={section+focusedMock} initialView={section==='catalogue'?'live':'all'} initialTestId={focusedMock} onEditQuestions={(topic,testId)=>{setQuestionTopic(topic);setQuestionMock(testId);navigate('questions');}} />}
                 {section === 'payments' && <CashfreeSandboxAudit/>}{section === 'qa' && <QaTab/>}
                 {section === 'plans' && <PlansTab />}
               </section>

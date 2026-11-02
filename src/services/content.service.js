@@ -128,7 +128,7 @@ class ContentService {
          FROM mock_questions WHERE topic_id = $1 ORDER BY position`,
       [topicId]
     );
-    return rows;
+    return rows.map(q=>require('./question-workflow.service').present(q));
   }
 
   async topicExists(id) {
