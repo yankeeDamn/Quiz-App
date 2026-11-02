@@ -1,0 +1,4 @@
+export const dynamic = 'force-dynamic';
+export default function LocalServerErrorTest(): never {
+  throw new Error('PRIVATE_ERROR_SENTINEL private@example.com private-cookie');
+}

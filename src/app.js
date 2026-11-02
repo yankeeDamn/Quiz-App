@@ -1,9 +1,12 @@
 'use strict';
 
+const config = require('./config');
+const monitoring = require('./telemetry/sentry');
+monitoring.init();
+
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
-const config = require('./config');
 const logger = require('./utils/logger');
 const routes = require('./routes');
 const { errorHandler, notFound } = require('./middleware/error-handler');

@@ -28,6 +28,16 @@ Post only with admin permission and within group rules. Use one main production 
 - Return visits in 7 days (retention)
 - Count of learners who voluntarily request Pro, and **paid** conversions only after checkout is tested
 
+### Implemented aggregate event instrumentation
+
+Production browser events are `sign_in`, `mock_started`, `mock_completed`, `pricing_viewed` and `pro_requested_whatsapp`. Properties are restricted to `exam_slug`, `test_id` and `plan_name` catalogue identifiers. No names, emails, attempt IDs, question text, answers, invitation codes or application references are sent. Private page views are excluded and URL queries/fragments are removed. Account sign-in is recorded after a successful Auth.js return, not when the provider button is clicked. Guest sign-ins are included; these counts are not unique new accounts.
+
+Scored/beta mock starts fire only for server-confirmed newly created attempts; recovering an attempt does not create another start event. Submission fires after a successful API result and is deduplicated in the current browser tab. Built-in practice starts, retakes and completions also emit the mock events and can be separated by their catalogue test IDs. Admin draft testing is excluded. Best-effort browser delivery is not an accounting ledger, and blocked scripts/network retries/new tabs can affect counts.
+
+Vercel currently requires Pro/Enterprise for custom-event reporting; enable Web Analytics in the intended project and verify its current entitlement before using this scorecard. This PR does not upgrade plans or create a paid service. Page-view integration is separate from Speed Insights, advertising and replay, which are not added.
+
+These anonymous counters support aggregate activity and completion/request ratios. They do **not** establish individual first-ever activity, first-ever paid intent, seven-day account retention or completed payments. Keep the consented beta scorecard/manual follow-up for those measures. Do not add a persistent analytics user identifier or email property to approximate retention. Full setup and local recovery/Sentry acceptance steps: [OBSERVABILITY.md](OBSERVABILITY.md).
+
 Use anonymous aggregate counts for public claims. Do not share individual results or email addresses with group members.
 
 ### 7-day tracking scorecard (fill in daily)

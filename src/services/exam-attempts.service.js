@@ -33,7 +33,7 @@ async function start(user, testId, adminDraft = false) {
     );
     if (existing.rowCount) {
       await client.query('COMMIT');
-      return visibleAttempt(existing.rows[0]);
+      return { ...visibleAttempt(existing.rows[0]), newlyCreated: false };
     }
     const loadedTest = adminDraft ? test : found.build();
     // Never accept a requested timing profile from the client. Grant lives in
@@ -55,7 +55,7 @@ async function start(user, testId, adminDraft = false) {
       [user.id,storedId,JSON.stringify(snapshot),effectiveMinutes]
     );
     await client.query('COMMIT');
-    return visibleAttempt(saved.rows[0]);
+    return { ...visibleAttempt(saved.rows[0]), newlyCreated: true };
   } catch (e) { await client.query('ROLLBACK'); throw e; }
   finally { client.release(); }
 }

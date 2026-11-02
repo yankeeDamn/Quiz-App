@@ -93,10 +93,14 @@ Tests: `npm test` in the root runs the API tests. `npm run build` in `exam-pract
 | `ADMIN_EMAILS` | API | For `/admin` | Your Google or GitHub email, comma separated for more than one |
 | `ADMIN_API_KEY` | API | No | Optional 24+ character key for `curl`. Not needed for the admin page |
 | `NEXT_PUBLIC_API_URL` | Site | Yes | The API's URL |
+| `NEXT_PUBLIC_SENTRY_DSN` | Site | No — optional | Frontend, SSR and edge error monitoring; blank disables Sentry |
+| `SENTRY_DSN` | API | No — optional | Express error monitoring; blank disables Sentry |
 | `NEXTAUTH_URL` | Site | Yes | The site's own URL |
 | `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` | Site | For Google sign-in | |
 | `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET` | Site | For GitHub sign-in | |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | Site | No | Defaults to the number in `render.yaml` |
+
+Recovery pages, aggregate analytics, optional Sentry setup and local acceptance steps are documented in [docs/OBSERVABILITY.md](docs/OBSERVABILITY.md). No database migration is needed for the observability changes.
 
 The Render build runs `npm run db:migrate` for you. It adds the plan columns and the `plan_grants` table and is safe to run again.
 

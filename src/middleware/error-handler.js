@@ -1,6 +1,7 @@
 'use strict';
 
 const logger = require('../utils/logger');
+const monitoring = require('../telemetry/sentry');
 
 /**
  * Centralised Express error-handling middleware.
@@ -14,6 +15,7 @@ function errorHandler(err, _req, res, _next) {
   const statusCode = databaseUnavailable ? 503 : (err.statusCode || 500);
   const isProduction = process.env.NODE_ENV === 'production';
 
+  if (statusCode >= 500) monitoring.captureException(err);
   logger.error({ err, statusCode }, err.message);
 
   res.status(statusCode).json({
