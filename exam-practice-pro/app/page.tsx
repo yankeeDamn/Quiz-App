@@ -9,6 +9,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { SearchBar } from '@/components/shared/search-bar';
 import { FilterChips } from '@/components/shared/filter-chips';
+import { MockCatalogue } from '@/components/mocks/mock-catalogue';
 import { QuizCard } from '@/components/quiz/quiz-card';
 import { ProviderCard } from '@/components/quiz/provider-card';
 import { getUniqueSubjects, examProviders, exams, getAllQuizzes } from '@/data/quizzes';
@@ -235,6 +236,13 @@ export default function HomePage() {
               </div>
             </motion.div>
           </div>
+        </section>
+
+        <section id="live-tests" className="container mx-auto px-4 py-12 sm:py-16" aria-labelledby="live-tests-heading">
+          <p className="ep-eyebrow">CHOOSE YOUR NEXT TEST</p>
+          <h2 id="live-tests-heading" className="mt-2 text-3xl font-bold tracking-tight">Free &amp; Pro mock tests</h2>
+          <p className="mb-6 mt-2 text-muted-foreground">Browse the live catalogue, start free practice or preview a Pro mock.</p>
+          <MockCatalogue />
         </section>
 
         {/* Discover exam categories after the main value proposition. */}

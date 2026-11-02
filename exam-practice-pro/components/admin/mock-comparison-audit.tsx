@@ -1,20 +1,21 @@
 'use client';
 import {useState} from 'react';
 import {admin} from '@/lib/admin';
+import {card} from './ui';
 type Summary={id:string;expected:number;actual:number;academicApproved:number;hindiVerified:number;hindiRequired:number;stale:number;missingExplanation:string[];invalidAnswers:string[];complete:boolean};
 type Pair={mock01Id:string;mock02Id:string;similarity?:number};
 type Report={exact:Pair[];near:Pair[];nearCount:number;mocks:Summary[];structure:{id:string;valid:boolean;sections:number;draft:boolean|null}[];publication:{id:string;editorialReady?:boolean;technicalReady?:boolean;publicationBlocker?:string|null;error?:string}[];releaseAuthorized:boolean;limits:string};
 export function MockComparisonAudit(){
  const [data,setData]=useState<Report|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false);
  const load=async()=>{setBusy(true);setError('');const r=await admin<Report>('/mock01-02/audit');setBusy(false);if(r.ok)setData(r.data);else setError(r.message);};
- return <section className="space-y-3 rounded-xl border p-5" aria-label="Mock 01 and 02 comparison audit">
+ return <section className={`${card} space-y-4`} aria-label="Mock 01 and 02 comparison audit">
   <h2 className="font-bold text-lg">Mock 01 vs Mock 02 — Read-only QA audit</h2>
   <p className="text-sm text-muted-foreground">Private staging reviewer report. No approval, import, activation or publication is possible here.</p>
   <button type="button" className="rounded border px-3 py-2 text-sm" disabled={busy} onClick={()=>void load()}>{busy?'Checking…':'Run read-only audit'}</button>
   {error&&<p role="alert" className="text-red-600">{error}</p>}
   {data&&<div className="space-y-3 text-sm">
-   <p role="status" className="rounded border border-amber-400 p-3 font-semibold">Exact matches: {data.exact.length} · Possible near-duplicates: {data.nearCount}. Release authorized: No.</p>
-   <div className="overflow-x-auto"><table className="w-full text-left"><thead><tr><th>Mock</th><th>Rows</th><th>Academic</th><th>Hindi</th><th>Stale</th><th>Explanation issues</th><th>Key issues</th></tr></thead><tbody>{data.mocks.map(m=><tr key={m.id} className="border-t"><td className="py-2">{m.id}</td><td>{m.actual}/{m.expected}</td><td>{m.academicApproved}/{m.expected}</td><td>{m.hindiVerified}/{m.hindiRequired}</td><td>{m.stale}</td><td>{m.missingExplanation.length}</td><td>{m.invalidAnswers.length}</td></tr>)}</tbody></table></div>
+   <div role="status" className="grid gap-3 sm:grid-cols-3">{[['Exact duplicate stems',data.exact.length],['Possible near-duplicates',data.nearCount],['Release authorized','No']].map(([label,value])=><div key={label} className="rounded-xl border bg-muted/30 p-4"><p className="text-2xl font-bold">{value}</p><p className="mt-1 text-xs text-muted-foreground">{label}</p></div>)}</div><p className="text-xs text-muted-foreground">Zero exact matches passes the exact-duplicate check. Human review, near-duplicate checks and publication gates remain separate.</p>
+   <div className="overflow-x-auto"><table className="w-full text-left"><thead className="bg-muted/60 text-xs uppercase"><tr><th>Mock</th><th>Rows</th><th>Academic</th><th>Hindi</th><th>Stale</th><th>Explanation issues</th><th>Key issues</th></tr></thead><tbody>{data.mocks.map(m=><tr key={m.id} className="border-t hover:bg-muted/30"><td className="py-2">{m.id}</td><td>{m.actual}/{m.expected}</td><td>{m.academicApproved}/{m.expected}</td><td>{m.hindiVerified}/{m.hindiRequired}</td><td>{m.stale}</td><td>{m.missingExplanation.length}</td><td>{m.invalidAnswers.length}</td></tr>)}</tbody></table></div>
    <h3 className="font-semibold">Exam structure and release gates</h3>
    <ul className="list-disc pl-5">{data.structure.map(s=><li key={s.id}>{s.id}: {s.valid?'Four-section structure valid':'Structure needs review'} · {s.draft===true?'Draft':s.draft===false?'Active':'Missing'}</li>)}</ul>
    <ul className="list-disc pl-5">{data.publication.map(p=><li key={p.id}>{p.id}: {p.error||p.publicationBlocker||'No recorded technical blocker'} · Editorial readiness: {p.editorialReady?'Yes':'No'}</li>)}</ul>

@@ -3,12 +3,10 @@
 import {useCallback,useEffect,useState} from 'react';
 import {Button} from '@/components/ui/button';
 import {admin,type AdminGrant,type AdminUser,type GrantPreview} from '@/lib/admin';
-import {CashfreeSandboxAudit} from '@/components/admin/cashfree-sandbox-audit';
 import {Field,Notice,card,input} from '@/components/admin/ui';
 
 const fmt=(d:string|null)=>(d?new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'–');
 const initial={email:'',plan:'pro',months:'1',amountInr:'',reason:'manual_payment',note:''};
-const showAudit=process.env.NEXT_PUBLIC_CASHFREE_SANDBOX_CHECKOUT==='true';
 
 export function PlansTab(){
  const [q,setQ]=useState('');
@@ -167,7 +165,7 @@ export function PlansTab(){
     <p className="mb-2 text-xs text-muted-foreground">Reviewed manual unlocks are separated from old records. Legacy entries may not have a structured payment reason.</p>
     {grantTable(manual,'manual')}
    </section>
-   {showAudit&&<CashfreeSandboxAudit/>}
+
   </div>
  </div>;
 }

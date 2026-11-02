@@ -1,30 +1,22 @@
 'use client';
-
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { fetchPlanState, type PlanState } from '@/lib/mocks';
-
-const GUEST: PlanState = { signedIn: false, active: false, plan: 'free', expiresAt: null, loaded: true };
-const LOADING: PlanState = { ...GUEST, loaded: false };
-
-/** The signed-in user's plan, read from the API. Guests get the free plan. */
-export function usePlan(): PlanState {
-  const { data: session, status } = useSession();
-  const [fetched, setFetched] = useState<PlanState | null>(null);
-  const userKey = session?.user ? (session.user.id ?? session.user.email ?? 'user') : null;
-
-  useEffect(() => {
-    if (!userKey) return;
-    let cancelled = false;
-    fetchPlanState().then((s) => {
-      if (!cancelled) setFetched(s);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [userKey]);
-
-  if (status === 'loading') return LOADING;
-  if (!userKey) return GUEST;
-  return fetched ?? LOADING;
+const GUEST:PlanState={signedIn:false,active:false,plan:'free',expiresAt:null,loaded:true};
+const LOADING:PlanState={...GUEST,loaded:false};
+/** Keep access display tied to the current account; the API enforces access again. */
+export function usePlan():PlanState{
+  const {data:session,status}=useSession();
+  const key=session?.user?(session.user.id??session.user.email??'user'):null;
+  const [fetched,setFetched]=useState<{key:string;state:PlanState}|null>(null);
+  useEffect(()=>{
+    if(!key)return;
+    let cancelled=false;
+    const load=()=>{void fetchPlanState().then(state=>{if(!cancelled)setFetched({key,state});});};
+    load();window.addEventListener('focus',load);
+    return()=>{cancelled=true;window.removeEventListener('focus',load);};
+  },[key]);
+  if(status==='loading')return LOADING;
+  if(!key)return GUEST;
+  return fetched?.key===key?fetched.state:LOADING;
 }

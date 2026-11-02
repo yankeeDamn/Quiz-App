@@ -1,5 +1,5 @@
 import { api, getUserProfile } from '@/lib/api';
-import { buildCertTest } from '@/lib/it-certs';
+import { IT_CERTS, buildCertTest } from '@/lib/it-certs';
 import { buildSeparatePractice, separateSummaries } from '@/lib/separate-exams';
 import { fetchPracticeLibrary } from '@/lib/practice-overrides';
 
@@ -9,7 +9,11 @@ export interface MockSummary {
   name: string;
   exam: string;
   kind: 'mock' | 'topic';
-  tier: 'free' | 'premium';
+  tier: 'free' | 'premium' | 'pro';
+  isPro?: boolean;
+  practiceOnly?: boolean;
+  previewQuestionCount?: number;
+  sectionTimingMinutes?: number | null;
   level: string;
   minutes: number;
   questionCount: number;
@@ -46,7 +50,11 @@ export type MockLoad =
 export async function fetchCatalog(): Promise<MockSummary[]> {
   const res = await api<{ tests: MockSummary[] }>('/api/v1/mocks', { public: true });
   if (!res.success || !res.data) throw new Error(res.error?.message || 'Could not load the tests');
-  return [...res.data.tests,...separateSummaries()];
+  const starters = IT_CERTS.map(cert=>buildCertTest(cert.id)).filter((t): t is MockTest=>!!t)
+    .map(t=>({id:t.id,name:t.name,exam:t.exam,kind:t.kind,tier:t.tier,level:t.level,minutes:t.minutes,questionCount:t.questionCount,
+      marksPerCorrect:t.marksPerCorrect,negativeMarks:t.negativeMarks,underReview:t.underReview,practiceOnly:true,sections:t.sections.map(s=>s.name)}));
+  const combined = [...res.data.tests,...separateSummaries().map(t=>({...t,practiceOnly:true})),...starters];
+  return [...new Map(combined.map(t=>[t.id,t])).values()];
 }
 
 export async function fetchMock(id: string, mode: 'test' | 'practice' = 'test'): Promise<MockLoad> {
@@ -207,3 +215,5 @@ export function negativeLabel(n: number): string {
   if (Math.abs(n - 2 / 3) < 0.001) return '−2/3 per wrong answer';
   return `−${n} per wrong answer`;
 }
+
+export const isProTest = (test: Pick<MockSummary, 'tier'>) => test.tier === 'premium' || test.tier === 'pro';

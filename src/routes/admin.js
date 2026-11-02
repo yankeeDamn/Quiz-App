@@ -94,6 +94,8 @@ router.use((req, res, next) => {
 router.use(adminLimiter, requireAdmin);
 
 router.get('/me', (req, res) => ok(res, { via: req.admin.via, email: req.admin.email }));
+router.get('/command-center', requireHumanReviewer, wrap(async(_req,res)=>ok(res,await require('../services/admin-command-center.service').metrics())));
+
 
 router.get('/practice/library', wrap(async(_req,res)=>ok(res,{
   overrides:await practiceOverrides.listOverrides({includeDrafts:true}),
@@ -354,6 +356,13 @@ router.get('/cashfree/sandbox-audit',requireHumanReviewer,wrap(async(req,res)=>{
 // ── Mock tests ─────────────────────────────────────────
 
 router.get('/tests', wrap(async (_req, res) => ok(res, { tests: await content.listTests() })));
+
+router.get('/tests/publication-candidates', requireHumanReviewer, wrap(async(_req,res)=>ok(res,await require('../services/admin-command-center.service').candidates())));
+router.delete('/tests/:id', requireHumanReviewer, wrap(async(req,res)=>{
+  if(!SLUG.test(req.params.id))return bad(res,'Bad test id');
+  const result=await content.deleteDraftTest(req.params.id);
+  return result.ok?ok(res,{}):bad(res,result.error,result.status);
+}));
 
 router.get('/tests/:id/preview', wrap(async (req,res)=>{
   if(!SLUG.test(req.params.id))return bad(res,'Bad test id');

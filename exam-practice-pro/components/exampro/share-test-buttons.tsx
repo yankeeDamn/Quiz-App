@@ -7,8 +7,8 @@ import { copyUrl } from '@/lib/mobile-share';
 
 export const validShareTestId = (id:string) => /^[a-z0-9-]{1,60}$/.test(id);
 
-export function ShareTestButtons({testId, title, compact=false}:{
-  testId:string;title:string;compact?:boolean;
+export function ShareTestButtons({testId, title, compact=false, testMode}:{
+  testId:string;title:string;compact?:boolean;testMode?:'test'|'practice';
 }) {
   const {language,t}=useExamLanguage();
   const [copied,setCopied]=useState(false);
@@ -17,8 +17,9 @@ export function ShareTestButtons({testId, title, compact=false}:{
   if(!validShareTestId(testId))return null;
 
   const link=()=>{
-    const url=new URL('/exampro',window.location.origin);
-    url.searchParams.set('test',testId);
+    const url=new URL(testMode?`/india-mocks/${testId}`:'/exampro',window.location.origin);
+    if(testMode)url.searchParams.set('mode',testMode);
+    else url.searchParams.set('test',testId);
     url.searchParams.set('lang',language);
     return url.toString();
   };
