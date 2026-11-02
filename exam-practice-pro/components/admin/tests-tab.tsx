@@ -199,7 +199,7 @@ export function TestsTab({onEditQuestions,initialView='all',initialTestId=''}:{o
       {preview&&<Dialog open onOpenChange={open=>{if(!open)setPreview(null);}}><DialogContent className="max-h-[90dvh] overflow-y-auto rounded-3xl p-6 sm:max-w-2xl"><DialogHeader><DialogTitle>Preview: {preview.name}</DialogTitle><DialogDescription>{preview.questionCount} active source questions · {preview.minutes} minutes. Private preview does not publish this mock.</DialogDescription></DialogHeader><ol className="list-inside list-decimal space-y-3 text-sm">{preview.questions.slice(0,30).map(q=><li key={q.id}>{q.question}</li>)}</ol>{preview.questionCount>30&&<p className="text-xs text-muted-foreground">Showing the first 30 question stems. Use Test draft for a complete private run.</p>}<Button variant="outline" onClick={()=>setPreview(null)}>Close preview</Button></DialogContent></Dialog>}
 
       {draft && (
-        <form onSubmit={save} className={`${card} grid gap-4`}>
+        <form onSubmit={save} className={card} aria-busy={busy}><fieldset disabled={busy} className="grid gap-4">
           <h2 ref={editorHeading} tabIndex={-1} className="scroll-mt-24 text-lg font-bold focus:outline-none">{editingId ? `Edit ${editingId}` : 'New mock test'}</h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {!editingId && <Field label="Id" hint="Lower case, dashes, for example ssc3"><input className={input} required value={draft.id} onChange={(e) => setDraft({ ...draft, id: e.target.value })} /></Field>}
@@ -256,7 +256,7 @@ export function TestsTab({onEditQuestions,initialView='all',initialTestId=''}:{o
             <Button disabled={busy} type="submit">{editingId ? 'Save test' : 'Create test'}</Button>
             <Button type="button" variant="outline" onClick={() => { setDraft(null); setEditingId(null); }}>Cancel</Button>
           </div>
-        </form>
+        </fieldset></form>
       )}
     </div>
   );
