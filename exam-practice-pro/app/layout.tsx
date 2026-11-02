@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/layout/theme-provider';
 import { AuthProvider } from '@/components/layout/auth-provider';
 import { UserStorageProvider } from '@/components/layout/user-storage-provider';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { PageAnalytics } from '@/components/telemetry/page-analytics';
 import { FloatingWhatsApp } from '@/components/mocks/whatsapp-button';
 
 const inter = Inter({
@@ -53,6 +54,7 @@ export default function RootLayout({
                 <div className="relative flex min-h-screen flex-col bg-background">
                   {children}
                   <FloatingWhatsApp />
+                  <PageAnalytics />
                 </div>
               </TooltipProvider>
             </UserStorageProvider>

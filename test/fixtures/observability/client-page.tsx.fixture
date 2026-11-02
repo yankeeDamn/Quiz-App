@@ -1,0 +1,7 @@
+'use client';
+import { useState } from 'react';
+export default function LocalObservabilityTest() {
+  const [crash,setCrash] = useState(false);
+  if(crash)throw new Error('PRIVATE_ERROR_SENTINEL private@example.com private-cookie');
+  return <main className="p-8"><h1>Local recovery test</h1><button className="rounded border p-4" onClick={()=>setCrash(true)}>Force test crash</button></main>;
+}

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import { track } from '@/lib/track';
 import { Bookmark, Clock, Flag, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { WhatsAppButton } from '@/components/mocks/whatsapp-button';
@@ -62,12 +63,15 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
   const submitRef = useRef<() => void>(() => {});
 
   const [spentSnapshot, setSpentSnapshot] = useState<number[]>([]);
+  const metricStarted = useRef(false), metricCompleted = useRef(false);
+  useEffect(()=>{if(!metricStarted.current){metricStarted.current=true;track('mock_started',{test_id:test.id});}},[test.id]);
 
   const submit = useCallback(() => {
+    if(!metricCompleted.current){metricCompleted.current=true;track('mock_completed',{test_id:test.id});}
     setSpentSnapshot([...spent.current]);
     setConfirming(false);
     setFinished(true);
-  }, []);
+  }, [test.id]);
   useEffect(() => {
     submitRef.current = submit;
   }, [submit]);
@@ -148,6 +152,8 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
   const result = useMemo(() => (finished ? scoreTest(test, items, answers) : null), [finished, test, items, answers]);
 
   const retake = () => {
+    metricCompleted.current=false;
+    track('mock_started',{test_id:test.id});
     setItems(shuffleTest(test, !practice));
     setAnswers(test.questions.map(() => -1));
     setMarked(test.questions.map(() => false));

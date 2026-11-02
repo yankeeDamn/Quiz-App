@@ -58,6 +58,8 @@ test('start is recoverable and never includes answer keys',async()=>{
  const one=await exams.start(alice,'fixture');
  const two=await exams.start(alice,'fixture');
  assert.equal(one.id,two.id);
+ assert.equal(one.newlyCreated,true);
+ assert.equal(two.newlyCreated,false);
  assert.equal(one.test.questions[0].answer,undefined);
  assert.equal(JSON.stringify(one).includes('B is correct'),false);
 });

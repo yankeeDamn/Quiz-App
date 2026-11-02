@@ -15,6 +15,7 @@ function SignInForm() {
   const searchParams = useSearchParams();
   const rawCallback = searchParams.get('callbackUrl') || '/';
   const callbackUrl = rawCallback.startsWith('/') && !rawCallback.startsWith('//') && !rawCallback.includes('\\') ? rawCallback : '/';
+  const successUrl = `/auth/complete?next=${encodeURIComponent(callbackUrl)}`;
   const error = searchParams.get('error');
   const [guestName, setGuestName] = useState('');
   const [providers, setProviders] = useState<string[] | null>(null);
@@ -23,7 +24,7 @@ function SignInForm() {
 
   const handleOAuthSignIn = async (provider: string) => {
     setIsLoading(provider);
-    await signIn(provider, { callbackUrl });
+    await signIn(provider, { callbackUrl: successUrl });
   };
 
   const handleGuestSignIn = async (e: React.FormEvent) => {
@@ -31,7 +32,7 @@ function SignInForm() {
     setIsLoading('guest');
     await signIn('guest', {
       name: guestName || 'Guest User',
-      callbackUrl,
+      callbackUrl: successUrl,
     });
   };
 

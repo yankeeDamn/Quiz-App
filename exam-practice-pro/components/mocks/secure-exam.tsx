@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { trackAttempt } from '@/lib/track';
 import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
@@ -11,7 +12,7 @@ import { ShareTestButtons } from '@/components/exampro/share-test-buttons';
 type Question = {id:string;topic:string;section:number;question:string;options:string[];hindi?:{question:string;options:string[]}|null};
 type Review = {id:string;question:string;options:string[];selected:number;correctAnswer:number;explanation:string;correct:boolean};
 type Attempt = {
- id:string;testId:string;title:string;startedAt:string;deadlineAt:string;submittedAt:string|null;
+ newlyCreated?:boolean;id:string;testId:string;title:string;startedAt:string;deadlineAt:string;submittedAt:string|null;
  responses:Record<string,number>;
  test:{id:string;name:string;minutes:number;marksPerCorrect:number;negativeMarks:number;passPercent:number;questions:Question[];sections:{name:string;from:number;to:number}[];sectionTimingMinutes?:number|null};
  result:null|{score:number;total:number;percentage:number;passed:boolean;correct:number;incorrect:number;skipped:number;review:Review[]}
@@ -41,12 +42,13 @@ function TranslatedReview({q,index}:{q:Review;index:number}) {
 export function SecureExam({testId,draftMode=false,betaMode=false}:{testId:string;draftMode?:boolean;betaMode?:boolean}) {
  const {data:session,status} = useSession();
  const attemptStartUrl = betaMode ? '/api/v1/beta/attempt' : draftMode ? `/api/v1/admin/tests/${testId}/draft-attempt` : '/api/v1/exam-attempts/start';
- const attemptBase = (id:string) => betaMode ? `/api/v1/beta/attempts/${id}` : draftMode ? `/api/v1/admin/draft-attempts/${id}` : `/api/v1/exam-attempts/${id}`;
+ const attemptBase = useCallback((id:string) => betaMode ? `/api/v1/beta/attempts/${id}` : draftMode ? `/api/v1/admin/draft-attempts/${id}` : `/api/v1/exam-attempts/${id}`,[betaMode,draftMode]);
  const [attempt,setAttempt] = useState<Attempt|null>(null);
  const [responses,setResponses] = useState<Record<string,number>>({});
  const [busy,setBusy] = useState(false);
  const [error,setError] = useState('');
  const [seconds,setSeconds] = useState(0);
+ const [clockNow,setClockNow]=useState(()=>Date.now());
  const [announcement,setAnnouncement]=useState('');
  const headingRef=useRef<HTMLHeadingElement>(null);
  const lastSection=useRef<number|null>(null);
@@ -58,7 +60,7 @@ export function SecureExam({testId,draftMode=false,betaMode=false}:{testId:strin
  const sectionMinutes = [15,20].includes(attempt?.test.sectionTimingMinutes ?? 0) ? attempt!.test.sectionTimingMinutes! : null;
  const activeSection = sectionMinutes && attempt
    ? Math.min(attempt.test.sections.length,
-       Math.max(0,Math.floor((Date.now()-new Date(attempt.startedAt).getTime())/(sectionMinutes*60000))))
+       Math.max(0,Math.floor((clockNow-new Date(attempt.startedAt).getTime())/(sectionMinutes*60000))))
    : null;
  const displayed = attempt?.test.questions[current];
  const translated = useTranslatedTexts(displayed&&!(language==='hi'&&displayed.hindi)?[displayed.question,...displayed.options]:[],{exam:true});
@@ -89,6 +91,7 @@ export function SecureExam({testId,draftMode=false,betaMode=false}:{testId:strin
       setResponses(r.data.attempt.responses);
       latest.current=r.data.attempt.responses;
       const started=r.data.attempt;
+      if(!draftMode&&started.newlyCreated===true&&!started.submittedAt)trackAttempt('mock_started',started.id,testId);
       if([15,20].includes(started.test.sectionTimingMinutes??0)){
         const minutes=started.test.sectionTimingMinutes!;
         const section=Math.min(started.test.sections.length-1,
@@ -98,7 +101,7 @@ export function SecureExam({testId,draftMode=false,betaMode=false}:{testId:strin
       setSeconds(Math.max(0,Math.ceil((new Date(started.deadlineAt).getTime()-Date.now())/1000)));
     }).catch(e=>{if(!cancelled)setError(e instanceof Error?e.message:'Cannot start your exam')});
    return ()=>{cancelled=true};
- },[status,session?.user?.email,testId,attemptStartUrl]);
+ },[status,session?.user?.email,testId,attemptStartUrl,draftMode,betaMode]);
 
  const submit = useCallback(async()=>{
    if(!attempt || attempt.submittedAt || submitLock.current)return;
@@ -107,14 +110,16 @@ export function SecureExam({testId,draftMode=false,betaMode=false}:{testId:strin
      const r=await api<{attempt:Attempt}>(`${attemptBase(attempt.id)}/submit`,{method:'POST',body:{responses:latest.current}});
      if(!r.success||!r.data)throw Error(r.error?.message||'Submission failed');
      setAttempt(r.data.attempt);
+     if(!draftMode&&r.data.attempt.submittedAt)trackAttempt('mock_completed',attempt.id,testId);
      setSaved(true);
    } catch(e){setError(e instanceof Error?e.message:'Submission failed');}
    finally{setBusy(false);submitLock.current=false}
- },[attempt]);
+ },[attempt,attemptBase,draftMode,testId]);
 
  useEffect(()=>{
    if(!attempt||attempt.submittedAt)return;
    const clock=()=>{
+     setClockNow(Date.now());
      const minutes=attempt.test.sectionTimingMinutes;
      if((minutes===15 || minutes===20) && attempt.test.sections.length===4){
        const active=Math.max(0,Math.floor((Date.now()-new Date(attempt.startedAt).getTime())/(minutes*60000)));
@@ -149,9 +154,9 @@ export function SecureExam({testId,draftMode=false,betaMode=false}:{testId:strin
      } catch(e) {if(!cancelled)setError(e instanceof Error?e.message:'Progress not saved. Try submitting.')}
    },500);
    return()=>{cancelled=true;window.clearTimeout(timeout)};
- },[attempt,saved,responses]);
+ },[attempt,saved,responses,attemptBase]);
 
- useEffect(()=>{ if(attempt && !attempt.submittedAt) headingRef.current?.focus(); },[current,attempt?.id,attempt?.submittedAt]);
+ useEffect(()=>{ if(attempt && !attempt.submittedAt) headingRef.current?.focus(); },[current,attempt]);
 
  if(status==='loading')return <p className="p-6" aria-busy="true">Checking sign-in…</p>;
  if(status!=='authenticated'||!session?.user?.email)return <section className="rounded-xl border p-6"><h1 className="text-xl font-bold">Sign in to take a scored exam</h1><p className="mt-2 text-sm text-muted-foreground">Guest practice is available, but scored exams require a verified Google or GitHub account to sync results across devices.</p><Button className="mt-4" asChild><Link href={`/auth/signin?callbackUrl=${encodeURIComponent((betaMode?'/exampro/beta/mock-01':(draftMode?'/admin/draft-test/':'/india-mocks/')+testId))}`}>Sign in</Link></Button></section>;

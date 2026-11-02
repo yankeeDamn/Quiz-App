@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { track } from '@/lib/track';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { Check } from 'lucide-react';
@@ -32,6 +33,8 @@ const FAQ: [string, string][] = [
 export default function PricingPage() {
   const { data: session } = useSession();
   const plan = usePlan();
+  const viewed = useRef(false);
+  useEffect(()=>{if(!viewed.current){viewed.current=true;track('pricing_viewed');}},[]);
   const [yearly, setYearly] = useState(false);
   const [segment, setSegment] = useState<'learner' | 'institute'>('learner');
   const visible = PLANS.filter((p) => p.segment === segment || (segment === 'institute' && p.id === 'pro'));
@@ -178,6 +181,7 @@ function PlanCard({ plan, yearly, email, name, current }: { plan: Plan; yearly: 
       ) : (
         <a
           href={whatsappLink(planMessage(plan, yearly, email, name))}
+          onClick={()=>track('pro_requested_whatsapp',{plan_name:plan.id})}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex min-h-11 items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
