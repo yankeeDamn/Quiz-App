@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { admin, type AdminTest, type AdminTopic, type TestSection } from '@/lib/admin';
 import { Field, Notice, card, input } from '@/components/admin/ui';
+import { LiveCatalogue } from '@/components/admin/live-catalogue';
+import { PublicationChecklist } from '@/components/admin/publication-checklist';
 import { MockReview } from '@/components/admin/mock-review';
 import { MockReleaseReadiness } from '@/components/admin/mock-release-readiness';
 
@@ -31,7 +33,9 @@ const blank = (topic: string): Draft => ({
 const countOf = (t: AdminTest) => t.configuredQuestionCount ?? t.sections.reduce((n, s) => n + s.parts.reduce((m, p) => m + (p.to - p.from), 0), 0);
 const changed = () => window.dispatchEvent(new Event('exampro-catalogue-changed'));
 
-export function TestsTab({onEditQuestions}:{onEditQuestions?:(topic:string)=>void}) {
+export function TestsTab({onEditQuestions,initialView='all'}:{onEditQuestions?:(topic:string)=>void;initialView?:'all'|'live'|'hidden'}) {
+  const [view,setView]=useState(initialView);
+  const [checklistId,setChecklistId]=useState<string|null>(null);
   const [search,setSearch]=useState('');
   const [category,setCategory]=useState('all');
   const [busy,setBusy]=useState(false);
@@ -87,6 +91,7 @@ export function TestsTab({onEditQuestions}:{onEditQuestions?:(topic:string)=>voi
     setBusy(false);
     setMsg(r.ok?{kind:'ok',text:'Test updated. Catalogue pages refresh on focus or within 30 seconds.'}:{kind:'error',text:r.message});
     if(r.ok)changed();
+    else if(r.status===409)setChecklistId(t.id);
     await load();
   };
   const checkBulk=async()=>{
@@ -137,7 +142,10 @@ export function TestsTab({onEditQuestions}:{onEditQuestions?:(topic:string)=>voi
     <div className="grid gap-6">
       {msg && <Notice kind={msg.kind}>{msg.text}</Notice>}
 
-      <section className={card}>
+      <div role="group" aria-label="Admin mock views" className="flex flex-wrap gap-2">
+        {([['all',`All mock definitions (${tests.length})`],['live','Live Catalogue'],['hidden',`Drafts / Hidden (${tests.filter(t=>!t.liveInCatalogue).length})`]] as const).map(([id,label])=><Button key={id} variant={view===id?'default':'outline'} aria-pressed={view===id} onClick={()=>setView(id)}>{label}</Button>)}
+      </div>
+      {view==='live'?<LiveCatalogue definitions={tests} onEditQuestions={onEditQuestions}/>:<section className={card}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-bold">Mocks &amp; Tests Manager</h2>
           <div className="flex flex-wrap gap-2"><Button variant="outline" disabled={busy} onClick={()=>void checkBulk()}>Publish All Reviewed Drafts</Button><Button disabled={busy} onClick={() => { setEditingId(null); setDraft(blank(firstTopic)); }}>+ Create New Mock Test</Button></div>
@@ -151,7 +159,7 @@ export function TestsTab({onEditQuestions}:{onEditQuestions?:(topic:string)=>voi
           <table className="w-full text-sm">
             <thead className="bg-muted/50"><tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground"><th className="p-3">Test Name &amp; Exam</th><th className="p-3">Questions / Mins</th><th className="p-3">Current Tier</th><th className="p-3">Publish Status</th><th className="p-3">Sectional Timer</th><th className="p-3">Actions</th></tr></thead>
             <tbody>
-              {tests.filter(t=>(category==='all'||t.exam===category)&&`${t.name} ${t.id}`.toLowerCase().includes(search.toLowerCase())).map((t) => (
+              {tests.filter(t=>(view!=='hidden'||!t.liveInCatalogue)&&(category==='all'||t.exam===category)&&`${t.name} ${t.id}`.toLowerCase().includes(search.toLowerCase())).map((t) => (
                 <tr key={t.id} className="border-t align-top hover:bg-muted/20">
                   <td className="min-w-52 p-3"><p className="font-semibold">{t.name}</p><span className="mt-1 block text-xs text-muted-foreground">{t.exam} · {t.id}</span>{t.hiddenReason&&<p className="mt-2 max-w-xs text-xs text-amber-700 dark:text-amber-300">{t.hiddenReason}</p>}</td>
                   <td className="p-3 text-xs tabular-nums"><p className="whitespace-nowrap">{countOf(t)} Qs · {t.minutes} mins</p><p className="mt-1 text-muted-foreground">{t.questionCount??0} accessible</p></td>
@@ -161,6 +169,7 @@ export function TestsTab({onEditQuestions}:{onEditQuestions?:(topic:string)=>voi
                   <td className="min-w-60 p-3"><div className="flex max-w-xs flex-wrap gap-x-3 gap-y-2 text-xs">
                     {!t.active && draftTestingEnabled && <Link className="min-h-8 font-semibold text-indigo-700 underline dark:text-indigo-300" href={`/admin/draft-test/${encodeURIComponent(t.id)}`}>Test Draft</Link>}
                     {countOf(t)===100&&/ssc/i.test(t.exam)&&/cgl/i.test(t.name)&&<button type="button" className="min-h-8 underline" onClick={() => {setReadinessId(t.id);setReviewId(null);setPreview(null)}}>Release readiness</button>}
+                    <button type="button" className="min-h-8 font-semibold text-indigo-700 underline dark:text-indigo-300" onClick={()=>setChecklistId(t.id)}>Publication checklist</button>
                     <button type="button" className="min-h-8 underline" onClick={() => onEditQuestions?.(t.sections[0]?.parts[0]?.topic??'')}>Edit Questions</button>
                     {countOf(t)===100&&/ssc/i.test(t.exam)&&/cgl/i.test(t.name)&&<button type="button" className="min-h-8 underline" onClick={() => {setReviewId(t.id);setReadinessId(null);setPreview(null)}}>Academic Review</button>}
                     <button type="button" className="min-h-8 underline" onClick={() => void showPreview(t)}>Preview Test</button>
@@ -170,13 +179,14 @@ export function TestsTab({onEditQuestions}:{onEditQuestions?:(topic:string)=>voi
                   </div></td>
                 </tr>
               ))}
-              {tests.length>0&&!tests.some(t=>(category==='all'||t.exam===category)&&`${t.name} ${t.id}`.toLowerCase().includes(search.toLowerCase()))&&<tr><td colSpan={6} className="p-5 text-muted-foreground">No tests match this search.</td></tr>}
+              {tests.length>0&&!tests.some(t=>(view!=='hidden'||!t.liveInCatalogue)&&(category==='all'||t.exam===category)&&`${t.name} ${t.id}`.toLowerCase().includes(search.toLowerCase()))&&<tr><td colSpan={6} className="p-5 text-muted-foreground">No tests match this search.</td></tr>}
               {tests.length === 0 && <tr><td colSpan={6} className="p-5 text-muted-foreground">No mock tests loaded. Create a draft, or check any API error above.</td></tr>}
             </tbody>
           </table>
         </div>
-      </section>
+      </section>}
 
+      {checklistId&&<PublicationChecklist key={checklistId} testId={checklistId} onClose={()=>setChecklistId(null)} onEditQuestions={onEditQuestions}/>}
       {readinessId && <MockReleaseReadiness key={readinessId} testId={readinessId} onClose={()=>setReadinessId(null)} />}
       {reviewId && <MockReview key={reviewId} testId={reviewId} onClose={()=>setReviewId(null)} />}
 

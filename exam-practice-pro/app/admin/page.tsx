@@ -35,7 +35,7 @@ export default function AdminPage() {
   const [questionTopic,setQuestionTopic]=useState('');
   const [attempt, setAttempt] = useState(0);
   const heading = useRef<HTMLHeadingElement>(null);
-  const selected = SECTIONS.find((item) => item.id === (section==='practice'?'questions':section)) ?? {label:'Overview', description:'Your content, publishing queue and service status at a glance.'};
+  const selected = SECTIONS.find((item) => item.id === (section==='practice'?'questions':section==='catalogue'?'tests':section)) ?? {label:'Overview', description:'Your content, publishing queue and service status at a glance.'};
   const account = session?.user?.email;
   const [authorizedAccount, setAuthorizedAccount] = useState<string | null>(null);
 
@@ -80,7 +80,7 @@ export default function AdminPage() {
               <div className="space-y-6 px-4 py-6 lg:sticky lg:top-20 lg:px-5 lg:py-8">
                 <div className="hidden px-3 lg:block"><p className="text-xs font-bold uppercase tracking-[0.18em] text-indigo-600 dark:text-indigo-300">ExamPro</p><p className="mt-1 text-lg font-bold tracking-tight">Command center</p></div>
                 <nav aria-label="Admin sections" className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible">
-                  {SECTIONS.map((item) => <button key={item.id} type="button" aria-current={(section === item.id || (section==='practice'&&item.id==='questions')) ? 'page' : undefined} aria-controls="admin-section" onClick={() => navigate(item.id)} className={`flex min-h-11 shrink-0 items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 ${(section === item.id || (section==='practice'&&item.id==='questions')) ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/20' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}><item.icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />{item.label}</button>)}
+                  {SECTIONS.map((item) => <button key={item.id} type="button" aria-current={(section === item.id || (section==='catalogue'&&item.id==='tests') || (section==='practice'&&item.id==='questions')) ? 'page' : undefined} aria-controls="admin-section" onClick={() => navigate(item.id)} className={`flex min-h-11 shrink-0 items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 ${(section === item.id || (section==='catalogue'&&item.id==='tests') || (section==='practice'&&item.id==='questions')) ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-500/20' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}><item.icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />{item.label}</button>)}
                 </nav>
                 <div className="hidden space-y-3 border-t px-3 pt-5 lg:block"><p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Quick links</p><button type="button" className="min-h-10 text-sm font-semibold text-indigo-600" onClick={()=>navigate('overview')}>Workspace overview</button><Link href="/certifications?tab=start-learning" className="flex min-h-10 items-center text-sm text-muted-foreground">Manage ebooks</Link><Link href="/" className="flex min-h-10 items-center justify-between text-sm text-muted-foreground hover:text-indigo-600">View student site <ArrowUpRight className="h-4 w-4" /></Link><Link href="/government-jobs" className="flex min-h-10 items-center justify-between text-sm text-muted-foreground hover:text-indigo-600">Government jobs <BriefcaseBusiness className="h-4 w-4" /></Link></div>
                 <div className="hidden rounded-2xl border bg-muted/30 p-4 lg:block"><ShieldCheck className="h-5 w-5 text-emerald-600" /><p className="mt-2 text-xs font-semibold">Verified administrator</p><p className="mt-1 break-all text-xs text-muted-foreground">{account}</p></div>
@@ -94,7 +94,7 @@ export default function AdminPage() {
               <CommandMetrics onNavigate={navigate}/><section id="admin-section" aria-label={selected.label} className="min-w-0">
                 {section === 'overview' && <AdminOverview onNavigate={navigate} />}
                 {(section === 'questions'||section === 'practice') && <div className="space-y-5"><div className="flex flex-wrap gap-2"><Button variant={section==='questions'?'default':'outline'} onClick={()=>navigate('questions')}>Database question bank</Button><Button variant={section==='practice'?'default':'outline'} onClick={()=>navigate('practice')}>Practice & IT library</Button></div>{section==='questions'?<QuestionsTab initialTopic={questionTopic}/>:<PracticeLibraryTab/>}</div>}
-                {section === 'tests' && <TestsTab onEditQuestions={topic=>{setQuestionTopic(topic);navigate('questions');}} />}
+                {(section === 'tests'||section==='catalogue') && <TestsTab key={section} initialView={section==='catalogue'?'live':'all'} onEditQuestions={topic=>{setQuestionTopic(topic);navigate('questions');}} />}
                 {section === 'payments' && <CashfreeSandboxAudit/>}{section === 'qa' && <QaTab/>}
                 {section === 'plans' && <PlansTab />}
               </section>

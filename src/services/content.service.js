@@ -228,16 +228,20 @@ class ContentService {
     if (!Array.isArray(definition.sections) || !definition.sections.length) {
       throw Object.assign(new Error('Draft sections are incomplete.'), { statusCode: 409 });
     }
-    const ids = [...new Set(definition.sections.flatMap(s => s.parts.map(p => p.topic)))];
+    const ids = [...new Set(definition.sections.flatMap(s => (s.parts || []).map(p => p.topic)))];
+    const checked = checkTest(definition, ids);
+    if (!checked.ok) throw Object.assign(new Error('Draft configuration needs correction: '+checked.error), {statusCode:409});
     const [topicRows, questionRows] = await Promise.all([
       db.query('SELECT id, name, category, active FROM mock_topics WHERE id = ANY($1::text[])', [ids]),
       db.query(`SELECT topic_id, position, question, options, answer, explanation, review_status, reviewed_at, access_tier
          FROM mock_questions WHERE topic_id = ANY($1::text[]) AND active
          ORDER BY topic_id, position`, [ids]),
     ]);
-    // Restrict testing to drafts whose entire source bank is hidden to learners.
-    if (topicRows.rows.length !== ids.length || topicRows.rows.some(t => t.active)) {
-      throw Object.assign(new Error('Draft test requires four inactive source topics.'), { statusCode: 409 });
+    // This builder is private to verified staging admin/beta routes. An unpublished
+    // definition may reuse active topics; never deactivate shared learner content
+    // just to run QA. Public visibility still uses separate publication gates.
+    if (topicRows.rows.length !== ids.length) {
+      throw Object.assign(new Error('Draft references missing source topics. Open Edit and select existing topics.'), { statusCode: 409 });
     }
     const byTopic = new Map(topicRows.rows.map(t => [t.id, {...t, questions: []}]));
     for (const q of questionRows.rows) {
@@ -249,9 +253,10 @@ class ContentService {
     const bank = { topics: [...byTopic.values()], mocks: [] };
     const expected = definition.sections.reduce((n,s) => n + s.parts.reduce((v,p) => v + p.to-p.from,0),0);
     const test = mocks.build(bank,definition,{privatePreview:true});
+    test.underReview = true; // An unpublished QA attempt must never claim exam readiness.
     if (!expected || test.questions.length !== expected ||
         new Set(test.questions.map(q=>q.id)).size !== expected) {
-      throw Object.assign(new Error('Draft contains missing or duplicate questions.'), { statusCode: 409 });
+      throw Object.assign(new Error(`Draft has ${test.questions.length} of ${expected} configured active questions, or duplicate positions. Open the publication checklist to find missing or retired questions.`), { statusCode: 409 });
     }
     return test;
   }
