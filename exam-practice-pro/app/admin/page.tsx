@@ -45,7 +45,7 @@ export default function AdminPage() {
     let cancelled = false;
     setAuthorizedAccount(null);
     if (status === 'loading') { setGate({ state: 'loading' }); return; }
-    if (!session?.user) { setGate({ state: 'signin' }); return; }
+    if (!account) { setGate({ state: 'signin' }); return; }
     setGate({ state: 'loading' });
     void admin('/me').then((result) => {
       if (cancelled) return;
@@ -55,7 +55,7 @@ export default function AdminPage() {
       else setGate({ state: 'error', message: result.message });
     });
     return () => { cancelled = true; };
-  }, [status, session?.user, account, attempt]);
+  }, [status, account, attempt]);
 
   const authorized = status === 'authenticated' && !!account && authorizedAccount === account && gate.state === 'ok';
   const navigate = (next: AdminSection,focusMock='') => { if(next==='tests')setFocusedMock(focusMock);setSection(next); requestAnimationFrame(() => heading.current?.focus()); };
