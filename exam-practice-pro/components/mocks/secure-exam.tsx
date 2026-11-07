@@ -1,5 +1,8 @@
 'use client';
 
+import { SponsoredSlot } from '@/components/ads/sponsored-slot';
+import { ContextualResourceCard } from '@/components/ads/contextual-resource-card';
+import { SafeAdSense } from '@/components/ads/safe-adsense';
 import { ContentReviewBadge, ReportMistake } from '@/components/shared/content-review';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
@@ -170,6 +173,7 @@ export function SecureExam({testId,draftMode=false,betaMode=false}:{testId:strin
    <div className="flex flex-wrap items-center justify-between gap-3">
       <h2 className="text-xl font-bold">Answer review</h2>{!draftMode&&!betaMode&&<ShareTestButtons testId={testId} title={attempt.title} compact/>}
     </div>
+   {!draftMode&&!betaMode&&<><SponsoredSlot slot="RESULT_SCREEN_OFFER" completed/><ContextualResourceCard topic={attempt.title} completed/><SafeAdSense completed/></>}
    {attempt.result.review.map((q,i)=><TranslatedReview key={q.id} q={q} index={i}/> )}
  </section>;
  const questions=attempt.test.questions;

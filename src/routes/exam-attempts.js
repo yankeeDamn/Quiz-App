@@ -16,19 +16,20 @@ router.post('/start', wrap(async (req,res) => {
 }));
 router.get('/:id', wrap(async (req,res) => ok(res,{ attempt:await service.get(req.user.id,req.params.id) })));
 router.get('/:id/analytics', wrap(async (req,res) => {
-  if (!isPlanActive(req.user.plan, req.user.planExpiresAt)) {
+  if (!require('../services/monetization.service').enabled() && !isPlanActive(req.user.plan, req.user.planExpiresAt)) {
     return res.status(403).json({success:false,error:{code:'PLAN_REQUIRED',message:'An active Pro plan is required for detailed analytics.'}});
   }
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(req.params.id)) {
     return res.status(400).json({success:false,error:{message:'Invalid attempt ID'}});
   }
   const {rows} = await db.query(
-    'SELECT snapshot,result,started_at,submitted_at FROM exam_attempts_v2 WHERE id=$1 AND user_id=$2 AND submitted_at IS NOT NULL AND (snapshot->>\'adminDraft\') IS DISTINCT FROM \'true\'',
+    'SELECT test_id,snapshot,result,started_at,submitted_at FROM exam_attempts_v2 WHERE id=$1 AND user_id=$2 AND submitted_at IS NOT NULL AND (snapshot->>\'adminDraft\') IS DISTINCT FROM \'true\'',
     [req.params.id,req.user.id]
   );
   if (!rows.length) return res.status(404).json({success:false,error:{message:'Completed attempt not found'}});
   res.set('Cache-Control','private, no-store');
   const a=rows[0];
+  if (!await require('../services/monetization.service').mockAccess(req.user,{id:a.test_id})) return res.status(403).json({success:false,error:{code:'PLAN_REQUIRED',message:'A matching pass or Pro is required.'}});
   return ok(res,{report:buildAnalytics(a.snapshot,a.result,a.started_at,a.submitted_at)});
 }));
 router.put('/:id/progress', wrap(async (req,res) => ok(res,{ attempt:await service.save(req.user.id,req.params.id,req.body?.responses,false) })));

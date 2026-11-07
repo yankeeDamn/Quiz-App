@@ -1,5 +1,6 @@
 'use client';
 
+import { MicroPasses, PaymentReturn } from '@/components/payments/micro-passes';
 import { useEffect, useRef, useState } from 'react';
 import { track } from '@/lib/track';
 import Link from 'next/link';
@@ -15,7 +16,7 @@ const sandboxCheckout=process.env.NEXT_PUBLIC_CASHFREE_SANDBOX_CHECKOUT==='true'
 import { PLANS, formatWhatsappNumber, inr, planMessage, planPrice, whatsappLink, type Plan } from '@/lib/plans';
 
 const STEPS: [string, string][] = [
-  ['Pick a plan', 'Choose monthly or yearly. Yearly costs ten months.'],
+  ['Pick a plan', 'Choose monthly or yearly. Pro yearly is ₹999.'],
   ['Message us on WhatsApp', 'The chat opens with your plan and email already written.'],
   ['Pay as we tell you there', 'We share the payment details in the chat and confirm when the money arrives.'],
   ['Pro unlocks', 'Sign in with the same email. Your premium mocks open straight away.'],
@@ -76,7 +77,7 @@ export default function PricingPage() {
               Monthly
             </button>
             <button aria-pressed={yearly} onClick={() => setYearly(true)} className={`min-h-11 px-4 text-sm font-semibold ${yearly ? 'bg-foreground text-background' : 'bg-card'}`}>
-              Yearly · 2 months free
+              Yearly · Pro ₹999
             </button>
           </div>
         </div>
@@ -96,6 +97,7 @@ export default function PricingPage() {
           </p>
         )}
 
+        <PaymentReturn/><MicroPasses/>
         <section className="mt-14" aria-labelledby="how-pay">
           <h2 id="how-pay" className="text-2xl font-bold">
             How paying works

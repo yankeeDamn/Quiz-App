@@ -48,6 +48,7 @@ app.use('/api/v1/admin/ebooks/:slug/pdf', express.raw({ type: 'application/pdf',
 app.use('/api/v1/admin', express.json({ limit: '1mb' }));
 // Raw bytes are mandatory for Cashfree webhook HMAC verification.
 app.use('/api/v1/cashfree/webhook', express.raw({ type: 'application/json', limit: '64kb' }));
+app.use('/api/v1/payments/webhook', express.raw({ type: 'application/json', limit: '64kb' }));
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: false, limit: '10kb' }));
 

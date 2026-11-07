@@ -29,7 +29,7 @@ test('sandbox guard fails closed even when the feature flag alone is set',()=>{
 });
 test('server prices are fixed and do not allow arbitrary amount or institute checkout',()=>{
  assert.deepEqual(cashfree.price('monthly'),{amount:199,months:1});
- assert.deepEqual(cashfree.price('yearly'),{amount:1990,months:12});
+ assert.deepEqual(cashfree.price('yearly'),{amount:999,months:12});
  assert.throws(()=>cashfree.price('institute'),e=>e.statusCode===400);
 });
 test('webhook HMAC validates timestamp plus original bytes and rejects modifications',()=>{
