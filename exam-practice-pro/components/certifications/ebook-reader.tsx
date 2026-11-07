@@ -1,5 +1,8 @@
 /* eslint-disable react-hooks/set-state-in-effect -- initialize account-scoped browser storage and refresh externally loaded data */
 "use client";
+import { CheckoutButton } from '@/components/payments/micro-passes';
+import { SponsoredSlot } from '@/components/ads/sponsored-slot';
+import { SafeAdSense } from '@/components/ads/safe-adsense';
 import { ContentReviewBadge, ReportMistake } from '@/components/shared/content-review';
 import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
@@ -111,6 +114,7 @@ function ConceptCheck({
   );
 }
 export function EbookReader(props: {
+  initialBook?: EbookTrack | null;
   slug: string;
   initialChapter?: string;
   resumeId?: string;
@@ -132,7 +136,9 @@ function ReaderSession({
   resumeId,
   initialView,
   identity,
+  initialBook,
 }: {
+  initialBook?: EbookTrack | null;
   slug: string;
   initialChapter?: string;
   resumeId?: string;
@@ -140,7 +146,7 @@ function ReaderSession({
   identity: string;
 }) {
   const [view, setView] = useState(initialView || "interactive");
-  const fallback = starterEbook(slug);
+  const fallback = initialBook || starterEbook(slug);
   const [book, setBook] = useState<EbookTrack | null>(fallback || null),
     [loading, setLoading] = useState(true),
     [error, setError] = useState(""),
@@ -333,7 +339,7 @@ function ReaderSession({
     return (
       <main className="ebook-print-root mx-auto w-full max-w-4xl flex-1 p-6">
         {book.allowPdfDownload === false && !book.permissions?.canEdit ? (
-          <p>Printing is disabled for this track.</p>
+          <div><p>Printing is disabled for this track or requires a pass.</p>{book.monetization?.locked&&<CheckoutButton code="IT_EBOOK_PACK_99"/>}</div>
         ) : (
           <EbookPrintView
             book={book}
@@ -428,6 +434,7 @@ function ReaderSession({
           </div>
         </aside>
         <article className="min-w-0 bg-background px-5 py-8 sm:px-10 lg:px-14">
+          {book.monetization?.locked&&<section className="my-5 rounded-2xl border border-indigo-300 p-5"><h2 className="text-xl font-bold">Unlock the full ebook, PDF & assessment</h2><p className="my-3">You are reading the free chapter preview. Continue with the ₹99 ebook pass or Pro.</p><CheckoutButton code="IT_EBOOK_PACK_99"/></section>}
           <div className="mb-6 flex flex-wrap gap-2 ebook-print-tools">
             <button
               type="button"
@@ -663,6 +670,7 @@ function ReaderSession({
           </div>
         </aside>
       </div>
+      {!exam && <div className="mx-auto max-w-4xl px-4"><SponsoredSlot slot="EBOOK_RAIL_SPONSOR" category="IT"/><SafeAdSense/></div>}
       {studio && canEditEbook(book) && (
         <EbookStudio
           identity={identity}

@@ -43,6 +43,7 @@ export type EbookPermissions = {
   canManageAccess: boolean;
 };
 export interface EbookTrack {
+  monetization?: {locked:boolean;freePreviewChapters:number;requireProForPdf:boolean};
   slug: string;
   title: string;
   subtitle: string;

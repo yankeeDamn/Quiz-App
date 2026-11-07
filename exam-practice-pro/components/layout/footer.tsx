@@ -61,6 +61,7 @@ export function Footer() {
             >
               WhatsApp {formatWhatsappNumber()}
             </a>
+            <Link href="/advertise" className="hover:underline">Advertise With Us</Link>
           </nav>
 
           {/* Copyright */}

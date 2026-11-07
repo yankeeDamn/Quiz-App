@@ -105,7 +105,7 @@ router.get(
           data: { test: found.summary },
         });
       }
-      if (!isPlanActive(req.user.plan, req.user.planExpiresAt)) {
+      if (!await require('../services/monetization.service').mockAccess(req.user,found.summary)) {
         return res.status(403).json({
           success: false,
           error: { code: 'PLAN_REQUIRED', message: 'This mock is part of the Pro plan.' },

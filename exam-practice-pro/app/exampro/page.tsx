@@ -405,6 +405,7 @@ export default function ExamProStudioPage() {
         <div className="flex items-start gap-3"><Building2 className="mt-1 text-orange-600"/><div><h2 className="text-lg font-bold">Institute accounts are the next milestone.</h2><p className="mt-2 max-w-2xl text-sm text-slate-500 dark:text-slate-300">Student batches, tenant-specific results, shared branding and billing are not enabled yet. The existing owner-admin exam tools remain available.</p></div></div>
         <div className="flex flex-wrap gap-2"><Link href="/institute-admin" className="ep-link-motion rounded-lg border px-4 py-3 font-semibold">Institute preview</Link><Link href="/admin" className="rounded-lg bg-orange-700 px-4 py-3 font-bold text-white">Owner admin</Link></div>
       </div></section>
+      <section className="mx-auto max-w-6xl px-4 py-8"><h2 className="text-xl font-bold">Coaching partner portals</h2><p className="my-3 text-sm">Create a branded portal, assign published mocks and manage private batch membership.</p><Link className="mr-5 underline" href="/admin?section=monetization">Manage coaching portals</Link><Link className="underline" href="/c/demo-academy">View demo portal</Link></section>
     </main>
     <Footer/>
   </>;

@@ -6,7 +6,7 @@ import {api} from '@/lib/api';
 type Row={id:string;billing_period:string;amount_inr:number;status:string;created_at:string};
 type Checkout={orderId:string;paymentSessionId:string;mode:'sandbox';amountInr:number};
 type OrderStatus={orderId:string;status:string;paid:boolean;amountInr:number;billingPeriod:string;paidAt:string|null};
-declare global{interface Window{Cashfree?: (args:{mode:'sandbox'})=>{checkout:(args:{paymentSessionId:string;redirectTarget:'_self'})=>Promise<unknown>}}}
+declare global{interface Window{Cashfree?: (args:{mode:'sandbox'|'production'})=>{checkout:(args:{paymentSessionId:string;redirectTarget:'_self'})=>Promise<unknown>}}}
 export function CashfreeSandboxCheckout({period}:{period:'monthly'|'yearly'}){
  const [phone,setPhone]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
  const [ready,setReady]=useState(false),[history,setHistory]=useState<Row[]>([]);

@@ -1,5 +1,6 @@
 'use client';
 
+import { MicroPasses } from '@/components/payments/micro-passes';
 import { useState } from 'react';
 import Link from 'next/link';
 import { CheckCircle2, Crown, Lock } from 'lucide-react';
@@ -65,6 +66,7 @@ export function ProMockModal({test,onClose}:{test:MockSummary;onClose:()=>void})
         {result?<p role="status" className="text-lg font-bold">{result.correct}/{result.total} correct</p>:<Button disabled={busy} onClick={()=>void submit()}>{busy?'Checking…':'Check preview answers'}</Button>}
         <Button asChild variant="outline"><Link href="/pricing">Unlock the complete mock →</Link></Button>
       </div>}
+      <MicroPasses compact/>
       {error&&<p role="alert" className="text-sm text-red-600 dark:text-red-300">{error}</p>}
     </DialogContent>
   </Dialog>;

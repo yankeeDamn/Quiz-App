@@ -1,5 +1,9 @@
 'use client';
 
+import { SponsoredSlot } from '@/components/ads/sponsored-slot';
+import { ContextualResourceCard } from '@/components/ads/contextual-resource-card';
+import { SafeAdSense } from '@/components/ads/safe-adsense';
+import { LiveEventBanner } from '@/components/mocks/live-event-banner';
 import { EbookResults } from '@/components/certifications/ebook-results';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
@@ -332,6 +336,7 @@ export default function DashboardPage() {
             </>
           )}
         </div>
+        <div className="mx-auto max-w-6xl px-4"><LiveEventBanner/>{cloud.some(a=>a.submittedAt)&&<><SponsoredSlot slot="RESULT_SCREEN_OFFER"/><ContextualResourceCard topic={stats?.weakestTopic||cloud.find(a=>a.submittedAt)?.title||''}/><SafeAdSense/></>}</div>
       </main>
       <Footer />
     </>

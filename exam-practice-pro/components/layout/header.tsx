@@ -77,6 +77,7 @@ export function Header() {
           >
             {t('pricing')}
           </Link>
+          <Link href="/advertise" className="px-1 py-2 text-sm font-medium">Advertise With Us</Link>
         </nav>
 
         {/* Right Side Actions */}
@@ -186,6 +187,7 @@ export function Header() {
                     {t(label)}
                   </Link>
                 ))}
+                <Link href="/advertise" className="rounded-lg px-3 py-2 text-sm">Advertise With Us</Link>
               </nav>
               <div className="border-t border-border/70 px-5 pt-4">
                 {status === 'loading' ? (

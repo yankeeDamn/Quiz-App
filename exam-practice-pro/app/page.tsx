@@ -1,5 +1,7 @@
 'use client';
 
+import { SponsoredSlot } from '@/components/ads/sponsored-slot';
+import { LiveEventBanner } from '@/components/mocks/live-event-banner';
 import { ContentReviewBadge } from '@/components/shared/content-review';
 import { useState, useMemo, useEffect } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
@@ -245,6 +247,7 @@ export default function HomePage() {
           <MockCatalogue />
         </section>
 
+        <div className="mx-auto max-w-6xl px-4"><LiveEventBanner/><SponsoredSlot slot="HOME_TOP_BANNER"/></div>
         {/* Discover exam categories after the main value proposition. */}
         <section className="container mx-auto px-4 py-12 sm:py-16" aria-labelledby="india-mocks-heading">
           <Reveal>

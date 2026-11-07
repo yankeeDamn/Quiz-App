@@ -1,4 +1,7 @@
 'use client';
+import { SponsoredSlot } from '@/components/ads/sponsored-slot';
+import { monetization,monetizationEnabled } from '@/lib/monetization';
+import { useSession } from 'next-auth/react';
 import { useEffect, useMemo, useState } from 'react';
 import { RefreshCw, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,6 +15,10 @@ type Tier='all'|'free'|'pro';
 
 export function MockCatalogue({initialCategory='all'}:{initialCategory?:string}) {
   const plan=usePlan();
+  const {data:session}=useSession();
+  const email=session?.user?.email||'';
+  const [access,setAccess]=useState<{email:string;ssc:boolean}|null>(null);
+  useEffect(()=>{if(!email||!monetizationEnabled)return;let active=true;void monetization<{ssc:boolean}>('/monetization/me').then(r=>{if(active&&r.data)setAccess({email,ssc:r.data.ssc});});return()=>{active=false;};},[email]);
   const [tests,setTests]=useState<MockSummary[]|null>(null);
   const [error,setError]=useState('');
   const [category,setCategory]=useState(initialCategory);
@@ -48,9 +55,10 @@ export function MockCatalogue({initialCategory='all'}:{initialCategory?:string})
     </div>
     <div role="group" aria-label="Filter by exam category" className="flex flex-wrap gap-2">{categories.map(([id,label])=><button type="button" key={id} aria-pressed={category===id} onClick={()=>setCategory(id)} className={`min-h-10 rounded-full border px-4 text-sm font-medium focus-visible:outline-indigo-500 ${category===id?'border-indigo-600 bg-indigo-600 text-white':'bg-card hover:border-indigo-400'}`}>{label}</button>)}</div>
     <div className="flex flex-wrap items-center justify-between gap-3"><label className="flex w-full max-w-md items-center gap-2 rounded-xl border bg-card px-3"><Search aria-hidden className="h-4 w-4 text-muted-foreground"/><input aria-label="Search mock tests" className="min-h-11 w-full bg-transparent text-sm outline-none" placeholder="Search tests, subjects or sections…" value={search} onChange={e=>setSearch(e.target.value)}/></label><Button variant="ghost" size="sm" onClick={()=>setRefresh(n=>n+1)}><RefreshCw className="h-4 w-4"/>Refresh tests</Button></div>
+    <SponsoredSlot slot="CATEGORY_NATIVE_CARD" category={category==='UPSC / PSC'?'UPSC':category==='Placements'?'Campus':category==='IT Certification'?'IT':category}/>
     {error&&<p role="alert" className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:bg-amber-950/30 dark:text-amber-200">{error}{tests&&' Showing the last loaded catalogue.'}</p>}
     {!tests&&!error&&<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Loading catalogue" aria-busy>{Array.from({length:6},(_,i)=><div key={i} className="h-72 motion-safe:animate-pulse rounded-2xl border bg-muted/50"/>)}</div>}
-    {tests&&<><p role="status" className="text-xs text-muted-foreground">{shown.length} matching tests · Published content only · Refreshes every 30 seconds and when you return to this page</p><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{shown.map(t=><MockCard key={t.id} test={t} plan={plan} onPreview={setSelected}/>)}</div>{shown.length===0&&<div className="rounded-2xl border border-dashed p-10 text-center"><h3 className="font-semibold">No {tier==='pro'?'published Pro ':''}tests match these filters</h3><p className="mt-2 text-sm text-muted-foreground">Try another category. New mocks appear here after review and publication.</p><Button className="mt-4" variant="outline" onClick={()=>{setTier('all');setCategory('all');setSearch('');}}>Reset filters</Button></div>}</>}
+    {tests&&<><p role="status" className="text-xs text-muted-foreground">{shown.length} matching tests · Published content only · Refreshes every 30 seconds and when you return to this page</p><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{shown.map(t=><MockCard key={t.id} test={t} plan={{...plan,active:plan.active||!!(access?.email===email&&access?.ssc&&/^ssc-cgl-2026-mock-/.test(t.id))}} onPreview={setSelected}/>)}</div>{shown.length===0&&<div className="rounded-2xl border border-dashed p-10 text-center"><h3 className="font-semibold">No {tier==='pro'?'published Pro ':''}tests match these filters</h3><p className="mt-2 text-sm text-muted-foreground">Try another category. New mocks appear here after review and publication.</p><Button className="mt-4" variant="outline" onClick={()=>{setTier('all');setCategory('all');setSearch('');}}>Reset filters</Button></div>}</>}
     {selected&&<ProMockModal key={selected.id} test={selected} onClose={()=>setSelected(null)}/>}
   </div>;
 }

@@ -88,7 +88,7 @@ export const PLANS: Plan[] = [
 export function planPrice(plan: Plan, yearly: boolean): { amount: number; per: string; note: string } {
   if (plan.monthlyInr === 0) return { amount: 0, per: 'free', note: 'No card needed' };
   if (!yearly) return { amount: plan.monthlyInr, per: 'per month', note: '' };
-  const total = plan.monthlyInr * YEARLY_MONTHS_CHARGED;
+  const total = plan.id === 'pro' ? 999 : plan.monthlyInr * YEARLY_MONTHS_CHARGED;
   return { amount: total, per: 'per year', note: `About ₹${Math.round(total / 12).toLocaleString('en-IN')} a month` };
 }
 

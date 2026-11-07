@@ -7,7 +7,7 @@ const FRONTEND='https://exampro-staging-ui.vercel.app';
 const API_PROD='https://quiz-app-regd.onrender.com';
 const API_VERSION='2025-01-01';
 const BASE='https://sandbox.cashfree.com/pg';
-const prices={monthly:{amount:199,months:1},yearly:{amount:1990,months:12}};
+const prices={monthly:{amount:199,months:1},yearly:{amount:999,months:12}};
 const fail=(message,statusCode=400)=>Object.assign(new Error(message),{statusCode});
 function enabled(){
  const api=String(process.env.CASHFREE_SANDBOX_API_ORIGIN||'');

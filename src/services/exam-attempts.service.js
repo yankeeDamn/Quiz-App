@@ -16,7 +16,7 @@ async function start(user, testId, adminDraft = false) {
   if (!VALID_ID.test(testId)) throw fail('Invalid test ID');
   const found = adminDraft ? null : await mocks.findMock(testId);
   if (!adminDraft && !found) throw fail('Published test not found', 404);
-  if (!adminDraft && mocks.isPaidTier(found.tier) && !isPlanActive(user.plan, user.planExpiresAt)) throw fail('Pro plan required', 403);
+  if (!adminDraft && mocks.isPaidTier(found.tier) && !await require('./monetization.service').mockAccess(user,found.summary)) throw fail('Pro plan required', 403);
   // Prefix the stored ID so a future published attempt never resumes the draft
   // and only the private admin endpoints may access the snapshot.
   const storedId = adminDraft ? 'draft-' + testId : testId;
