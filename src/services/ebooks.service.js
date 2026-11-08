@@ -664,6 +664,104 @@ function createEbooksService(db = database, clock = Date.now) {
       );
     });
   }
+  /**
+   * Persist monetization independently from unsaved chapter/exam edits.
+   * An optimistic revision check prevents one admin tab overwriting another.
+   */
+  async function updateAccess(slug, input, user) {
+    if (!isOwnerAdmin(user))
+      fail("Only the owner admin can change ebook pricing and PDF access.", 403);
+    if (!input || typeof input !== "object" || Array.isArray(input))
+      fail("Invalid access settings.");
+    return transaction(async (client) => {
+      const { row, rights } = await read(slug, user, client, true);
+      if (!Number.isInteger(input.revision) || input.revision !== row.revision)
+        fail("The ebook was changed elsewhere. Reload it before updating access.", 409, "EBOOK_CONFLICT");
+
+      const previous = accessFields(row);
+      const accessLevel = input.accessLevel === undefined ? previous.accessLevel : input.accessLevel;
+      const freePreviewPages = input.freePreviewPages === undefined
+        ? previous.freePreviewPages : input.freePreviewPages;
+      const allowFullPdfDownload = input.allowFullPdfDownload === undefined
+        ? previous.allowFullPdfDownload : input.allowFullPdfDownload;
+
+      if (!["free", "pro"].includes(accessLevel))
+        fail("Choose Free or Pro access.");
+      if (!Number.isInteger(freePreviewPages) || freePreviewPages < 1 || freePreviewPages > 20)
+        fail("Preview pages must be an integer between 1 and 20.");
+      if (typeof allowFullPdfDownload !== "boolean")
+        fail("Full PDF download permission must be true or false.");
+      if ((previous.isBundledPublicEdition || SEEDS.has(slug)) && accessLevel !== "free")
+        fail("Bundled public editions must remain Free.", 400);
+      if (accessLevel === "pro" && String(row.document.pdfUrl || "").startsWith("https://"))
+        fail("Remove the public PDF URL and upload a protected PDF before enabling Pro.", 400);
+
+      if (freePreviewPages !== previous.freePreviewPages) {
+        const asset = (await client.query(
+          "SELECT bytes FROM ebook_pdf_assets WHERE slug=$1", [slug],
+        )).rows[0];
+        if (asset) {
+          const preview = await require("./ebook-pdf-preview").createPdfPreview(
+            asset.bytes, freePreviewPages,
+          );
+          await client.query(
+            `UPDATE ebook_pdf_assets
+             SET preview_bytes=$2,preview_pages=$3,updated_at=NOW()
+             WHERE slug=$1`,
+            [slug, preview, freePreviewPages],
+          );
+        }
+      }
+      const doc = {
+        ...row.document,
+        accessLevel,
+        freePreviewPages,
+        allowFullPdfDownload,
+        allowPdfDownload: allowFullPdfDownload,
+      };
+      const saved = (await client.query(
+        `UPDATE ebooks SET
+          access_level=$2,free_preview_pages=$3,allow_full_pdf_download=$4,
+          document=$5,revision=revision+1,updated_at=NOW()
+         WHERE slug=$1 RETURNING *`,
+        [slug, accessLevel, freePreviewPages, allowFullPdfDownload, JSON.stringify(doc)],
+      )).rows[0];
+      return present(saved, rights);
+    });
+  }
+
+  /** Visibility is a publication state, distinct from Free/Pro pricing. */
+  async function updateVisibility(slug, input, user) {
+    if (!isOwnerAdmin(user))
+      fail("Only the owner admin can publish or change ebook visibility.", 403);
+    if (!input || !["admin_only", "invite_only", "public"].includes(input.visibility))
+      fail("Choose a valid ebook visibility.");
+    return transaction(async (client) => {
+      const { row, rights } = await read(slug, user, client, true);
+      if (!Number.isInteger(input.revision) || input.revision !== row.revision)
+        fail("This ebook changed elsewhere. Reload before changing visibility.", 409, "EBOOK_CONFLICT");
+      if ((SEEDS.has(slug) || accessFields(row).isBundledPublicEdition) &&
+          input.visibility !== "public")
+        fail("Bundled public editions must remain public.", 400);
+      // Switching visibility must validate *published* content, not rely on a
+      // button and not silently mark incomplete drafts as learner-ready.
+      const proposed = validateBook({ ...row.document, visibility: input.visibility }, slug);
+      const saved = (await client.query(
+        `UPDATE ebooks
+         SET visibility=$2,document=$3,revision=revision+1,updated_at=NOW()
+         WHERE slug=$1 RETURNING *`,
+        [slug, input.visibility, JSON.stringify({
+          ...row.document,
+          ...proposed,
+          fullPdfStorageKey: accessFields(row).fullPdfStorageKey,
+          previewPdfStorageKey: accessFields(row).previewPdfStorageKey,
+          ownerEmail: row.document.ownerEmail,
+        })],
+      )).rows[0];
+      return present(saved, rights);
+    });
+  }
+
   async function practice(slug, user) {
     const { row, rights, monetization } = await read(slug, user);
     if (monetization?.locked)
@@ -1021,6 +1119,8 @@ function createEbooksService(db = database, clock = Date.now) {
     list,
     adminList,
     adminGet,
+    updateAccess,
+    updateVisibility,
     get,
     save,
     practice,
