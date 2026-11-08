@@ -79,6 +79,17 @@ test("seed migration is idempotent and reader APIs strip answer keys and owner c
   const edited = await call("/ebooks/python-mastery", "owner");
   assert.equal(edited.json.data.ebook.finalExamQuestions.length, 15);
 });
+test("owner admin inventory returns every non-archived ebook ordered by latest update", async () => {
+  const inventory = await call("/admin/ebooks", "owner");
+  assert.equal(inventory.status, 200);
+  assert.ok(inventory.json.data.ebooks.length >= 10);
+  assert.ok(inventory.json.data.ebooks.every((ebook) => ebook.permissions.canEdit));
+  const timestamps = inventory.json.data.ebooks.map((ebook) => new Date(ebook.updatedAt).getTime());
+  assert.deepEqual(timestamps, [...timestamps].sort((a, b) => b - a));
+  assert.equal((await call("/admin/ebooks", "reader")).status, 200);
+  assert.equal((await call("/admin/ebooks")).status, 401);
+});
+
 test("private content is hidden, invite reads require approval, and approval uses verified identity", async () => {
   assert.equal(
     (await call("/admin/ebooks", "reader", "POST", book())).status,
