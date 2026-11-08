@@ -214,6 +214,18 @@ function createRouters(books = service, identity = authenticateNextAuth) {
       ok(res, { ebook: await books.save(req.params.slug, req.body, req.user) }),
     ),
   );
+  adminRouter.patch(
+    "/:slug/access",
+    wrap(async (req, res) =>
+      ok(res, { ebook: await books.updateAccess(req.params.slug, req.body, req.user) }),
+    ),
+  );
+  adminRouter.patch(
+    "/:slug/visibility",
+    wrap(async (req, res) =>
+      ok(res, { ebook: await books.updateVisibility(req.params.slug, req.body, req.user) }),
+    ),
+  );
   adminRouter.delete(
     "/:slug",
     wrap(async (req, res) => {
