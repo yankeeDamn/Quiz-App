@@ -550,8 +550,20 @@ function createEbooksService(db = database, clock = Date.now) {
 
       let fullPdfStorageKey = previousAccess?.fullPdfStorageKey || null;
       let previewPdfStorageKey = previousAccess?.previewPdfStorageKey || null;
+      const detachPdf =
+        !!previous &&
+        !!previousAccess?.fullPdfStorageKey &&
+        raw.pdfUrl === "";
+      if (detachPdf) {
+        await client.query("DELETE FROM ebook_pdf_assets WHERE slug=$1", [slug]);
+        fullPdfStorageKey = null;
+        previewPdfStorageKey = null;
+        document.pdfUrl = "";
+        document.pdfFileName = "";
+      }
       if (
         previous &&
+        !detachPdf &&
         document.freePreviewPages !== previousAccess.freePreviewPages
       ) {
         const asset = (
