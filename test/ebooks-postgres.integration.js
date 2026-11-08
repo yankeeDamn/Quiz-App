@@ -90,6 +90,89 @@ test("owner admin inventory returns every non-archived ebook ordered by latest u
   assert.equal((await call("/admin/ebooks")).status, 401);
 });
 
+test("owner access changes persist immediately, regenerate previews, and enforce tier in reader routes", async () => {
+  const slug = "instant-tier-controls";
+  const created = await call("/admin/ebooks", "owner", "POST", {
+    ...book(), slug, visibility: "public",
+  });
+  assert.equal(created.status, 200);
+  let revision = created.json.data.ebook.revision;
+
+  const pdf = await require("pdf-lib").PDFDocument.create();
+  for (let page = 0; page < 6; page++) pdf.addPage();
+  const source = Buffer.from(await pdf.save());
+  const upload = await fetch(
+    base + "/api/v1/admin/ebooks/" + slug +
+    "/pdf?filename=guide.pdf&revision=" + revision,
+    { method: "POST", headers: {
+        "Content-Type": "application/pdf",
+        Authorization: "Bearer " + token("owner"),
+      },
+      body: source,
+    },
+  );
+  assert.equal(upload.status, 200);
+  revision = (await upload.json()).data.ebook.revision;
+
+  const change = async (who, values) =>
+    call("/admin/ebooks/" + slug + "/access", who, "PATCH", {
+      revision, ...values,
+    });
+
+  assert.equal((await change("reader", { accessLevel: "pro" })).status, 403);
+  assert.equal((await change("owner", { accessLevel: "invalid" })).status, 400);
+  let result = await change("owner", {
+    accessLevel: "pro",
+    freePreviewPages: 3,
+    allowFullPdfDownload: false,
+  });
+  assert.equal(result.status, 200);
+  revision = result.json.data.ebook.revision;
+  assert.equal(result.json.data.ebook.accessLevel, "pro");
+  assert.equal(result.json.data.ebook.freePreviewPages, 3);
+  assert.equal(result.json.data.ebook.allowFullPdfDownload, false);
+  assert.equal((await change("owner", { accessLevel: "free", revision: revision - 1 })).status, 409);
+
+  const inventory = await call("/admin/ebooks", "owner");
+  const record = inventory.json.data.ebooks.find((entry) => entry.slug === slug);
+  assert.equal(record.accessLevel, "pro");
+  assert.equal(record.freePreviewPages, 3);
+  const reader = await call("/ebooks/" + slug);
+  assert.equal(reader.status, 200);
+  assert.equal(reader.json.data.ebook.chapters.length, 2);
+  assert.equal(reader.json.data.ebook.finalExamQuestions, undefined);
+
+  const stream = await fetch(base + "/api/v1/ebooks/" + slug + "/pdf");
+  assert.equal(stream.status, 200);
+  assert.equal(stream.headers.get("x-ebook-preview"), "true");
+  assert.equal((await require("pdf-lib").PDFDocument.load(await stream.arrayBuffer())).getPageCount(), 3);
+  assert.equal((await fetch(base + "/api/v1/ebooks/" + slug + "/download")).status, 403);
+
+  result = await change("owner", { allowFullPdfDownload: true });
+  assert.equal(result.status, 200);
+  revision = result.json.data.ebook.revision;
+  const guestDownload = await fetch(base + "/api/v1/ebooks/" + slug + "/download");
+  assert.equal(guestDownload.status, 200);
+  assert.equal((await require("pdf-lib").PDFDocument.load(await guestDownload.arrayBuffer())).getPageCount(), 3);
+
+  result = await change("owner", { accessLevel: "free" });
+  assert.equal(result.status, 200);
+  revision = result.json.data.ebook.revision;
+  const guestFull = await fetch(base + "/api/v1/ebooks/" + slug + "/pdf");
+  assert.equal((await require("pdf-lib").PDFDocument.load(await guestFull.arrayBuffer())).getPageCount(), 6);
+  assert.equal((await call("/admin/ebooks/python-mastery/access", "owner", "PATCH", {
+    revision: (await call("/admin/ebooks/python-mastery", "owner")).json.data.ebook.revision,
+    accessLevel: "pro",
+  })).status, 400);
+
+  const visibility = await call("/admin/ebooks/" + slug + "/visibility", "owner", "PATCH", {
+    revision, visibility: "admin_only",
+  });
+  assert.equal(visibility.status, 200);
+  assert.equal(visibility.json.data.ebook.visibility, "admin_only");
+  assert.equal((await call("/ebooks/" + slug)).status, 404);
+});
+
 test("private content is hidden, invite reads require approval, and approval uses verified identity", async () => {
   assert.equal(
     (await call("/admin/ebooks", "reader", "POST", book())).status,
