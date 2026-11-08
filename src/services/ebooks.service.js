@@ -357,30 +357,63 @@ function createEbooksService(db = database, clock = Date.now) {
     const monetization = await require("./monetization.service").ebookPolicy(slug,user,row.document);
     return { row, rights, monetization };
   }
+  function accessFields(row) {
+    const doc = row.document || {};
+    const preview = Number(row.free_preview_pages ?? doc.freePreviewPages ?? 2);
+    return {
+      accessLevel: row.access_level || doc.accessLevel || "free",
+      freePreviewPages: Number.isInteger(preview) ? Math.min(20, Math.max(1, preview)) : 2,
+      allowFullPdfDownload:
+        row.allow_full_pdf_download ??
+        doc.allowFullPdfDownload ??
+        doc.allowPdfDownload ??
+        false,
+      fullPdfStorageKey: row.full_pdf_storage_key ?? doc.fullPdfStorageKey ?? null,
+      previewPdfStorageKey: row.preview_pdf_storage_key ?? doc.previewPdfStorageKey ?? null,
+      isBundledPublicEdition:
+        row.is_bundled_public_edition ??
+        doc.isBundledPublicEdition ??
+        SEEDS.has(row.slug),
+    };
+  }
   function present(row, rights, summary = false) {
-    const { finalExamQuestions, ownerEmail, ...doc } = row.document;
+    const { finalExamQuestions = [], ownerEmail, ...doc } = row.document || {};
+    const access = accessFields(row);
+    const chapters = Array.isArray(doc.chapters) ? doc.chapters : [];
     const value = {
       ...doc,
+      ...access,
+      id: row.slug,
+      slug: row.slug,
+      allowPdfDownload: access.allowFullPdfDownload,
       visibility: row.visibility,
       revision: row.revision,
       updatedAt: row.updated_at,
       permissions: rights,
-      chapterCount: doc.chapters.length,
-      durationMinutes: doc.chapters.reduce(
-        (sum, c) => sum + c.durationMinutes,
+      chapterCount: chapters.length,
+      durationMinutes: chapters.reduce(
+        (sum, c) => sum + Number(c.durationMinutes || 0),
         0,
       ),
       questionCount: finalExamQuestions.length,
     };
+    if (!rights.canEdit) {
+      delete value.fullPdfStorageKey;
+      delete value.previewPdfStorageKey;
+    }
     if (summary) delete value.chapters;
-    if (rights.canEdit && !summary)
-      value.finalExamQuestions = finalExamQuestions;
+    if (rights.canEdit && !summary) value.finalExamQuestions = finalExamQuestions;
     return value;
   }
   async function list(user) {
     const rows = (
       await db.query(
-        `SELECT b.*, a.role AS access_role,a.status AS access_status FROM ebooks b LEFT JOIN ebook_access a ON a.slug=b.slug AND a.email=$1 WHERE NOT b.archived ORDER BY b.slug LIMIT 200`,
+        `SELECT b.*, a.role AS access_role,a.status AS access_status
+         FROM ebooks b
+         LEFT JOIN ebook_access a ON a.slug=b.slug AND a.email=$1
+         WHERE NOT b.archived
+         ORDER BY b.updated_at DESC, b.slug
+         LIMIT 200`,
         [emailOf(user)],
       )
     ).rows;
@@ -389,23 +422,71 @@ function createEbooksService(db = database, clock = Date.now) {
         role: row.access_role,
         status: row.access_status,
       });
-      if(!rights.canRead)return null;
-      const value=present(row,rights,true);
-      const policy=await require("./monetization.service").ebookPolicy(row.slug,user,row.document);
-      if(policy&&!rights.canEdit){value.monetization=policy;if(policy.locked && value.pdfUrl?.startsWith("https://"))delete value.pdfUrl;}
+      if (!rights.canRead) return null;
+      const value = present(row, rights, true);
+      const policy = await require("./monetization.service").ebookPolicy(
+        row.slug,
+        user,
+        { ...row.document, ...accessFields(row) },
+      );
+      if (policy && !rights.canEdit) {
+        value.monetization = policy;
+        if (policy.locked && value.pdfUrl?.startsWith("https://")) delete value.pdfUrl;
+      }
       return value;
     }));
     return summaries.filter(Boolean);
   }
+  async function adminList(user) {
+    const owner = isOwnerAdmin(user);
+    const rows = owner
+      ? (
+          await db.query(
+            `SELECT b.*, 'editor' AS access_role, 'approved' AS access_status
+             FROM ebooks b
+             WHERE NOT b.archived
+             ORDER BY b.updated_at DESC, b.slug
+             LIMIT 500`,
+          )
+        ).rows
+      : (
+          await db.query(
+            `SELECT b.*, a.role AS access_role, a.status AS access_status
+             FROM ebooks b
+             JOIN ebook_access a ON a.slug=b.slug
+             WHERE NOT b.archived
+               AND a.email=$1
+               AND a.status='approved'
+               AND a.role='editor'
+             ORDER BY b.updated_at DESC, b.slug
+             LIMIT 500`,
+            [emailOf(user)],
+          )
+        ).rows;
+    return rows.map((row) =>
+      present(
+        row,
+        permissions(row, user, {
+          role: row.access_role,
+          status: row.access_status,
+        }),
+        true,
+      ),
+    );
+  }
   async function get(slug, user) {
     const { row, rights, monetization } = await read(slug, user);
-    const value=present(row, rights);
-    if(monetization && !rights.canEdit){
-      value.monetization=monetization;
-      if(monetization.locked){
-        if(value.pdfUrl?.startsWith("https://"))delete value.pdfUrl;
-        value.chapters=[...value.chapters].sort((a,b)=>a.order-b.order).slice(0,monetization.freePreviewChapters);
-
+    const value = present(row, rights);
+    if (monetization && !rights.canEdit) {
+      value.monetization = {
+        ...monetization,
+        freePreviewPages: accessFields(row).freePreviewPages,
+      };
+      if (monetization.locked) {
+        if (value.pdfUrl?.startsWith("https://")) delete value.pdfUrl;
+        value.chapters = [...(value.chapters || [])]
+          .sort((a, b) => a.order - b.order)
+          .slice(0, monetization.freePreviewChapters || 2);
       }
     }
     return value;
@@ -415,11 +496,13 @@ function createEbooksService(db = database, clock = Date.now) {
       fail("Only an owner administrator can create ebooks.", 403);
     return transaction(async (client) => {
       let previous;
+      let previousAccess = null;
       if (!create) {
         const current = await read(slug, user, client, true);
         if (!current.rights.canEdit)
           fail("Editing is not approved for this account.", 403);
         previous = current.row;
+        previousAccess = accessFields(previous);
         if (raw.revision !== previous.revision)
           fail(
             "This ebook changed. Reload before saving to avoid overwriting another editor.",
@@ -430,13 +513,19 @@ function createEbooksService(db = database, clock = Date.now) {
           fail("Only the owner admin can change visibility.", 403);
       }
       const document = validateBook(raw, slug);
-      if (previous && !isOwnerAdmin(user) && (
-        document.accessLevel !== (previous.document.accessLevel || "free") ||
-        document.freePreviewPages !== (previous.document.freePreviewPages || 2) ||
-        document.allowPdfDownload !== (previous.document.allowPdfDownload !== false)
-      )) fail("Only the owner admin can change PDF access settings.",403);
-      const legacy = await require("./monetization.service").ebookPolicy(slug,user,document);
-      if (legacy && document.pdfUrl && document.pdfUrl !== `/api/v1/ebooks/${slug}/pdf`)
+      if (
+        previous &&
+        !isOwnerAdmin(user) &&
+        (
+          document.accessLevel !== previousAccess.accessLevel ||
+          document.freePreviewPages !== previousAccess.freePreviewPages ||
+          document.allowFullPdfDownload !== previousAccess.allowFullPdfDownload
+        )
+      )
+        fail("Only the owner admin can change PDF access settings.", 403);
+      if (document.isBundledPublicEdition && document.visibility !== "public")
+        fail("Bundled public editions must remain public and Free.", 400);
+      if (document.accessLevel === "pro" && document.pdfUrl?.startsWith("https://"))
         fail("Paywalled ebooks require a private PDF upload.");
       if (
         document.linkedMockTestId &&
@@ -454,29 +543,68 @@ function createEbooksService(db = database, clock = Date.now) {
         ).rows.length
       )
         fail("Linked mock test ID does not exist.");
-      if (SEEDS.has(slug) && document.visibility !== "public")
-        fail(
-          "Built-in starters are bundled publicly. Create a separate private ebook for restricted material.",
-        );
-      if (previous && document.freePreviewPages !== (previous.document.freePreviewPages || 2)) {
-        const asset = (await client.query("SELECT bytes FROM ebook_pdf_assets WHERE slug=$1",[slug])).rows[0];
+
+      let fullPdfStorageKey = previousAccess?.fullPdfStorageKey || null;
+      let previewPdfStorageKey = previousAccess?.previewPdfStorageKey || null;
+      if (
+        previous &&
+        document.freePreviewPages !== previousAccess.freePreviewPages
+      ) {
+        const asset = (
+          await client.query(
+            "SELECT bytes FROM ebook_pdf_assets WHERE slug=$1",
+            [slug],
+          )
+        ).rows[0];
         if (asset) {
-          const preview = await require('./ebook-pdf-preview').createPdfPreview(asset.bytes, document.freePreviewPages);
-          await client.query("UPDATE ebook_pdf_assets SET preview_bytes=$2,preview_pages=$3 WHERE slug=$1",[slug,preview,document.freePreviewPages]);
+          const preview = await require("./ebook-pdf-preview").createPdfPreview(
+            asset.bytes,
+            document.freePreviewPages,
+          );
+          await client.query(
+            "UPDATE ebook_pdf_assets SET preview_bytes=$2,preview_pages=$3,updated_at=NOW() WHERE slug=$1",
+            [slug, preview, document.freePreviewPages],
+          );
+          previewPdfStorageKey = `postgres://ebook_pdf_assets/${slug}/preview`;
+          fullPdfStorageKey ||= `postgres://ebook_pdf_assets/${slug}/full`;
         }
       }
       const updated = {
         ...document,
+        fullPdfStorageKey,
+        previewPdfStorageKey,
+        allowPdfDownload: document.allowFullPdfDownload,
         ownerEmail: previous?.document.ownerEmail || emailOf(user),
       };
+      const values = [
+        slug,
+        JSON.stringify(updated),
+        document.visibility,
+        document.accessLevel,
+        document.freePreviewPages,
+        document.allowFullPdfDownload,
+        fullPdfStorageKey,
+        previewPdfStorageKey,
+        document.isBundledPublicEdition,
+      ];
       const result = create
         ? await client.query(
-            `INSERT INTO ebooks(slug,document,visibility) VALUES($1,$2,$3) RETURNING *`,
-            [slug, JSON.stringify(updated), document.visibility],
+            `INSERT INTO ebooks(
+               slug,document,visibility,access_level,free_preview_pages,
+               allow_full_pdf_download,full_pdf_storage_key,preview_pdf_storage_key,
+               is_bundled_public_edition
+             ) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+            values,
           )
         : await client.query(
-            `UPDATE ebooks SET document=$2,visibility=$3,revision=revision+1,updated_at=NOW() WHERE slug=$1 RETURNING *`,
-            [slug, JSON.stringify(updated), document.visibility],
+            `UPDATE ebooks
+             SET document=$2,visibility=$3,access_level=$4,free_preview_pages=$5,
+                 allow_full_pdf_download=$6,full_pdf_storage_key=$7,
+                 preview_pdf_storage_key=$8,is_bundled_public_edition=$9,
+                 revision=revision+1,updated_at=NOW()
+             WHERE slug=$1
+             RETURNING *`,
+            values,
           );
       return present(
         result.rows[0],
@@ -489,8 +617,9 @@ function createEbooksService(db = database, clock = Date.now) {
   }
   async function practice(slug, user) {
     const { row, rights, monetization } = await read(slug, user);
-    if(monetization?.locked&&!rights.canEdit) fail("Ebook pass or Pro required",403);
-    return row.document.finalExamQuestions;
+    if (monetization?.locked && !rights.canEdit)
+      fail("Ebook pass or Pro required", 403);
+    return row.document.finalExamQuestions || [];
   }
   async function archive(slug, user) {
     if (!isOwnerAdmin(user))
@@ -498,7 +627,13 @@ function createEbooksService(db = database, clock = Date.now) {
     if (SEEDS.has(slug)) fail("Built-in public starters cannot be archived.");
     await read(slug, user);
     await db.query(
-      "UPDATE ebooks SET archived=TRUE,revision=revision+1,updated_at=NOW() WHERE slug=$1",
+      `UPDATE ebooks
+       SET archived=TRUE,
+           visibility='archived',
+           document=document || jsonb_build_object('visibility','archived'),
+           revision=revision+1,
+           updated_at=NOW()
+       WHERE slug=$1`,
       [slug],
     );
   }
@@ -524,23 +659,45 @@ function createEbooksService(db = database, clock = Date.now) {
           409,
           "EBOOK_CONFLICT",
         );
-      // Parse and build the preview before committing either asset.
+      const access = accessFields(row);
       let preview;
-      try { preview = await require('./ebook-pdf-preview').createPdfPreview(bytes, row.document.freePreviewPages || 2); }
-      catch (error) { if(error.statusCode===503)throw error; fail("The PDF could not be processed. Upload a valid, unencrypted PDF."); }
+      try {
+        preview = await require("./ebook-pdf-preview").createPdfPreview(
+          bytes,
+          access.freePreviewPages,
+        );
+      } catch (error) {
+        if (error.statusCode === 503) throw error;
+        fail("The PDF could not be processed. Upload a valid, unencrypted PDF.");
+      }
       await client.query(
-        `INSERT INTO ebook_pdf_assets(slug,filename,bytes,preview_bytes,preview_pages) VALUES($1,$2,$3,$4,$5) ON CONFLICT(slug) DO UPDATE SET filename=$2,bytes=$3,preview_bytes=$4,preview_pages=$5,updated_at=NOW()`,
-        [slug, filename, bytes, preview, row.document.freePreviewPages || 2],
+        `INSERT INTO ebook_pdf_assets(slug,filename,bytes,preview_bytes,preview_pages)
+         VALUES($1,$2,$3,$4,$5)
+         ON CONFLICT(slug) DO UPDATE
+         SET filename=$2,bytes=$3,preview_bytes=$4,preview_pages=$5,updated_at=NOW()`,
+        [slug, filename, bytes, preview, access.freePreviewPages],
       );
+      const fullPdfStorageKey = `postgres://ebook_pdf_assets/${slug}/full`;
+      const previewPdfStorageKey = `postgres://ebook_pdf_assets/${slug}/preview`;
       const doc = {
         ...row.document,
+        accessLevel: access.accessLevel,
+        freePreviewPages: access.freePreviewPages,
+        allowFullPdfDownload: access.allowFullPdfDownload,
+        allowPdfDownload: access.allowFullPdfDownload,
+        isBundledPublicEdition: access.isBundledPublicEdition,
+        fullPdfStorageKey,
+        previewPdfStorageKey,
         pdfUrl: `/api/v1/ebooks/${slug}/pdf`,
         pdfFileName: filename,
       };
       const saved = (
         await client.query(
-          "UPDATE ebooks SET document=$2,revision=revision+1,updated_at=NOW() WHERE slug=$1 RETURNING *",
-          [slug, JSON.stringify(doc)],
+          `UPDATE ebooks
+           SET document=$2,full_pdf_storage_key=$3,preview_pdf_storage_key=$4,
+               revision=revision+1,updated_at=NOW()
+           WHERE slug=$1 RETURNING *`,
+          [slug, JSON.stringify(doc), fullPdfStorageKey, previewPdfStorageKey],
         )
       ).rows[0];
       return present(saved, rights);
@@ -548,14 +705,14 @@ function createEbooksService(db = database, clock = Date.now) {
   }
   async function pdf(slug, user, download = false) {
     const { row, rights, monetization } = await read(slug, user);
+    const access = accessFields(row);
     const previewOnly = !!monetization?.locked && !rights.canEdit;
+    if (download && !access.allowFullPdfDownload && !isOwnerAdmin(user))
+      fail("Full PDF downloading is disabled for this ebook.", 403);
     if (
-      download &&
-      row.document.allowPdfDownload === false &&
-      !isOwnerAdmin(user)
+      !access.fullPdfStorageKey &&
+      row.document.pdfUrl !== `/api/v1/ebooks/${slug}/pdf`
     )
-      fail("PDF downloading is disabled for this track.", 403);
-    if (row.document.pdfUrl !== `/api/v1/ebooks/${slug}/pdf`)
       fail("No uploaded PDF is attached.", 404);
     const asset = (
       await db.query(
@@ -565,13 +722,27 @@ function createEbooksService(db = database, clock = Date.now) {
     ).rows[0];
     if (!asset) fail("No uploaded PDF is attached.", 404);
     if (previewOnly) {
-      const count = row.document.freePreviewPages || 2;
-      // Legacy assets and changed page limits are regenerated, never served full.
-      const bytes = asset.preview_bytes && asset.preview_pages === count
-        ? asset.preview_bytes : await require('./ebook-pdf-preview').createPdfPreview(asset.bytes, count);
-      return {filename: `preview-${asset.filename}`, bytes, preview: true};
+      const count = access.freePreviewPages;
+      const bytes =
+        asset.preview_bytes && Number(asset.preview_pages) === count
+          ? asset.preview_bytes
+          : await require("./ebook-pdf-preview").createPdfPreview(
+              asset.bytes,
+              count,
+            );
+      return {
+        filename: `preview-${asset.filename}`,
+        bytes,
+        preview: true,
+        previewPages: count,
+      };
     }
-    return {...asset, preview: false};
+    return {
+      filename: asset.filename,
+      bytes: asset.bytes,
+      preview: false,
+      previewPages: access.freePreviewPages,
+    };
   }
   async function requestAccess(slug, user, note) {
     if (!SLUG.test(slug)) fail("Ebook not found", 404);
@@ -799,6 +970,7 @@ function createEbooksService(db = database, clock = Date.now) {
   }
   return {
     list,
+    adminList,
     get,
     save,
     practice,
