@@ -85,18 +85,19 @@ function validateBook(raw, slug) {
     ].includes(raw.level)
   )
     fail("Unknown level.");
+  const draftOnly = raw.visibility === "admin_only";
   if (
     !Array.isArray(raw.chapters) ||
-    raw.chapters.length < 1 ||
-    raw.chapters.length > 50
+    raw.chapters.length > 50 ||
+    (!draftOnly && raw.chapters.length < 1)
   )
-    fail("Add 1–50 chapters.");
+    fail(draftOnly ? "Use 0–50 chapters for a private draft." : "Add 1–50 chapters before publishing.");
   if (
     !Array.isArray(raw.finalExamQuestions) ||
-    raw.finalExamQuestions.length < 1 ||
-    raw.finalExamQuestions.length > 100
+    raw.finalExamQuestions.length > 100 ||
+    (!draftOnly && raw.finalExamQuestions.length < 1)
   )
-    fail("Add 1–100 final exam questions.");
+    fail(draftOnly ? "Use 0–100 final exam questions for a private draft." : "Add 1–100 final exam questions before publishing.");
   const ids = new Set();
   const chapters = raw.chapters.map((chapter, order) => {
     const id = text(chapter.id, 2, 60, "Chapter ID");
@@ -186,17 +187,18 @@ function validateBook(raw, slug) {
     ![0, 0.25].includes(negativeMarks)
   )
     fail("Invalid pass percentage or marking settings.");
-  if (
-    raw.allowPdfDownload !== undefined &&
-    typeof raw.allowPdfDownload !== "boolean"
-  )
-    fail("PDF download setting must be boolean.");
-  const accessLevel = raw.accessLevel ?? "free";
+  const rawDownload = raw.allowFullPdfDownload ?? raw.allowPdfDownload;
+  if (rawDownload !== undefined && typeof rawDownload !== "boolean")
+    fail("Full PDF download setting must be boolean.");
+  const isBundledPublicEdition = SEEDS.has(slug);
+  const accessLevel = isBundledPublicEdition ? "free" : (raw.accessLevel ?? "free");
   const freePreviewPages = raw.freePreviewPages ?? 2;
+  const allowFullPdfDownload = rawDownload === true;
   if (!["free", "pro"].includes(accessLevel)) fail("Choose Free or Pro access.");
-  if (!Number.isInteger(freePreviewPages) || freePreviewPages < 1 || freePreviewPages > 50)
-    fail("Preview pages must be an integer from 1 to 50.");
-  if (SEEDS.has(slug) && accessLevel === "pro") fail("Bundled public editions must stay Free.");
+  if (!Number.isInteger(freePreviewPages) || freePreviewPages < 1 || freePreviewPages > 20)
+    fail("Preview pages must be an integer from 1 to 20.");
+  if (isBundledPublicEdition && raw.accessLevel === "pro")
+    fail("Bundled public editions must stay Free.");
   let pdfUrl = raw.pdfUrl || "";
   if (accessLevel === "pro" && pdfUrl && pdfUrl !== `/api/v1/ebooks/${slug}/pdf`)
     fail("Pro PDFs must be uploaded privately through Ebook Studio.");
@@ -224,8 +226,14 @@ function validateBook(raw, slug) {
     passPercent,
     marksPerCorrect,
     negativeMarks,
-    accessLevel, freePreviewPages,
-    allowPdfDownload: raw.allowPdfDownload !== false,
+    accessLevel,
+    freePreviewPages,
+    allowFullPdfDownload,
+    // Legacy readers still understand this alias while all new code uses allowFullPdfDownload.
+    allowPdfDownload: allowFullPdfDownload,
+    fullPdfStorageKey: null,
+    previewPdfStorageKey: null,
+    isBundledPublicEdition,
     isCheatSheet: raw.isCheatSheet === true,
     pdfUrl,
     pdfFileName: text(raw.pdfFileName || "", 0, 180, "PDF filename"),
