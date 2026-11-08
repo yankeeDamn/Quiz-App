@@ -457,7 +457,7 @@ function createEbooksService(db = database, clock = Date.now) {
         user,
         { ...row.document, ...accessFields(row) },
       );
-      if (policy && !rights.canEdit) {
+      if (policy) {
         value.monetization = policy;
         if (policy.locked && value.pdfUrl?.startsWith("https://")) delete value.pdfUrl;
       }
@@ -491,27 +491,36 @@ function createEbooksService(db = database, clock = Date.now) {
             [emailOf(user)],
           )
         ).rows;
-    return rows.map((row) =>
-      present(
-        row,
-        permissions(row, user, {
-          role: row.access_role,
-          status: row.access_status,
-        }),
-        true,
-      ),
-    );
+    return rows
+      .map((row) =>
+        present(
+          row,
+          permissions(row, user, {
+            role: row.access_role,
+            status: row.access_status,
+          }),
+          true,
+        ),
+      )
+      .filter((book) => book.permissions.canEdit);
+  }
+  async function adminGet(slug, user) {
+    const { row, rights } = await read(slug, user);
+    if (!rights.canEdit)
+      fail("Editing is not approved for this account.", 403);
+    return present(row, rights);
   }
   async function get(slug, user) {
     const { row, rights, monetization } = await read(slug, user);
     const value = present(row, rights);
-    if (monetization && !rights.canEdit) {
+    if (monetization) {
       value.monetization = {
         ...monetization,
         freePreviewPages: accessFields(row).freePreviewPages,
       };
       if (monetization.locked) {
         if (value.pdfUrl?.startsWith("https://")) delete value.pdfUrl;
+        delete value.finalExamQuestions;
         value.chapters = [...(value.chapters || [])]
           .sort((a, b) => a.order - b.order)
           .slice(0, monetization.freePreviewChapters || 2);
@@ -657,7 +666,7 @@ function createEbooksService(db = database, clock = Date.now) {
   }
   async function practice(slug, user) {
     const { row, rights, monetization } = await read(slug, user);
-    if (monetization?.locked && !rights.canEdit)
+    if (monetization?.locked)
       fail("Ebook pass or Pro required", 403);
     return row.document.finalExamQuestions || [];
   }
@@ -746,8 +755,8 @@ function createEbooksService(db = database, clock = Date.now) {
   async function pdf(slug, user, download = false) {
     const { row, rights, monetization } = await read(slug, user);
     const access = accessFields(row);
-    const previewOnly = !!monetization?.locked && !rights.canEdit;
-    if (download && !access.allowFullPdfDownload && !isOwnerAdmin(user))
+    const previewOnly = !!monetization?.locked;
+    if (download && !access.allowFullPdfDownload)
       fail("Full PDF downloading is disabled for this ebook.", 403);
     if (
       !access.fullPdfStorageKey &&
@@ -880,7 +889,7 @@ function createEbooksService(db = database, clock = Date.now) {
       fail("Negative marking must be true or false.");
     return transaction(async (client) => {
       const { row, rights, monetization } = await read(slug, user, client, true);
-      if(monetization?.locked&&!rights.canEdit) fail("Ebook pass or Pro required",403);
+      if(monetization?.locked) fail("Ebook pass or Pro required",403);
       // A learner can explicitly challenge the exam without completing chapters.
       const expires = new Date(clock() + row.document.examMinutes * 60000);
       const saved = (
@@ -1011,6 +1020,7 @@ function createEbooksService(db = database, clock = Date.now) {
   return {
     list,
     adminList,
+    adminGet,
     get,
     save,
     practice,
