@@ -9,6 +9,7 @@ import {
 } from "@/lib/ebooks";
 import { EbookShare } from "./ebook-share";
 import { Field, input } from "@/components/admin/ui";
+import { BookOpen, CheckCircle2, Crown, FileText, Layers3, LoaderCircle, ShieldCheck } from "lucide-react";
 export function EbookInventory({
   owner,
   pending,
@@ -17,6 +18,7 @@ export function EbookInventory({
   onClone,
   onRefresh,
   onMessage,
+  onUpdated,
 }: {
   owner: boolean;
   pending: number;
@@ -25,12 +27,13 @@ export function EbookInventory({
   onClone: (book: EbookTrack) => void;
   onRefresh: () => void;
   onMessage: (message: string) => void;
+  onUpdated: (ebook: EbookTrack) => void;
 }) {
   const [books, setBooks] = useState<EbookSummary[]>([]),
     [search, setSearch] = useState(""),
     [category, setCategory] = useState("All"),
     [visibility, setVisibility] = useState("all"),
-    [busy, setBusy] = useState(false);
+    [busySlug, setBusySlug] = useState("");
   useEffect(() => {
     let active = true;
     const request = owner
@@ -66,7 +69,7 @@ export function EbookInventory({
     ],
     [
       "Print / PDF ready",
-      `${books.filter((b) => b.allowPdfDownload !== false || b.pdfUrl).length} tracks`,
+      `${books.filter((b) => b.fullPdfStorageKey || b.pdfUrl).length} tracks`,
     ],
     [
       "Assessments",
@@ -75,21 +78,50 @@ export function EbookInventory({
     ["Pending approvals", owner ? String(pending) : "Owner managed"],
   ];
   const fetchBook = async (slug: string) => {
-    const r = await ebookApi<{ ebook: EbookTrack }>(`/ebooks/${slug}`);
+    const r = await ebookAdminApi<{ ebook: EbookTrack }>(`/${slug}`);
     if (!r.data) throw Error(r.error?.message || "Could not load ebook.");
     return r.data.ebook;
   };
+  const patchBook = async (
+    book: EbookSummary,
+    kind: "access" | "visibility",
+    patch: { accessLevel?: "free" | "pro"; visibility?: EbookTrack["visibility"] },
+  ) => {
+    if (!owner || busySlug) return;
+    if (kind === "access" && book.isBundledPublicEdition && patch.accessLevel === "pro") {
+      onMessage("Bundled public editions must remain Free.");
+      return;
+    }
+    if (kind === "visibility" && patch.visibility === "public" &&
+        !window.confirm("Publish this ebook to learners? Incomplete drafts will be rejected.")) return;
+    setBusySlug(book.slug);
+    const response = await ebookAdminApi<{ebook:EbookTrack}>(
+      `/${encodeURIComponent(book.slug)}/${kind}`,
+      { method: "PATCH", body: { revision: book.revision, ...patch } },
+    );
+    setBusySlug("");
+    if (!response.data) {
+      onMessage(response.error?.message || "Unable to update the ebook.");
+      return;
+    }
+    onUpdated(response.data.ebook);
+    onMessage(kind === "access" ? "Free/Pro access saved." : "Publication visibility saved.");
+    onRefresh();
+  };
   return (
     <div className="space-y-5">
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        {stats.map(([label, value]) => (
-          <div key={label} className="rounded-2xl border bg-muted/20 p-4">
-            <p className="text-xs text-muted-foreground">{label}</p>
-            <p className="mt-3 text-lg font-bold">{value}</p>
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5" aria-label="Ebook library metrics">
+        {stats.map(([label, value], index) => (
+          <div key={label} className="relative overflow-hidden rounded-2xl border border-slate-200 bg-card p-5 shadow-sm dark:border-slate-800">
+            <div className="mb-4 grid h-10 w-10 place-items-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-300">
+              {index === 0 ? <BookOpen className="h-5 w-5"/> : index === 1 ? <Layers3 className="h-5 w-5"/> : index === 2 ? <FileText className="h-5 w-5"/> : index === 3 ? <CheckCircle2 className="h-5 w-5"/> : <ShieldCheck className="h-5 w-5"/>}
+            </div>
+            <p className="text-xs font-semibold text-muted-foreground">{label}</p>
+            <p className="mt-2 text-base font-extrabold tracking-tight">{value}</p>
           </div>
         ))}
-      </div>
-      <div className="grid gap-3 sm:grid-cols-3">
+      </section>
+      <div className="grid gap-3 rounded-2xl border border-slate-200 bg-card p-4 shadow-sm dark:border-slate-800 sm:grid-cols-3">
         <input
           type="search"
           aria-label="Search ebook inventory"
@@ -121,11 +153,11 @@ export function EbookInventory({
           ))}
         </select>
       </div>
-      <div className="overflow-x-auto rounded-xl border">
-        <table className="w-full min-w-[900px] text-left text-sm">
-          <thead className="bg-muted">
+      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-card shadow-sm dark:border-slate-800">
+        <table className="w-full min-w-[980px] text-left text-sm">
+          <thead className="bg-slate-100/70 dark:bg-slate-900">
             <tr>
-              {["Track", "Visibility", "Content", "Actions"].map((label) => (
+              {["Ebook", "Publication", "Reader tier", "Content", "Actions"].map((label) => (
                 <th className="p-4" key={label}>
                   {label}
                 </th>
@@ -134,7 +166,7 @@ export function EbookInventory({
           </thead>
           <tbody>
             {shown.map((book) => (
-              <tr key={book.slug} className="border-t">
+              <tr key={book.slug} className="border-t transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-900/50">
                 <td className="max-w-sm p-4">
                   <p className="font-semibold">{book.title}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
@@ -142,40 +174,37 @@ export function EbookInventory({
                   </p>
                 </td>
                 <td className="p-4">
-                  <button
-                    type="button"
-                    disabled={!owner || busy}
-                    className="min-h-10 rounded-full border px-3 text-xs font-semibold disabled:opacity-60"
-                    onClick={async () => {
-                      setBusy(true);
-                      try {
-                        const full = await fetchBook(book.slug);
-                        const values = [
-                          "admin_only",
-                          "invite_only",
-                          "public",
-                        ] as const;
-                        const next =
-                          values[(values.indexOf(full.visibility) + 1) % 3];
-                        const r = await ebookApi(`/admin/ebooks/${book.slug}`, {
-                          method: "PUT",
-                          body: { ...full, visibility: next },
-                        });
-                        if (!r.success) throw Error(r.error?.message);
-                        onRefresh();
-                      } catch (error) {
-                        onMessage(
-                          error instanceof Error
-                            ? error.message
-                            : "Visibility change failed.",
-                        );
-                      } finally {
-                        setBusy(false);
-                      }
-                    }}
+                  <select
+                    aria-label={`Publication visibility for ${book.title}`}
+                    className="min-h-10 max-w-[170px] rounded-xl border border-slate-200 bg-background px-3 text-xs font-semibold disabled:opacity-50 dark:border-slate-700"
+                    value={book.visibility}
+                    disabled={!owner || !!busySlug || book.isBundledPublicEdition}
+                    onChange={(event) => void patchBook(book, "visibility", {
+                      visibility: event.target.value as EbookTrack["visibility"],
+                    })}
                   >
-                    {book.visibility}
-                  </button>
+                    <option value="admin_only">Private draft</option>
+                    <option value="invite_only">Invite only</option>
+                    <option value="public">Public</option>
+                  </select>
+                </td>
+                <td className="p-4">
+                  <div className="inline-flex items-center gap-2">
+                    <select
+                      aria-label={`Reader tier for ${book.title}`}
+                      value={book.accessLevel || "free"}
+                      disabled={!owner || !!busySlug || book.isBundledPublicEdition}
+                      onChange={(event) => void patchBook(book, "access", {
+                        accessLevel: event.target.value as "free" | "pro",
+                      })}
+                      className={`min-h-10 rounded-xl border px-3 text-xs font-bold disabled:opacity-50 ${book.accessLevel === "pro" ? "border-violet-200 bg-violet-50 text-violet-900 dark:border-violet-800 dark:bg-violet-950 dark:text-violet-200" : "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"}`}
+                    >
+                      <option value="free">Free</option>
+                      <option value="pro">Pro</option>
+                    </select>
+                    {busySlug === book.slug && <LoaderCircle className="h-4 w-4 animate-spin text-indigo-600"/>}
+                    {book.accessLevel === "pro" && <Crown className="h-4 w-4 text-violet-500"/>}
+                  </div>
                 </td>
                 <td className="p-4 text-xs">
                   {book.chapterCount} chapters
@@ -198,12 +227,19 @@ export function EbookInventory({
                       onClick={() => onSelect(book.slug, "pdf")}
                       className="min-h-9 rounded-lg border px-3 text-xs"
                     >
-                      PDF settings
+                      Manage PDF
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onSelect(book.slug, "exam")}
+                      className="min-h-9 rounded-lg border px-3 text-xs"
+                    >
+                      Edit exam
                     </button>
                     {owner && (
                       <button
                         type="button"
-                        disabled={busy}
+                        disabled={!!busySlug}
                         onClick={async () => {
                           try {
                             onClone(await fetchBook(book.slug));
@@ -249,10 +285,21 @@ export function EbookExamSettings({
     patch: Partial<(typeof questions)[number]>,
   ) => onQuestions(questions.map((q, j) => (j === i ? { ...q, ...patch } : q)));
   return (
-    <div className="space-y-5">
-      <h3 className="text-xl font-bold">
-        Assessment settings & visual question builder
-      </h3>
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-50 via-white to-white p-6 shadow-sm dark:border-indigo-900 dark:from-indigo-950/40 dark:via-slate-950 dark:to-slate-950">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-widest text-indigo-700 dark:text-indigo-300">Exam Builder</p>
+          <h3 className="mt-2 text-2xl font-extrabold tracking-tight">Assessment & question studio</h3>
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+            Author questions, correct answers, explanations, scoring and timing.
+            Use Save changes to persist edits; new drafts can remain incomplete.
+          </p>
+        </div>
+        <div className="rounded-xl border border-indigo-200 bg-white px-4 py-3 text-center dark:border-indigo-800 dark:bg-slate-900">
+          <span className="block text-2xl font-extrabold text-indigo-700 dark:text-indigo-300">{questions.length}</span>
+          <span className="text-xs font-semibold text-muted-foreground">Questions</span>
+        </div>
+      </div>
       <div className="grid gap-4 sm:grid-cols-4">
         <Field label="Pass percentage">
           <input
@@ -306,7 +353,7 @@ export function EbookExamSettings({
       </Field>
       <div className="space-y-3">
         {questions.map((q, i) => (
-          <details key={i} className="rounded-xl border p-4">
+          <details key={i} className="rounded-2xl border border-slate-200 bg-card p-5 shadow-sm dark:border-slate-800">
             <summary className="cursor-pointer text-sm font-semibold">
               {i + 1}. {q.question || "New question"}
             </summary>
@@ -383,7 +430,7 @@ export function EbookExamSettings({
       </div>
       <button
         type="button"
-        className="min-h-11 rounded-xl border px-4 text-sm font-semibold"
+        className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-5 text-sm font-bold text-indigo-700 hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-300"
         onClick={() =>
           onQuestions([
             ...questions,

@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { EbookUpgradeGate } from "./ebook-upgrade-gate";
+import { EbookMonetizationControls, type EbookAccessPatch } from "./ebook-monetization-controls";
+import { CheckCircle2, CloudUpload, FileLock2, FileText, LoaderCircle } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { API_BASE_URL, getBackendToken } from "@/lib/api";
 import { type EbookTrack } from "@/lib/ebooks";
@@ -226,10 +228,16 @@ export function EbookPrintView({
 export function PdfSettings({
   book,
   onChange,
+  onAccessCommit,
+  accessBusy,
+  owner,
   onUploaded,
 }: {
   book: EbookTrack;
   onChange: (patch: Partial<EbookTrack>) => void;
+  onAccessCommit: (patch: EbookAccessPatch) => void;
+  accessBusy: boolean;
+  owner: boolean;
   onUploaded: (book: EbookTrack) => void;
 }) {
   const [message, setMessage] = useState("");
@@ -238,7 +246,7 @@ export function PdfSettings({
   const fileRef = useRef<HTMLInputElement>(null);
 
   const upload = async (file?: File) => {
-    if (!file || !book.revision || busy) return;
+    if (!file || !book.revision || busy || accessBusy) return;
     if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
       setMessage("Choose a PDF file.");
       return;
@@ -286,86 +294,44 @@ export function PdfSettings({
   };
 
   return (
-    <section className="space-y-5 rounded-2xl border p-5">
-      <div>
-        <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">
-          Protected document storage
-        </p>
-        <h3 className="mt-1 text-xl font-bold">PDF Manager</h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Full PDFs are stored only in protected backend storage. Pro readers without an entitlement receive a physically separate preview file, never the full PDF hidden in the browser.
-        </p>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-3">
-        <label className="grid gap-2 text-sm font-semibold">
-          Access level
-          <select
-            className="rounded-xl border bg-background p-3"
-            value={book.accessLevel}
-            disabled={book.isBundledPublicEdition}
-            onChange={(event) =>
-              onChange({ accessLevel: event.target.value as "free" | "pro" })
-            }
-          >
-            <option value="free">Free</option>
-            <option value="pro">Pro</option>
-          </select>
-        </label>
-
-        <label className={`grid gap-2 text-sm font-semibold ${book.accessLevel === "free" ? "opacity-55" : ""}`}>
-          Free preview pages
-          <input
-            className="rounded-xl border bg-background p-3"
-            type="number"
-            min={1}
-            max={20}
-            disabled={book.accessLevel === "free"}
-            value={book.freePreviewPages ?? 2}
-            onChange={(event) =>
-              onChange({
-                freePreviewPages: Math.min(
-                  20,
-                  Math.max(1, Number(event.target.value) || 2),
-                ),
-              })
-            }
-          />
-          <span className="text-xs font-normal text-muted-foreground">
-            {book.accessLevel === "free"
-              ? "Full ebook is accessible for free."
-              : "Changing this value regenerates the protected preview on Save ebook."}
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 p-6 text-white shadow-lg sm:p-7">
+        <div className="max-w-2xl">
+          <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-indigo-200">
+            <FileLock2 className="h-4 w-4" /> Secure publishing
+          </p>
+          <h3 className="mt-3 text-2xl font-extrabold tracking-tight sm:text-3xl">PDF Manager</h3>
+          <p className="mt-2 text-sm leading-6 text-indigo-100/90">
+            Upload a protected edition and deliver only permitted preview pages.
+            Reader access is verified on the server for every file request.
+          </p>
+        </div>
+        <div className="grid min-w-[160px] gap-2 rounded-xl border border-white/15 bg-white/10 p-4 text-sm">
+          <span className="text-indigo-100">Edition status</span>
+          <strong className="flex items-center gap-2">
+            {book.fullPdfStorageKey ? <CheckCircle2 className="h-4 w-4 text-emerald-300" /> : <FileText className="h-4 w-4" />}
+            {book.fullPdfStorageKey ? "Protected PDF ready" : "No private PDF"}
+          </strong>
+          <span className="text-xs text-indigo-200">
+            {book.fullPdfStorageKey ? "Preview generated" : "Upload an edition below"}
           </span>
-        </label>
-
-        <div>
-          <p className="mb-2 text-sm font-semibold">Allow Full PDF Download</p>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={book.allowFullPdfDownload}
-            onClick={() =>
-              onChange({
-                allowFullPdfDownload: !book.allowFullPdfDownload,
-                allowPdfDownload: !book.allowFullPdfDownload,
-              })
-            }
-            className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${book.allowFullPdfDownload ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-700"}`}
-          >
-            <span className={`h-5 w-5 rounded-full bg-white shadow transition-transform ${book.allowFullPdfDownload ? "translate-x-6" : "translate-x-1"}`} />
-            <span className="sr-only">
-              {book.allowFullPdfDownload ? "Disable" : "Enable"} full PDF download
-            </span>
-          </button>
         </div>
       </div>
 
-      {book.isBundledPublicEdition && (
-        <p className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-100">
-          This is a bundled public edition. Its access level is explicitly Free and cannot be converted to Pro.
-        </p>
-      )}
+      <EbookMonetizationControls
+        book={book}
+        owner={owner}
+        busy={accessBusy || busy}
+        onCommit={onAccessCommit}
+      />
 
+      <section className="grid gap-6 rounded-2xl border border-slate-200 bg-card p-5 shadow-sm lg:grid-cols-[minmax(0,1fr)_280px] sm:p-6">
+        <div className="space-y-5">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-indigo-600">Edition details</p>
+            <h4 className="mt-1 text-lg font-bold">Printable reference</h4>
+            <p className="mt-1 text-sm text-muted-foreground">Changes to these details are saved with the Save changes action.</p>
+          </div>
       <label className="grid gap-2 text-sm font-semibold">
         Edition version
         <input
@@ -403,12 +369,12 @@ export function PdfSettings({
 
       <div
         role="button"
-        tabIndex={book.revision && !busy ? 0 : -1}
-        aria-disabled={!book.revision || busy}
-        className={`rounded-2xl border-2 border-dashed p-8 text-center transition-colors ${dragging ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/30" : "border-slate-300 dark:border-slate-700"} ${!book.revision || busy ? "cursor-not-allowed opacity-55" : "cursor-pointer hover:border-indigo-400"}`}
+        tabIndex={book.revision && !busy && !accessBusy ? 0 : -1}
+        aria-disabled={!book.revision || busy || accessBusy}
+        className={`rounded-2xl border-2 border-dashed p-8 text-center transition-colors ${dragging ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/30" : "border-slate-300 dark:border-slate-700"} ${!book.revision || busy || accessBusy ? "cursor-not-allowed opacity-55" : "cursor-pointer hover:border-indigo-400"}`}
         onDragOver={(event) => {
           event.preventDefault();
-          if (book.revision && !busy) setDragging(true);
+          if (book.revision && !busy && !accessBusy) setDragging(true);
         }}
         onDragLeave={() => setDragging(false)}
         onDrop={(event) => {
@@ -416,16 +382,17 @@ export function PdfSettings({
           setDragging(false);
           void upload(event.dataTransfer.files?.[0]);
         }}
-        onClick={() => book.revision && !busy && fileRef.current?.click()}
+        onClick={() => book.revision && !busy && !accessBusy && fileRef.current?.click()}
         onKeyDown={(event) => {
-          if ((event.key === "Enter" || event.key === " ") && book.revision && !busy) {
+          if ((event.key === "Enter" || event.key === " ") && book.revision && !busy && !accessBusy) {
             event.preventDefault();
             fileRef.current?.click();
           }
         }}
       >
+        <CloudUpload className="mx-auto mb-3 h-10 w-10 text-indigo-600" />
         <p className="font-semibold">
-          {busy ? "Uploading and generating preview…" : "Drag & drop a PDF here, or click to choose"}
+          {busy ? <span className="inline-flex items-center gap-2"><LoaderCircle className="h-4 w-4 animate-spin" />Uploading and generating preview…</span> : "Drop a PDF here or click to browse"}
         </p>
         <p className="mt-2 text-xs text-muted-foreground">
           Maximum 3 MiB. Save the ebook first. Uploading replaces the protected full PDF and preview atomically.
@@ -435,14 +402,14 @@ export function PdfSettings({
           className="sr-only"
           type="file"
           accept="application/pdf,.pdf"
-          disabled={!book.revision || busy}
+          disabled={!book.revision || busy || accessBusy}
           onChange={(event) => void upload(event.target.files?.[0])}
         />
       </div>
 
       {book.pdfUrl && (
-        <div className="rounded-xl border bg-muted/20 p-4">
-          <p className="text-sm font-semibold">Attached protected PDF</p>
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4 dark:border-emerald-900 dark:bg-emerald-950/20">
+          <p className="flex items-center gap-2 text-sm font-semibold"><CheckCircle2 className="h-4 w-4 text-emerald-600" /> Attached protected PDF</p>
           <p className="mt-1 break-all text-xs text-muted-foreground">
             {book.pdfFileName || "ebook.pdf"}
           </p>
@@ -466,7 +433,7 @@ export function PdfSettings({
         </div>
       )}
 
-      <p role="status" className="text-sm">{message}</p>
+      {message && <p role="status" className="rounded-xl border bg-muted/20 p-3 text-sm">{message}</p>}
 
       {book.revision && (
         <a
@@ -478,6 +445,17 @@ export function PdfSettings({
           Preview authorized reader view ↗
         </a>
       )}
-    </section>
+        </div>
+        <aside className="flex flex-col gap-3 rounded-xl border border-indigo-100 bg-indigo-50/60 p-5 text-sm dark:border-indigo-900 dark:bg-indigo-950/20">
+          <p className="text-xs font-bold uppercase tracking-widest text-indigo-700 dark:text-indigo-300">How publishing works</p>
+          <div className="space-y-4">
+            <p><strong className="block">1. Save an ebook</strong><span className="text-muted-foreground">Create the ebook record before uploading a PDF.</span></p>
+            <p><strong className="block">2. Set access</strong><span className="text-muted-foreground">Free/Pro and download controls save immediately for existing ebooks.</span></p>
+            <p><strong className="block">3. Upload privately</strong><span className="text-muted-foreground">The backend creates a separate PDF preview using only the allowed pages.</span></p>
+            <p><strong className="block">4. Verify readers</strong><span className="text-muted-foreground">Check free and entitled sessions before publishing.</span></p>
+          </div>
+        </aside>
+      </section>
+    </div>
   );
 }
