@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import {
   EBOOK_CATEGORIES,
   ebookApi,
+  ebookAdminApi,
   type EbookTrack,
   type EbookSummary,
 } from "@/lib/ebooks";
@@ -32,11 +33,18 @@ export function EbookInventory({
     [busy, setBusy] = useState(false);
   useEffect(() => {
     let active = true;
-    void ebookApi<{ ebooks: EbookSummary[] }>("/ebooks").then((r) => {
+    const request = owner
+      ? ebookAdminApi<{ ebooks: EbookSummary[] }>("")
+      : ebookApi<{ ebooks: EbookSummary[] }>("/ebooks");
+    void request.then((result) => {
       if (!active) return;
-      if (r.data)
-        setBooks(r.data.ebooks.filter((b) => owner || b.permissions?.canEdit));
-      else onMessage(r.error?.message || "Inventory unavailable.");
+      if (result.data)
+        setBooks(
+          owner
+            ? result.data.ebooks
+            : result.data.ebooks.filter((book) => book.permissions?.canEdit),
+        );
+      else onMessage(result.error?.message || "Inventory unavailable.");
     });
     return () => {
       active = false;
@@ -561,7 +569,7 @@ export function EbookBackup({
                 )
               )
                 return;
-              const imported = {
+              const imported: EbookTrack = {
                 ...b,
                 pdfUrl: undefined,
                 pdfFileName: undefined,
@@ -577,7 +585,21 @@ export function EbookBackup({
                 marksPerCorrect:
                   typeof b.marksPerCorrect === "number" ? b.marksPerCorrect : 1,
                 negativeMarks: b.negativeMarks === 0.25 ? 0.25 : 0,
-                allowPdfDownload: b.allowPdfDownload !== false,
+                accessLevel: b.isBundledPublicEdition === true ? "free" : (b.accessLevel === "pro" ? "pro" : "free"),
+                freePreviewPages:
+                  typeof b.freePreviewPages === "number" &&
+                  Number.isInteger(b.freePreviewPages) &&
+                  b.freePreviewPages >= 1 &&
+                  b.freePreviewPages <= 20
+                    ? b.freePreviewPages
+                    : 2,
+                allowFullPdfDownload:
+                  b.allowFullPdfDownload === true || b.allowPdfDownload === true,
+                allowPdfDownload:
+                  b.allowFullPdfDownload === true || b.allowPdfDownload === true,
+                fullPdfStorageKey: null,
+                previewPdfStorageKey: null,
+                isBundledPublicEdition: false,
                 isCheatSheet: b.isCheatSheet === true,
                 draftBulk: undefined,
                 references: Array.isArray(b.references)

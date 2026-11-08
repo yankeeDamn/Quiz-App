@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/set-state-in-effect -- initialize account-scoped browser storage and refresh externally loaded data */
 "use client";
-import { CheckoutButton } from '@/components/payments/micro-passes';
 import { SponsoredSlot } from '@/components/ads/sponsored-slot';
 import { SafeAdSense } from '@/components/ads/safe-adsense';
 import { ContentReviewBadge, ReportMistake } from '@/components/shared/content-review';
@@ -33,6 +32,7 @@ import { EbookShare } from "./ebook-share";
 import { EbookStudio } from "./ebook-studio";
 import { AttachedPdf, EbookPrintView } from "./ebook-pdf";
 import { EbookAssessment } from "./ebook-assessment";
+import { EbookUpgradeGate } from "./ebook-upgrade-gate";
 function ConceptCheck({
   chapter,
   onComplete,
@@ -220,6 +220,16 @@ function ReaderSession({
       active = false;
     };
   }, [slug, identity, reload, initialChapter, fallback]);
+  useEffect(() => {
+    if (!book?.monetization?.locked) return;
+    const refreshAccess = () => setReload((value) => value + 1);
+    const timer = window.setInterval(refreshAccess, 15000);
+    window.addEventListener("focus", refreshAccess);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("focus", refreshAccess);
+    };
+  }, [book?.monetization?.locked]);
   const chapter = book?.chapters[Math.min(index, book.chapters.length - 1)];
   const ids = new Set(book?.chapters.map((c) => c.id) || []);
   const completeCount = progress.completed.filter((id) => ids.has(id)).length;
@@ -340,8 +350,8 @@ function ReaderSession({
   if (view === "pdf" || view === "cheatsheet")
     return (
       <main className="ebook-print-root mx-auto w-full max-w-4xl flex-1 p-6">
-        {book.allowPdfDownload === false && !book.permissions?.canEdit ? (
-          <div><p>Printing is disabled for this track or requires a pass.</p>{book.monetization?.locked&&<CheckoutButton code="IT_EBOOK_PACK_99"/>}</div>
+        {book.monetization?.locked && !book.permissions?.canEdit ? (
+          <EbookUpgradeGate previewPages={book.freePreviewPages ?? 2} />
         ) : (
           <EbookPrintView
             book={book}
@@ -436,7 +446,7 @@ function ReaderSession({
           </div>
         </aside>
         <article className="min-w-0 bg-background px-5 py-8 sm:px-10 lg:px-14">
-          {book.monetization?.locked&&<section className="my-5 rounded-2xl border border-indigo-300 p-5"><h2 className="text-xl font-bold">Unlock the full ebook, PDF & assessment</h2><p className="my-3">You are reading the free chapter preview. Continue with the ₹99 ebook pass or Pro.</p><CheckoutButton code="IT_EBOOK_PACK_99"/></section>}
+          {book.monetization?.locked && <EbookUpgradeGate previewPages={book.freePreviewPages ?? 2} />}
           <div className="mb-6 flex flex-wrap gap-2 ebook-print-tools">
             <button
               type="button"

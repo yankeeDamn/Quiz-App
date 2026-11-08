@@ -1,11 +1,12 @@
 /* eslint-disable react-hooks/set-state-in-effect -- initialize account-scoped browser storage and refresh externally loaded data */
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { ArrowDown, ArrowUp, Plus, Save, Trash2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, LoaderCircle, Plus, Save, Trash2, X } from "lucide-react";
 import { parseBulk } from "@/lib/admin";
 import {
   EBOOK_CATEGORIES,
   ebookApi,
+  ebookAdminApi,
   loadDraft,
   saveDraft,
   type EbookTrack,
@@ -38,18 +39,29 @@ const emptyChapter = (): EbookChapter => ({
   conceptChecks: [emptyQuestion(), emptyQuestion()],
 });
 const newBook = (): EbookTrack => ({
+  id: null,
   slug: "",
   title: "",
   subtitle: "",
   category: "Python",
   level: "Beginner to Pro",
   visibility: "admin_only",
-  chapters: [emptyChapter()],
+  accessLevel: "free",
+  freePreviewPages: 2,
+  allowFullPdfDownload: false,
+  allowPdfDownload: false,
+  fullPdfStorageKey: null,
+  previewPdfStorageKey: null,
+  isBundledPublicEdition: false,
+  chapters: [],
   examId: "",
   examMinutes: 20,
   finalExamQuestions: [],
   updatedAt: "",
 });
+const slugify = (value:string) =>
+  value.toLowerCase().normalize("NFKD").replace(/[^a-z0-9\s-]/g,"")
+    .trim().replace(/\s+/g,"-").replace(/-+/g,"-").slice(0,60);
 const toBulk = (book: EbookTrack) =>
   book.draftBulk ??
   (book.finalExamQuestions || [])
@@ -89,6 +101,10 @@ export function EbookStudio({
     [tab, setTab] = useState(initialBook ? "content" : "inventory");
   const [inventoryVersion, setInventoryVersion] = useState(0);
   const [bulkDirty, setBulkDirty] = useState(false);
+  const [adminBooks,setAdminBooks]=useState<EbookSummary[]>(summaries);
+  const [toast,setToast]=useState<{kind:"ok"|"error";text:string}|null>(null);
+  const [archiveOpen,setArchiveOpen]=useState(false);
+  const proGatedCount=adminBooks.filter((item)=>item.accessLevel==="pro"&&!item.isBundledPublicEdition).length;
   const setBulk = (value: string) => {
     setBulkValue(value);
     setBulkDirty(false);
@@ -97,12 +113,20 @@ export function EbookStudio({
   const [requests, setRequests] = useState<EbookAccessRequest[]>([]),
     [grantEmail, setGrantEmail] = useState(""),
     [restore, setRestore] = useState<EbookTrack | null>(null);
-  const [newlySaved, setNewlySaved] = useState<EbookSummary[]>([]);
   useEffect(() => {
     dialog.current?.showModal();
     setRestore(loadDraft(identity));
     if (!initialBook && owner) setBook(newBook());
   }, [identity, owner, initialBook]);
+  const notify=(text:string,kind:"ok"|"error"="ok")=>{setMessage(text);setToast({text,kind});};
+  useEffect(()=>{if(!toast)return;const id=window.setTimeout(()=>setToast(null),4500);return()=>window.clearTimeout(id);},[toast]);
+  const refreshAdminBooks=async()=>{
+    if(!owner)return;
+    const result=await ebookAdminApi<{ebooks:EbookSummary[]}>("");
+    if(result.data)setAdminBooks(result.data.ebooks);
+    else notify(result.error?.message||"Could not load ebook inventory.","error");
+  };
+  useEffect(()=>{void refreshAdminBooks();},[owner,inventoryVersion]);
   const loadRequests = async () => {
     const result = await ebookApi<{ requests: EbookAccessRequest[] }>(
       "/admin/ebooks/requests",
@@ -116,8 +140,9 @@ export function EbookStudio({
   const load = async (slug: string) => {
     if (
       book &&
+      (book.slug || book.title) &&
       !window.confirm(
-        "Switch ebook? Unsaved edits can be saved as a local draft first.",
+        "Switch ebook? Save a local draft first if you need to preserve unsaved edits.",
       )
     )
       return false;
@@ -130,17 +155,31 @@ export function EbookStudio({
       return true;
     }
     setBusy(true);
-    const result = await ebookApi<{ ebook: EbookTrack }>(`/ebooks/${slug}`);
+    const result = await ebookAdminApi<{ ebook: EbookTrack }>(
+      `/${encodeURIComponent(slug)}`,
+    );
     setBusy(false);
     if (result.data) {
-      setBook(result.data.ebook);
-      setBulk(toBulk(result.data.ebook));
+      const loaded = {
+        ...result.data.ebook,
+        id: result.data.ebook.id || result.data.ebook.slug,
+        accessLevel: result.data.ebook.accessLevel || "free",
+        freePreviewPages: result.data.ebook.freePreviewPages || 2,
+        allowFullPdfDownload:
+          result.data.ebook.allowFullPdfDownload ??
+          result.data.ebook.allowPdfDownload ??
+          false,
+        fullPdfStorageKey: result.data.ebook.fullPdfStorageKey || null,
+        previewPdfStorageKey: result.data.ebook.previewPdfStorageKey || null,
+        isBundledPublicEdition:
+          result.data.ebook.isBundledPublicEdition === true,
+      };
+      setBook(loaded);
+      setBulk(toBulk(loaded));
       return true;
-    } else {
-      setBook(null);
-      setMessage(result.error?.message || "Could not open ebook.");
-      return false;
     }
+    notify(result.error?.message || "Could not open ebook.", "error");
+    return false;
   };
   const change = (patch: Partial<EbookTrack>) =>
     setBook((old) => (old ? { ...old, ...patch } : old));
@@ -181,31 +220,51 @@ export function EbookStudio({
           }))
         : book.finalExamQuestions,
     };
-    setMessage(
-      saveDraft(identity, copy)
-        ? "Draft saved on this device for this account. It is not published or synced."
+    const saved = saveDraft(identity, copy);
+    notify(
+      saved
+        ? `Local draft saved at ${new Date().toLocaleTimeString()}. It is not published or synced.`
         : "Local storage is unavailable; keep this window open and copy your work.",
+      saved ? "ok" : "error",
     );
   };
-  const save = async () => {
-    if (!book) return;
+  const handleSaveEbook = async () => {
+    if (!book || busy) return;
     const parsed = parseBulk(bulk);
     if (bulkDirty && parsed.errors.length) {
-      setMessage(parsed.errors.join(" "));
+      notify(parsed.errors.join(" "), "error");
+      return;
+    }
+    if (!book.title.trim() || book.title.trim().length < 3) {
+      notify("Add an ebook title of at least 3 characters.", "error");
+      return;
+    }
+    if (!/^[a-z0-9][a-z0-9-]{1,59}$/.test(book.slug)) {
+      notify("Use a lowercase kebab-case slug of 2–60 characters.", "error");
+      return;
+    }
+    if (
+      book.visibility !== "admin_only" &&
+      (!book.chapters.length || !(book.finalExamQuestions?.length))
+    ) {
+      notify(
+        "Public and invite-only ebooks need at least one chapter and one assessment question. Keep an incomplete ebook private.",
+        "error",
+      );
       return;
     }
     if (
       book.visibility === "public" &&
       owner &&
-      !window.confirm(
-        "Save this ebook as public? Anyone will be able to read its content.",
-      )
+      !window.confirm("Save this ebook as public? Anyone can read its permitted content.")
     )
       return;
+
     setBusy(true);
     setMessage("");
     const payload = {
       ...book,
+      allowPdfDownload: book.allowFullPdfDownload,
       finalExamQuestions: bulkDirty
         ? parsed.rows.map((q, index) => ({
             ...q,
@@ -215,34 +274,33 @@ export function EbookStudio({
                 ? book.finalExamQuestions[index].domain
                 : undefined,
           }))
-        : book.finalExamQuestions,
+        : book.finalExamQuestions || [],
     };
-    const result = await ebookApi<{ ebook: EbookTrack }>(
-      `/admin/ebooks${book.revision ? "/" + book.slug : ""}`,
-      { method: book.revision ? "PUT" : "POST", body: payload },
+    const exists = Boolean(book.id || book.revision);
+    const result = await ebookAdminApi<{ ebook: EbookTrack }>(
+      exists ? `/${encodeURIComponent(book.slug)}` : "",
+      { method: exists ? "PUT" : "POST", body: payload },
     );
     setBusy(false);
     if (result.data) {
-      setBook(result.data.ebook);
-      setSelected(result.data.ebook.slug);
-      setBulk(toBulk(result.data.ebook));
-      setNewlySaved((items) => [
-        ...items.filter((item) => item.slug !== result.data!.ebook.slug),
-        {
-          ...result.data!.ebook,
-          chapterCount: result.data!.ebook.chapters.length,
-          durationMinutes: 0,
-        },
-      ]);
-      setMessage("Ebook saved to the server.");
+      const saved = {
+        ...result.data.ebook,
+        id: result.data.ebook.id || result.data.ebook.slug,
+      };
+      setBook(saved);
+      setSelected(saved.slug);
+      setBulk(toBulk(saved));
+      setBulkDirty(false);
       setInventoryVersion((v) => v + 1);
+      notify(exists ? "Ebook updated successfully." : "New ebook created successfully.");
       onSaved();
-    } else {
-      setMessage(
-        result.error?.message ||
-          "Save failed. Use Save local draft to preserve edits.",
-      );
+      return;
     }
+    notify(
+      result.error?.message ||
+        "Save failed. Use Save local draft to preserve edits.",
+      "error",
+    );
   };
   const approve = async (
     slug: string,
@@ -304,7 +362,7 @@ export function EbookStudio({
               ? [
                   [
                     "access",
-                    `Access (${requests.filter((r) => r.status === "pending").length})`,
+                    `Access (${proGatedCount})`,
                   ],
                 ]
               : []),
@@ -342,7 +400,14 @@ export function EbookStudio({
                   slug: `${source.slug.slice(0, 40)}-copy-${crypto.randomUUID().slice(0, 6)}`,
                   title: source.title + " (copy)",
                   visibility: "admin_only",
+                  id: null,
                   revision: undefined,
+                  accessLevel: source.isBundledPublicEdition ? "free" : source.accessLevel,
+                  allowFullPdfDownload: false,
+                  allowPdfDownload: false,
+                  fullPdfStorageKey: null,
+                  previewPdfStorageKey: null,
+                  isBundledPublicEdition: false,
                   pdfUrl: "",
                   pdfFileName: "",
                   permissions: undefined,
@@ -383,6 +448,8 @@ export function EbookStudio({
                         ...old,
                         pdfUrl: value.pdfUrl,
                         pdfFileName: value.pdfFileName,
+                        fullPdfStorageKey: value.fullPdfStorageKey,
+                        previewPdfStorageKey: value.previewPdfStorageKey,
                         revision: value.revision,
                         updatedAt: value.updatedAt,
                       }
@@ -517,29 +584,44 @@ export function EbookStudio({
         )}
         {tab === "content" && (
           <>
-            <Field label="Choose ebook">
-              <select
-                className={input}
-                value={selected}
-                onChange={(event) => void load(event.target.value)}
-              >
-                {owner && <option value="">Create a new private ebook</option>}
-                {!owner && !selected && (
-                  <option value="">Select an approved ebook</option>
-                )}
-                {[
-                  ...summaries,
-                  ...newlySaved.filter(
-                    (item) =>
-                      !summaries.some((book) => book.slug === item.slug),
-                  ),
-                ].map((book) => (
-                  <option key={book.slug} value={book.slug}>
-                    {book.title}
+            <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+              <Field label="Choose ebook">
+                <select
+                  className={input}
+                  value={selected}
+                  disabled={busy}
+                  onChange={(event) => void load(event.target.value)}
+                >
+                  <option value="">
+                    {owner ? "+ Create New Ebook" : "Select an approved ebook"}
                   </option>
-                ))}
-              </select>
-            </Field>
+                  {adminBooks.map((item) => (
+                    <option key={item.slug} value={item.slug}>
+                      {item.title} · {item.accessLevel === "pro" ? "Pro" : "Free"}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              {owner && (
+                <button
+                  type="button"
+                  disabled={busy}
+                  className="min-h-11 rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white disabled:opacity-50"
+                  onClick={() => {
+                    setBook(newBook());
+                    setSelected("");
+                    setChapterIndex(0);
+                    setBulk("");
+                    setBulkDirty(false);
+                    setTab("content");
+                    notify("New ebook form ready. Title will generate the slug until first save.");
+                  }}
+                >
+                  <Plus className="mr-2 inline h-4 w-4" />
+                  New Ebook
+                </button>
+              )}
+            </div>
             {restore && (
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-300 p-4 text-sm">
                 <span>
@@ -569,9 +651,14 @@ export function EbookStudio({
                     <input
                       className={input}
                       value={book.title}
-                      onChange={(event) =>
-                        change({ title: event.target.value })
-                      }
+                      onChange={(event) => {
+                        const title = event.target.value;
+                        change(
+                          book.id || book.revision
+                            ? { title }
+                            : { title, slug: slugify(title) },
+                        );
+                      }}
                     />
                   </Field>
                   <Field
@@ -579,7 +666,8 @@ export function EbookStudio({
                     hint="Stable lowercase link; cannot change after the first save."
                   >
                     <input
-                      disabled={!!book.revision || !owner}
+                      disabled={!!book.id || !!book.revision || !owner}
+                      readOnly={!!book.id || !!book.revision}
                       className={input}
                       value={book.slug}
                       onChange={(event) => change({ slug: event.target.value })}
@@ -654,6 +742,88 @@ export function EbookStudio({
                     />
                   </Field>
                 </div>
+                <section className="rounded-xl border border-slate-200 bg-slate-50/60 p-5 dark:border-slate-800 dark:bg-slate-900/50">
+                  <div className="mb-4">
+                    <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">
+                      Monetization & PDF Access
+                    </p>
+                    <h3 className="mt-1 font-bold">Reader entitlement and file delivery</h3>
+                  </div>
+                  <div className="grid gap-5 lg:grid-cols-3">
+                    <div>
+                      <p className="mb-2 text-sm font-semibold">Access Level</p>
+                      <div className="inline-flex rounded-xl border bg-background p-1" role="group" aria-label="Ebook access level">
+                        {(["free","pro"] as const).map((level) => (
+                          <button
+                            key={level}
+                            type="button"
+                            disabled={!owner || book.isBundledPublicEdition}
+                            aria-pressed={book.accessLevel === level}
+                            onClick={() => change({ accessLevel: level })}
+                            className={`min-h-10 rounded-lg px-4 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50 ${book.accessLevel === level ? "bg-indigo-600 text-white" : "text-muted-foreground"}`}
+                          >
+                            {level === "free" ? "Free" : "Pro"}
+                          </button>
+                        ))}
+                      </div>
+                      {book.isBundledPublicEdition && (
+                        <p className="mt-2 text-xs text-emerald-700 dark:text-emerald-300">
+                          Bundled public editions are permanently Free.
+                        </p>
+                      )}
+                    </div>
+                    <label className={`grid gap-2 text-sm font-semibold ${book.accessLevel === "free" ? "opacity-55" : ""}`}>
+                      Free Preview Pages
+                      <input
+                        type="number"
+                        min={1}
+                        max={20}
+                        disabled={book.accessLevel === "free" || !owner}
+                        className={input}
+                        value={book.freePreviewPages ?? 2}
+                        onChange={(event) =>
+                          change({
+                            freePreviewPages: Math.min(
+                              20,
+                              Math.max(1, Number(event.target.value) || 2),
+                            ),
+                          })
+                        }
+                      />
+                      <span className="text-xs font-normal text-muted-foreground">
+                        {book.accessLevel === "free"
+                          ? "Full ebook is accessible for free."
+                          : "Only this many PDF pages are delivered before upgrade."}
+                      </span>
+                    </label>
+                    <div>
+                      <p className="mb-2 text-sm font-semibold">Allow Full PDF Download</p>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={book.allowFullPdfDownload}
+                        disabled={!owner}
+                        onClick={() =>
+                          change({
+                            allowFullPdfDownload: !book.allowFullPdfDownload,
+                            allowPdfDownload: !book.allowFullPdfDownload,
+                          })
+                        }
+                        className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors disabled:opacity-50 ${book.allowFullPdfDownload ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-700"}`}
+                      >
+                        <span
+                          className={`inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${book.allowFullPdfDownload ? "translate-x-6" : "translate-x-1"}`}
+                        />
+                        <span className="sr-only">
+                          {book.allowFullPdfDownload ? "Disable" : "Enable"} full PDF download
+                        </span>
+                      </button>
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Inline reading still requires server entitlement. This setting controls the direct download endpoint.
+                      </p>
+                    </div>
+                  </div>
+                </section>
                 <Field label="Summary">
                   <textarea
                     className={input}
@@ -710,6 +880,11 @@ export function EbookStudio({
                         </option>
                       ))}
                     </select>
+                    {!book.chapters.length && (
+                      <p className="rounded-xl border border-dashed p-5 text-sm text-muted-foreground">
+                        No chapters yet. Click Add chapter to start authoring.
+                      </p>
+                    )}
                     {chapter && (
                       <>
                         <div className="flex flex-wrap gap-2">
@@ -1061,10 +1236,10 @@ export function EbookStudio({
               <button
                 type="button"
                 disabled={busy}
-                onClick={() => void save()}
+                onClick={() => void handleSaveEbook()}
                 className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white disabled:opacity-50"
               >
-                <Save className="h-4 w-4" />
+                {busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 {busy ? "Saving…" : "Save ebook"}
               </button>
               <button
@@ -1079,34 +1254,60 @@ export function EbookStudio({
                   type="button"
                   className="min-h-11 rounded-xl border px-4 text-sm text-red-600"
                   disabled={busy}
-                  onClick={async () => {
-                    if (
-                      !window.confirm(
-                        "Archive this ebook and remove it from the learning hub?",
-                      )
-                    )
-                      return;
-                    const result = await ebookApi(
-                      `/admin/ebooks/${book.slug}`,
-                      { method: "DELETE" },
-                    );
-                    if (result.success) {
-                      onSaved();
-                      setBook(newBook());
-                      setSelected("");
-                      setBulk("");
-                    }
-                    setMessage(
-                      result.success
-                        ? "Ebook archived."
-                        : result.error?.message || "Archive failed.",
-                    );
-                  }}
-                >
+                  onClick={() => setArchiveOpen(true)}
+               >
                   Archive ebook
                 </button>
               )}
             </div>
+          </div>
+        )}
+        {toast && (
+          <div
+            role={toast.kind === "error" ? "alert" : "status"}
+            className={`fixed right-5 top-24 z-[100] max-w-sm rounded-xl border px-4 py-3 text-sm font-semibold shadow-xl ${toast.kind === "error" ? "border-red-300 bg-red-50 text-red-900 dark:border-red-900 dark:bg-red-950 dark:text-red-100" : "border-emerald-300 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-100"}`}
+          >
+            {toast.text}
+          </div>
+        )}
+        {archiveOpen && book?.revision && (
+          <div className="fixed inset-0 z-[90] grid place-items-center bg-slate-950/60 p-4" role="presentation">
+            <section role="dialog" aria-modal="true" aria-labelledby="archive-ebook-title" className="w-full max-w-md rounded-2xl border bg-card p-6 shadow-2xl">
+              <h3 id="archive-ebook-title" className="text-xl font-bold">Archive this ebook?</h3>
+              <p className="mt-3 text-sm text-muted-foreground">
+                {book.title} will be removed from active authoring and learner listings. Existing attempts remain preserved.
+              </p>
+              <div className="mt-6 flex justify-end gap-3">
+                <button type="button" disabled={busy} className="min-h-11 rounded-xl border px-4 text-sm font-semibold" onClick={() => setArchiveOpen(false)}>
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={busy}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-red-600 px-4 text-sm font-semibold text-white disabled:opacity-50"
+                  onClick={async () => {
+                    setBusy(true);
+                    const result = await ebookAdminApi(`/${encodeURIComponent(book.slug)}`, { method: "DELETE" });
+                    setBusy(false);
+                    if (!result.success) {
+                      notify(result.error?.message || "Archive failed.", "error");
+                      return;
+                    }
+                    setArchiveOpen(false);
+                    setBook(newBook());
+                    setSelected("");
+                    setBulk("");
+                    setBulkDirty(false);
+                    setInventoryVersion((v) => v + 1);
+                    notify("Ebook archived.");
+                    onSaved();
+                  }}
+                >
+                  {busy && <LoaderCircle className="h-4 w-4 animate-spin" />}
+                  Archive ebook
+                </button>
+              </div>
+            </section>
           </div>
         )}
         {tab === "access" && owner && (

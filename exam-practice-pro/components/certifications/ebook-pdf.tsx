@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { CheckoutButton } from "@/components/payments/micro-passes";
+import { EbookUpgradeGate } from "./ebook-upgrade-gate";
 import { useSession } from "next-auth/react";
 import { API_BASE_URL, getBackendToken } from "@/lib/api";
 import { type EbookTrack } from "@/lib/ebooks";
@@ -53,7 +53,7 @@ function PdfViewer({ book }: { book: EbookTrack }) {
       try {
         // External links are permitted only for unprotected public books.
         if(book.pdfUrl?.startsWith('https://')) {setUrl(book.pdfUrl);return;}
-        const response=await fetch(`/api/ebooks/${book.slug}/read`,{cache:'no-store',signal:controller.signal});
+        const response=await fetch(`/api/ebooks/${book.slug}/pdf`,{cache:'no-store',signal:controller.signal});
         if(!response.ok)throw Error('Unable to load PDF. Check your access or retry.');
         const nextPreview=response.headers.get('X-Ebook-Preview')==='true';
         if(poll && objectUrl && currentPreview===nextPreview){await response.body?.cancel();return;}
@@ -78,14 +78,11 @@ function PdfViewer({ book }: { book: EbookTrack }) {
     {error&&<p role="alert">{error}</p>}
     {url?<>
       <iframe title={`${book.title} PDF`} src={url} className="h-[75dvh] w-full rounded-xl border" referrerPolicy="no-referrer"/>
-      {preview&&<div className="rounded-xl border border-indigo-300 bg-background p-6 text-center" role="region" aria-label="Unlock full ebook">
-        <h3 className="text-xl font-bold">Continue reading with the IT ebook pass or Pro.</h3>
-        <p className="my-3">You have reached the end of the free PDF preview.</p>
-        <CheckoutButton code="IT_EBOOK_PACK_99"/>
-        <a className="ml-4 underline" href="/pricing">Compare Pro plans</a>
-        <button className="mt-4 block w-full text-sm underline" onClick={()=>setRefresh(n=>n+1)}>Already paid? Check access</button>
-      </div>}
-      {book.allowPdfDownload!==false&&<a className="inline-block rounded-xl border px-4 py-3" href={book.pdfUrl?.startsWith('https://')?book.pdfUrl:`/api/ebooks/${book.slug}/download`}>{preview?'Download preview':'Download PDF'}</a>}
+      {preview&&<>
+        <EbookUpgradeGate previewPages={book.freePreviewPages ?? 2}/>
+        <button className="block w-full text-sm underline" onClick={()=>setRefresh(n=>n+1)}>Already paid? Check access</button>
+      </>}
+      {book.allowFullPdfDownload&& !preview && <a className="inline-block rounded-xl border px-4 py-3" href={book.pdfUrl?.startsWith('https://')?book.pdfUrl:`/api/ebooks/${book.slug}/download`}>Download PDF</a>}
     </>:!error&&<p role="status">Loading authorized PDF…</p>}
   </section>;
 }
@@ -235,20 +232,139 @@ export function PdfSettings({
   onChange: (patch: Partial<EbookTrack>) => void;
   onUploaded: (book: EbookTrack) => void;
 }) {
-  const [message, setMessage] = useState(""),
-    [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const upload = async (file?: File) => {
+    if (!file || !book.revision || busy) return;
+    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+      setMessage("Choose a PDF file.");
+      return;
+    }
+    if (file.size > 3 * 1024 * 1024) {
+      setMessage("Maximum upload size is 3 MiB.");
+      return;
+    }
+    setBusy(true);
+    setMessage("");
+    try {
+      const response = await fetch(
+        `/api/admin/ebooks/${encodeURIComponent(book.slug)}/upload-pdf`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/pdf",
+            "X-Ebook-Filename": file.name,
+            "X-Ebook-Revision": String(book.revision),
+          },
+          body: file,
+          cache: "no-store",
+          signal: AbortSignal.timeout(30000),
+        },
+      );
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(
+          payload?.error?.message || "PDF upload failed.",
+        );
+      }
+      const saved = payload?.data?.ebook as EbookTrack | undefined;
+      if (!saved) throw new Error("PDF service returned an invalid response.");
+      onUploaded(saved);
+      setMessage(
+        `PDF stored privately. A separate ${saved.freePreviewPages ?? 2}-page preview was generated on the server.`,
+      );
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "PDF upload failed.");
+    } finally {
+      setBusy(false);
+      setDragging(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
   return (
     <section className="space-y-5 rounded-2xl border p-5">
-      <h3 className="text-xl font-bold">PDF & printable references</h3>
-      <label className="grid gap-2 text-sm font-semibold">Access level
-        <select className="rounded-xl border bg-background p-3" value={book.accessLevel||'free'} onChange={e=>onChange({accessLevel:e.target.value as 'free'|'pro'})}>
-          <option value="free">Free</option><option value="pro">Pro</option>
-        </select>
-      </label>
-      <label className="grid gap-2 text-sm font-semibold">Free preview pages
-        <input className="rounded-xl border bg-background p-3" type="number" min={1} max={50} value={book.freePreviewPages??2} onChange={e=>onChange({freePreviewPages:Number(e.target.value)})}/>
-      </label>
-      <p className="text-xs text-muted-foreground">Save these settings before uploading. Pro PDFs require a private upload. Bundled public editions stay Free. Legacy Monetization rules can also require a pass.</p>
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">
+          Protected document storage
+        </p>
+        <h3 className="mt-1 text-xl font-bold">PDF Manager</h3>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Full PDFs are stored only in protected backend storage. Pro readers without an entitlement receive a physically separate preview file, never the full PDF hidden in the browser.
+        </p>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <label className="grid gap-2 text-sm font-semibold">
+          Access level
+          <select
+            className="rounded-xl border bg-background p-3"
+            value={book.accessLevel}
+            disabled={book.isBundledPublicEdition}
+            onChange={(event) =>
+              onChange({ accessLevel: event.target.value as "free" | "pro" })
+            }
+          >
+            <option value="free">Free</option>
+            <option value="pro">Pro</option>
+          </select>
+        </label>
+
+        <label className={`grid gap-2 text-sm font-semibold ${book.accessLevel === "free" ? "opacity-55" : ""}`}>
+          Free preview pages
+          <input
+            className="rounded-xl border bg-background p-3"
+            type="number"
+            min={1}
+            max={20}
+            disabled={book.accessLevel === "free"}
+            value={book.freePreviewPages ?? 2}
+            onChange={(event) =>
+              onChange({
+                freePreviewPages: Math.min(
+                  20,
+                  Math.max(1, Number(event.target.value) || 2),
+                ),
+              })
+            }
+          />
+          <span className="text-xs font-normal text-muted-foreground">
+            {book.accessLevel === "free"
+              ? "Full ebook is accessible for free."
+              : "Changing this value regenerates the protected preview on Save ebook."}
+          </span>
+        </label>
+
+        <div>
+          <p className="mb-2 text-sm font-semibold">Allow Full PDF Download</p>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={book.allowFullPdfDownload}
+            onClick={() =>
+              onChange({
+                allowFullPdfDownload: !book.allowFullPdfDownload,
+                allowPdfDownload: !book.allowFullPdfDownload,
+              })
+            }
+            className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${book.allowFullPdfDownload ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-700"}`}
+          >
+            <span className={`h-5 w-5 rounded-full bg-white shadow transition-transform ${book.allowFullPdfDownload ? "translate-x-6" : "translate-x-1"}`} />
+            <span className="sr-only">
+              {book.allowFullPdfDownload ? "Disable" : "Enable"} full PDF download
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {book.isBundledPublicEdition && (
+        <p className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-100">
+          This is a bundled public edition. Its access level is explicitly Free and cannot be converted to Pro.
+        </p>
+      )}
 
       <label className="grid gap-2 text-sm font-semibold">
         Edition version
@@ -256,97 +372,102 @@ export function PdfSettings({
           className="rounded-xl border bg-background p-3"
           maxLength={40}
           value={book.version || "1.0"}
-          onChange={(e) => onChange({ version: e.target.value })}
+          onChange={(event) => onChange({ version: event.target.value })}
         />
       </label>
-      <label className="flex gap-3 text-sm">
-        <input
-          type="checkbox"
-          checked={book.allowPdfDownload !== false}
-          onChange={(e) => onChange({ allowPdfDownload: e.target.checked })}
-        />
-        Allow full PDF download (authorized readers)
-      </label>
+
       <label className="flex gap-3 text-sm">
         <input
           type="checkbox"
           checked={!!book.isCheatSheet}
-          onChange={(e) => onChange({ isCheatSheet: e.target.checked })}
+          onChange={(event) => onChange({ isCheatSheet: event.target.checked })}
         />
         Enable compact cheat-sheet view
       </label>
-      <label className="grid gap-2 text-sm font-semibold">
-        Hosted public PDF URL
+
+      {book.accessLevel === "free" && book.visibility === "public" && (
+        <label className="grid gap-2 text-sm font-semibold">
+          Optional public hosted PDF URL
+          <input
+            type="url"
+            value={book.pdfUrl?.startsWith("https://") ? book.pdfUrl : ""}
+            onChange={(event) => onChange({ pdfUrl: event.target.value })}
+            placeholder="https://your-host.example/guide.pdf"
+            className="rounded-xl border bg-background p-3"
+          />
+          <span className="text-xs font-normal text-muted-foreground">
+            External URLs are allowed only for fully free public ebooks. Pro or restricted ebooks must use protected upload.
+          </span>
+        </label>
+      )}
+
+      <div
+        role="button"
+        tabIndex={book.revision && !busy ? 0 : -1}
+        aria-disabled={!book.revision || busy}
+        className={`rounded-2xl border-2 border-dashed p-8 text-center transition-colors ${dragging ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/30" : "border-slate-300 dark:border-slate-700"} ${!book.revision || busy ? "cursor-not-allowed opacity-55" : "cursor-pointer hover:border-indigo-400"}`}
+        onDragOver={(event) => {
+          event.preventDefault();
+          if (book.revision && !busy) setDragging(true);
+        }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(event) => {
+          event.preventDefault();
+          setDragging(false);
+          void upload(event.dataTransfer.files?.[0]);
+        }}
+        onClick={() => book.revision && !busy && fileRef.current?.click()}
+        onKeyDown={(event) => {
+          if ((event.key === "Enter" || event.key === " ") && book.revision && !busy) {
+            event.preventDefault();
+            fileRef.current?.click();
+          }
+        }}
+      >
+        <p className="font-semibold">
+          {busy ? "Uploading and generating preview…" : "Drag & drop a PDF here, or click to choose"}
+        </p>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Maximum 3 MiB. Save the ebook first. Uploading replaces the protected full PDF and preview atomically.
+        </p>
         <input
-          type="url"
-          disabled={book.visibility !== "public" || book.accessLevel === "pro"}
-          value={book.pdfUrl?.startsWith("https://") ? book.pdfUrl : ""}
-          onChange={(e) => onChange({ pdfUrl: e.target.value })}
-          placeholder="https://your-host.example/guide.pdf"
-          className="rounded-xl border bg-background p-3"
-        />
-      </label>
-      <p className="text-xs text-muted-foreground">
-        Hosted links are for public books. For private/invite tracks, upload
-        below so every retrieval checks access. Save URL and download
-        preferences using Save ebook.
-      </p>
-      <label className="grid gap-2 text-sm font-semibold">
-        Upload PDF (maximum 3 MiB; save the ebook first)
-        <input
+          ref={fileRef}
+          className="sr-only"
           type="file"
           accept="application/pdf,.pdf"
           disabled={!book.revision || busy}
-          onChange={async (e) => {
-            const file = e.target.files?.[0];
-            if (!file || !book.revision) return;
-            if (file.size > 3 * 1024 * 1024) {
-              setMessage("Maximum upload size is 3 MiB.");
-              return;
-            }
-            setBusy(true);
-            try {
-              const response = await pdfRequest(book.slug, {
-                file,
-                revision: book.revision,
-              });
-              const data = await response.json();
-              onUploaded(data.data.ebook);
-              setMessage(
-                "PDF stored securely. Other form edits are preserved; save the ebook to persist them.",
-              );
-            } catch (error) {
-              setMessage(
-                error instanceof Error ? error.message : "Upload failed.",
-              );
-            } finally {
-              setBusy(false);
-            }
-          }}
+          onChange={(event) => void upload(event.target.files?.[0])}
         />
-      </label>
+      </div>
+
       {book.pdfUrl && (
-        <div className="flex flex-wrap items-center gap-4">
-          <span className="break-all text-xs">
-            Attached: {book.pdfFileName || book.pdfUrl}
-          </span>
+        <div className="rounded-xl border bg-muted/20 p-4">
+          <p className="text-sm font-semibold">Attached protected PDF</p>
+          <p className="mt-1 break-all text-xs text-muted-foreground">
+            {book.pdfFileName || "ebook.pdf"}
+          </p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Full storage key: {book.fullPdfStorageKey ? "protected backend asset" : "not persisted yet"} · Preview: {book.previewPdfStorageKey ? "generated" : "pending"}
+          </p>
           <button
             type="button"
-            className="min-h-10 rounded-lg border px-3 text-sm"
-            onClick={() => onChange({ pdfUrl: "", pdfFileName: "" })}
+            className="mt-3 min-h-10 rounded-lg border px-3 text-sm"
+            onClick={() =>
+              onChange({
+                pdfUrl: "",
+                pdfFileName: "",
+                fullPdfStorageKey: null,
+                previewPdfStorageKey: null,
+              })
+            }
           >
             Detach on next save
           </button>
         </div>
       )}
-      <p role="status" className="text-sm">
-        {busy ? "Uploading…" : message}
-      </p>
-      <p className="text-xs text-muted-foreground">
-        Uploading replaces the saved attachment immediately and advances the
-        ebook revision. Downloads cannot prevent readers from saving readable
-        content.
-      </p>
+
+      <p role="status" className="text-sm">{message}</p>
+
       {book.revision && (
         <a
           className="inline-block rounded-xl border px-4 py-3 text-sm font-semibold"
@@ -354,7 +475,7 @@ export function PdfSettings({
           target="_blank"
           rel="noopener noreferrer"
         >
-          Preview printable ebook ↗
+          Preview authorized reader view ↗
         </a>
       )}
     </section>

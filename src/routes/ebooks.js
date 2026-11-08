@@ -109,6 +109,7 @@ function createRouters(books = service, identity = authenticateNextAuth) {
       );
       res.type("application/pdf");
       res.set("X-Ebook-Preview", asset.preview ? "true" : "false");
+      res.set("X-Ebook-Preview-Pages", String(asset.previewPages || 0));
       res.set("X-Content-Type-Options", "nosniff");
       res.set(
         "Content-Disposition",
@@ -180,6 +181,18 @@ function createRouters(books = service, identity = authenticateNextAuth) {
     "/requests",
     wrap(async (req, res) =>
       ok(res, { requests: await books.accessQueue(req.user) }),
+    ),
+  );
+  adminRouter.get(
+    "/",
+    wrap(async (req, res) =>
+      ok(res, { ebooks: await books.adminList(req.user) }),
+    ),
+  );
+  adminRouter.get(
+    "/:slug",
+    wrap(async (req, res) =>
+      ok(res, { ebook: await books.adminGet(req.params.slug, req.user) }),
     ),
   );
   adminRouter.post(

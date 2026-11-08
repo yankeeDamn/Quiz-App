@@ -111,9 +111,22 @@ async function save(kind,id,r){
  }else throw fail('Invalid configuration kind');return put(kind,id,d);
 }
 async function ebookPolicy(slug,user,book){
- // The sales switch controls checkout, never access to already-protected content.
+ // Reader access is server-authoritative. The checkout feature flag controls sales,
+ // never whether already-granted access remains valid.
+ const bundled=book?.isBundledPublicEdition===true;
+ const level=book?.accessLevel||'free';
+ if(bundled || level==='free') return null;
  const p=await document('ebook',slug);
- if(!p?.isFreemiumGated && book?.accessLevel!=='pro')return null;
- return {freePreviewChapters:2,...p,requireProForPdf:true,locked:!await entitlement(user,'IT_EBOOK_PACK_99')};
+ const isProSubscriber=isPlanActive(user?.plan,user?.planExpiresAt);
+ const hasActiveEbookPass=await entitlement(user,'IT_EBOOK_PACK_99');
+ return {
+  freePreviewChapters: Number.isInteger(p?.freePreviewChapters)?p.freePreviewChapters:2,
+  freePreviewPages: Number.isInteger(book?.freePreviewPages)?book.freePreviewPages:2,
+  requireProForPdf:true,
+  accessLevel:level,
+  hasActiveEbookPass,
+  isProSubscriber,
+  locked:!(hasActiveEbookPass||isProSubscriber),
+ };
 }
 module.exports={enabled,owner,PRODUCTS,SLOTS,CATEGORIES,fail,product,documents,document,put,entitlement,mockAccess,grant,transaction,manual,validateResource,validateAd,ads,track,adAction,save,ebookPolicy,url,activeAd};
