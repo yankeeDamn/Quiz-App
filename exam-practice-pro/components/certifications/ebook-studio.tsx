@@ -22,7 +22,8 @@ import {
 import { PdfSettings } from "./ebook-pdf";
 import { EbookMonetizationControls, type EbookAccessPatch } from "./ebook-monetization-controls";
 import { LessonMarkdown, CodeExample } from "./lesson-content";
-import { Field, input } from "@/components/admin/ui";
+import { Field } from "@/components/admin/ui";
+import { ebookFieldClass as input, ebookTextareaClass } from "./ebook-admin-ui";
 const emptyQuestion = () => ({
   question: "",
   options: ["", "", "", ""],
@@ -431,7 +432,7 @@ export function EbookStudio({
         closeStudio();
       }}
       onClose={onClose}
-      className="m-auto max-h-[94dvh] w-[min(98vw,104rem)] overflow-y-auto rounded-3xl border border-slate-200 bg-slate-50 p-0 text-slate-950 shadow-2xl backdrop:bg-slate-950/70 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
+      className="m-auto max-h-[94dvh] w-[min(98vw,104rem)] overflow-y-auto rounded-[2rem] border border-slate-200/80 bg-slate-50/95 p-0 text-slate-950 shadow-[0_32px_90px_-28px_rgba(15,23,42,0.6)] backdrop:bg-slate-950/75 backdrop:backdrop-blur-sm dark:border-slate-800 dark:bg-slate-950/95 dark:text-white [&_button]:transition-all [&_button]:duration-200 [&_button]:focus-visible:outline-none [&_button]:focus-visible:ring-4 [&_button]:focus-visible:ring-indigo-500/20 [&_input]:transition-all [&_select]:transition-all [&_textarea]:transition-all"
     >
       <header className="sticky top-0 z-30 border-b border-white/10 bg-gradient-to-r from-slate-950 via-indigo-950 to-slate-900 px-5 py-5 text-white shadow-lg sm:px-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -599,7 +600,7 @@ export function EbookStudio({
             {owner && (
               <button
                 type="button"
-                className="min-h-11 rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white"
+                className="min-h-11 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 hover:-translate-y-0.5 hover:from-indigo-700 hover:to-violet-700"
                 onClick={startNew}
             >
                 + Create new ebook
@@ -688,7 +689,7 @@ export function EbookStudio({
             </Field>
             <button
               type="button"
-              className="min-h-10 rounded-lg border px-3 text-sm"
+              className="min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:border-indigo-800 dark:hover:bg-indigo-950/40"
               onClick={() => {
                 const parsed = parseBulk(bulk);
                 if (parsed.errors.length) {
@@ -792,7 +793,7 @@ export function EbookStudio({
                 </span>
                 <button
                   type="button"
-                  className="min-h-10 font-semibold underline"
+                  className="min-h-10 rounded-xl px-3 text-sm font-semibold text-indigo-700 underline-offset-4 hover:bg-indigo-50 hover:underline dark:text-indigo-300 dark:hover:bg-indigo-950/40"
                   onClick={() => {
                     setBook(restore);
                     setSelected(restore.revision ? restore.slug : "");
@@ -925,7 +926,7 @@ export function EbookStudio({
                       <button
                         key={c.id}
                         type="button"
-                        className={`block w-full rounded-lg p-3 text-left text-xs ${i === chapterIndex ? "bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200" : "hover:bg-muted"}`}
+                        className={`block w-full rounded-2xl border p-3.5 text-left text-xs font-semibold shadow-sm ${i === chapterIndex ? "border-indigo-300 bg-indigo-50 text-indigo-800 ring-2 ring-indigo-500/10 dark:border-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-200" : "border-transparent bg-white text-slate-600 hover:border-indigo-100 hover:bg-indigo-50/70 hover:text-indigo-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:border-indigo-900 dark:hover:bg-indigo-950/30"}`}
                         onClick={() => setChapterIndex(i)}
                       >
                         {i + 1}. {c.title}
@@ -937,7 +938,7 @@ export function EbookStudio({
                       <h3 className="font-bold">Chapters</h3>
                       <button
                         type="button"
-                        className="inline-flex min-h-10 items-center gap-2 rounded-lg border px-3 text-sm"
+                        className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
                         onClick={() => {
                           change({
                             chapters: [...book.chapters, emptyChapter()],
@@ -975,7 +976,7 @@ export function EbookStudio({
                             aria-label="Move chapter earlier"
                             type="button"
                             disabled={chapterIndex === 0}
-                            className="rounded-lg border p-2 disabled:opacity-40"
+                            className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
                             onClick={() => move(-1)}
                           >
                             <ArrowUp className="h-4 w-4" />
@@ -984,7 +985,7 @@ export function EbookStudio({
                             aria-label="Move chapter later"
                             type="button"
                             disabled={chapterIndex === book.chapters.length - 1}
-                            className="rounded-lg border p-2 disabled:opacity-40"
+                            className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
                             onClick={() => move(1)}
                           >
                             <ArrowDown className="h-4 w-4" />
@@ -1000,7 +1001,7 @@ export function EbookStudio({
                               });
                               setChapterIndex(0);
                             }}
-                            className="inline-flex items-center gap-2 rounded-lg border px-3 text-sm disabled:opacity-40"
+                            className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
                           >
                             <Trash2 className="h-4 w-4" />
                             Remove chapter
@@ -1059,7 +1060,7 @@ export function EbookStudio({
                             <button
                               key={label}
                               type="button"
-                              className="min-h-9 rounded-lg border px-3 text-xs"
+                              className="min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
                               onClick={() => {
                                 const area = markdownRef.current;
                                 const start =
@@ -1320,7 +1321,7 @@ export function EbookStudio({
                 type="button"
                 disabled={busy || accessBusy}
                 onClick={() => void handleSaveEbook()}
-                className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white disabled:opacity-50"
+                className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 hover:-translate-y-0.5 hover:from-indigo-700 hover:to-violet-700 disabled:opacity-50"
               >
                 {busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 {busy ? "Saving…" : book.revision ? "Save changes" : "Create ebook"}
@@ -1329,14 +1330,14 @@ export function EbookStudio({
                 type="button"
                 onClick={draft}
                 disabled={busy || accessBusy}
-                className="min-h-11 rounded-xl border px-4 text-sm font-semibold"
+                className="min-h-11 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
               >
                 Save local draft
               </button>
               {owner && book.revision && (
                 <button
                   type="button"
-                  className="min-h-11 rounded-xl border px-4 text-sm text-red-600"
+                  className="min-h-11 rounded-2xl border border-rose-200 bg-rose-50 px-4 text-sm font-bold text-rose-700 shadow-sm hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-100 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-300"
                   disabled={busy}
                   onClick={() => setArchiveOpen(true)}
                >
@@ -1362,13 +1363,13 @@ export function EbookStudio({
                 {book.title} will be removed from active authoring and learner listings. Existing attempts remain preserved.
               </p>
               <div className="mt-6 flex justify-end gap-3">
-                <button type="button" disabled={busy} className="min-h-11 rounded-xl border px-4 text-sm font-semibold" onClick={() => setArchiveOpen(false)}>
+                <button type="button" disabled={busy} className="min-h-11 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200" onClick={() => setArchiveOpen(false)}>
                   Cancel
                 </button>
                 <button
                   type="button"
                   disabled={busy}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-red-600 px-4 text-sm font-semibold text-white disabled:opacity-50"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-gradient-to-r from-rose-600 to-red-600 px-4 text-sm font-bold text-white shadow-lg shadow-rose-600/20 hover:-translate-y-0.5 hover:from-rose-700 hover:to-red-700 disabled:opacity-50"
                   onClick={async () => {
                     setBusy(true);
                     const result = await ebookAdminApi(`/${encodeURIComponent(book.slug)}`, { method: "DELETE" });
@@ -1424,7 +1425,7 @@ export function EbookStudio({
                     key={role}
                     type="button"
                     disabled={!book?.revision || busy}
-                    className="min-h-10 rounded-lg border px-3 text-sm disabled:opacity-40"
+                    className="min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
                     onClick={() =>
                       book &&
                       void approve(book.slug, grantEmail, role, "approved")
@@ -1457,7 +1458,7 @@ export function EbookStudio({
                         "approved",
                       )
                     }
-                    className="min-h-10 rounded-lg border px-3 text-xs font-semibold"
+                    className="min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
                   >
                     Approve as Reader
                   </button>
@@ -1472,7 +1473,7 @@ export function EbookStudio({
                         "approved",
                       )
                     }
-                    className="min-h-10 rounded-lg border px-3 text-xs font-semibold"
+                    className="min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
                   >
                     Approve as Co-Editor
                   </button>
@@ -1487,7 +1488,7 @@ export function EbookStudio({
                         "revoked",
                       )
                     }
-                    className="min-h-10 rounded-lg border px-3 text-xs font-semibold text-red-600"
+                    className="min-h-10 rounded-xl border border-rose-200 bg-rose-50 px-3 text-xs font-bold text-rose-700 shadow-sm hover:-translate-y-0.5 hover:bg-rose-100 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-300"
                   >
                     Revoke Access
                   </button>
