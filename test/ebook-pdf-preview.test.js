@@ -19,7 +19,13 @@ test('preview is a separate two-page document with no source annotations', async
   assert.equal(preview.catalog.has(PDFName.of('Names')), false);
   const {getDocument} = await import('pdfjs-dist/legacy/build/pdf.mjs');
   const rendered = await getDocument({data:new Uint8Array(result)}).promise;
-  assert.equal((await (await rendered.getPage(1)).getTextContent()).items.length,0);
+  const previewText=[];
+  for(let n=1;n<=rendered.numPages;n++){
+    const content=await (await rendered.getPage(n)).getTextContent();
+    previewText.push(content.items.map(item=>('str' in item?item.str:'')).join(' '));
+  }
+  assert.match(previewText.join(' '),/Visible preview/);
+  assert.doesNotMatch(previewText.join(' '),/CONFIDENTIAL PAID PAGE/);
   await rendered.destroy();
   assert.equal((await PDFDocument.load(source)).getPageCount(), 5);
 });
@@ -30,5 +36,6 @@ test('short PDFs are handled and invalid input fails closed', async () => {
   const bytes = Buffer.from(await doc.save());
   assert.equal((await PDFDocument.load(await createPdfPreview(bytes))).getPageCount(), 1);
   await assert.rejects(createPdfPreview(bytes, 0));
+  await assert.rejects(createPdfPreview(bytes, 21));
   await assert.rejects(createPdfPreview(Buffer.from('not a PDF')));
 });
