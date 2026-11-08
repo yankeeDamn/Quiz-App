@@ -9,7 +9,7 @@ import {
 } from "@/lib/ebooks";
 import { EbookShare } from "./ebook-share";
 import { Field } from "@/components/admin/ui";
-import { ebookFieldClass as input, ebookSelectClass, ebookTextareaClass } from "./ebook-admin-ui";
+import { ebookFieldClass as input } from "./ebook-admin-ui";
 import { BookOpen, CheckCircle2, Crown, FileText, Layers3, LoaderCircle, ShieldCheck } from "lucide-react";
 export function EbookInventory({
   owner,
