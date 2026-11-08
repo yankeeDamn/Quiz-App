@@ -504,7 +504,7 @@ export function EbookStudio({
             <div className="relative max-w-xl">
               <select
                 id="ebook-studio-picker"
-                className="min-h-12 w-full appearance-none rounded-xl border border-slate-200 bg-background px-4 pr-10 text-sm font-semibold shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 disabled:opacity-50 dark:border-slate-700"
+                className={`${input} appearance-none pr-10 font-semibold`}
                 value={selected}
                 disabled={busy || accessBusy}
                 onChange={(event) => void load(event.target.value)}
@@ -529,14 +529,14 @@ export function EbookStudio({
             {owner && (
               <button type="button" disabled={busy || accessBusy}
                 onClick={startNew}
-                className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-4 text-sm font-bold text-indigo-700 transition hover:bg-indigo-100 disabled:opacity-50 dark:border-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-200">
+                className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-violet-50 px-4 text-sm font-bold text-indigo-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md disabled:opacity-50 dark:border-indigo-800 dark:from-indigo-950/50 dark:to-violet-950/40 dark:text-indigo-200">
                 <Plus className="h-4 w-4"/> New ebook
               </button>
             )}
             {book && tab !== "inventory" && (
               <button type="button" disabled={busy || accessBusy}
                 onClick={() => void handleSaveEbook()}
-                className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-indigo-600 px-5 text-sm font-bold text-white shadow-md shadow-indigo-600/20 transition hover:bg-indigo-700 disabled:opacity-50">
+                className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 hover:-translate-y-0.5 hover:from-indigo-700 hover:to-violet-700 hover:shadow-xl disabled:opacity-50">
                 {busy ? <LoaderCircle className="h-4 w-4 animate-spin"/> : <Save className="h-4 w-4"/>}
                 {busy ? "Saving…" : book.revision ? "Save changes" : "Create ebook"}
               </button>
