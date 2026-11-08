@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { CheckoutButton } from "@/components/payments/micro-passes";
+import { useSession } from "next-auth/react";
 import { API_BASE_URL, getBackendToken } from "@/lib/api";
 import { type EbookTrack } from "@/lib/ebooks";
 import { HighlightedCode, LessonMarkdown } from "./lesson-content";
@@ -36,63 +38,56 @@ export function AttachedPdf({ book }: { book: EbookTrack }) {
   );
 }
 function PdfViewer({ book }: { book: EbookTrack }) {
-  const [url, setUrl] = useState(
-      book.pdfUrl?.startsWith("https://") ? book.pdfUrl : "",
-    ),
-    [error, setError] = useState("");
-  useEffect(() => {
-    let active = true,
-      objectUrl = "";
-    if (!book.pdfUrl || book.pdfUrl.startsWith("https://")) return;
-    void pdfRequest(book.slug)
-      .then((response) => response.blob())
-      .then((blob) => {
-        if (!active) return;
-        objectUrl = URL.createObjectURL(blob);
-        setUrl(objectUrl);
-      })
-      .catch((error) => {
-        if (active) setError(error.message);
-      });
-    return () => {
-      active = false;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
+  const {data:session} = useSession();
+  const [url,setUrl]=useState("");
+  const [preview,setPreview]=useState(false);
+  const [error,setError]=useState("");
+  const [refresh,setRefresh]=useState(0);
+  useEffect(()=>{
+    let active=true, objectUrl="", busy=false;
+    let currentPreview: boolean | null=null;
+    const controller=new AbortController();
+    const load=async(poll=false)=>{
+      if(busy || document.visibilityState==='hidden')return;
+      busy=true;
+      try {
+        // External links are permitted only for unprotected public books.
+        if(book.pdfUrl?.startsWith('https://')) {setUrl(book.pdfUrl);return;}
+        const response=await fetch(`/api/ebooks/${book.slug}/read`,{cache:'no-store',signal:controller.signal});
+        if(!response.ok)throw Error('Unable to load PDF. Check your access or retry.');
+        const nextPreview=response.headers.get('X-Ebook-Preview')==='true';
+        if(poll && objectUrl && currentPreview===nextPreview){await response.body?.cancel();return;}
+        const blob=await response.blob();
+        if(!active)return;
+        const next=URL.createObjectURL(blob);
+        if(objectUrl)URL.revokeObjectURL(objectUrl);
+        objectUrl=next;currentPreview=nextPreview;setUrl(next);setPreview(nextPreview);setError('');
+      } catch(e) {if(active){setUrl('');setError(e instanceof Error?e.message:'PDF unavailable');}}
+      finally {busy=false;}
     };
-  }, [book.slug, book.pdfUrl, book.revision]);
-  return (
-    <section className="space-y-4">
-      <h2 className="text-xl font-bold">PDF Ebook Viewer</h2>
-      {error && <p role="alert">{error}</p>}
-      {url ? (
-        <>
-          <iframe
-            title={`${book.title} PDF`}
-            src={url}
-            className="h-[75dvh] w-full rounded-xl border"
-            referrerPolicy="no-referrer"
-          />
-          {book.allowPdfDownload !== false && (
-            <a
-              href={url}
-              download={book.pdfFileName || `${book.slug}.pdf`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block rounded-xl border px-4 py-3 text-sm font-semibold"
-            >
-              Download attached PDF ↗
-            </a>
-          )}
-          <p className="text-xs text-muted-foreground">
-            If your browser cannot embed this PDF, use the download/open link. A
-            readable PDF can still be saved by browser tools; the download
-            setting is a UI preference, not DRM.
-          </p>
-        </>
-      ) : (
-        !error && <p role="status">Loading authorized PDF…</p>
-      )}
-    </section>
-  );
+    void load();
+    const focus=()=>void load();
+    window.addEventListener('focus',focus);
+    document.addEventListener('visibilitychange',focus);
+    // Recheck server entitlement while a preview is open, including delayed webhooks.
+    const timer=window.setInterval(()=>{if(preview)void load(true);},15000);
+    return ()=>{active=false;controller.abort();clearInterval(timer);window.removeEventListener('focus',focus);document.removeEventListener('visibilitychange',focus);if(objectUrl)URL.revokeObjectURL(objectUrl);};
+  },[book.slug,book.pdfUrl,book.revision,session?.user?.email,refresh,preview]);
+  return <section className="space-y-4">
+    <h2 className="text-xl font-bold">{preview?'Free PDF preview':'PDF Ebook Viewer'}</h2>
+    {error&&<p role="alert">{error}</p>}
+    {url?<>
+      <iframe title={`${book.title} PDF`} src={url} className="h-[75dvh] w-full rounded-xl border" referrerPolicy="no-referrer"/>
+      {preview&&<div className="rounded-xl border border-indigo-300 bg-background p-6 text-center" role="region" aria-label="Unlock full ebook">
+        <h3 className="text-xl font-bold">Continue reading with the IT ebook pass or Pro.</h3>
+        <p className="my-3">You have reached the end of the free PDF preview.</p>
+        <CheckoutButton code="IT_EBOOK_PACK_99"/>
+        <a className="ml-4 underline" href="/pricing">Compare Pro plans</a>
+        <button className="mt-4 block w-full text-sm underline" onClick={()=>setRefresh(n=>n+1)}>Already paid? Check access</button>
+      </div>}
+      {book.allowPdfDownload!==false&&<a className="inline-block rounded-xl border px-4 py-3" href={book.pdfUrl?.startsWith('https://')?book.pdfUrl:`/api/ebooks/${book.slug}/download`}>{preview?'Download preview':'Download PDF'}</a>}
+    </>:!error&&<p role="status">Loading authorized PDF…</p>}
+  </section>;
 }
 export function EbookPrintView({
   book,
@@ -245,6 +240,16 @@ export function PdfSettings({
   return (
     <section className="space-y-5 rounded-2xl border p-5">
       <h3 className="text-xl font-bold">PDF & printable references</h3>
+      <label className="grid gap-2 text-sm font-semibold">Access level
+        <select className="rounded-xl border bg-background p-3" value={book.accessLevel||'free'} onChange={e=>onChange({accessLevel:e.target.value as 'free'|'pro'})}>
+          <option value="free">Free</option><option value="pro">Pro</option>
+        </select>
+      </label>
+      <label className="grid gap-2 text-sm font-semibold">Free preview pages
+        <input className="rounded-xl border bg-background p-3" type="number" min={1} max={50} value={book.freePreviewPages??2} onChange={e=>onChange({freePreviewPages:Number(e.target.value)})}/>
+      </label>
+      <p className="text-xs text-muted-foreground">Save these settings before uploading. Pro PDFs require a private upload. Bundled public editions stay Free. Legacy Monetization rules can also require a pass.</p>
+
       <label className="grid gap-2 text-sm font-semibold">
         Edition version
         <input
@@ -260,7 +265,7 @@ export function PdfSettings({
           checked={book.allowPdfDownload !== false}
           onChange={(e) => onChange({ allowPdfDownload: e.target.checked })}
         />
-        Show learner PDF/print buttons
+        Allow full PDF download (authorized readers)
       </label>
       <label className="flex gap-3 text-sm">
         <input
@@ -274,7 +279,7 @@ export function PdfSettings({
         Hosted public PDF URL
         <input
           type="url"
-          disabled={book.visibility !== "public"}
+          disabled={book.visibility !== "public" || book.accessLevel === "pro"}
           value={book.pdfUrl?.startsWith("https://") ? book.pdfUrl : ""}
           onChange={(e) => onChange({ pdfUrl: e.target.value })}
           placeholder="https://your-host.example/guide.pdf"

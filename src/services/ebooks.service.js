@@ -191,7 +191,15 @@ function validateBook(raw, slug) {
     typeof raw.allowPdfDownload !== "boolean"
   )
     fail("PDF download setting must be boolean.");
+  const accessLevel = raw.accessLevel ?? "free";
+  const freePreviewPages = raw.freePreviewPages ?? 2;
+  if (!["free", "pro"].includes(accessLevel)) fail("Choose Free or Pro access.");
+  if (!Number.isInteger(freePreviewPages) || freePreviewPages < 1 || freePreviewPages > 50)
+    fail("Preview pages must be an integer from 1 to 50.");
+  if (SEEDS.has(slug) && accessLevel === "pro") fail("Bundled public editions must stay Free.");
   let pdfUrl = raw.pdfUrl || "";
+  if (accessLevel === "pro" && pdfUrl && pdfUrl !== `/api/v1/ebooks/${slug}/pdf`)
+    fail("Pro PDFs must be uploaded privately through Ebook Studio.");
   if (pdfUrl && pdfUrl !== `/api/v1/ebooks/${slug}/pdf`) {
     let url;
     try {
@@ -216,6 +224,7 @@ function validateBook(raw, slug) {
     passPercent,
     marksPerCorrect,
     negativeMarks,
+    accessLevel, freePreviewPages,
     allowPdfDownload: raw.allowPdfDownload !== false,
     isCheatSheet: raw.isCheatSheet === true,
     pdfUrl,
@@ -337,7 +346,7 @@ function createEbooksService(db = database, clock = Date.now) {
           ? "EBOOK_ACCESS_REQUIRED"
           : "BOOK_NOT_FOUND",
       );
-    const monetization = await require("./monetization.service").ebookPolicy(slug,user);
+    const monetization = await require("./monetization.service").ebookPolicy(slug,user,row.document);
     return { row, rights, monetization };
   }
   function present(row, rights, summary = false) {
@@ -374,8 +383,8 @@ function createEbooksService(db = database, clock = Date.now) {
       });
       if(!rights.canRead)return null;
       const value=present(row,rights,true);
-      const policy=await require("./monetization.service").ebookPolicy(row.slug,user);
-      if(policy&&!rights.canEdit){value.monetization=policy;if(policy.locked&&policy.requireProForPdf){delete value.pdfUrl;value.allowPdfDownload=false;}}
+      const policy=await require("./monetization.service").ebookPolicy(row.slug,user,row.document);
+      if(policy&&!rights.canEdit){value.monetization=policy;if(policy.locked && value.pdfUrl?.startsWith("https://"))delete value.pdfUrl;}
       return value;
     }));
     return summaries.filter(Boolean);
@@ -386,8 +395,9 @@ function createEbooksService(db = database, clock = Date.now) {
     if(monetization && !rights.canEdit){
       value.monetization=monetization;
       if(monetization.locked){
+        if(value.pdfUrl?.startsWith("https://"))delete value.pdfUrl;
         value.chapters=[...value.chapters].sort((a,b)=>a.order-b.order).slice(0,monetization.freePreviewChapters);
-        if(monetization.requireProForPdf){delete value.pdfUrl;value.allowPdfDownload=false;}
+
       }
     }
     return value;
@@ -412,6 +422,14 @@ function createEbooksService(db = database, clock = Date.now) {
           fail("Only the owner admin can change visibility.", 403);
       }
       const document = validateBook(raw, slug);
+      if (previous && !isOwnerAdmin(user) && (
+        document.accessLevel !== (previous.document.accessLevel || "free") ||
+        document.freePreviewPages !== (previous.document.freePreviewPages || 2) ||
+        document.allowPdfDownload !== (previous.document.allowPdfDownload !== false)
+      )) fail("Only the owner admin can change PDF access settings.",403);
+      const legacy = await require("./monetization.service").ebookPolicy(slug,user,document);
+      if (legacy && document.pdfUrl && document.pdfUrl !== `/api/v1/ebooks/${slug}/pdf`)
+        fail("Paywalled ebooks require a private PDF upload.");
       if (
         document.linkedMockTestId &&
         ![
@@ -432,6 +450,13 @@ function createEbooksService(db = database, clock = Date.now) {
         fail(
           "Built-in starters are bundled publicly. Create a separate private ebook for restricted material.",
         );
+      if (previous && document.freePreviewPages !== (previous.document.freePreviewPages || 2)) {
+        const asset = (await client.query("SELECT bytes FROM ebook_pdf_assets WHERE slug=$1",[slug])).rows[0];
+        if (asset) {
+          const preview = await require('./ebook-pdf-preview').createPdfPreview(asset.bytes, document.freePreviewPages);
+          await client.query("UPDATE ebook_pdf_assets SET preview_bytes=$2,preview_pages=$3 WHERE slug=$1",[slug,preview,document.freePreviewPages]);
+        }
+      }
       const updated = {
         ...document,
         ownerEmail: previous?.document.ownerEmail || emailOf(user),
@@ -491,9 +516,13 @@ function createEbooksService(db = database, clock = Date.now) {
           409,
           "EBOOK_CONFLICT",
         );
+      // Parse and build the preview before committing either asset.
+      let preview;
+      try { preview = await require('./ebook-pdf-preview').createPdfPreview(bytes, row.document.freePreviewPages || 2); }
+      catch (error) { if(error.statusCode===503)throw error; fail("The PDF could not be processed. Upload a valid, unencrypted PDF."); }
       await client.query(
-        `INSERT INTO ebook_pdf_assets(slug,filename,bytes) VALUES($1,$2,$3) ON CONFLICT(slug) DO UPDATE SET filename=$2,bytes=$3,updated_at=NOW()`,
-        [slug, filename, bytes],
+        `INSERT INTO ebook_pdf_assets(slug,filename,bytes,preview_bytes,preview_pages) VALUES($1,$2,$3,$4,$5) ON CONFLICT(slug) DO UPDATE SET filename=$2,bytes=$3,preview_bytes=$4,preview_pages=$5,updated_at=NOW()`,
+        [slug, filename, bytes, preview, row.document.freePreviewPages || 2],
       );
       const doc = {
         ...row.document,
@@ -511,7 +540,7 @@ function createEbooksService(db = database, clock = Date.now) {
   }
   async function pdf(slug, user, download = false) {
     const { row, rights, monetization } = await read(slug, user);
-    if(monetization?.locked&&monetization.requireProForPdf&&!rights.canEdit) fail("Ebook pass or Pro required",403);
+    const previewOnly = !!monetization?.locked && !rights.canEdit;
     if (
       download &&
       row.document.allowPdfDownload === false &&
@@ -522,12 +551,19 @@ function createEbooksService(db = database, clock = Date.now) {
       fail("No uploaded PDF is attached.", 404);
     const asset = (
       await db.query(
-        "SELECT filename,bytes FROM ebook_pdf_assets WHERE slug=$1",
+        "SELECT filename,bytes,preview_bytes,preview_pages FROM ebook_pdf_assets WHERE slug=$1",
         [slug],
       )
     ).rows[0];
     if (!asset) fail("No uploaded PDF is attached.", 404);
-    return asset;
+    if (previewOnly) {
+      const count = row.document.freePreviewPages || 2;
+      // Legacy assets and changed page limits are regenerated, never served full.
+      const bytes = asset.preview_bytes && asset.preview_pages === count
+        ? asset.preview_bytes : await require('./ebook-pdf-preview').createPdfPreview(asset.bytes, count);
+      return {filename: `preview-${asset.filename}`, bytes, preview: true};
+    }
+    return {...asset, preview: false};
   }
   async function requestAccess(slug, user, note) {
     if (!SLUG.test(slug)) fail("Ebook not found", 404);

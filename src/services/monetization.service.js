@@ -25,7 +25,7 @@ async function document(kind,id){return (await db.query('SELECT document FROM mo
 async function put(kind,id,doc){await db.query(`INSERT INTO monetization_documents(kind,id,document) VALUES($1,$2,$3::jsonb) ON CONFLICT(kind,id) DO UPDATE SET document=EXCLUDED.document,updated_at=now()`,[kind,id,JSON.stringify(doc)]);return {...doc,id};}
 async function entitlement(user,code,resource=''){
  if(owner(user)||isPlanActive(user?.plan,user?.planExpiresAt))return true;
- if(!enabled()||!user?.id||user.id==='guest')return false;
+ if(!user?.id||user.id==='guest')return false;
  const r=await db.query(`SELECT 1 FROM monetization_grants WHERE user_id=$1 AND expires_at>now() AND (code IN ('PRO_MONTHLY','PRO_ANNUAL') OR (code=$2 AND resource_id=$3)) LIMIT 1`,[user.id,code,resource]);return r.rowCount>0;
 }
 async function mockAccess(user,summary){
@@ -110,8 +110,10 @@ async function save(kind,id,r){
   d={isFreemiumGated:r.isFreemiumGated===true,freePreviewChapters:r.freePreviewChapters,requireProForPdf:r.requireProForPdf!==false};
  }else throw fail('Invalid configuration kind');return put(kind,id,d);
 }
-async function ebookPolicy(slug,user){
- if(!enabled())return null;const p=await document('ebook',slug);if(!p?.isFreemiumGated)return null;
- return {...p,locked:!await entitlement(user,'IT_EBOOK_PACK_99')};
+async function ebookPolicy(slug,user,book){
+ // The sales switch controls checkout, never access to already-protected content.
+ const p=await document('ebook',slug);
+ if(!p?.isFreemiumGated && book?.accessLevel!=='pro')return null;
+ return {freePreviewChapters:2,...p,requireProForPdf:true,locked:!await entitlement(user,'IT_EBOOK_PACK_99')};
 }
 module.exports={enabled,owner,PRODUCTS,SLOTS,CATEGORIES,fail,product,documents,document,put,entitlement,mockAccess,grant,transaction,manual,validateResource,validateAd,ads,track,adAction,save,ebookPolicy,url,activeAd};
