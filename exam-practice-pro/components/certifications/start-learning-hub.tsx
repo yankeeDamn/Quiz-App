@@ -217,7 +217,7 @@ export function StartLearningHub() {
                   {book.durationMinutes} min
                 </span>
               </div>
-              {book.allowPdfDownload !== false && (
+              {book.allowFullPdfDownload && (
                 <Link
                   href={`/certifications/learn/${book.slug}?view=pdf`}
                   className="mt-4 text-xs font-semibold text-indigo-600 dark:text-indigo-300"
