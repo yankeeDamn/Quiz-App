@@ -569,7 +569,7 @@ export function EbookBackup({
                 )
               )
                 return;
-              const imported = {
+              const imported: EbookTrack = {
                 ...b,
                 pdfUrl: undefined,
                 pdfFileName: undefined,
