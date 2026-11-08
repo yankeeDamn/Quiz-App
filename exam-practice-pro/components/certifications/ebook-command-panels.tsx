@@ -537,8 +537,12 @@ export function EbookBackup({
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
   return (
-    <section className="space-y-3 rounded-xl border p-4">
-      <h3 className="font-semibold">Import / export</h3>
+    <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">Portability</p>
+        <h3 className="mt-1 text-lg font-bold">Import / export</h3>
+        <p className="mt-1 text-sm text-muted-foreground">Back up ebook content, restore drafts, or import Markdown into the selected chapter.</p>
+      </div>
       <div className="flex flex-wrap gap-3">
         <button
           type="button"
@@ -578,9 +582,10 @@ export function EbookBackup({
         </button>
       </div>
       {owner && (
-        <label className="flex gap-2 text-sm">
+        <label className="flex min-h-11 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/70 px-3 text-sm font-medium dark:border-slate-800 dark:bg-slate-900/60">
           <input
             type="checkbox"
+            className="h-4 w-4 rounded border-slate-300 accent-indigo-600"
             checked={replace}
             disabled={!book?.revision}
             onChange={(e) => setReplace(e.target.checked)}
@@ -594,6 +599,7 @@ export function EbookBackup({
           : "Import JSON as a new private draft"}
         <input
           type="file"
+          className={`${input} cursor-pointer file:mr-3 file:rounded-xl file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-xs file:font-bold file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-950/50 dark:file:text-indigo-200`}
           accept=".json,application/json"
           disabled={!owner && !book?.revision}
           onChange={async (e) => {
@@ -672,6 +678,7 @@ export function EbookBackup({
         Import Markdown into selected chapter
         <input
           type="file"
+          className={`${input} cursor-pointer file:mr-3 file:rounded-xl file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-xs file:font-bold file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-950/50 dark:file:text-indigo-200`}
           accept=".md,text/markdown"
           onChange={async (e) => {
             try {
@@ -689,9 +696,11 @@ export function EbookBackup({
           }}
         />
       </label>
-      <p role="status" className="text-xs">
-        {error}
-      </p>
+      {error && (
+        <p role="status" className="rounded-xl border border-indigo-100 bg-indigo-50/60 px-3 py-2 text-xs font-medium text-indigo-900 dark:border-indigo-900 dark:bg-indigo-950/30 dark:text-indigo-100">
+          {error}
+        </p>
+      )}
     </section>
   );
 }
