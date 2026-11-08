@@ -23,7 +23,7 @@ import { PdfSettings } from "./ebook-pdf";
 import { EbookMonetizationControls, type EbookAccessPatch } from "./ebook-monetization-controls";
 import { LessonMarkdown, CodeExample } from "./lesson-content";
 import { Field } from "@/components/admin/ui";
-import { ebookFieldClass as input, ebookTextareaClass } from "./ebook-admin-ui";
+import { ebookFieldClass as input } from "./ebook-admin-ui";
 const emptyQuestion = () => ({
   question: "",
   options: ["", "", "", ""],
