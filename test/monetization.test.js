@@ -46,13 +46,21 @@ test('bundled public editions cannot be silently paywalled',async()=>{
  await assert.rejects(m.save('ebook','new-book',{isFreemiumGated:true,freePreviewChapters:1}),/at least two/);
 });
 test('ebook API redacts paid chapters, keeps protected PDF link and blocks assessments',async()=>{
- const book=structuredClone(require('../content/ebooks-starter.json')[0]);book.slug='original-premium';book.pdfUrl='/api/v1/ebooks/original-premium/pdf';
+ const book=structuredClone(require('../content/ebooks-starter.json')[0]);book.slug='original-premium';book.accessLevel='pro';book.freePreviewPages=2;book.isBundledPublicEdition=false;book.pdfUrl='/api/v1/ebooks/original-premium/pdf';
  db.query=async(sql)=>sql.includes('monetization_documents')?{rows:[{document:{isFreemiumGated:true,freePreviewChapters:2,requireProForPdf:true}}]}:{rows:[],rowCount:0};
- const local={query:async(sql)=>sql.includes('FROM ebooks ')?{rows:[{slug:book.slug,visibility:'public',document:book,revision:1}]}:{rows:[]},getClient:async()=>({...local,release(){}})};
+ const local={query:async(sql)=>sql.includes('FROM ebooks ')?{rows:[{slug:book.slug,visibility:'public',document:book,revision:1,access_level:'pro',free_preview_pages:2,allow_full_pdf_download:false,is_bundled_public_edition:false}]}:{rows:[]},getClient:async()=>({...local,release(){}})};
  const books=require('../src/services/ebooks.service').createEbooksService(local);
  const preview=await books.get(book.slug,user);assert.equal(preview.chapters.length,2);assert.equal(preview.pdfUrl,book.pdfUrl);assert.equal(preview.finalExamQuestions,undefined);
  await assert.rejects(books.practice(book.slug,user),/pass or Pro/);await assert.rejects(books.pdf(book.slug,user),/No uploaded PDF/);await assert.rejects(books.start(book.slug,user,{}),/pass or Pro/);
 });
+test('ebook access level is authoritative: Free stays free even if a legacy gate exists',async()=>{
+ db.query=async(sql)=>sql.includes('monetization_documents')
+  ?{rows:[{document:{isFreemiumGated:true,freePreviewChapters:2,requireProForPdf:true}}]}
+  :{rows:[],rowCount:0};
+ assert.equal(await m.ebookPolicy('free-guide',user,{accessLevel:'free',isBundledPublicEdition:false}),null);
+ assert.equal(await m.ebookPolicy('bundled-guide',user,{accessLevel:'pro',isBundledPublicEdition:true}),null);
+});
+
 function configure(){process.env.MONETIZATION_CASHFREE_MODE='sandbox';process.env.MONETIZATION_CASHFREE_APP_ID='test-app';process.env.MONETIZATION_CASHFREE_SECRET='test-only-secret';process.env.MONETIZATION_FRONTEND_ORIGIN='https://exampro-staging-ui.vercel.app';process.env.MONETIZATION_API_ORIGIN='https://staging.example.test';}
 test('live payments require a separate explicit switch; webhook HMAC covers original bytes',()=>{
  configure();process.env.MONETIZATION_CASHFREE_MODE='production';delete process.env.MONETIZATION_LIVE_PAYMENTS_ENABLED;assert.throws(()=>pay.settings(),/disabled/);configure();
