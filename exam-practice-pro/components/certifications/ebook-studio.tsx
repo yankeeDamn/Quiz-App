@@ -549,6 +549,18 @@ export function EbookStudio({
               pending={requests.filter((r) => r.status === "pending").length}
               version={inventoryVersion}
               onMessage={setMessage}
+              onUpdated={(updated) => {
+                setBook((old) => old && old.slug === updated.slug ? {
+                  ...old,
+                  accessLevel: updated.accessLevel,
+                  freePreviewPages: updated.freePreviewPages,
+                  allowFullPdfDownload: updated.allowFullPdfDownload,
+                  allowPdfDownload: updated.allowFullPdfDownload,
+                  visibility: updated.visibility,
+                  revision: updated.revision,
+                  updatedAt: updated.updatedAt,
+                } : old);
+              }}
               onRefresh={() => {
                 setInventoryVersion((v) => v + 1);
                 onSaved();
