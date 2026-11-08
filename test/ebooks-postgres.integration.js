@@ -426,7 +426,9 @@ test("PDF uploads persist, require revisions, and recheck reader/editor access o
   let current = (
     await call("/admin/ebooks", "owner", "POST", { ...book(), slug })
   ).json.data.ebook;
-  const bytes = Buffer.from("%PDF-1.4\n% test-only fixture\n%%EOF");
+  const pdf = await require("pdf-lib").PDFDocument.create();
+  pdf.addPage();
+  const bytes = Buffer.from(await pdf.save());
   const upload = async (who, body = bytes, revision = current.revision) => {
     const response = await fetch(
       base +

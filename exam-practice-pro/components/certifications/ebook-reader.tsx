@@ -334,6 +334,8 @@ function ReaderSession({
         </div>
       </main>
     );
+  if (book.pdfUrl && (view === "pdf" || view === "cheatsheet" || (book.monetization?.locked && book.accessLevel === "pro")))
+    return <main className="mx-auto w-full max-w-5xl p-6"><AttachedPdf book={book}/></main>;
   if (!chapter) return null;
   if (view === "pdf" || view === "cheatsheet")
     return (

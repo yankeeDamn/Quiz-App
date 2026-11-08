@@ -50,6 +50,8 @@ export interface EbookTrack {
   category: EbookCategory;
   level: "Beginner to Pro" | "Intermediate" | "Advanced" | "Certification Cram";
   visibility: EbookVisibility;
+  accessLevel?: "free" | "pro";
+  freePreviewPages?: number;
   allowPdfDownload?: boolean;
   pdfUrl?: string;
   pdfFileName?: string;

@@ -98,18 +98,21 @@ function createRouters(books = service, identity = authenticateNextAuth) {
     wrap(async (req, res) => ok(res, { ebooks: await books.list(req.user) })),
   );
   router.get(
-    "/:slug/pdf",
+    ["/:slug/pdf", "/:slug/read", "/:slug/download"],
     optional,
     wrap(async (req, res) => {
+      const download = req.path.endsWith("/download") || req.query.download === "1";
       const asset = await books.pdf(
         req.params.slug,
         req.user,
-        req.query.download === "1",
+        download,
       );
       res.type("application/pdf");
+      res.set("X-Ebook-Preview", asset.preview ? "true" : "false");
+      res.set("X-Content-Type-Options", "nosniff");
       res.set(
         "Content-Disposition",
-        `${req.query.download === "1" ? "attachment" : "inline"}; filename*=UTF-8''${encodeURIComponent(asset.filename)}`,
+        `${download ? "attachment" : "inline"}; filename*=UTF-8''${encodeURIComponent(asset.filename)}`,
       );
       res.send(asset.bytes);
     }),

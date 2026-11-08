@@ -45,13 +45,13 @@ test('bundled public editions cannot be silently paywalled',async()=>{
  await assert.rejects(m.save('ebook','python-mastery',{isFreemiumGated:true,freePreviewChapters:2}),/public editions/);
  await assert.rejects(m.save('ebook','new-book',{isFreemiumGated:true,freePreviewChapters:1}),/at least two/);
 });
-test('ebook API redacts paid chapters and blocks PDF, practice and assessment starts',async()=>{
+test('ebook API redacts paid chapters, keeps protected PDF link and blocks assessments',async()=>{
  const book=structuredClone(require('../content/ebooks-starter.json')[0]);book.slug='original-premium';book.pdfUrl='/api/v1/ebooks/original-premium/pdf';
  db.query=async(sql)=>sql.includes('monetization_documents')?{rows:[{document:{isFreemiumGated:true,freePreviewChapters:2,requireProForPdf:true}}]}:{rows:[],rowCount:0};
  const local={query:async(sql)=>sql.includes('FROM ebooks ')?{rows:[{slug:book.slug,visibility:'public',document:book,revision:1}]}:{rows:[]},getClient:async()=>({...local,release(){}})};
  const books=require('../src/services/ebooks.service').createEbooksService(local);
- const preview=await books.get(book.slug,user);assert.equal(preview.chapters.length,2);assert.equal(preview.pdfUrl,undefined);assert.equal(preview.allowPdfDownload,false);assert.equal(preview.finalExamQuestions,undefined);
- await assert.rejects(books.practice(book.slug,user),/pass or Pro/);await assert.rejects(books.pdf(book.slug,user),/pass or Pro/);await assert.rejects(books.start(book.slug,user,{}),/pass or Pro/);
+ const preview=await books.get(book.slug,user);assert.equal(preview.chapters.length,2);assert.equal(preview.pdfUrl,book.pdfUrl);assert.equal(preview.finalExamQuestions,undefined);
+ await assert.rejects(books.practice(book.slug,user),/pass or Pro/);await assert.rejects(books.pdf(book.slug,user),/No uploaded PDF/);await assert.rejects(books.start(book.slug,user,{}),/pass or Pro/);
 });
 function configure(){process.env.MONETIZATION_CASHFREE_MODE='sandbox';process.env.MONETIZATION_CASHFREE_APP_ID='test-app';process.env.MONETIZATION_CASHFREE_SECRET='test-only-secret';process.env.MONETIZATION_FRONTEND_ORIGIN='https://exampro-staging-ui.vercel.app';process.env.MONETIZATION_API_ORIGIN='https://staging.example.test';}
 test('live payments require a separate explicit switch; webhook HMAC covers original bytes',()=>{
