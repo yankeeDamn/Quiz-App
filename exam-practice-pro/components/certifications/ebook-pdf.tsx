@@ -2,7 +2,8 @@
 import { useEffect, useRef, useState } from "react";
 import { EbookUpgradeGate } from "./ebook-upgrade-gate";
 import { EbookMonetizationControls, type EbookAccessPatch } from "./ebook-monetization-controls";
-import { CheckCircle2, CloudUpload, FileLock2, FileText, LoaderCircle } from "lucide-react";
+import { CheckCircle2, CloudUpload, FileLock2, FileText, LoaderCircle, RefreshCw } from "lucide-react";
+import { ebookFieldClass } from "./ebook-admin-ui";
 import { useSession } from "next-auth/react";
 import { API_BASE_URL, getBackendToken } from "@/lib/api";
 import { type EbookTrack } from "@/lib/ebooks";
@@ -82,7 +83,7 @@ function PdfViewer({ book }: { book: EbookTrack }) {
       <iframe title={`${book.title} PDF`} src={url} className="h-[75dvh] w-full rounded-xl border" referrerPolicy="no-referrer"/>
       {preview&&<>
         <EbookUpgradeGate previewPages={book.freePreviewPages ?? 2}/>
-        <button className="block w-full text-sm underline" onClick={()=>setRefresh(n=>n+1)}>Already paid? Check access</button>
+        <button className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-indigo-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 dark:border-slate-700 dark:bg-slate-950 dark:text-indigo-300" onClick={()=>setRefresh(n=>n+1)}><RefreshCw className="h-4 w-4"/> Already paid? Check access</button>
       </>}
       {book.allowFullPdfDownload&& !preview && <a className="inline-block rounded-xl border px-4 py-3" href={book.pdfUrl?.startsWith('https://')?book.pdfUrl:`/api/ebooks/${book.slug}/download`}>Download PDF</a>}
     </>:!error&&<p role="status">Loading authorized PDF…</p>}
@@ -120,7 +121,7 @@ export function EbookPrintView({
         <button
           type="button"
           onClick={() => window.print()}
-          className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white"
+          className="rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 hover:-translate-y-0.5 hover:from-indigo-700 hover:to-violet-700"
         >
           Print / Save as PDF
         </button>
@@ -335,7 +336,7 @@ export function PdfSettings({
       <label className="grid gap-2 text-sm font-semibold">
         Edition version
         <input
-          className="rounded-xl border bg-background p-3"
+          className={ebookFieldClass}
           maxLength={40}
           value={book.version || "1.0"}
           onChange={(event) => onChange({ version: event.target.value })}
@@ -359,7 +360,7 @@ export function PdfSettings({
             value={book.pdfUrl?.startsWith("https://") ? book.pdfUrl : ""}
             onChange={(event) => onChange({ pdfUrl: event.target.value })}
             placeholder="https://your-host.example/guide.pdf"
-            className="rounded-xl border bg-background p-3"
+            className={ebookFieldClass}
           />
           <span className="text-xs font-normal text-muted-foreground">
             External URLs are allowed only for fully free public ebooks. Pro or restricted ebooks must use protected upload.
@@ -371,7 +372,7 @@ export function PdfSettings({
         role="button"
         tabIndex={book.revision && !busy && !accessBusy ? 0 : -1}
         aria-disabled={!book.revision || busy || accessBusy}
-        className={`rounded-2xl border-2 border-dashed p-8 text-center transition-colors ${dragging ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/30" : "border-slate-300 dark:border-slate-700"} ${!book.revision || busy || accessBusy ? "cursor-not-allowed opacity-55" : "cursor-pointer hover:border-indigo-400"}`}
+        className={`rounded-3xl border-2 border-dashed p-10 text-center shadow-inner transition-all ${dragging ? "scale-[1.01] border-indigo-500 bg-indigo-50 shadow-indigo-500/10 dark:bg-indigo-950/30" : "border-slate-300 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-900/50"} ${!book.revision || busy || accessBusy ? "cursor-not-allowed opacity-55" : "cursor-pointer hover:-translate-y-0.5 hover:border-indigo-400 hover:bg-indigo-50/60 hover:shadow-lg dark:hover:bg-indigo-950/20"}`}
         onDragOver={(event) => {
           event.preventDefault();
           if (book.revision && !busy && !accessBusy) setDragging(true);
@@ -418,7 +419,7 @@ export function PdfSettings({
           </p>
           <button
             type="button"
-            className="mt-3 min-h-10 rounded-lg border px-3 text-sm"
+            className="mt-3 min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
             onClick={() =>
               onChange({
                 pdfUrl: "",
