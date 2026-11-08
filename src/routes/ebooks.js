@@ -182,6 +182,12 @@ function createRouters(books = service, identity = authenticateNextAuth) {
       ok(res, { requests: await books.accessQueue(req.user) }),
     ),
   );
+  adminRouter.get(
+    "/",
+    wrap(async (req, res) =>
+      ok(res, { ebooks: await books.adminList(req.user) }),
+    ),
+  );
   adminRouter.post(
     "/",
     wrap(async (req, res) =>
