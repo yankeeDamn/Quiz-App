@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Check, Crown, FileText, LoaderCircle, LockKeyhole, ShieldCheck } from "lucide-react";
 import type { EbookTrack } from "@/lib/ebooks";
+import { ebookFieldClass } from "./ebook-admin-ui";
 
 export type EbookAccessPatch = Partial<
   Pick<EbookTrack, "accessLevel" | "freePreviewPages" | "allowFullPdfDownload">
@@ -60,7 +61,7 @@ export function EbookMonetizationControls({
                 aria-pressed={book.accessLevel === level}
                 disabled={locked || bundled}
                 onClick={() => level !== book.accessLevel && onCommit({ accessLevel: level })}
-                className={`inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-lg px-3 text-sm font-bold transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 ${book.accessLevel === level ? "bg-white text-indigo-700 shadow-sm ring-1 ring-indigo-100 dark:bg-indigo-600 dark:text-white dark:ring-indigo-500" : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"}`}
+                className={`inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-3 text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-500/20 disabled:cursor-not-allowed disabled:opacity-50 ${book.accessLevel === level ? "bg-white text-indigo-700 shadow-md ring-1 ring-indigo-100 dark:bg-indigo-600 dark:text-white dark:ring-indigo-500" : "text-slate-600 hover:-translate-y-0.5 hover:bg-white hover:text-slate-900 hover:shadow-sm dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"}`}
               >
                 {level === "free" ? <FileText className="h-4 w-4"/> : <Crown className="h-4 w-4"/>}
                 {level === "free" ? "Free" : "Pro"}
@@ -93,7 +94,7 @@ export function EbookMonetizationControls({
               onChange={(event) => setPages(Number(event.target.value))}
               onBlur={commitPages}
               onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }}
-              className="min-h-11 w-full rounded-xl border border-slate-200 bg-background px-4 pr-20 text-sm font-semibold shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 disabled:cursor-not-allowed dark:border-slate-700"
+              className={`${ebookFieldClass} pr-20 font-semibold`}
             />
             <span className="pointer-events-none absolute right-4 top-3 text-xs text-muted-foreground">pages</span>
           </div>
@@ -113,7 +114,7 @@ export function EbookMonetizationControls({
             aria-label="Allow authorized readers to download the full PDF"
             disabled={locked}
             onClick={() => onCommit({ allowFullPdfDownload: !book.allowFullPdfDownload })}
-            className="group inline-flex min-h-11 items-center gap-3 rounded-xl border border-slate-200 bg-background px-4 transition-colors hover:border-indigo-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700"
+            className="group inline-flex min-h-11 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 font-semibold shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-50 hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:hover:bg-indigo-950/30"
           >
             <span className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${book.allowFullPdfDownload ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-600"}`}>
               <span className={`h-4.5 w-4.5 rounded-full bg-white shadow-sm transition-transform ${book.allowFullPdfDownload ? "translate-x-6" : "translate-x-1"}`} />
