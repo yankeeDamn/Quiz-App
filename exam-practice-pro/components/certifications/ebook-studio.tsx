@@ -104,6 +104,7 @@ export function EbookStudio({
   const [adminBooks,setAdminBooks]=useState<EbookSummary[]>(summaries);
   const [toast,setToast]=useState<{kind:"ok"|"error";text:string}|null>(null);
   const [archiveOpen,setArchiveOpen]=useState(false);
+  const proGatedCount=adminBooks.filter((item)=>item.accessLevel==="pro"&&!item.isBundledPublicEdition).length;
   const setBulk = (value: string) => {
     setBulkValue(value);
     setBulkDirty(false);
@@ -112,7 +113,6 @@ export function EbookStudio({
   const [requests, setRequests] = useState<EbookAccessRequest[]>([]),
     [grantEmail, setGrantEmail] = useState(""),
     [restore, setRestore] = useState<EbookTrack | null>(null);
-  const [newlySaved, setNewlySaved] = useState<EbookSummary[]>([]);
   useEffect(() => {
     dialog.current?.showModal();
     setRestore(loadDraft(identity));
@@ -140,8 +140,9 @@ export function EbookStudio({
   const load = async (slug: string) => {
     if (
       book &&
+      (book.slug || book.title) &&
       !window.confirm(
-        "Switch ebook? Unsaved edits can be saved as a local draft first.",
+        "Switch ebook? Save a local draft first if you need to preserve unsaved edits.",
       )
     )
       return false;
@@ -154,17 +155,31 @@ export function EbookStudio({
       return true;
     }
     setBusy(true);
-    const result = await ebookApi<{ ebook: EbookTrack }>(`/ebooks/${slug}`);
+    const result = await ebookAdminApi<{ ebook: EbookTrack }>(
+      `/${encodeURIComponent(slug)}`,
+    );
     setBusy(false);
     if (result.data) {
-      setBook(result.data.ebook);
-      setBulk(toBulk(result.data.ebook));
+      const loaded = {
+        ...result.data.ebook,
+        id: result.data.ebook.id || result.data.ebook.slug,
+        accessLevel: result.data.ebook.accessLevel || "free",
+        freePreviewPages: result.data.ebook.freePreviewPages || 2,
+        allowFullPdfDownload:
+          result.data.ebook.allowFullPdfDownload ??
+          result.data.ebook.allowPdfDownload ??
+          false,
+        fullPdfStorageKey: result.data.ebook.fullPdfStorageKey || null,
+        previewPdfStorageKey: result.data.ebook.previewPdfStorageKey || null,
+        isBundledPublicEdition:
+          result.data.ebook.isBundledPublicEdition === true,
+      };
+      setBook(loaded);
+      setBulk(toBulk(loaded));
       return true;
-    } else {
-      setBook(null);
-      setMessage(result.error?.message || "Could not open ebook.");
-      return false;
     }
+    notify(result.error?.message || "Could not open ebook.", "error");
+    return false;
   };
   const change = (patch: Partial<EbookTrack>) =>
     setBook((old) => (old ? { ...old, ...patch } : old));
@@ -205,31 +220,51 @@ export function EbookStudio({
           }))
         : book.finalExamQuestions,
     };
-    setMessage(
-      saveDraft(identity, copy)
-        ? "Draft saved on this device for this account. It is not published or synced."
+    const saved = saveDraft(identity, copy);
+    notify(
+      saved
+        ? `Local draft saved at ${new Date().toLocaleTimeString()}. It is not published or synced.`
         : "Local storage is unavailable; keep this window open and copy your work.",
+      saved ? "ok" : "error",
     );
   };
-  const save = async () => {
-    if (!book) return;
+  const handleSaveEbook = async () => {
+    if (!book || busy) return;
     const parsed = parseBulk(bulk);
     if (bulkDirty && parsed.errors.length) {
-      setMessage(parsed.errors.join(" "));
+      notify(parsed.errors.join(" "), "error");
+      return;
+    }
+    if (!book.title.trim() || book.title.trim().length < 3) {
+      notify("Add an ebook title of at least 3 characters.", "error");
+      return;
+    }
+    if (!/^[a-z0-9][a-z0-9-]{1,59}$/.test(book.slug)) {
+      notify("Use a lowercase kebab-case slug of 2–60 characters.", "error");
+      return;
+    }
+    if (
+      book.visibility !== "admin_only" &&
+      (!book.chapters.length || !(book.finalExamQuestions?.length))
+    ) {
+      notify(
+        "Public and invite-only ebooks need at least one chapter and one assessment question. Keep an incomplete ebook private.",
+        "error",
+      );
       return;
     }
     if (
       book.visibility === "public" &&
       owner &&
-      !window.confirm(
-        "Save this ebook as public? Anyone will be able to read its content.",
-      )
+      !window.confirm("Save this ebook as public? Anyone can read its permitted content.")
     )
       return;
+
     setBusy(true);
     setMessage("");
     const payload = {
       ...book,
+      allowPdfDownload: book.allowFullPdfDownload,
       finalExamQuestions: bulkDirty
         ? parsed.rows.map((q, index) => ({
             ...q,
@@ -239,34 +274,33 @@ export function EbookStudio({
                 ? book.finalExamQuestions[index].domain
                 : undefined,
           }))
-        : book.finalExamQuestions,
+        : book.finalExamQuestions || [],
     };
-    const result = await ebookApi<{ ebook: EbookTrack }>(
-      `/admin/ebooks${book.revision ? "/" + book.slug : ""}`,
-      { method: book.revision ? "PUT" : "POST", body: payload },
+    const exists = Boolean(book.id || book.revision);
+    const result = await ebookAdminApi<{ ebook: EbookTrack }>(
+      exists ? `/${encodeURIComponent(book.slug)}` : "",
+      { method: exists ? "PUT" : "POST", body: payload },
     );
     setBusy(false);
     if (result.data) {
-      setBook(result.data.ebook);
-      setSelected(result.data.ebook.slug);
-      setBulk(toBulk(result.data.ebook));
-      setNewlySaved((items) => [
-        ...items.filter((item) => item.slug !== result.data!.ebook.slug),
-        {
-          ...result.data!.ebook,
-          chapterCount: result.data!.ebook.chapters.length,
-          durationMinutes: 0,
-        },
-      ]);
-      setMessage("Ebook saved to the server.");
+      const saved = {
+        ...result.data.ebook,
+        id: result.data.ebook.id || result.data.ebook.slug,
+      };
+      setBook(saved);
+      setSelected(saved.slug);
+      setBulk(toBulk(saved));
+      setBulkDirty(false);
       setInventoryVersion((v) => v + 1);
+      notify(exists ? "Ebook updated successfully." : "New ebook created successfully.");
       onSaved();
-    } else {
-      setMessage(
-        result.error?.message ||
-          "Save failed. Use Save local draft to preserve edits.",
-      );
+      return;
     }
+    notify(
+      result.error?.message ||
+        "Save failed. Use Save local draft to preserve edits.",
+      "error",
+    );
   };
   const approve = async (
     slug: string,
