@@ -354,7 +354,11 @@ function createEbooksService(db = database, clock = Date.now) {
           ? "EBOOK_ACCESS_REQUIRED"
           : "BOOK_NOT_FOUND",
       );
-    const monetization = await require("./monetization.service").ebookPolicy(slug,user,row.document);
+    const monetization = await require("./monetization.service").ebookPolicy(
+      slug,
+      user,
+      { ...row.document, ...accessFields(row) },
+    );
     return { row, rights, monetization };
   }
   function accessFields(row) {
