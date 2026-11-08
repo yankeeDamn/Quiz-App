@@ -282,10 +282,21 @@ export function EbookExamSettings({
     patch: Partial<(typeof questions)[number]>,
   ) => onQuestions(questions.map((q, j) => (j === i ? { ...q, ...patch } : q)));
   return (
-    <div className="space-y-5">
-      <h3 className="text-xl font-bold">
-        Assessment settings & visual question builder
-      </h3>
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-50 via-white to-white p-6 shadow-sm dark:border-indigo-900 dark:from-indigo-950/40 dark:via-slate-950 dark:to-slate-950">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-widest text-indigo-700 dark:text-indigo-300">Exam Builder</p>
+          <h3 className="mt-2 text-2xl font-extrabold tracking-tight">Assessment & question studio</h3>
+          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+            Author questions, correct answers, explanations, scoring and timing.
+            Use Save changes to persist edits; new drafts can remain incomplete.
+          </p>
+        </div>
+        <div className="rounded-xl border border-indigo-200 bg-white px-4 py-3 text-center dark:border-indigo-800 dark:bg-slate-900">
+          <span className="block text-2xl font-extrabold text-indigo-700 dark:text-indigo-300">{questions.length}</span>
+          <span className="text-xs font-semibold text-muted-foreground">Questions</span>
+        </div>
+      </div>
       <div className="grid gap-4 sm:grid-cols-4">
         <Field label="Pass percentage">
           <input
@@ -339,7 +350,7 @@ export function EbookExamSettings({
       </Field>
       <div className="space-y-3">
         {questions.map((q, i) => (
-          <details key={i} className="rounded-xl border p-4">
+          <details key={i} className="rounded-2xl border border-slate-200 bg-card p-5 shadow-sm dark:border-slate-800">
             <summary className="cursor-pointer text-sm font-semibold">
               {i + 1}. {q.question || "New question"}
             </summary>
@@ -416,7 +427,7 @@ export function EbookExamSettings({
       </div>
       <button
         type="button"
-        className="min-h-11 rounded-xl border px-4 text-sm font-semibold"
+        className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-5 text-sm font-bold text-indigo-700 hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-300"
         onClick={() =>
           onQuestions([
             ...questions,
