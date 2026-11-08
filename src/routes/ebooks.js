@@ -109,6 +109,7 @@ function createRouters(books = service, identity = authenticateNextAuth) {
       );
       res.type("application/pdf");
       res.set("X-Ebook-Preview", asset.preview ? "true" : "false");
+      res.set("X-Ebook-Preview-Pages", String(asset.previewPages || 0));
       res.set("X-Content-Type-Options", "nosniff");
       res.set(
         "Content-Disposition",
