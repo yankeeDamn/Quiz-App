@@ -220,6 +220,16 @@ function ReaderSession({
       active = false;
     };
   }, [slug, identity, reload, initialChapter, fallback]);
+  useEffect(() => {
+    if (!book?.monetization?.locked) return;
+    const refreshAccess = () => setReload((value) => value + 1);
+    const timer = window.setInterval(refreshAccess, 15000);
+    window.addEventListener("focus", refreshAccess);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("focus", refreshAccess);
+    };
+  }, [book?.monetization?.locked]);
   const chapter = book?.chapters[Math.min(index, book.chapters.length - 1)];
   const ids = new Set(book?.chapters.map((c) => c.id) || []);
   const completeCount = progress.completed.filter((id) => ids.has(id)).length;
