@@ -1,11 +1,12 @@
 /* eslint-disable react-hooks/set-state-in-effect -- initialize account-scoped browser storage and refresh externally loaded data */
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { ArrowDown, ArrowUp, Plus, Save, Trash2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, LoaderCircle, Plus, Save, Trash2, X } from "lucide-react";
 import { parseBulk } from "@/lib/admin";
 import {
   EBOOK_CATEGORIES,
   ebookApi,
+  ebookAdminApi,
   loadDraft,
   saveDraft,
   type EbookTrack,
@@ -38,18 +39,29 @@ const emptyChapter = (): EbookChapter => ({
   conceptChecks: [emptyQuestion(), emptyQuestion()],
 });
 const newBook = (): EbookTrack => ({
+  id: null,
   slug: "",
   title: "",
   subtitle: "",
   category: "Python",
   level: "Beginner to Pro",
   visibility: "admin_only",
-  chapters: [emptyChapter()],
+  accessLevel: "free",
+  freePreviewPages: 2,
+  allowFullPdfDownload: false,
+  allowPdfDownload: false,
+  fullPdfStorageKey: null,
+  previewPdfStorageKey: null,
+  isBundledPublicEdition: false,
+  chapters: [],
   examId: "",
   examMinutes: 20,
   finalExamQuestions: [],
   updatedAt: "",
 });
+const slugify = (value:string) =>
+  value.toLowerCase().normalize("NFKD").replace(/[^a-z0-9\s-]/g,"")
+    .trim().replace(/\s+/g,"-").replace(/-+/g,"-").slice(0,60);
 const toBulk = (book: EbookTrack) =>
   book.draftBulk ??
   (book.finalExamQuestions || [])
@@ -89,6 +101,9 @@ export function EbookStudio({
     [tab, setTab] = useState(initialBook ? "content" : "inventory");
   const [inventoryVersion, setInventoryVersion] = useState(0);
   const [bulkDirty, setBulkDirty] = useState(false);
+  const [adminBooks,setAdminBooks]=useState<EbookSummary[]>(summaries);
+  const [toast,setToast]=useState<{kind:"ok"|"error";text:string}|null>(null);
+  const [archiveOpen,setArchiveOpen]=useState(false);
   const setBulk = (value: string) => {
     setBulkValue(value);
     setBulkDirty(false);
@@ -103,6 +118,15 @@ export function EbookStudio({
     setRestore(loadDraft(identity));
     if (!initialBook && owner) setBook(newBook());
   }, [identity, owner, initialBook]);
+  const notify=(text:string,kind:"ok"|"error"="ok")=>{setMessage(text);setToast({text,kind});};
+  useEffect(()=>{if(!toast)return;const id=window.setTimeout(()=>setToast(null),4500);return()=>window.clearTimeout(id);},[toast]);
+  const refreshAdminBooks=async()=>{
+    if(!owner)return;
+    const result=await ebookAdminApi<{ebooks:EbookSummary[]}>("");
+    if(result.data)setAdminBooks(result.data.ebooks);
+    else notify(result.error?.message||"Could not load ebook inventory.","error");
+  };
+  useEffect(()=>{void refreshAdminBooks();},[owner,inventoryVersion]);
   const loadRequests = async () => {
     const result = await ebookApi<{ requests: EbookAccessRequest[] }>(
       "/admin/ebooks/requests",
