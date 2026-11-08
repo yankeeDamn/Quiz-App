@@ -19,7 +19,7 @@ export async function GET(_request: Request, {params}: {params: Promise<{slug:st
       headers: token ? {Authorization:`Bearer ${token}`} : {}, cache:'no-store',
       signal:AbortSignal.timeout(30000), redirect:'error',
     });
-    for (const key of ['Content-Type','Content-Disposition','X-Ebook-Preview']) {
+    for (const key of ['Content-Type','Content-Disposition','X-Ebook-Preview','X-Ebook-Preview-Pages']) {
       const value=response.headers.get(key); if(value)headers.set(key,value);
     }
     return new Response(response.body, {status:response.status,headers});
