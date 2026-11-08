@@ -155,7 +155,7 @@ export async function ebookApi<T>(
 
 export async function ebookAdminApi<T>(
   path = "",
-  options: { method?: "GET"|"POST"|"PUT"|"DELETE"; body?: unknown } = {},
+  options: { method?: "GET"|"POST"|"PUT"|"PATCH"|"DELETE"; body?: unknown } = {},
 ): Promise<{success:boolean;data?:T;error?:{message:string}}> {
   try {
     const response = await fetch(`/api/admin/ebooks${path}`, {
