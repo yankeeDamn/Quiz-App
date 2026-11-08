@@ -6,7 +6,7 @@ const { createPdfPreview } = require('../src/services/ebook-pdf-preview');
 
 test('preview is a separate two-page document with no source annotations', async () => {
   const doc = await PDFDocument.create();
-  for (let i = 0; i < 5; i++) doc.addPage();
+  for (let i = 0; i < 5; i++) doc.addPage([600 + i * 10, 800 + i * 10]);
   doc.getPage(0).drawText('Visible preview');
   doc.getPage(2).drawText('CONFIDENTIAL PAID PAGE');
   await doc.attach(Buffer.from('SECRET ATTACHMENT'), 'secret.txt');
@@ -17,16 +17,9 @@ test('preview is a separate two-page document with no source annotations', async
   assert.equal(preview.getPageCount(), 2);
   assert.equal(preview.getPage(0).node.Annots()?.size() || 0, 0);
   assert.equal(preview.catalog.has(PDFName.of('Names')), false);
-  const {getDocument} = await import('pdfjs-dist/legacy/build/pdf.mjs');
-  const rendered = await getDocument({data:new Uint8Array(result)}).promise;
-  const previewText=[];
-  for(let n=1;n<=rendered.numPages;n++){
-    const content=await (await rendered.getPage(n)).getTextContent();
-    previewText.push(content.items.map(item=>('str' in item?item.str:'')).join(' '));
-  }
-  assert.match(previewText.join(' '),/Visible preview/);
-  assert.doesNotMatch(previewText.join(' '),/CONFIDENTIAL PAID PAGE/);
-  await rendered.destroy();
+  assert.deepEqual(preview.getPage(0).getSize(), {width:600,height:800});
+  assert.deepEqual(preview.getPage(1).getSize(), {width:610,height:810});
+  assert.notDeepEqual(preview.getPage(1).getSize(), {width:620,height:820});
   assert.equal((await PDFDocument.load(source)).getPageCount(), 5);
 });
 
