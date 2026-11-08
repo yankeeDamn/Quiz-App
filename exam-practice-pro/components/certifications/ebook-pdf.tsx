@@ -85,7 +85,7 @@ function PdfViewer({ book }: { book: EbookTrack }) {
         <EbookUpgradeGate previewPages={book.freePreviewPages ?? 2}/>
         <button className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-indigo-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 dark:border-slate-700 dark:bg-slate-950 dark:text-indigo-300" onClick={()=>setRefresh(n=>n+1)}><RefreshCw className="h-4 w-4"/> Already paid? Check access</button>
       </>}
-      {book.allowFullPdfDownload&& !preview && <a className="inline-block rounded-xl border px-4 py-3" href={book.pdfUrl?.startsWith('https://')?book.pdfUrl:`/api/ebooks/${book.slug}/download`}>Download PDF</a>}
+      {book.allowFullPdfDownload&& !preview && <a className="inline-flex min-h-11 items-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-indigo-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 dark:border-slate-700 dark:bg-slate-950 dark:text-indigo-300" href={book.pdfUrl?.startsWith('https://')?book.pdfUrl:`/api/ebooks/${book.slug}/download`}>Download PDF</a>}
     </>:!error&&<p role="status">Loading authorized PDF…</p>}
   </section>;
 }
@@ -127,7 +127,7 @@ export function EbookPrintView({
         </button>
         <a
           href={`/certifications/learn/${book.slug}`}
-          className="rounded-xl border px-4 py-3 text-sm"
+          className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
         >
           Back to interactive tutorial
         </a>
@@ -343,9 +343,10 @@ export function PdfSettings({
         />
       </label>
 
-      <label className="flex gap-3 text-sm">
+      <label className="flex min-h-11 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/70 px-3 text-sm font-medium dark:border-slate-800 dark:bg-slate-900/60">
         <input
           type="checkbox"
+          className="h-4 w-4 rounded border-slate-300 accent-indigo-600"
           checked={!!book.isCheatSheet}
           onChange={(event) => onChange({ isCheatSheet: event.target.checked })}
         />
