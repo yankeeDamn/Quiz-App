@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect -- initialize account-scoped browser storage and refresh externally loaded data */
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { ArrowDown, ArrowUp, LoaderCircle, Plus, Save, Trash2, X } from "lucide-react";
+import { ArrowDown, ArrowUp, BookOpen, Check, ChevronDown, ClipboardList, FileText, LayoutDashboard, LibraryBig, LoaderCircle, Plus, Save, ShieldCheck, Trash2, Users, X } from "lucide-react";
 import { parseBulk } from "@/lib/admin";
 import {
   EBOOK_CATEGORIES,
@@ -20,6 +20,7 @@ import {
   EbookBackup,
 } from "./ebook-command-panels";
 import { PdfSettings } from "./ebook-pdf";
+import { EbookMonetizationControls, type EbookAccessPatch } from "./ebook-monetization-controls";
 import { LessonMarkdown, CodeExample } from "./lesson-content";
 import { Field, input } from "@/components/admin/ui";
 const emptyQuestion = () => ({
@@ -104,6 +105,8 @@ export function EbookStudio({
   const [adminBooks,setAdminBooks]=useState<EbookSummary[]>(summaries);
   const [toast,setToast]=useState<{kind:"ok"|"error";text:string}|null>(null);
   const [archiveOpen,setArchiveOpen]=useState(false);
+  const [accessBusy,setAccessBusy]=useState(false);
+  const [dirty,setDirty]=useState(false);
   const proGatedCount=adminBooks.filter((item)=>item.accessLevel==="pro"&&!item.isBundledPublicEdition).length;
   const setBulk = (value: string) => {
     setBulkValue(value);
@@ -138,20 +141,17 @@ export function EbookStudio({
     if (owner) void loadRequests();
   }, [owner]);
   const load = async (slug: string) => {
-    if (
-      book &&
-      (book.slug || book.title) &&
-      !window.confirm(
-        "Switch ebook? Save a local draft first if you need to preserve unsaved edits.",
-      )
-    )
-      return false;
-    setSelected(slug);
-    setChapterIndex(0);
+    if (busy || accessBusy) return false;
+    if (dirty && !window.confirm(
+      "You have unsaved changes. Switch ebooks and discard them? You can save a local draft first.",
+    )) return false;
     setMessage("");
     if (!slug) {
       setBook(newBook());
+      setSelected("");
+      setChapterIndex(0);
       setBulk("");
+      setDirty(false);
       return true;
     }
     setBusy(true);
@@ -175,14 +175,98 @@ export function EbookStudio({
           result.data.ebook.isBundledPublicEdition === true,
       };
       setBook(loaded);
+      setSelected(slug);
+      setChapterIndex(0);
       setBulk(toBulk(loaded));
+      setDirty(false);
       return true;
     }
     notify(result.error?.message || "Could not open ebook.", "error");
     return false;
   };
-  const change = (patch: Partial<EbookTrack>) =>
+  const change = (patch: Partial<EbookTrack>) => {
+    setDirty(true);
     setBook((old) => (old ? { ...old, ...patch } : old));
+  };
+  const commitAccess = async (patch: EbookAccessPatch) => {
+    if (!book || accessBusy || busy || !owner) return;
+    if (book.isBundledPublicEdition && patch.accessLevel === "pro") {
+      notify("Bundled public editions must remain Free.", "error");
+      return;
+    }
+    const before = {
+      accessLevel: book.accessLevel,
+      freePreviewPages: book.freePreviewPages,
+      allowFullPdfDownload: book.allowFullPdfDownload,
+    };
+    const next = { ...patch, ...(patch.allowFullPdfDownload === undefined
+      ? {} : { allowPdfDownload: patch.allowFullPdfDownload }) };
+    if (!book.revision) {
+      change(next);
+      return;
+    }
+    setAccessBusy(true);
+    setBook((old) => old ? { ...old, ...next } : old);
+    const result = await ebookAdminApi<{ ebook: EbookTrack }>(
+      `/${encodeURIComponent(book.slug)}/access`,
+      { method: "PATCH", body: { revision: book.revision, ...patch } },
+    );
+    setAccessBusy(false);
+    if (!result.data) {
+      setBook((old) => old && old.slug === book.slug
+        ? { ...old, ...before, allowPdfDownload: before.allowFullPdfDownload } : old);
+      notify(result.error?.message || "Unable to save ebook access.", "error");
+      return;
+    }
+    const updated = result.data.ebook;
+    setBook((old) => old && old.slug === updated.slug ? {
+      ...old,
+      accessLevel: updated.accessLevel,
+      freePreviewPages: updated.freePreviewPages,
+      allowFullPdfDownload: updated.allowFullPdfDownload,
+      allowPdfDownload: updated.allowFullPdfDownload,
+      revision: updated.revision,
+      updatedAt: updated.updatedAt,
+    } : old);
+    setInventoryVersion((v) => v + 1);
+    notify("Access settings saved. Readers see the new rule immediately.");
+    onSaved();
+  };
+  const commitVisibility = async (visibility: EbookTrack["visibility"]) => {
+    if (!book || !owner || busy || accessBusy || visibility === book.visibility) return;
+    if (book.isBundledPublicEdition && visibility !== "public") {
+      notify("Bundled public editions must remain public.", "error");
+      return;
+    }
+    if (visibility === "public" &&
+        !window.confirm("Publish this ebook to learners? Only reviewed, complete content should be made public.")) return;
+    if (!book.revision) {
+      change({ visibility });
+      return;
+    }
+    const before = book.visibility;
+    setAccessBusy(true);
+    setBook((old) => old ? { ...old, visibility } : old);
+    const result = await ebookAdminApi<{ ebook: EbookTrack }>(
+      `/${encodeURIComponent(book.slug)}/visibility`,
+      { method: "PATCH", body: { revision: book.revision, visibility } },
+    );
+    setAccessBusy(false);
+    if (!result.data) {
+      setBook((old) => old && old.slug === book.slug
+        ? { ...old, visibility: before } : old);
+      notify(result.error?.message || "Unable to change publication visibility.", "error");
+      return;
+    }
+    const updated = result.data.ebook;
+    setBook((old) => old && old.slug === updated.slug ? {
+      ...old, visibility: updated.visibility,
+      revision: updated.revision, updatedAt: updated.updatedAt,
+    } : old);
+    setInventoryVersion((v) => v + 1);
+    notify("Publication visibility updated successfully.");
+    onSaved();
+  };
   const chapter = book?.chapters[chapterIndex];
   const changeChapter = (patch: Partial<EbookChapter>) =>
     book &&
@@ -229,7 +313,7 @@ export function EbookStudio({
     );
   };
   const handleSaveEbook = async () => {
-    if (!book || busy) return;
+    if (!book || busy || accessBusy) return;
     const parsed = parseBulk(bulk);
     if (bulkDirty && parsed.errors.length) {
       notify(parsed.errors.join(" "), "error");
@@ -291,6 +375,7 @@ export function EbookStudio({
       setSelected(saved.slug);
       setBulk(toBulk(saved));
       setBulkDirty(false);
+      setDirty(false);
       setInventoryVersion((v) => v + 1);
       notify(exists ? "Ebook updated successfully." : "New ebook created successfully.");
       onSaved();
