@@ -66,6 +66,25 @@ function question(raw, id) {
     explanation: text(raw.explanation, 5, 3000, "Explanation"),
   };
 }
+function draftQuestion(raw, id) {
+  const source = raw && typeof raw === "object" ? raw : {};
+  const options = Array.isArray(source.options) ? source.options : [];
+  return {
+    id,
+    ...(source.domain
+      ? { domain: text(source.domain, 0, 180, "Question domain") }
+      : {}),
+    question: text(source.question || "", 0, 3000, "Question"),
+    options: [0, 1, 2, 3].map((index) =>
+      text(options[index] || "", 0, 1000, "Option"),
+    ),
+    answer:
+      Number.isInteger(source.answer) && source.answer >= 0 && source.answer <= 3
+        ? source.answer
+        : 0,
+    explanation: text(source.explanation || "", 0, 3000, "Explanation"),
+  };
+}
 function validateBook(raw, slug) {
   if (!raw || typeof raw !== "object" || Array.isArray(raw))
     fail("Ebook must be an object.");
@@ -112,15 +131,16 @@ function validateBook(raw, slug) {
       fail("Chapter duration must be 1–240 minutes.");
     if (
       !Array.isArray(chapter.keyTakeaways) ||
-      chapter.keyTakeaways.length < 1 ||
-      chapter.keyTakeaways.length > 12
+      chapter.keyTakeaways.length > 12 ||
+      (!draftOnly && chapter.keyTakeaways.length < 1)
     )
-      fail("Add 1–12 takeaways per chapter.");
+      fail(draftOnly ? "Use 0–12 takeaways in a private draft." : "Add 1–12 takeaways per chapter.");
     if (
       !Array.isArray(chapter.conceptChecks) ||
-      chapter.conceptChecks.length !== 2
+      chapter.conceptChecks.length > 2 ||
+      (!draftOnly && chapter.conceptChecks.length !== 2)
     )
-      fail("Add exactly two concept checks per chapter.");
+      fail(draftOnly ? "Use up to two concept checks in a private draft." : "Add exactly two concept checks per chapter.");
     let codeSnippet;
     if (chapter.codeSnippet) {
       if (
@@ -148,21 +168,23 @@ function validateBook(raw, slug) {
     return {
       id,
       order,
-      title: text(chapter.title, 3, 180, "Chapter title"),
+      title: text(chapter.title || "", draftOnly ? 0 : 3, 180, "Chapter title"),
       durationMinutes: chapter.durationMinutes,
       summary: text(chapter.summary, 0, 500, "Chapter summary"),
       contentMarkdown: text(
-        chapter.contentMarkdown,
-        20,
+        chapter.contentMarkdown || "",
+        draftOnly ? 0 : 20,
         40000,
         "Chapter content",
       ),
       codeSnippet,
       keyTakeaways: chapter.keyTakeaways.map((tip) =>
-        text(tip, 3, 1000, "Takeaway"),
+        text(tip || "", draftOnly ? 0 : 3, 1000, "Takeaway"),
       ),
       conceptChecks: chapter.conceptChecks.map((check, i) =>
-        question(check, `${id}-check-${i}`),
+        draftOnly
+          ? draftQuestion(check, `${id}-check-${i}`)
+          : question(check, `${id}-check-${i}`),
       ),
     };
   });
@@ -241,7 +263,7 @@ function validateBook(raw, slug) {
     version: text(raw.version || "1.0", 1, 40, "Version"),
     slug,
     title: text(raw.title, 3, 180, "Title"),
-    subtitle: text(raw.subtitle, 3, 1000, "Summary"),
+    subtitle: text(raw.subtitle || "", draftOnly ? 0 : 3, 1000, "Summary"),
     category: raw.category,
     level: raw.level,
     visibility: raw.visibility,
@@ -253,7 +275,9 @@ function validateBook(raw, slug) {
       seeds.find((book) => book.slug === slug)?.examTitle ||
       "Final Skill Assessment",
     finalExamQuestions: raw.finalExamQuestions.map((q, i) =>
-      question(q, `${slug}-q${i + 1}`),
+      draftOnly
+        ? draftQuestion(q, `${slug}-q${i + 1}`)
+        : question(q, `${slug}-q${i + 1}`),
     ),
     references: Array.isArray(raw.references)
       ? raw.references
