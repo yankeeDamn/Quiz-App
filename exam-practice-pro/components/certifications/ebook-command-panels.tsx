@@ -8,7 +8,8 @@ import {
   type EbookSummary,
 } from "@/lib/ebooks";
 import { EbookShare } from "./ebook-share";
-import { Field, input } from "@/components/admin/ui";
+import { Field } from "@/components/admin/ui";
+import { ebookFieldClass as input, ebookSelectClass, ebookTextareaClass } from "./ebook-admin-ui";
 import { BookOpen, CheckCircle2, Crown, FileText, Layers3, LoaderCircle, ShieldCheck } from "lucide-react";
 export function EbookInventory({
   owner,
@@ -176,7 +177,7 @@ export function EbookInventory({
                 <td className="p-4">
                   <select
                     aria-label={`Publication visibility for ${book.title}`}
-                    className="min-h-10 max-w-[170px] rounded-xl border border-slate-200 bg-background px-3 text-xs font-semibold disabled:opacity-50 dark:border-slate-700"
+                    className="min-h-10 max-w-[180px] rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm outline-none transition-all hover:border-indigo-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
                     value={book.visibility}
                     disabled={!owner || !!busySlug || book.isBundledPublicEdition}
                     onChange={(event) => void patchBook(book, "visibility", {
@@ -197,7 +198,7 @@ export function EbookInventory({
                       onChange={(event) => void patchBook(book, "access", {
                         accessLevel: event.target.value as "free" | "pro",
                       })}
-                      className={`min-h-10 rounded-xl border px-3 text-xs font-bold disabled:opacity-50 ${book.accessLevel === "pro" ? "border-violet-200 bg-violet-50 text-violet-900 dark:border-violet-800 dark:bg-violet-950 dark:text-violet-200" : "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"}`}
+                      className={`min-h-10 rounded-xl border px-3 text-xs font-bold shadow-sm outline-none transition-all focus:ring-4 focus:ring-indigo-500/10 disabled:opacity-50 ${book.accessLevel === "pro" ? "border-violet-200 bg-violet-50 text-violet-900 hover:border-violet-300 dark:border-violet-800 dark:bg-violet-950 dark:text-violet-200" : "border-emerald-200 bg-emerald-50 text-emerald-900 hover:border-emerald-300 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"}`}
                     >
                       <option value="free">Free</option>
                       <option value="pro">Pro</option>
@@ -218,21 +219,21 @@ export function EbookInventory({
                     <button
                       type="button"
                       onClick={() => onSelect(book.slug, "content")}
-                      className="min-h-9 rounded-lg border px-3 text-xs"
+                      className="min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
                     >
                       Edit chapters
                     </button>
                     <button
                       type="button"
                       onClick={() => onSelect(book.slug, "pdf")}
-                      className="min-h-9 rounded-lg border px-3 text-xs"
+                      className="min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
                     >
                       Manage PDF
                     </button>
                     <button
                       type="button"
                       onClick={() => onSelect(book.slug, "exam")}
-                      className="min-h-9 rounded-lg border px-3 text-xs"
+                      className="min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
                     >
                       Edit exam
                     </button>
@@ -247,7 +248,7 @@ export function EbookInventory({
                             onMessage(String(error));
                           }
                         }}
-                        className="min-h-9 rounded-lg border px-3 text-xs"
+                        className="min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
                       >
                         Clone private draft
                       </button>
@@ -353,7 +354,7 @@ export function EbookExamSettings({
       </Field>
       <div className="space-y-3">
         {questions.map((q, i) => (
-          <details key={i} className="rounded-2xl border border-slate-200 bg-card p-5 shadow-sm dark:border-slate-800">
+          <details key={i} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/[0.04] transition-shadow open:shadow-md dark:border-slate-800 dark:bg-slate-950">
             <summary className="cursor-pointer text-sm font-semibold">
               {i + 1}. {q.question || "New question"}
             </summary>
@@ -419,7 +420,7 @@ export function EbookExamSettings({
               </Field>
               <button
                 type="button"
-                className="min-h-10 text-sm text-red-600"
+                className="min-h-10 rounded-xl px-3 text-sm font-bold text-rose-700 hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-950/40"
                 onClick={() => onQuestions(questions.filter((_, j) => j !== i))}
               >
                 Remove question
@@ -430,7 +431,7 @@ export function EbookExamSettings({
       </div>
       <button
         type="button"
-        className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-5 text-sm font-bold text-indigo-700 hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-300"
+        className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-violet-50 px-5 text-sm font-bold text-indigo-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md dark:border-indigo-800 dark:from-indigo-950/50 dark:to-violet-950/40 dark:text-indigo-200"
         onClick={() =>
           onQuestions([
             ...questions,
@@ -542,7 +543,7 @@ export function EbookBackup({
         <button
           type="button"
           disabled={!book}
-          className="min-h-10 rounded-lg border px-3 text-sm"
+          className="min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
           onClick={() =>
             book &&
             download(
@@ -557,7 +558,7 @@ export function EbookBackup({
         <button
           type="button"
           disabled={!book}
-          className="min-h-10 rounded-lg border px-3 text-sm"
+          className="min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
           onClick={() =>
             book &&
             download(
