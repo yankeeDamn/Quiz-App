@@ -43,16 +43,30 @@ export type EbookPermissions = {
   canManageAccess: boolean;
 };
 export interface EbookTrack {
-  monetization?: {locked:boolean;freePreviewChapters:number;requireProForPdf:boolean};
+  id?: string | null;
+  monetization?: {
+    locked:boolean;
+    freePreviewChapters:number;
+    freePreviewPages?:number;
+    requireProForPdf:boolean;
+    accessLevel?:'free'|'pro';
+    hasActiveEbookPass?:boolean;
+    isProSubscriber?:boolean;
+  };
   slug: string;
   title: string;
   subtitle: string;
   category: EbookCategory;
   level: "Beginner to Pro" | "Intermediate" | "Advanced" | "Certification Cram";
   visibility: EbookVisibility;
-  accessLevel?: "free" | "pro";
-  freePreviewPages?: number;
+  accessLevel: "free" | "pro";
+  freePreviewPages: number;
+  allowFullPdfDownload: boolean;
+  /** @deprecated use allowFullPdfDownload */
   allowPdfDownload?: boolean;
+  fullPdfStorageKey: string | null;
+  previewPdfStorageKey: string | null;
+  isBundledPublicEdition: boolean;
   pdfUrl?: string;
   pdfFileName?: string;
   isCheatSheet?: boolean;
@@ -73,6 +87,7 @@ export interface EbookTrack {
   revision?: number;
   references?: string[];
   permissions?: EbookPermissions;
+  localDraftSavedAt?: string;
 }
 export type EbookSummary = Omit<
   EbookTrack,
@@ -137,6 +152,31 @@ export async function ebookApi<T>(
     ...options,
   });
 }
+
+export async function ebookAdminApi<T>(
+  path = "",
+  options: { method?: "GET"|"POST"|"PUT"|"DELETE"; body?: unknown } = {},
+): Promise<{success:boolean;data?:T;error?:{message:string}}> {
+  try {
+    const response = await fetch(`/api/admin/ebooks${path}`, {
+      method: options.method || "GET",
+      headers: options.body === undefined ? undefined : {"Content-Type":"application/json"},
+      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      cache: "no-store",
+      signal: AbortSignal.timeout(30000),
+    });
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) {
+      return {
+        success:false,
+        error:{message:payload?.error?.message || payload?.message || "Ebook request failed."},
+      };
+    }
+    return payload as {success:boolean;data?:T;error?:{message:string}};
+  } catch {
+    return {success:false,error:{message:"Ebook service unavailable."}};
+  }
+}
 // The API's per-book permissions are UI hints; the backend authorizes every mutation.
 export const isOwnerAdmin = (capabilities: { isOwnerAdmin?: boolean } | null) =>
   capabilities?.isOwnerAdmin === true;
@@ -182,21 +222,39 @@ export function writeProgress(
     /* storage unavailable */
   }
 }
-export function draftKey(identity: string) {
-  return `exampro:ebook:draft:v1:${encodeURIComponent(identity)}`;
+export function draftKey(identity: string, ebookKey = "new") {
+  return `exampro:ebook:draft:v2:${encodeURIComponent(identity)}:${encodeURIComponent(ebookKey || "new")}`;
 }
+const latestDraftKey = (identity:string) =>
+  `exampro:ebook:draft:v2:latest:${encodeURIComponent(identity)}`;
+
 export function saveDraft(identity: string, draft: EbookTrack) {
   try {
-    localStorage.setItem(draftKey(identity), JSON.stringify(draft));
+    const key = draft.id || draft.slug || "new";
+    const savedAt = new Date().toISOString();
+    localStorage.setItem(
+      draftKey(identity, key),
+      JSON.stringify({ savedAt, book: { ...draft, localDraftSavedAt: savedAt } }),
+    );
+    localStorage.setItem(latestDraftKey(identity), key);
     return true;
   } catch {
     return false;
   }
 }
-export function loadDraft(identity: string): EbookTrack | null {
+export function loadDraft(identity: string, ebookKey?: string): EbookTrack | null {
   try {
-    const raw = JSON.parse(localStorage.getItem(draftKey(identity)) || "null");
-    return raw && Array.isArray(raw.chapters) ? raw : null;
+    let key = ebookKey || localStorage.getItem(latestDraftKey(identity)) || "new";
+    let raw = JSON.parse(localStorage.getItem(draftKey(identity, key)) || "null");
+    if (raw?.book && Array.isArray(raw.book.chapters)) {
+      return { ...raw.book, localDraftSavedAt: raw.savedAt };
+    }
+    // One-time compatibility with the original single-draft key.
+    const legacy = JSON.parse(
+      localStorage.getItem(`exampro:ebook:draft:v1:${encodeURIComponent(identity)}`) || "null",
+    );
+    if (legacy && Array.isArray(legacy.chapters)) return legacy;
+    return null;
   } catch {
     return null;
   }
