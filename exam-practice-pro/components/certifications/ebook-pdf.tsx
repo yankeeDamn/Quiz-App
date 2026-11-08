@@ -246,7 +246,7 @@ export function PdfSettings({
   const fileRef = useRef<HTMLInputElement>(null);
 
   const upload = async (file?: File) => {
-    if (!file || !book.revision || busy) return;
+    if (!file || !book.revision || busy || accessBusy) return;
     if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
       setMessage("Choose a PDF file.");
       return;
@@ -369,12 +369,12 @@ export function PdfSettings({
 
       <div
         role="button"
-        tabIndex={book.revision && !busy ? 0 : -1}
-        aria-disabled={!book.revision || busy}
-        className={`rounded-2xl border-2 border-dashed p-8 text-center transition-colors ${dragging ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/30" : "border-slate-300 dark:border-slate-700"} ${!book.revision || busy ? "cursor-not-allowed opacity-55" : "cursor-pointer hover:border-indigo-400"}`}
+        tabIndex={book.revision && !busy && !accessBusy ? 0 : -1}
+        aria-disabled={!book.revision || busy || accessBusy}
+        className={`rounded-2xl border-2 border-dashed p-8 text-center transition-colors ${dragging ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/30" : "border-slate-300 dark:border-slate-700"} ${!book.revision || busy || accessBusy ? "cursor-not-allowed opacity-55" : "cursor-pointer hover:border-indigo-400"}`}
         onDragOver={(event) => {
           event.preventDefault();
-          if (book.revision && !busy) setDragging(true);
+          if (book.revision && !busy && !accessBusy) setDragging(true);
         }}
         onDragLeave={() => setDragging(false)}
         onDrop={(event) => {
@@ -382,9 +382,9 @@ export function PdfSettings({
           setDragging(false);
           void upload(event.dataTransfer.files?.[0]);
         }}
-        onClick={() => book.revision && !busy && fileRef.current?.click()}
+        onClick={() => book.revision && !busy && !accessBusy && fileRef.current?.click()}
         onKeyDown={(event) => {
-          if ((event.key === "Enter" || event.key === " ") && book.revision && !busy) {
+          if ((event.key === "Enter" || event.key === " ") && book.revision && !busy && !accessBusy) {
             event.preventDefault();
             fileRef.current?.click();
           }
@@ -402,7 +402,7 @@ export function PdfSettings({
           className="sr-only"
           type="file"
           accept="application/pdf,.pdf"
-          disabled={!book.revision || busy}
+          disabled={!book.revision || busy || accessBusy}
           onChange={(event) => void upload(event.target.files?.[0])}
         />
       </div>
