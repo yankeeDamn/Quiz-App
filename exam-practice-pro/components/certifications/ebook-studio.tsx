@@ -448,6 +448,8 @@ export function EbookStudio({
                         ...old,
                         pdfUrl: value.pdfUrl,
                         pdfFileName: value.pdfFileName,
+                        fullPdfStorageKey: value.fullPdfStorageKey,
+                        previewPdfStorageKey: value.previewPdfStorageKey,
                         revision: value.revision,
                         updatedAt: value.updatedAt,
                       }
