@@ -387,6 +387,22 @@ export function EbookStudio({
       "error",
     );
   };
+  const startNew = () => {
+    if (!owner || busy || accessBusy) return;
+    if (dirty && !window.confirm("Discard unsaved changes and start a new ebook?")) return;
+    setBook(newBook());
+    setSelected("");
+    setChapterIndex(0);
+    setBulk("");
+    setBulkDirty(false);
+    setDirty(false);
+    setTab("content");
+    notify("New ebook ready. Save it as a private draft before attaching a PDF.");
+  };
+  const closeStudio = () => {
+    if (dirty && !window.confirm("Close without saving these edits? You can save a local draft first.")) return;
+    onClose();
+  };
   const approve = async (
     slug: string,
     email: string,
@@ -412,57 +428,120 @@ export function EbookStudio({
       aria-label="Manage and publish ebooks"
       onCancel={(event) => {
         event.preventDefault();
-        onClose();
+        closeStudio();
       }}
       onClose={onClose}
-      className="m-auto max-h-[90dvh] w-[min(97vw,100rem)] overflow-y-auto rounded-2xl border bg-card p-0 text-foreground shadow-2xl backdrop:bg-slate-950/60"
+      className="m-auto max-h-[94dvh] w-[min(98vw,104rem)] overflow-y-auto rounded-3xl border border-slate-200 bg-slate-50 p-0 text-slate-950 shadow-2xl backdrop:bg-slate-950/70 dark:border-slate-800 dark:bg-slate-950 dark:text-white"
     >
-      <div className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b bg-card p-5">
-        <div>
-          <p className="text-[11px] font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">
-            ExamPro authoring
-          </p>
-          <h2 className="mt-1 text-xl font-bold">Manage & Publish Ebooks</h2>
+      <header className="sticky top-0 z-30 border-b border-white/10 bg-gradient-to-r from-slate-950 via-indigo-950 to-slate-900 px-5 py-5 text-white shadow-lg sm:px-8">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <div className="hidden h-12 w-12 shrink-0 place-items-center rounded-2xl border border-white/20 bg-white/10 sm:grid">
+              <BookOpen className="h-6 w-6 text-indigo-200"/>
+            </div>
+            <div>
+              <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-indigo-200">
+                ExamPro / Content operations
+              </p>
+              <h2 className="mt-1 text-2xl font-extrabold tracking-tight sm:text-3xl">
+                Manage & Publish Ebooks
+              </h2>
+              <p className="mt-1 text-xs leading-5 text-indigo-100/80">
+                One workspace for learning content, editions, assessments and reader access.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="hidden rounded-full border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold text-indigo-100 sm:inline-flex">
+              {adminBooks.length} ebooks · {proGatedCount} Pro
+            </span>
+            <button
+              type="button"
+              aria-label="Close ebook studio"
+              onClick={closeStudio}
+              className="grid h-11 w-11 place-items-center rounded-xl border border-white/20 bg-white/10 text-white transition hover:bg-white/20"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
-        <button
-          type="button"
-          aria-label="Close ebook studio"
-          onClick={onClose}
-          className="rounded-lg p-3 hover:bg-muted"
-        >
-          <X className="h-5 w-5" />
-        </button>
-      </div>
-      <div className="space-y-5 p-5 sm:p-7">
+      </header>
+      <div className="space-y-6 p-4 sm:p-7">
         <nav
           aria-label="Ebook command center"
-          className="flex gap-2 overflow-x-auto pb-2"
+          className="flex gap-1.5 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-sm dark:border-slate-800 dark:bg-slate-900"
         >
-          {[
-            ["inventory", "Inventory & KPIs"],
+          {([
+            ["inventory", "Library overview"],
             ["content", "Chapter Studio"],
             ["pdf", "PDF Manager"],
             ["exam", "Exam Builder"],
-            ...(owner
-              ? [
-                  [
-                    "access",
-                    `Access (${proGatedCount})`,
-                  ],
-                ]
-              : []),
-          ].map(([id, label]) => (
+            ...(owner ? [["access", `Access (${proGatedCount})`]] : []),
+          ] as string[][]).map(([id, label]) => (
             <button
               key={id}
               type="button"
               onClick={() => setTab(id)}
               aria-pressed={tab === id}
-              className={`min-h-11 shrink-0 rounded-xl border px-4 text-sm font-semibold ${tab === id ? "bg-indigo-600 text-white" : ""}`}
+              className={`inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold transition-all sm:text-sm ${tab === id ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"}`}
             >
+              {id === "inventory" ? <LayoutDashboard className="h-4 w-4"/> :
+                id === "content" ? <LibraryBig className="h-4 w-4"/> :
+                id === "pdf" ? <FileText className="h-4 w-4"/> :
+                id === "exam" ? <ClipboardList className="h-4 w-4"/> :
+                <Users className="h-4 w-4"/>}
               {label}
             </button>
           ))}
         </nav>
+
+        <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0 flex-1 space-y-2">
+            <label htmlFor="ebook-studio-picker" className="block text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+              Active ebook · switch workspace
+            </label>
+            <div className="relative max-w-xl">
+              <select
+                id="ebook-studio-picker"
+                className="min-h-12 w-full appearance-none rounded-xl border border-slate-200 bg-background px-4 pr-10 text-sm font-semibold shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 disabled:opacity-50 dark:border-slate-700"
+                value={selected}
+                disabled={busy || accessBusy}
+                onChange={(event) => void load(event.target.value)}
+              >
+                <option value="">{owner ? "New unsaved ebook" : "Choose an ebook"}</option>
+                {adminBooks.map((item) => (
+                  <option key={item.slug} value={item.slug}>
+                    {item.title} · {item.accessLevel === "pro" ? "Pro" : "Free"} · {item.visibility}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-4 h-4 w-4 text-slate-400"/>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {book?.revision
+                ? `Saved revision ${book.revision} · ${book.visibility.replaceAll("_", " ")} · ${book.accessLevel === "pro" ? "Pro entitlement" : "Free access"}`
+                : "Create a new ebook, then save it privately before publishing."}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {dirty && <span className="rounded-full bg-amber-100 px-3 py-2 text-xs font-semibold text-amber-900 dark:bg-amber-950 dark:text-amber-200">Unsaved content edits</span>}
+            {owner && (
+              <button type="button" disabled={busy || accessBusy}
+                onClick={startNew}
+                className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-4 text-sm font-bold text-indigo-700 transition hover:bg-indigo-100 disabled:opacity-50 dark:border-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-200">
+                <Plus className="h-4 w-4"/> New ebook
+              </button>
+            )}
+            {book && tab !== "inventory" && (
+              <button type="button" disabled={busy || accessBusy}
+                onClick={() => void handleSaveEbook()}
+                className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-indigo-600 px-5 text-sm font-bold text-white shadow-md shadow-indigo-600/20 transition hover:bg-indigo-700 disabled:opacity-50">
+                {busy ? <LoaderCircle className="h-4 w-4 animate-spin"/> : <Save className="h-4 w-4"/>}
+                {busy ? "Saving…" : book.revision ? "Save changes" : "Create ebook"}
+              </button>
+            )}
+          </div>
+        </div>
         {tab === "inventory" && (
           <>
             <EbookInventory
@@ -508,15 +587,9 @@ export function EbookStudio({
               <button
                 type="button"
                 className="min-h-11 rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white"
-                onClick={() => {
-                  setBook(newBook());
-                  setChapterIndex(0);
-                  setSelected("");
-                  setBulk("");
-                  setTab("content");
-                }}
-              >
-                + Create private ebook
+                onClick={startNew}
+            >
+                + Create new ebook
               </button>
             )}
           </>
@@ -526,6 +599,9 @@ export function EbookStudio({
             <PdfSettings
               book={book}
               onChange={change}
+              owner={owner}
+              accessBusy={accessBusy || busy}
+              onAccessCommit={(patch) => void commitAccess(patch)}
               onUploaded={(value) => {
                 setBook((old) =>
                   old
@@ -669,43 +745,18 @@ export function EbookStudio({
         )}
         {tab === "content" && (
           <>
-            <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
-              <Field label="Choose ebook">
-                <select
-                  className={input}
-                  value={selected}
-                  disabled={busy}
-                  onChange={(event) => void load(event.target.value)}
-                >
-                  <option value="">
-                    {owner ? "+ Create New Ebook" : "Select an approved ebook"}
-                  </option>
-                  {adminBooks.map((item) => (
-                    <option key={item.slug} value={item.slug}>
-                      {item.title} · {item.accessLevel === "pro" ? "Pro" : "Free"}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-              {owner && (
-                <button
-                  type="button"
-                  disabled={busy}
-                  className="min-h-11 rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white disabled:opacity-50"
-                  onClick={() => {
-                    setBook(newBook());
-                    setSelected("");
-                    setChapterIndex(0);
-                    setBulk("");
-                    setBulkDirty(false);
-                    setTab("content");
-                    notify("New ebook form ready. Title will generate the slug until first save.");
-                  }}
-                >
-                  <Plus className="mr-2 inline h-4 w-4" />
-                  New Ebook
-                </button>
-              )}
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/60 p-5 dark:border-indigo-900 dark:bg-indigo-950/20">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">Authoring workspace</p>
+                <h3 className="mt-1 text-xl font-extrabold tracking-tight">Build your learning track</h3>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+                  Write chapters, preview lessons instantly, and define who can read the ebook.
+                  Free/Pro controls save immediately for existing ebooks; chapter edits use Save changes.
+                </p>
+              </div>
+              <span className="rounded-full border border-indigo-200 bg-white px-3 py-1.5 text-xs font-bold text-indigo-700 dark:border-indigo-800 dark:bg-slate-900 dark:text-indigo-200">
+                {book?.chapters.length ?? 0} chapters
+              </span>
             </div>
             {restore && (
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-300 p-4 text-sm">
@@ -799,14 +850,11 @@ export function EbookStudio({
                     hint="Only the owner admin can publish or restrict access."
                   >
                     <select
-                      disabled={!owner}
+                      disabled={!owner || busy || accessBusy || book.isBundledPublicEdition}
                       className={input}
                       value={book.visibility}
                       onChange={(event) =>
-                        change({
-                          visibility: event.target
-                            .value as EbookTrack["visibility"],
-                        })
+                        void commitVisibility(event.target.value as EbookTrack["visibility"])
                       }
                     >
                       <option value="admin_only">Private admin draft</option>
@@ -827,88 +875,12 @@ export function EbookStudio({
                     />
                   </Field>
                 </div>
-                <section className="rounded-xl border border-slate-200 bg-slate-50/60 p-5 dark:border-slate-800 dark:bg-slate-900/50">
-                  <div className="mb-4">
-                    <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">
-                      Monetization & PDF Access
-                    </p>
-                    <h3 className="mt-1 font-bold">Reader entitlement and file delivery</h3>
-                  </div>
-                  <div className="grid gap-5 lg:grid-cols-3">
-                    <div>
-                      <p className="mb-2 text-sm font-semibold">Access Level</p>
-                      <div className="inline-flex rounded-xl border bg-background p-1" role="group" aria-label="Ebook access level">
-                        {(["free","pro"] as const).map((level) => (
-                          <button
-                            key={level}
-                            type="button"
-                            disabled={!owner || book.isBundledPublicEdition}
-                            aria-pressed={book.accessLevel === level}
-                            onClick={() => change({ accessLevel: level })}
-                            className={`min-h-10 rounded-lg px-4 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50 ${book.accessLevel === level ? "bg-indigo-600 text-white" : "text-muted-foreground"}`}
-                          >
-                            {level === "free" ? "Free" : "Pro"}
-                          </button>
-                        ))}
-                      </div>
-                      {book.isBundledPublicEdition && (
-                        <p className="mt-2 text-xs text-emerald-700 dark:text-emerald-300">
-                          Bundled public editions are permanently Free.
-                        </p>
-                      )}
-                    </div>
-                    <label className={`grid gap-2 text-sm font-semibold ${book.accessLevel === "free" ? "opacity-55" : ""}`}>
-                      Free Preview Pages
-                      <input
-                        type="number"
-                        min={1}
-                        max={20}
-                        disabled={book.accessLevel === "free" || !owner}
-                        className={input}
-                        value={book.freePreviewPages ?? 2}
-                        onChange={(event) =>
-                          change({
-                            freePreviewPages: Math.min(
-                              20,
-                              Math.max(1, Number(event.target.value) || 2),
-                            ),
-                          })
-                        }
-                      />
-                      <span className="text-xs font-normal text-muted-foreground">
-                        {book.accessLevel === "free"
-                          ? "Full ebook is accessible for free."
-                          : "Only this many PDF pages are delivered before upgrade."}
-                      </span>
-                    </label>
-                    <div>
-                      <p className="mb-2 text-sm font-semibold">Allow Full PDF Download</p>
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-checked={book.allowFullPdfDownload}
-                        disabled={!owner}
-                        onClick={() =>
-                          change({
-                            allowFullPdfDownload: !book.allowFullPdfDownload,
-                            allowPdfDownload: !book.allowFullPdfDownload,
-                          })
-                        }
-                        className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors disabled:opacity-50 ${book.allowFullPdfDownload ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-700"}`}
-                      >
-                        <span
-                          className={`inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${book.allowFullPdfDownload ? "translate-x-6" : "translate-x-1"}`}
-                        />
-                        <span className="sr-only">
-                          {book.allowFullPdfDownload ? "Disable" : "Enable"} full PDF download
-                        </span>
-                      </button>
-                      <p className="mt-2 text-xs text-muted-foreground">
-                        Inline reading still requires server entitlement. This setting controls the direct download endpoint.
-                      </p>
-                    </div>
-                  </div>
-                </section>
+                <EbookMonetizationControls
+                  book={book}
+                  owner={owner}
+                  busy={accessBusy || busy}
+                  onCommit={(patch) => void commitAccess(patch)}
+                />
                 <Field label="Summary">
                   <textarea
                     className={input}
@@ -1320,16 +1292,17 @@ export function EbookStudio({
             <div className="flex flex-wrap gap-3">
               <button
                 type="button"
-                disabled={busy}
+                disabled={busy || accessBusy}
                 onClick={() => void handleSaveEbook()}
                 className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white disabled:opacity-50"
               >
                 {busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                {busy ? "Saving…" : "Save ebook"}
+                {busy ? "Saving…" : book.revision ? "Save changes" : "Create ebook"}
               </button>
               <button
                 type="button"
                 onClick={draft}
+                disabled={busy || accessBusy}
                 className="min-h-11 rounded-xl border px-4 text-sm font-semibold"
               >
                 Save local draft
@@ -1383,6 +1356,7 @@ export function EbookStudio({
                     setSelected("");
                     setBulk("");
                     setBulkDirty(false);
+                    setDirty(false);
                     setInventoryVersion((v) => v + 1);
                     notify("Ebook archived.");
                     onSaved();
