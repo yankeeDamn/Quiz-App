@@ -222,6 +222,23 @@ test("private creation drafts may start empty while publishable ebooks require c
   }, "empty-draft");
   assert.equal(draft.chapters.length, 0);
   assert.equal(draft.finalExamQuestions.length, 0);
+  const partial = service.validateBook({
+    ...copy(seeds[0]),
+    slug: "partial-draft",
+    visibility: "admin_only",
+    subtitle: "",
+    chapters: [{
+      id: "chapter-one",
+      title: "New chapter",
+      durationMinutes: 20,
+      summary: "",
+      contentMarkdown: "",
+      keyTakeaways: [],
+      conceptChecks: [{question:"",options:["","","",""],answer:0,explanation:""}],
+    }],
+    finalExamQuestions: [],
+  }, "partial-draft");
+  assert.equal(partial.chapters[0].conceptChecks[0].question, "");
   assert.throws(
     () => service.validateBook({...draft,visibility:"public"}, "empty-draft"),
     /chapter|question/i,
