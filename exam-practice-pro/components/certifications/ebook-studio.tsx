@@ -579,6 +579,7 @@ export function EbookStudio({
                 setBulk(toBulk(source));
                 setSelected("");
                 setChapterIndex(0);
+                setDirty(true);
                 setTab("content");
                 setMessage("Private draft copied. Save to create it.");
               }}
@@ -669,6 +670,7 @@ export function EbookStudio({
                 onChange={(event) => {
                   setBulkValue(event.target.value);
                   setBulkDirty(true);
+                  setDirty(true);
                 }}
               />
             </Field>
@@ -710,24 +712,36 @@ export function EbookStudio({
                 const imported = replace
                   ? {
                       ...value,
+                      id: book.id || book.slug,
                       slug: book.slug,
                       revision: book.revision,
                       visibility: book.visibility,
                       permissions: book.permissions,
+                      accessLevel: book.accessLevel,
+                      freePreviewPages: book.freePreviewPages,
+                      allowFullPdfDownload: book.allowFullPdfDownload,
+                      fullPdfStorageKey: book.fullPdfStorageKey,
+                      previewPdfStorageKey: book.previewPdfStorageKey,
+                      isBundledPublicEdition: book.isBundledPublicEdition,
                       pdfUrl: book.pdfUrl,
                       pdfFileName: book.pdfFileName,
                     }
                   : {
                       ...value,
+                      id: null,
                       slug: `${value.slug.slice(0, 40)}-import-${crypto.randomUUID().slice(0, 6)}`,
                       revision: undefined,
                       visibility: "admin_only" as const,
+                      fullPdfStorageKey: null,
+                      previewPdfStorageKey: null,
+                      isBundledPublicEdition: false,
                       pdfUrl: "",
                       pdfFileName: "",
                       permissions: undefined,
                     };
                 setBook(imported);
                 setBulk(toBulk(imported));
+                setDirty(true);
                 setSelected(replace ? book.slug : "");
                 setChapterIndex(0);
               }}
@@ -965,7 +979,7 @@ export function EbookStudio({
                           </button>
                           <button
                             type="button"
-                            disabled={book.chapters.length < 2}
+                            disabled={book.chapters.length < 1}
                             onClick={() => {
                               change({
                                 chapters: book.chapters.filter(
