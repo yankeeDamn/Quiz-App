@@ -152,7 +152,10 @@ test("new ebook write routes reject anonymous and automation keys before any dat
 
 test("optional Phase 2 fields default compatibly and validate PDF URLs and exam settings", () => {
   const legacy = service.validateBook(copy(seeds[0]), "legacy-learning");
-  assert.equal(legacy.allowPdfDownload, true);
+  assert.equal(legacy.allowFullPdfDownload, false);
+  assert.equal(legacy.allowPdfDownload, false);
+  assert.equal(legacy.accessLevel, "free");
+  assert.equal(legacy.freePreviewPages, 2);
   assert.equal(legacy.passPercent, 70);
   assert.equal(legacy.marksPerCorrect, 1);
   assert.equal(legacy.negativeMarks, 0);
@@ -202,12 +205,29 @@ test("optional Phase 2 fields default compatibly and validate PDF URLs and exam 
     { passPercent: 101 },
     { marksPerCorrect: 0 },
     { negativeMarks: -0.25 },
-    { allowPdfDownload: "yes" },
+    { allowFullPdfDownload: "yes" },
+    { freePreviewPages: 21 },
   ])
     assert.throws(() =>
       service.validateBook({ ...raw, ...patch }, "private-pdf"),
     );
 });
+test("private creation drafts may start empty while publishable ebooks require content", () => {
+  const draft = service.validateBook({
+    ...copy(seeds[0]),
+    slug: "empty-draft",
+    visibility: "admin_only",
+    chapters: [],
+    finalExamQuestions: [],
+  }, "empty-draft");
+  assert.equal(draft.chapters.length, 0);
+  assert.equal(draft.finalExamQuestions.length, 0);
+  assert.throws(
+    () => service.validateBook({...draft,visibility:"public"}, "empty-draft"),
+    /chapter|question/i,
+  );
+});
+
 test("configured grading uses an attempt snapshot, custom marks and per-domain breakdown", () => {
   const snapshot = {
     passPercent: 80,
