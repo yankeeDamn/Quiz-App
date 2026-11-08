@@ -18,6 +18,7 @@ export function EbookInventory({
   onClone,
   onRefresh,
   onMessage,
+  onUpdated,
 }: {
   owner: boolean;
   pending: number;
@@ -26,6 +27,7 @@ export function EbookInventory({
   onClone: (book: EbookTrack) => void;
   onRefresh: () => void;
   onMessage: (message: string) => void;
+  onUpdated: (ebook: EbookTrack) => void;
 }) {
   const [books, setBooks] = useState<EbookSummary[]>([]),
     [search, setSearch] = useState(""),
@@ -102,6 +104,7 @@ export function EbookInventory({
       onMessage(response.error?.message || "Unable to update the ebook.");
       return;
     }
+    onUpdated(response.data.ebook);
     onMessage(kind === "access" ? "Free/Pro access saved." : "Publication visibility saved.");
     onRefresh();
   };
