@@ -226,6 +226,7 @@ async function migrate() {
     await client.query(fs.readFileSync(path.join(__dirname, 'ebooks-schema.sql'), 'utf8'));
     await require('./seed-ebooks').seedEbooks(client);
     await client.query(fs.readFileSync(path.join(__dirname, 'ebook-pdf-preview.sql'), 'utf8'));
+    await client.query(fs.readFileSync(path.join(__dirname, 'ebook-admin-monetization.sql'), 'utf8'));
     await client.query('COMMIT');
     console.log('✅ Migrations complete.');
   } catch (err) {
