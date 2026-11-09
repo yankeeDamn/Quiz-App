@@ -31,6 +31,7 @@ export interface Plan {
   limit: string;
   features: string[];
   highlight?: boolean;
+  enquiryOnly?: boolean;
   /** Which people the plan is sold to. */
   segment: 'learner' | 'institute';
 }
@@ -47,8 +48,8 @@ export const PLANS: Plan[] = [
     limit: 'For one learner',
     segment: 'learner',
     features: [
-      'All 10 topic tests with instant answers',
-      '5 mock tests: SSC mini mocks, Bank PO, RRB, UPSC and campus',
+      'Published Free topic practice; availability shown in the catalogue',
+      'Public starter practice, labelled when awaiting review',
       'Certification quizzes and flashcards',
       'Bookmarks, notes and progress',
     ],
@@ -63,10 +64,10 @@ export const PLANS: Plan[] = [
     highlight: true,
     features: [
       'Everything in Free',
-      '6 more mock tests, including SSC CGL Mini Mock 2, Bank PO Mock 2 and Campus Test 3',
+      'Access to published Pro content while your plan is active',
       'Section and time analysis',
       'WhatsApp doubt support from a mentor',
-      'New full mocks added every month',
+      'Check the live catalogue before purchasing',
     ],
   },
   {
@@ -74,13 +75,14 @@ export const PLANS: Plan[] = [
     name: 'Institute',
     audience: 'Coaching centres and schools',
     monthlyInr: 2999,
-    limit: 'Up to 500 students',
+    limit: 'Scope and limits agreed after readiness review',
+    enquiryOnly: true,
     segment: 'institute',
     features: [
-      'Everything in Pro for every student',
-      'Your institute name and logo on the exam window',
-      'Batch results shared on WhatsApp',
-      'Priority support on WhatsApp',
+      'Institute onboarding is in development',
+      'Public branding preview available',
+      'Private batches and reporting require rollout approval',
+      'Contact us to discuss a pilot',
     ],
   },
 ];
@@ -98,6 +100,7 @@ export function inr(n: number): string {
 
 /** Message that opens in WhatsApp when someone picks a paid plan. */
 export function planMessage(plan: Plan, yearly: boolean, email?: string | null, name?: string | null): string {
+  if (plan.enquiryOnly) return 'Hi, I would like to discuss an ExamPro institute pilot. Please confirm available features, limits and a reviewed quote before any payment.';
   const price = planPrice(plan, yearly);
   return [
     `Hi, I want the ${plan.name} plan (${yearly ? 'yearly' : 'monthly'}, ${inr(price.amount)}) on ExamPro.`,

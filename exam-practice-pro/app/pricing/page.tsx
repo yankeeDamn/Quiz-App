@@ -28,7 +28,7 @@ const FAQ: [string, string][] = [
   ['How long until my plan starts?', 'We unlock it by hand after the payment arrives, usually within a few hours during the day. You will get a WhatsApp message.'],
   ['What if I renew early?', 'Renewals add to your current end date. You never lose paid days.'],
   ['Can I get a refund?', 'Review our refund policy and contact us promptly with the payment reference.'],
-  ['We are an institute. What do we get?', 'Your students get Pro, and we can put your institute name and logo on the exam window. Message us with your student count and we will set it up.'],
+  ['We are an institute. What do we get?', 'Institute management is in development. A public branding preview is available. Contact us for a readiness review and a confirmed scope; an individual paid plan does not grant institute-wide access.'],
 ];
 
 export default function PricingPage() {
@@ -48,7 +48,7 @@ export default function PricingPage() {
         <p className="text-sm font-semibold text-blue-700 dark:text-blue-400">Pricing</p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">Start free. Upgrade when you are ready.</h1>
         <p className="mt-3 max-w-2xl text-muted-foreground">
-          Free covers daily practice. Pro opens every full mock. Pay through WhatsApp and we unlock your plan by hand. On the staging site, signed-in learners can also test the Cashfree sandbox checkout.
+          Free covers daily practice. Pro provides access to published Pro content. Check the current catalogue before paying. Pay through WhatsApp and we unlock your plan by hand. On the staging site, signed-in learners can also test the Cashfree sandbox checkout.
         </p>
 
         {sandboxCheckout && <p className="mt-3 rounded border border-amber-400 p-3 text-sm">Cashfree sandbox testing is available on staging only. This is not live billing.</p>}
@@ -155,10 +155,10 @@ function PlanCard({ plan, yearly, email, name, current }: { plan: Plan; yearly: 
         <p className="text-sm text-muted-foreground">{plan.audience}</p>
       </header>
       <p className="text-4xl font-extrabold tabular-nums">
-        {price.amount === 0 ? '₹0' : inr(price.amount)}
+        {plan.enquiryOnly ? 'Discuss a pilot' : price.amount === 0 ? '₹0' : inr(price.amount)}
         <span className="mt-1 block text-sm font-normal text-muted-foreground">
-          {price.per}
-          {price.note ? ` · ${price.note}` : ''}
+          {plan.enquiryOnly ? 'Not available for self-service purchase' : price.per}
+          {!plan.enquiryOnly && price.note ? ` · ${price.note}` : ''}
         </span>
       </p>
       <p className="font-mono text-sm font-semibold text-orange-700 dark:text-orange-400">{plan.limit}</p>
@@ -170,7 +170,9 @@ function PlanCard({ plan, yearly, email, name, current }: { plan: Plan; yearly: 
           </li>
         ))}
       </ul>
-      {plan.monthlyInr === 0 ? (
+      {plan.enquiryOnly ? (
+        <a href={whatsappLink(planMessage(plan, yearly))} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center rounded-lg border px-4 py-2 font-semibold">Discuss institute pilot</a>
+      ) : plan.monthlyInr === 0 ? (
         <Button variant="outline" asChild>
           <Link href="/india-mocks">Start free</Link>
         </Button>

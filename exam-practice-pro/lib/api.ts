@@ -5,23 +5,12 @@
  * Authentication uses a short-lived JWT minted by `/api/auth/backend-token`.
  */
 
-// A production Vercel build must never call the visitor's localhost when the
-// public API environment variable is missing or accidentally left at localhost.
-// The deployed Render service is the stable default for this ExamPro project.
-const configuredApi = (process.env.NEXT_PUBLIC_API_URL || '').trim();
-const productionFallback = 'https://quiz-app-regd.onrender.com';
-const developmentFallback = 'http://localhost:3001';
-function pointsToLocalHost(value: string): boolean {
-  try {
-    const host = new URL(value).hostname.toLowerCase();
-    return host === 'localhost' || host === '127.0.0.1';
-  } catch { return false; }
-}
-const candidateApi = process.env.NODE_ENV === 'production' &&
-    (!configuredApi || pointsToLocalHost(configuredApi))
-  ? productionFallback
-  : configuredApi || (process.env.NODE_ENV === 'production' ? productionFallback : developmentFallback);
-export const API_BASE_URL = candidateApi.endsWith('/') ? candidateApi.slice(0, -1) : candidateApi;
+import { resolveApiOrigin } from './api-origin';
+export const API_BASE_URL = resolveApiOrigin(
+  process.env.NEXT_PUBLIC_API_URL, process.env.NODE_ENV,
+  process.env.NEXT_PUBLIC_APP_ENV,
+  typeof window === 'undefined' ? '' : window.location.hostname,
+);
 
 // Do not cache bearer tokens across account switches in a browser tab.
 
@@ -70,6 +59,7 @@ export async function api<T = unknown>(
   path: string,
   options: ApiOptions = {}
 ): Promise<{ success: boolean; data?: T; error?: { message: string; code?: string; status?: number } }> {
+  if (!API_BASE_URL) return {success:false,error:{code:'API_NOT_CONFIGURED',message:'The API is not configured for this environment. Contact ExamPro support.'}};
   const { method = 'GET', body, public: isPublic = false, optionalAuth = false, signal } = options;
 
   const headers: Record<string, string> = {

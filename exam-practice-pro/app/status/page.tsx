@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { API_BASE_URL } from '@/lib/api';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 
@@ -6,20 +7,12 @@ export const dynamic = 'force-dynamic';
 export const metadata = {title:'Deployment & API status | ExamPro',robots:{index:false,follow:false}};
 
 export default async function ExamProStatusPage(){
-  const configured=(process.env.NEXT_PUBLIC_API_URL||'').trim();
-  const fallback='https://quiz-app-regd.onrender.com';
-  let localUrl=false;
-  try {
-    const host=new URL(configured).hostname.toLowerCase();
-    localUrl=host==='localhost'||host==='127.0.0.1';
-  } catch { /* Empty or non-URL config is handled below. */ }
-  const candidate=process.env.NODE_ENV==='production' && (!configured||localUrl)
-    ?fallback:configured|| (process.env.NODE_ENV==='production'?fallback:'http://localhost:3001');
-  const backend=candidate.endsWith('/')?candidate.slice(0,-1):candidate;
+  const backend=API_BASE_URL;
   const commit=process.env.VERCEL_GIT_COMMIT_SHA||process.env.GITHUB_SHA||'not provided by this deployment';
   let apiReady=false;
   let details='API unavailable or asleep';
   try {
+    if (!backend) throw new Error('API not configured');
     const response=await fetch(backend+'/api/v1/health/ready',{
       cache:'no-store',
       signal:AbortSignal.timeout(8000),
@@ -54,7 +47,7 @@ export default async function ExamProStatusPage(){
         </section>
         <section className="rounded-xl border p-5">
           <h2 className="font-bold">What is and isn't live</h2>
-          <p className="mt-2 text-sm text-muted-foreground">Published mock sharing, EN/हिं/বাং interface controls and topic practice require a working API and current frontend. Translation of question content additionally needs Azure Translator credentials on Render. The public branded practice portal is not a private institute dashboard. Cashfree payments are not enabled.</p>
+          <p className="mt-2 text-sm text-muted-foreground">Published mock sharing, EN/हिं/বাং interface controls and topic practice require a working API and current frontend. Translation of question content additionally needs Azure Translator credentials on Render. The public branded practice portal is not a private institute dashboard. Payment availability depends on the separately configured checkout mode; this page does not verify billing readiness.</p>
         </section>
       </div>
       <div className="flex flex-wrap gap-3">
