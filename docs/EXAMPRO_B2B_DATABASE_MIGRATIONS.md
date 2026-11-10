@@ -21,6 +21,14 @@ Duplicate legacy owners must be reconciled by an explicit owner-reviewed plan; t
 
 `test/institutes-postgres.integration.js` accepts only an explicit `INSTITUTE_TEST_DATABASE_URL`, loopback host and database named `institute_tests` (optional synthetic suffix). It applies base pilot + foundation SQL twice, then uses synthetic users/data. GitHub Actions provisions PostgreSQL 16 and destroys it with the job. There is no Neon connection or inherited DATABASE_URL fallback. Use a fresh disposable database for each run; the test intentionally does not delete pre-existing data.
 
-Future delivery migrations must add immutable snapshots, version/reviewer provenance, teacher-batch mapping, negative scoring/deadlines and result storage without editing existing attempts. Future subscriptions need configurable plans/usage and payment ledger; foundation does not grant a trial purchase entitlement.
+## Delivery migration (manual, after foundation)
+
+`src/db/institute-delivery.sql` adds nullable author/reviewer/fingerprint fields, question version history, teacher-batch mapping, exam definitions and immutable published snapshots, and per-attempt snapshots/deadlines/responses/revision/results. Existing question IDs and answer keys are not rewritten. Legacy pilot attempts and published exams without snapshots remain stored and are deliberately unavailable to the new runner; there is no automatic conversion or republication.
+
+The original integer `pilot_attempts.score/total` fields retain their correct-answer/question-count interpretation. The new JSON `result` holds weighted and potentially negative marks. No existing student score is recomputed. Triggers reject edits to published snapshots, schedules and submitted results. Snapshot provenance is independent of subsequent bank edits or retirement.
+
+Run `psql -v ON_ERROR_STOP=1 -f src/db/institute-delivery.sql` only after approval for a named environment and the foundation preflight/backup procedure above. It is not connected to startup or `db:migrate`. Enable `INSTITUTE_DELIVERY_ENABLED=true` only after all three schema files have been reviewed/applied to the authorized target. Leave it false for a foundation-only rollout.
+
+Local disposable PostgreSQL 18: all three SQL files applied twice and 15 API/integrity scenarios passed. CI runs the same suite on PostgreSQL 16. No staging/production database connection was used. Future subscriptions still need configurable plans/usage and a payment ledger; none of these migrations grants paid access.
 
 Rollback is feature disablement and code reversion, retaining additive tables and original data. A destructive down migration is intentionally not shipped.

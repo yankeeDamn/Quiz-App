@@ -12,6 +12,7 @@ router.use((_req,res,next)=>process.env.INSTITUTES_ENABLED==='true'?next():res.s
 router.get('/institutes/public/:slug',wrap(async(req,res)=>ok(res,await s.publicProfile(req.params.slug))));
 router.use(authenticateNextAuth);
 router.use(rateLimit({windowMs:60000,limit:120,keyGenerator:req=>req.user.id,standardHeaders:'draft-7',legacyHeaders:false}));
+router.use(require('./institute-delivery'));
 router.get('/institutes/my',wrap(async(req,res)=>ok(res,{institutes:await s.mine(req.user)})));
 router.post('/institutes/applications',wrap(async(req,res)=>ok(res,await s.apply(req.user,req.body),201)));
 router.post('/institutes/invitations/accept',wrap(async(req,res)=>ok(res,await s.accept(req.user,req.body.token))));
