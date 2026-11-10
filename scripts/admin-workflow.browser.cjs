@@ -77,7 +77,7 @@ async function intercept(route){
   let available=false;
   for(let i=0;i<80;i++){try{if((await fetch(origin+'/admin')).ok){available=true;break;}}catch{}await delay(250);}
   assert.ok(available,'Local production app did not start: '+serverLogs);
-  browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
+  browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE}:{}),args:['--disable-dev-shm-usage']});
   const context=await browser.newContext({viewport:{width:1440,height:1100},reducedMotion:'reduce'});
   await context.route('**/*',intercept);
   const page=await context.newPage();page.on('pageerror',e=>browserErrors.push(e.message));
@@ -161,6 +161,7 @@ async function intercept(route){
   await page.getByRole('menuitem',{name:'Edit mock settings',exact:true}).waitFor();
   await page.screenshot({animations:'disabled',path:path.join(output,'mock-actions-menu.png'),fullPage:false});
   await page.keyboard.press('Escape');
+  await page.getByRole('menu').waitFor({state:'detached'}); // Wait for the desktop popup exit before testing mobile layout.
   await page.setViewportSize({width:390,height:844});await page.evaluate(()=>document.documentElement.classList.add('dark'));
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),true,'mock manager must fit mobile width');
   await page.evaluate(()=>window.scrollTo(0,0));
