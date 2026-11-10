@@ -100,6 +100,17 @@ async function batchMember(user,slug,batchId,memberId,role,remove=false) {
   await f.audit(c,t.institute.id,user,'batch.'+role+(remove?'.removed':'.added'),batchId);return {updated:true};
  });
 }
+async function batchMembers(user,slug,batchId) {
+ p.uuid(batchId);return f.within(user,slug,'workspace:read',async(c,t)=>{
+  if(!['owner','admin','teacher'].includes(t.role))throw p.fail('Permission denied',403);
+  const b=await c.query('SELECT id FROM pilot_batches WHERE institute_id=$1 AND id=$2 FOR SHARE',[t.institute.id,batchId]);
+  if(!b.rowCount)throw p.fail('Batch unavailable',404);
+  if(t.role==='teacher'&&!(await c.query('SELECT 1 FROM pilot_batch_teachers WHERE institute_id=$1 AND batch_id=$2 AND user_id=$3 FOR SHARE',[t.institute.id,batchId,user.id])).rowCount)throw p.fail('Batch unavailable',404);
+  return (await c.query(`SELECT m.user_id,u.name,u.email,m.role,m.status FROM pilot_memberships m JOIN users u ON u.id=m.user_id
+   WHERE m.institute_id=$1 AND m.status='active' AND ((m.role='student' AND EXISTS(SELECT 1 FROM pilot_batch_students b WHERE b.institute_id=m.institute_id AND b.batch_id=$2 AND b.user_id=m.user_id))
+   OR (m.role='teacher' AND EXISTS(SELECT 1 FROM pilot_batch_teachers b WHERE b.institute_id=m.institute_id AND b.batch_id=$2 AND b.user_id=m.user_id))) ORDER BY u.name,m.user_id LIMIT 200`,[t.institute.id,batchId])).rows;
+ });
+}
 async function exam(c,t,id,lock='SHARE') {
  p.uuid(id);const e=(await c.query(`SELECT * FROM pilot_exams WHERE institute_id=$1 AND id=$2 FOR ${lock}`,[t.institute.id,id])).rows[0];
  if(!e||(t.role==='teacher'&&e.created_by!==t.user.id))throw p.fail('Exam unavailable',404);return e;
@@ -146,4 +157,4 @@ async function publish(user,slug,id) {
   await f.audit(c,t.institute.id,user,'exam.published',id);return {id,status:'published',questionCount:ids.length};
  });
 }
-module.exports={banks,questions,createQuestion,importCsv,changeQuestion,versions,batches,batchMember,exams,saveExam,assign,publish};
+module.exports={banks,questions,createQuestion,importCsv,changeQuestion,versions,batches,batchMember,batchMembers,exams,saveExam,assign,publish};

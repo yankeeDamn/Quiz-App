@@ -188,6 +188,10 @@ test('only own results and assigned teacher batch reports are readable; removing
  await expectCall(at(A)+'/batches/'+A.deliveryBatch+'/report','student-a-2@example.test','GET',undefined,403);
  await expectCall(at(A)+'/batches/'+B.deliveryBatch+'/report','teacher-a@example.test','GET',undefined,404);
  const report=await expectCall(at(A)+'/batches/'+A.deliveryBatch+'/report','teacher-a@example.test');assert.equal(report.attempts.length,1);assert.equal(report.attempts[0].result.review,undefined);
+ await expectCall(at(A)+'/batches/'+B.deliveryBatch+'/members','teacher-a@example.test','GET',undefined,404);
+ await expectCall(at(A)+'/batches/'+A.deliveryBatch+'/members','student-a-2@example.test','GET',undefined,403);
+ await expectCall(at(B)+'/batches/'+B.deliveryBatch+'/members','dual@example.test','GET',undefined,404);
+ assert.equal((await expectCall(at(A)+'/batches/'+A.deliveryBatch+'/members','teacher-a@example.test')).members.length,10);
  assert.equal((await expectCall(at(B)+'/results','student-b-1@example.test')).results.length,0);
  await expectCall(at(A)+'/members/'+A.students[1]+'/revoke','owner-a@example.test','POST',{});
  await expectCall(endpoint,'student-a-1@example.test','GET',undefined,404);

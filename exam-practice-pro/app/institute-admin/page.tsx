@@ -94,6 +94,7 @@ export default function InstituteAdminPreview() {
       <div className="mx-auto max-w-6xl px-4 py-8 sm:py-12">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <Link href="/" className="text-sm font-semibold text-blue-700 dark:text-blue-400">← Back to ExamPro</Link>
+          {process.env.NEXT_PUBLIC_INSTITUTES_ENABLED==='true'&&<Link href="/institute" className="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2">Open your authenticated institute workspace</Link>}
           <span className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">DEMO PREVIEW · NOT AN ADMIN LOGIN</span>
         </div>
         <div className="mb-8">

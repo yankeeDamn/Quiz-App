@@ -127,6 +127,6 @@ async function workspace(user,slug) { return within(user,slug,'workspace:read',a
  (SELECT count(*)::int FROM pilot_exams WHERE institute_id=$1 AND status='published') AS published_exams,
  (SELECT count(*)::int FROM pilot_attempts WHERE institute_id=$1 AND submitted_at IS NOT NULL) AS submitted_attempts`,[t.institute.id])).rows[0]:null;
  const activity=(t.role==='owner'||t.role==='admin')?(await c.query('SELECT action,created_at FROM pilot_audit_logs WHERE institute_id=$1 ORDER BY id DESC LIMIT 20',[t.institute.id])).rows:[];
- return {institute:{id:t.institute.id,slug:t.institute.slug,name:t.institute.name,status:t.institute.status,profile:t.institute.profile},role:t.role,permissions:t.permissions,counts,activity};
+ return {institute:{id:t.institute.id,slug:t.institute.slug,name:t.institute.name,status:t.institute.status,profile:t.institute.profile},role:t.role,permissions:t.permissions,counts,activity,modules:{delivery:process.env.INSTITUTE_DELIVERY_ENABLED==='true'}};
  }); }
 module.exports={transaction,platform,audit,tenant,within,mine,publicProfile,apply,applications,review,lifecycle,settings,members,invite,invitations,revokeInvite,accept,revokeMember,workspace};
