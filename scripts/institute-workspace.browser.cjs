@@ -4,7 +4,7 @@ const assert=require('node:assert/strict'),path=require('node:path'),fs=require(
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 const root=path.resolve(__dirname,'..'),frontend=path.join(root,'exam-practice-pro'),origin='http://127.0.0.1:3021';
 const output=path.join(root,'test-results','institute-workspace');fs.mkdirSync(output,{recursive:true});
-let server,browser,role='owner',invites=[],calls=[];
+let server,browser,page,role='owner',invites=[],calls=[];
 const perms={owner:['workspace:read','members:read','members:invite','members:revoke','staff:admin','settings:write'],student:['workspace:read']};
 async function intercept(route){const request=route.request(),u=new URL(request.url()),reply=(data,status=200)=>route.fulfill({status,contentType:'application/json',body:JSON.stringify(data)});
  if(u.pathname==='/api/auth/session')return reply({user:{name:'Synthetic Owner',email:'synthetic@example.test'},expires:'2099-01-01T00:00:00Z'});
@@ -25,7 +25,7 @@ async function intercept(route){const request=route.request(),u=new URL(request.
  server=spawn(process.execPath,[path.join(frontend,'node_modules/next/dist/bin/next'),'start','--hostname','127.0.0.1','--port','3021'],{cwd:frontend,env:{...process.env,NODE_ENV:'production',AUTH_SECRET:'synthetic-ui-only'},stdio:'ignore'});
  for(let i=0;i<80;i++){try{if((await fetch(origin+'/institute')).ok)break;}catch{}await new Promise(r=>setTimeout(r,250));}
  browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE}:{}),args:['--disable-dev-shm-usage']});
- const context=await browser.newContext({viewport:{width:1440,height:1000}});await context.route('**/*',intercept);const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const context=await browser.newContext({viewport:{width:1440,height:1000}});await context.route('**/*',intercept);page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(origin+'/institute');await page.getByRole('link',{name:'Synthetic Alpha owner · trial'}).waitFor();
  await page.getByRole('link',{name:'Synthetic Alpha owner · trial'}).click();await page.getByRole('heading',{name:'Synthetic Alpha',exact:true}).waitFor();
  await page.getByRole('link',{name:'Members & invitations'}).click();await page.getByText('student@example.test',{exact:true}).waitFor();
@@ -40,4 +40,4 @@ async function intercept(route){const request=route.request(),u=new URL(request.
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),'workspace must fit mobile width');
  role='student';calls=[];await page.reload();await page.getByText('Your role cannot view institute member records.',{exact:true}).waitFor();assert.equal(await page.getByRole('button',{name:'Create invitation'}).count(),0);assert.equal(calls.some(c=>c.path.endsWith('/members')),false);
  assert.deepEqual(errors,[]);console.log('PASS: institute navigation, invitation, cancel, mobile width, role menus and console checks');
- }finally{await browser?.close();server?.kill('SIGTERM');}})().catch(e=>{console.error(e);process.exitCode=1;});
+ }catch(error){if(page)await page.screenshot({path:path.join(output,'failure.png'),fullPage:true}).catch(()=>{});throw error;}finally{await browser?.close();server?.kill('SIGTERM');}})().catch(e=>{console.error(e);process.exitCode=1;});
