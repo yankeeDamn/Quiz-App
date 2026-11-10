@@ -20,6 +20,7 @@ const router = Router();
 
 // ── API v1 routes ──────────────────────────────────────
 router.use(require('./monetization').router);
+router.use(require('./institutes'));
 router.use('/health', healthRoutes);
 router.use('/mocks', mocksRoutes);
 router.use('/exampro', examproFeatures);

@@ -7,7 +7,7 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    branches: ["**"]
 
 jobs:
   # ── Backend: Lint & Test ─────────────────────
@@ -162,3 +162,32 @@ jobs:
 
           docker stop test-api
           docker rm test-api
+
+  institutes-postgres:
+    name: Institute isolation (disposable PostgreSQL)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: institute-ci-only
+          POSTGRES_DB: institute_tests
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Migrate twice and test two synthetic institutes
+        run: node --test test/institutes-postgres.integration.js
+        env:
+          INSTITUTE_TEST_DATABASE_URL: postgresql://postgres:institute-ci-only@127.0.0.1:5432/institute_tests
