@@ -78,7 +78,7 @@ jobs:
       - name: Install isolated UI acceptance browser
         run: |
           npm install --prefix "$RUNNER_TEMP/exampro-ui-tools" --no-package-lock --no-save playwright@1.62.1
-          "$RUNNER_TEMP/exampro-ui-tools/node_modules/.bin/playwright" install --with-deps chromium
+          "$RUNNER_TEMP/exampro-ui-tools/node_modules/.bin/playwright" install chromium
 
       - name: Test mocked admin review and publishing workflow
         run: node scripts/admin-workflow.browser.cjs
