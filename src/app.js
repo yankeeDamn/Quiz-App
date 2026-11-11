@@ -51,6 +51,7 @@ app.use('/api/v1/institutes', express.json({ limit: '256kb' }));
 // Raw bytes are mandatory for Cashfree webhook HMAC verification.
 app.use('/api/v1/cashfree/webhook', express.raw({ type: 'application/json', limit: '64kb' }));
 app.use('/api/v1/payments/webhook', express.raw({ type: 'application/json', limit: '64kb' }));
+app.use('/api/v1/institute-billing/webhook', express.raw({ type: 'application/json', limit: '64kb' }));
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: false, limit: '10kb' }));
 
@@ -70,6 +71,7 @@ app.use('/api/', generalLimiter);
 // ──────────────────────────────────────────────────────────
 // 6. API routes (versioned)
 // ──────────────────────────────────────────────────────────
+app.use('/api/v1/institute-billing', require('./routes/institute-billing-webhook'));
 app.use('/api/v1', routes);
 
 // ──────────────────────────────────────────────────────────

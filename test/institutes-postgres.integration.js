@@ -13,8 +13,9 @@ process.env.INSTITUTE_INVITATION_SECRET='synthetic-institute-invitation-secret-o
 const jwt=require('jsonwebtoken'),express=require('express'),{randomUUID}=require('node:crypto');
 const db=require('../src/config/database');
 const router=require('../src/routes/institutes');
-const app=express();app.use(express.json({limit:'128kb'}));app.use('/api/v1',router);
+const app=express();app.use('/api/v1/institute-billing',require('../src/routes/institute-billing-webhook'));app.use(express.json({limit:'128kb'}));app.use('/api/v1',router);
 app.use((err,_req,res,_next)=>res.status(err.statusCode||500).json({error:err.message}));
+app.use((_req,res)=>res.status(404).json({error:'Not found'}));
 let server,base,A,B;
 const token=email=>jwt.sign({sub:email,email,provider:'google',emailVerified:true},process.env.AUTH_SECRET,{expiresIn:'1h'});
 async function call(path,email='platform@example.test',method='GET',body){
@@ -32,7 +33,7 @@ async function join(i,email,role,owner){
 }
 test.before(async()=>{
  await db.query(`CREATE TABLE IF NOT EXISTS users(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),email text UNIQUE,name text,image text,provider text,provider_id text,role text DEFAULT 'user',payment_status text DEFAULT 'unpaid',plan text DEFAULT 'free',plan_expires_at timestamptz,created_at timestamptz DEFAULT now(),updated_at timestamptz DEFAULT now())`);
- for(let n=0;n<2;n++) { await db.query(fs.readFileSync('src/db/pilot-schema.sql','utf8'));await db.query(fs.readFileSync('src/db/institute-foundation.sql','utf8'));await db.query(fs.readFileSync('src/db/institute-delivery.sql','utf8'));await db.query(fs.readFileSync('src/db/institute-reporting.sql','utf8')); }
+ for(let n=0;n<2;n++) { await db.query(fs.readFileSync('src/db/pilot-schema.sql','utf8'));await db.query(fs.readFileSync('src/db/institute-foundation.sql','utf8'));await db.query(fs.readFileSync('src/db/institute-delivery.sql','utf8'));await db.query(fs.readFileSync('src/db/institute-reporting.sql','utf8'));await db.query(fs.readFileSync('src/db/institute-billing.sql','utf8')); }
  server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));base='http://127.0.0.1:'+server.address().port;
 });
 test.after(async()=>{if(server){server.closeAllConnections();await new Promise(r=>server.close(r));}await db.end();});
@@ -247,4 +248,79 @@ test('aggregate reports and CSV exports enforce assigned staff scope and exclude
  await db.query('DELETE FROM pilot_batch_teachers WHERE institute_id=$1 AND batch_id=$2 AND user_id=$3',[A.id,A.deliveryBatch,A.teacher]);
  await expectCall(endpoint+'/analytics','teacher-a@example.test','GET',undefined,404);
  assert.equal((await expectCall(endpoint+'/analytics','owner-a@example.test')).summary.submitted,1);
+});
+
+let billingOrder;
+const billingPlan={code:'SYNTHETIC_TEST',name:'Synthetic fixture, not a public offer',amountPaise:12345,periodDays:30,active:true,limits:{students:9,teachers:1,batches:3,questions:6,monthlyAttempts:4}};
+function configureBilling(){process.env.INSTITUTE_BILLING_ENABLED='true';process.env.APP_ENV='test';process.env.MONETIZATION_ENABLED='true';process.env.MONETIZATION_CASHFREE_MODE='sandbox';process.env.MONETIZATION_CASHFREE_APP_ID='synthetic-app';process.env.MONETIZATION_CASHFREE_SECRET='synthetic-secret-only';process.env.MONETIZATION_FRONTEND_ORIGIN='https://exampro-staging-ui.vercel.app';process.env.MONETIZATION_API_ORIGIN='https://exampro-staging-api.onrender.com';}
+test('institute quotes require platform review and never trust buyer price, limits or tenant IDs',async()=>{
+ await expectCall(at(A)+'/billing','owner-a@example.test','GET',undefined,404);configureBilling();
+ await expectCall('/platform/institutes/billing/plans','owner-a@example.test','PUT',billingPlan,403);
+ await expectCall('/platform/institutes/billing/plans',undefined,'PUT',billingPlan);
+ billingOrder=await expectCall('/platform/institutes/'+A.id+'/billing/quotes',undefined,'POST',{planCode:billingPlan.code,amountPaise:1,institute_id:B.id},201);
+ assert.equal(billingOrder.plan_snapshot.amountPaise,12345);
+ await expectCall('/platform/institutes/'+A.id+'/billing/quotes',undefined,'POST',{planCode:billingPlan.code},409);
+ await expectCall(at(A)+'/billing','teacher-a@example.test','GET',undefined,403);
+ await expectCall(at(A)+'/billing','owner-b@example.test','GET',undefined,404);
+ await expectCall(at(B)+'/billing/orders/'+billingOrder.id+'/checkout','owner-b@example.test','POST',{phone:'9999999999'},404);
+ await assert.rejects(db.query('UPDATE pilot_billing_orders SET amount_paise=1 WHERE id=$1',[billingOrder.id]),e=>e.code==='23514');
+ const status=await expectCall(at(A)+'/billing','owner-a@example.test');assert.equal(status.subscription,null);assert.equal(status.receipts.length,0);
+});
+test('provider-confirmed institute payment creates one subscription and receipt under concurrent retries',async()=>{
+ const pay=require('../src/services/monetization-payments.service'),billing=require('../src/services/institutes/billing'),original=pay.gateway;
+ const purchaser=(await db.query('SELECT requested_by FROM pilot_billing_orders WHERE id=$1',[billingOrder.id])).rows[0].requested_by;
+ let amount=1,status='ACTIVE';
+ pay.gateway=async(method,path,body)=>{if(method==='POST'){assert.equal(body.order_id,billingOrder.id);assert.equal(body.order_amount,123.45);assert.equal(body.customer_details.customer_id,purchaser);assert.match(body.order_meta.notify_url,/institute-billing\/webhook$/);return {order_id:body.order_id,payment_session_id:'synthetic-session'};}return {order_id:billingOrder.id,order_amount:amount,order_currency:'INR',order_status:status,customer_details:{customer_id:purchaser}};};
+ try{
+  const checkout=await expectCall(at(A)+'/billing/orders/'+billingOrder.id+'/checkout','owner-a@example.test','POST',{phone:'9999999999',amount:1,limits:{students:9999}});assert.equal(checkout.amountPaise,12345);
+  await expectCall(at(A)+'/billing/orders/'+billingOrder.id+'/reconcile','owner-a@example.test','POST',{},409);
+  amount=123.45;assert.equal((await expectCall(at(A)+'/billing/orders/'+billingOrder.id+'/reconcile','owner-a@example.test','POST',{})).status,'pending');
+  const raw=Buffer.from(JSON.stringify({type:'PAYMENT_SUCCESS_WEBHOOK',data:{order:{order_id:billingOrder.id},payment:{payment_status:'SUCCESS'}}})),timestamp=String(Date.now());
+  const signature=require('node:crypto').createHmac('sha256',process.env.MONETIZATION_CASHFREE_SECRET).update(timestamp).update(raw).digest('base64');
+  const notify=signature=>fetch(base+'/api/v1/institute-billing/webhook',{method:'POST',headers:{'Content-Type':'application/json','x-webhook-signature':signature,'x-webhook-timestamp':timestamp},body:raw});
+  assert.equal((await notify('forged')).status,401);
+  status='PAID';const both=await Promise.all([notify(signature),call(at(A)+'/billing/orders/'+billingOrder.id+'/reconcile','owner-a@example.test','POST',{})]);assert.equal(both[0].status,200);assert.equal((await both[0].json()).data.status,'paid');assert.equal(both[1].status,200);
+  assert.equal((await billing.webhook(raw,signature,timestamp)).status,'paid');
+  const overview=await expectCall(at(A)+'/billing','owner-a@example.test');assert.equal(overview.receipts.length,1);assert.equal(overview.subscription.effectiveStatus,'active');assert.deepEqual(overview.subscription.limits,billingPlan.limits);
+  assert.equal((await db.query('SELECT count(*)::int n FROM pilot_subscriptions WHERE institute_id=$1 AND billing_managed',[A.id])).rows[0].n,1);
+  assert.ok((await db.query('SELECT plan,payment_status FROM users')).rows.every(u=>u.plan==='free'&&u.payment_status==='unpaid'));
+  await assert.rejects(db.query('UPDATE pilot_billing_receipts SET amount_paise=1 WHERE order_id=$1',[billingOrder.id]),e=>e.code==='23514');
+  await expectCall(at(A)+'/billing/cancel','owner-a@example.test','POST',{});assert.equal((await expectCall(at(A)+'/billing','owner-a@example.test')).subscription.effectiveStatus,'active');
+ }finally{pay.gateway=original;}
+});
+test('quota checks serialize concurrent new usage and preserve reads and ongoing attempts',async()=>{
+ process.env.INSTITUTE_QUOTAS_ENABLED='true';
+ try{
+  const invite1=await expectCall(at(A)+'/invitations','owner-a@example.test','POST',{email:'quota-one@example.test',role:'student'},201),invite2=await expectCall(at(A)+'/invitations','owner-a@example.test','POST',{email:'quota-two@example.test',role:'student'},201);
+  const accepted=await Promise.all([call('/institutes/invitations/accept','quota-one@example.test','POST',{token:invite1.token}),call('/institutes/invitations/accept','quota-two@example.test','POST',{token:invite2.token})]);assert.deepEqual(accepted.map(x=>x.status).sort(),[200,409]);
+  const batches=await Promise.all([call(at(A)+'/batches','owner-a@example.test','POST',{name:'Capacity one'}),call(at(A)+'/batches','owner-a@example.test','POST',{name:'Capacity two'})]);assert.deepEqual(batches.map(x=>x.status).sort(),[201,409]);
+  const questions=await Promise.all([call(at(A)+'/banks/'+A.deliveryBank+'/questions','teacher-a@example.test','POST',questionInput('capacity-one')),call(at(A)+'/banks/'+A.deliveryBank+'/questions','teacher-a@example.test','POST',questionInput('capacity-two'))]);assert.deepEqual(questions.map(x=>x.status).sort(),[201,409]);
+  const starts=await Promise.all([call(at(A)+'/exams/'+A.deliveryExam.id+'/start','student-a-4@example.test','POST',{}),call(at(A)+'/exams/'+A.deliveryExam.id+'/start','student-a-5@example.test','POST',{})]);assert.deepEqual(starts.map(x=>x.status).sort(),[200,409]);
+  const winner=starts[0].status===200?4:5,attempt=starts.find(r=>r.status===200).json.data;
+  assert.equal((await expectCall(at(A)+'/exams/'+A.deliveryExam.id+'/start',`student-a-${winner}@example.test`,'POST',{})).id,attempt.id);
+  await expectCall(at(B)+'/batches','owner-b@example.test','POST',{name:'No subscription'},402);
+  const unpaid=await expectCall('/platform/institutes/'+A.id+'/billing/quotes',undefined,'POST',{planCode:billingPlan.code},201);
+  const c=await db.getClient();try{await c.query('BEGIN');await assert.rejects(c.query('INSERT INTO pilot_billing_receipts(institute_id,order_id,amount_paise,currency,mode,period_start,period_end) VALUES($1,$2,100,\'INR\',\'sandbox\',now(),now()+interval \'1 day\')',[B.id,unpaid.id]),e=>e.code==='23503');await c.query('ROLLBACK');}finally{c.release();}
+  await db.query("UPDATE pilot_subscriptions SET current_period_end=now()-interval '1 second' WHERE institute_id=$1 AND billing_managed",[A.id]);
+  assert.equal((await expectCall(at(A)+'/billing','owner-a@example.test')).subscription.effectiveStatus,'expired');
+  await expectCall(at(A)+'/batches','owner-a@example.test','POST',{name:'After expiry'},402);
+  await expectCall(at(A)+'/attempts/'+attempt.id,`student-a-${winner}@example.test`,'PUT',{revision:0,responses:{}});
+  await expectCall(at(A)+'/attempts/'+attempt.id+'/submit',`student-a-${winner}@example.test`,'POST',{revision:1,responses:{}});
+ }finally{delete process.env.INSTITUTE_QUOTAS_ENABLED;}
+});
+
+test('expired subscriptions renew from current time and unstarted quotes can be cancelled without deleting records',async()=>{
+ const pay=require('../src/services/monetization-payments.service'),original=pay.gateway;
+ const overview=await expectCall(at(A)+'/billing','owner-a@example.test'),order=overview.orders.find(o=>o.status==='quoted');
+ assert.ok(order);const purchaser=(await db.query('SELECT requested_by FROM pilot_billing_orders WHERE id=$1',[order.id])).rows[0].requested_by;
+ pay.gateway=async(method,path,body)=>method==='POST'?{order_id:body.order_id,payment_session_id:'synthetic-renewal'}:{order_id:order.id,order_amount:123.45,order_currency:'INR',order_status:'PAID',customer_details:{customer_id:purchaser}};
+ try{
+  await expectCall(at(A)+'/billing/orders/'+order.id+'/checkout','owner-a@example.test','POST',{phone:'9999999999'});
+  await expectCall(at(A)+'/billing/orders/'+order.id+'/cancel-quote','owner-a@example.test','POST',{},409);
+  await expectCall(at(A)+'/billing/orders/'+order.id+'/reconcile','owner-a@example.test','POST',{});
+  const renewed=await expectCall(at(A)+'/billing','owner-a@example.test');assert.equal(renewed.subscription.effectiveStatus,'active');assert.equal(renewed.receipts.length,2);assert.equal(renewed.subscription.cancel_at_period_end,false);
+  const replacement=await expectCall('/platform/institutes/'+A.id+'/billing/quotes',undefined,'POST',{planCode:billingPlan.code},201);
+  await expectCall(at(A)+'/billing/orders/'+replacement.id+'/cancel-quote','owner-a@example.test','POST',{});
+  assert.equal((await db.query('SELECT status FROM pilot_billing_orders WHERE id=$1',[replacement.id])).rows[0].status,'cancelled');
+ }finally{pay.gateway=original;}
 });

@@ -21,3 +21,7 @@ Foundation alone does not implement exam delivery/billing and cannot satisfy ste
 3. Open authorized batch analytics. Compare eligible student–exam assignments, completion, average percentage and topic/section counts with synthetic fixtures. Removing a student from a batch/membership changes the current-cohort report; preserved attempts are not deleted.
 4. Export a report. Check CSV quoting and formula-neutralization, and follow the next-page control for more than 500 results. Cross-tenant IDs, unassigned teachers and student requests must fail.
 5. Stop the expiry worker and observe backlog monitoring. Re-enable and verify recovery. This capacity/operations exercise remains a release gate; small synthetic correctness tests are not a load benchmark.
+
+### Institute billing sandbox
+
+Follow `EXAMPRO_INSTITUTE_BILLING_ACCEPTANCE.md` after separately approving the fifth manual migration and exact staging revision. No real-provider sandbox settlement has been verified by the synthetic test suite. Keep live payments disabled. Verify the existing consumer Free/Pro plans and advertising remain independent of an institute purchase.

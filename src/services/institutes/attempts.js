@@ -1,6 +1,7 @@
 'use strict';
 const p=require('./policy'),v=require('./content-policy'),f=require('./foundation');
 const {cleanResponses,grade}=require('../exam-grade');
+const quotas=require('./quotas');
 async function clock(c) { return (await c.query('SELECT clock_timestamp() AS now')).rows[0].now; }
 async function eligible(c,t,id) {
  p.uuid(id);
@@ -33,10 +34,12 @@ async function assigned(user,slug) {
 }
 async function start(user,slug,id) {
  return f.within(user,slug,'assigned:take',async(c,t)=>{
+  await quotas.lock(c,t.institute.id);
   const e=await eligible(c,t,id),now=await clock(c);
   let a=(await c.query('SELECT * FROM pilot_attempts WHERE institute_id=$1 AND exam_id=$2 AND student_id=$3 FOR UPDATE',[t.institute.id,id,user.id])).rows[0];
   if(!a) {
    if(now<e.starts_at||now>=e.ends_at)throw p.fail('Exam is outside its scheduled window',409);
+   await quotas.requireCapacity(c,t.institute.id,'monthlyAttempts');
    const deadline=new Date(Math.min(+now+e.duration_minutes*60000,+e.ends_at));
    const inserted=await c.query(`INSERT INTO pilot_attempts(institute_id,exam_id,student_id,started_at,deadline_at,snapshot)
     VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(exam_id,student_id) DO NOTHING RETURNING *`,[t.institute.id,id,user.id,now,deadline,JSON.stringify(e.snapshot)]);

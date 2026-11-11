@@ -18,3 +18,13 @@
 - [ ] Rollback owner, previous SHA, monitoring window and incident criteria recorded.
 
 The foundation flag stays off until its own review and controlled acceptance. A green Vercel preview/build is not release approval.
+
+### Additional billing gates
+
+- [ ] Institute Cashfree sandbox order, webhook, timeout, failure/retry, expiry and renewal accepted against the actual provider.
+- [ ] Commercial plan terms, customer support, refunds/chargebacks and tax invoicing approved.
+- [ ] Quota behavior/load tested against an approved staging database with accurate usage.
+- [ ] Live institute billing implementation independently reviewed; current code deliberately rejects production mode.
+- [ ] Open orders reconciled before any callback/config rollback.
+
+Synthetic provider responses are not settlement evidence. Institute billing remains sandbox-only and commercial readiness remains **NOT READY**.
