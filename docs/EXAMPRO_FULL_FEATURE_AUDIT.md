@@ -60,7 +60,7 @@ All listed controls have code, but **none is claimed live-verified merely from r
 
 | Module / platform owner | Source and controls | Existing test evidence | Classification and dependency |
 | --- | --- | --- | --- |
-| Gate/session | `app/admin/layout.tsx`, `components/admin/admin-shell.tsx`, `lib/admin.ts`: session gate, retry, tabs, reload | Admin tests and synthetic browser script | Not verified live: tab-switch draft preservation; SessionProvider default focus refetch requires deliberate testing |
+| Gate/session | `app/admin/layout.tsx`, `app/admin/page.tsx`, `lib/admin.ts`: session gate, retry, tabs, reload | Admin tests and synthetic browser script | Not verified live: tab-switch draft preservation; SessionProvider default focus refetch requires deliberate testing |
 | Overview | `admin-command-center.service.js`: counts, publication candidates, refresh and navigation | Admin draft-source/catalogue tests | Not verified live; real counts require DB |
 | Question Bank | `components/admin/questions-tab.tsx`, `src/routes/admin.js`: topic selector/create/edit, search, tier/status filters, CSV picker/preview/import, add/edit/review/publish/draft/retire/restore | Question workflow, CSV picker, import, publication gate tests | Partially working by automated evidence; authenticated DB and browser acceptance pending |
 | Mocks & Tests | `components/admin/tests-tab.tsx`: draft/live lists, search/filter/pagination, create/edit/clone/delete, preview, checklist, publish/unpublish, tier changes | Admin draft/csv/catalogue/publication tests; synthetic browser coverage in baseline CI | Not verified live; do not mutate existing mocks for audit |
@@ -87,3 +87,16 @@ No feature should be promoted to “Working” without attaching the particular 
 - After fixes: **289/289 backend tests pass** (three added environment-resolution tests). Frontend build result is recorded in the PR.
 - Read-only HTTP diagnostics: both APIs return 200 for readiness, catalogue and government-jobs. Production monetization config returns 404; staging returns 200. Thus production advertisement submission is disabled by configuration, not a functional live booking service.
 - Database impact: none. Staging acceptance: deploy only after owner approval; set explicit API and APP_ENV; validate missing/wrong URL fails closed, all learner links and existing PDF proxies, pricing disclosure and account switching. Rollback: revert this PR's frontend/config commits; no data rollback.
+
+## Implementation checkpoint — 11 November 2026
+
+The baseline inventory above describes the deployed baseline, not an assertion that drafted work is deployed. Main remains `4afbeac`. No production/staging changes were made.
+
+- Draft #89: configuration/pricing regression CI passes.
+- Draft #90: foundation PostgreSQL passes; its original full CI fails an admin mobile assertion. The deterministic menu-detachment fix is in #91, whose complete CI passes.
+- Draft #91: authenticated workspaces, invitations, branding and platform application review; complete CI passes.
+- Draft #92: private bank/CSV/review/versioning, batches, assignment, immutable publication, server-timed/graded attempts and own/assigned-teacher results; complete CI passes.
+- Draft #93: teaching and student screens connected to those APIs; complete CI [42872627737](https://github.com/yankeeDamn/Quiz-App/actions/runs/42872627737) passes. 296 unit tests and 15 disposable PostgreSQL scenarios pass. The synthetic browser journey covers authoring, role-appropriate review, assignment/publication confirmation, autosave, refresh, mobile submission and result display. Desktop/mobile screenshots were visually inspected; the screenshot capture is being adjusted to start at the top of the page so sticky headers do not appear midway through full-page captures.
+- Admin session stability: source inspection shows the authorization effect is keyed by account/status, not the session object. Existing Auth.js focus refresh preserves authenticated status; the regression suite now explicitly checks unsaved draft preservation across three focus refreshes plus account-switch/sign-out removal. No global session revalidation was disabled. Record the new CI result before classifying this behavior as confirmed.
+
+B2B billing/quotas/invoices, independent advertising payment evidence, complete aggregates/exports/rankings, unattended expired-attempt finalization and scale/backup/security acceptance remain incomplete. Provider OAuth and real API-backed browser flows, protected PDF upload/free/Pro workflows, jobs tracker encrypted-record acceptance and all live administrative mutations remain unverified. Legacy consumer quiz statistics remain client-reported practice data and are not used by the institute delivery/result APIs. **NOT READY**.
