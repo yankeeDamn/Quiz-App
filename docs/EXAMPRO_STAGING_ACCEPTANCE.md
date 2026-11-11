@@ -13,3 +13,11 @@ This document is a proposed procedure, not permission to deploy or migrate. **No
 9. Record screenshots using synthetic data only, test results, deployed revision, migration checksum, known failures and owner acceptance. Stop release on any critical unverified behavior.
 
 Foundation alone does not implement exam delivery/billing and cannot satisfy steps 6–8 in full.
+
+### Reporting / expiry acceptance (requires approved deployment and migration)
+
+1. Apply the fourth manual institute migration on the approved isolated staging DB. Start with all flags disabled, then explicitly enable foundation/delivery and `INSTITUTE_EXPIRY_WORKER_ENABLED`.
+2. With synthetic data, start a short scheduled exam, save one answer and close the browser. After deadline + 30 seconds, verify one immutable graded result and one `attempt.expired_automatically` audit event. Confirm a duplicate submit cannot change it.
+3. Open authorized batch analytics. Compare eligible student–exam assignments, completion, average percentage and topic/section counts with synthetic fixtures. Removing a student from a batch/membership changes the current-cohort report; preserved attempts are not deleted.
+4. Export a report. Check CSV quoting and formula-neutralization, and follow the next-page control for more than 500 results. Cross-tenant IDs, unassigned teachers and student requests must fail.
+5. Stop the expiry worker and observe backlog monitoring. Re-enable and verify recovery. This capacity/operations exercise remains a release gate; small synthetic correctness tests are not a load benchmark.

@@ -41,6 +41,10 @@ async function intercept(route){
    return ok({...attempt,serverNow:new Date().toISOString()});
   }
   if(p===apiBase+'/results')return ok({results:attempt?[{id:attempt.id,title:attempt.title,submitted_at:attempt.submittedAt,result:attempt.result}]:[]});
+  if(p===apiBase+'/batches/batch-a/report')return ok({attempts:attempt?.submittedAt?[{id:attempt.id,name:'Synthetic learner',title:attempt.title,submitted_at:attempt.submittedAt,result:attempt.result}]:[]});
+  if(p===apiBase+'/batches/batch-a/analytics')return ok({summary:{eligible_assignments:10,students:10,exams:1,started:1,submitted:1,average_percentage:100,completion_percentage:10},performance:[{kind:'topic',name:'Arithmetic',questions:1,correct:1,incorrect:0,skipped:0}],scope:'Current active batch members and assigned published exams'});
+  if(p===apiBase+'/batches/batch-a/export')return ok({csv:'"Student","Score"\r\n"Synthetic learner","2"\r\n',filename:'synthetic-batch-report.csv',count:1,nextOffset:null});
+
   return ok({user:{plan:'free',planActive:false},isGuest:false,tests:[]});
  }
  if(u.origin===origin)return route.continue();return route.abort();
@@ -69,6 +73,11 @@ async function intercept(route){
  await page.reload();await page.getByRole('button',{name:'Resume exam',exact:true}).click();assert.equal(await page.getByRole('radio',{name:'A. Alpha',exact:true}).isChecked(),true);
  await page.setViewportSize({width:390,height:844});await page.evaluate(()=>document.documentElement.classList.add('dark'));await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({animations:'disabled',path:path.join(output,'student-exam-mobile-dark.png'),fullPage:true});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),'private runner must fit mobile width');
  await page.getByRole('button',{name:'Submit institute exam',exact:true}).click();await page.getByRole('button',{name:'Confirm exam submission',exact:true}).click();await page.getByText('2 / 2 marks (100%)',{exact:true}).waitFor();assert.equal(await page.getByText('Synthetic private explanation',{exact:true}).count(),0,'review remains withheld before exam window closes');
- await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({animations:'disabled',path:path.join(output,'student-result-mobile-dark.png'),fullPage:true});assert.deepEqual(errors,[]);
+ await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({animations:'disabled',path:path.join(output,'student-result-mobile-dark.png'),fullPage:true});role='owner';await page.goto(origin+'/institute/synthetic-alpha/analytics');await page.getByLabel('Report batch',{exact:true}).selectOption('batch-a');
+ await page.getByRole('heading',{name:'Topic and section performance',exact:true}).waitFor();await page.getByText('100%',{exact:true}).waitFor();
+ const downloaded=page.waitForEvent('download');await page.getByRole('button',{name:'Download batch report CSV',exact:true}).click();assert.equal((await downloaded).suggestedFilename(),'synthetic-batch-report.csv');
+ await page.getByText('Downloaded 1 permitted records. Export complete.',{exact:true}).waitFor();
+ await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({animations:'disabled',path:path.join(output,'batch-analytics-mobile.png'),fullPage:true});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1));
+ assert.deepEqual(errors,[]);
  assert.ok(calls.some(c=>c.path.endsWith('/submit')));console.log('PASS: synthetic question authoring, independent review controls, draft/assignment/publication, student autosave/refresh, mobile runner and result');
  }catch(error){if(page)await page.screenshot({animations:'disabled',path:path.join(output,'failure.png'),fullPage:true}).catch(()=>{});throw error;}finally{await browser?.close();server?.kill('SIGTERM');}})().catch(e=>{console.error(e);process.exitCode=1;});

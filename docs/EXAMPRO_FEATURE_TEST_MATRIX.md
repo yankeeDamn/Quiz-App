@@ -19,3 +19,12 @@ Evidence date: 10 November 2026. **NOT READY** until all launch-critical columns
 | Operations | Read-only revision and health evidence | Staging frontend parity, Neon branch identity, backups/restores, vulnerability scan, capacity and owner signoff |
 
 Real OAuth sign-in is not simulated by using a synthetic signed token. The DB integration test uses the real backend identity verifier with synthetic tokens and synthetic users; a provider callback test is separate.
+
+### Reporting / expiry continuation — 2026-11-11
+
+- Local unit suite: **299/299 PASS**.
+- Disposable PostgreSQL 18 suite: **17/17 PASS** (two institutes, repeated additive migrations, concurrent worker finalization, grading, revoked access, report authorization, CSV formula protection).
+- Next.js production build with loopback-only synthetic configuration: **PASS**.
+- Browser script now checks mobile batch aggregates and authorized CSV download. New browser run pending CI; prior institute delivery UI CI #42872627737 passed before this change.
+- GitHub checks on external CI-setup commits for PRs #90/#94 are `action_required`, not passing runs. Earlier installation failures occurred in browser dependency installation. Do not infer browser acceptance from unit/build success.
+- No live migration, deployment, content publication, or paid entitlement change.

@@ -32,7 +32,7 @@ async function join(i,email,role,owner){
 }
 test.before(async()=>{
  await db.query(`CREATE TABLE IF NOT EXISTS users(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),email text UNIQUE,name text,image text,provider text,provider_id text,role text DEFAULT 'user',payment_status text DEFAULT 'unpaid',plan text DEFAULT 'free',plan_expires_at timestamptz,created_at timestamptz DEFAULT now(),updated_at timestamptz DEFAULT now())`);
- for(let n=0;n<2;n++) { await db.query(fs.readFileSync('src/db/pilot-schema.sql','utf8'));await db.query(fs.readFileSync('src/db/institute-foundation.sql','utf8'));await db.query(fs.readFileSync('src/db/institute-delivery.sql','utf8')); }
+ for(let n=0;n<2;n++) { await db.query(fs.readFileSync('src/db/pilot-schema.sql','utf8'));await db.query(fs.readFileSync('src/db/institute-foundation.sql','utf8'));await db.query(fs.readFileSync('src/db/institute-delivery.sql','utf8'));await db.query(fs.readFileSync('src/db/institute-reporting.sql','utf8')); }
  server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));base='http://127.0.0.1:'+server.address().port;
 });
 test.after(async()=>{if(server){server.closeAllConnections();await new Promise(r=>server.close(r));}await db.end();});
@@ -209,4 +209,42 @@ test('deadline uses database time; late answers are ignored and review unlocks o
  const expired=await expectCall(at(A)+'/attempts/'+a.id,'student-a-2@example.test','PUT',{revision:0,responses:{[A.deliveryQ.id]:0}});
  assert.ok(expired.submittedAt);assert.equal(expired.result.score,0);assert.equal(expired.result.skipped,2);assert.equal(expired.result.review.length,2);
  await expectCall(at(A)+'/exams/'+e.id+'/start','student-a-3@example.test','POST',{},409);
+});
+
+test('background expiry grades saved responses once even when a learner never returns',async()=>{
+ const {finalizeExpired}=require('../src/services/institutes/expiry');
+ const e=await expectCall(at(A)+'/exams','teacher-a@example.test','POST',examInput(A,{endsAt:new Date(Date.now()+2000).toISOString()}),201);
+ await expectCall(at(A)+'/exams/'+e.id+'/assignments','owner-a@example.test','POST',{batchId:A.deliveryBatch});
+ await expectCall(at(A)+'/exams/'+e.id+'/publish','owner-a@example.test','POST',{});
+ const a=await expectCall(at(A)+'/exams/'+e.id+'/start','student-a-3@example.test','POST',{});
+ await expectCall(at(A)+'/attempts/'+a.id,'student-a-3@example.test','PUT',{revision:0,responses:{[A.deliveryQ.id]:0}});
+ // An ended membership cannot keep an existing started attempt pending indefinitely.
+ await expectCall(at(A)+'/members/'+A.students[3]+'/revoke','owner-a@example.test','POST',{});
+ assert.equal(await finalizeExpired(),0);
+ await new Promise(resolve=>setTimeout(resolve,Math.max(0,+new Date(a.deadlineAt)-Date.now()+50)));
+ const finalized=await Promise.all([finalizeExpired(),finalizeExpired()]);assert.equal(finalized.reduce((a,b)=>a+b,0),1);
+ const result=(await db.query('SELECT * FROM pilot_attempts WHERE id=$1',[a.id])).rows[0];assert.equal(result.result.score,2);assert.equal(result.revision,2);assert.ok(result.submitted_at);
+ assert.equal(await finalizeExpired(),0);
+ assert.equal((await db.query("SELECT id FROM pilot_audit_logs WHERE resource_id=$1 AND action='attempt.expired_automatically'",[a.id])).rowCount,1);
+ await expectCall(at(A)+'/attempts/'+a.id,'student-a-3@example.test','GET',undefined,404);
+});
+test('aggregate reports and CSV exports enforce assigned staff scope and exclude answer keys',async()=>{
+ const endpoint=at(A)+'/batches/'+A.deliveryBatch;
+ for(const suffix of ['/analytics','/export']){
+  await expectCall(endpoint+suffix,'student-a-2@example.test','GET',undefined,403);
+  await expectCall(at(A)+'/batches/'+B.deliveryBatch+suffix,'teacher-a@example.test','GET',undefined,404);
+  await expectCall(at(B)+'/batches/'+B.deliveryBatch+suffix,'dual@example.test','GET',undefined,404);
+ }
+ const data=await expectCall(endpoint+'/analytics','teacher-a@example.test');
+ assert.equal(data.summary.submitted,1);assert.equal(data.summary.students,7);assert.equal(data.summary.eligible_assignments,21);
+ assert.equal(data.summary.completion_percentage,4.76);assert.equal(data.summary.average_percentage,0);
+ assert.equal(data.performance.find(r=>r.kind==='topic').skipped,2);assert.equal(JSON.stringify(data).includes('correctAnswer'),false);
+ await db.query('UPDATE users SET name=$2 WHERE id=$1',[A.students[2],'=HYPERLINK("https://example.test")']);
+ const exported=await expectCall(endpoint+'/export','teacher-a@example.test');assert.equal(exported.count,1);assert.equal(exported.nextOffset,null);
+ assert.ok(exported.csv.includes("'="));assert.ok(!exported.csv.includes('correctAnswer'));assert.ok(!exported.csv.includes('example.test,student-b'));
+ await expectCall(endpoint+'/export?offset=-1','owner-a@example.test','GET',undefined,400);
+ assert.equal((await expectCall(endpoint+'/export?offset=500','owner-a@example.test')).count,0);
+ await db.query('DELETE FROM pilot_batch_teachers WHERE institute_id=$1 AND batch_id=$2 AND user_id=$3',[A.id,A.deliveryBatch,A.teacher]);
+ await expectCall(endpoint+'/analytics','teacher-a@example.test','GET',undefined,404);
+ assert.equal((await expectCall(endpoint+'/analytics','owner-a@example.test')).summary.submitted,1);
 });
