@@ -161,6 +161,7 @@ async function intercept(route){
   await page.getByRole('menuitem',{name:'Edit mock settings',exact:true}).waitFor();
   await page.screenshot({animations:'disabled',path:path.join(output,'mock-actions-menu.png'),fullPage:false});
   await page.keyboard.press('Escape');
+  await page.getByRole('menu').waitFor({state:'detached'}); // Wait for popup exit before measuring mobile layout.
   await page.setViewportSize({width:390,height:844});await page.evaluate(()=>document.documentElement.classList.add('dark'));
   assert.equal(await manager.evaluate(element=>element.scrollWidth<=element.clientWidth+1),true,'mock manager must fit mobile width');
   await page.evaluate(()=>window.scrollTo(0,0));
