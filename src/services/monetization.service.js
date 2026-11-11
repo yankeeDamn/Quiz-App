@@ -17,7 +17,7 @@ const PRODUCTS = Object.freeze({
 const SLOTS={HOME_TOP_BANNER:999,CATEGORY_NATIVE_CARD:499,EBOOK_RAIL_SPONSOR:799,RESULT_SCREEN_OFFER:699};
 const CATEGORIES=['ALL','SSC','Banking','Railways','UPSC','Campus','IT'];
 function text(v,max=140,required=true){if(typeof v!=='string'||v.length>max||(required&&!v.trim()))throw fail('Invalid text field');return v.trim();}
-function url(v){const s=text(v,2048);let u;try{u=new URL(s);}catch{throw fail('A valid HTTPS URL is required');}if(u.protocol!=='https:'||u.username||u.password||u.hostname==='localhost'||/^(127\.|10\.|192\.168\.|\[)/.test(u.hostname))throw fail('Public HTTPS URL required');return u.href;}
+function url(v){const s=text(v,2048);let u;try{u=new URL(s);}catch{throw fail('A valid HTTPS URL is required');}if(u.protocol!=='https:'||u.username||u.password||u.port||require('node:net').isIP(u.hostname.replace(/^\[|\]$/g,''))||!u.hostname.includes('.')||/(?:^|\.)(localhost|local|internal)$/i.test(u.hostname.replace(/\.+$/,'')))throw fail('Public HTTPS URL required');return u.href;}
 function slug(v){if(typeof v!=='string'||!/^[a-z0-9][a-z0-9-]{1,59}$/.test(v))throw fail('Invalid ID');return v;}
 function product(code){if(!Object.hasOwn(PRODUCTS,code))throw fail('Unknown product');return PRODUCTS[code];}
 async function documents(kind){return (await db.query('SELECT id,document FROM monetization_documents WHERE kind=$1 ORDER BY updated_at DESC',[kind])).rows.map(r=>({...r.document,id:r.id}));}
@@ -73,24 +73,14 @@ function validateAd(raw){
  const phone=text(raw.whatsappNumber,15);if(!/^[1-9]\d{9,14}$/.test(phone))throw fail('Use country code and WhatsApp digits');
  return {advertiserName:text(raw.advertiserName,80),contactEmail:email,whatsappNumber:phone,slotType:raw.slotType,targetCategory:raw.targetCategory,headline:text(raw.headline,70),subtext:text(raw.subtext,140),ctaLabel:text(raw.ctaLabel,40),destinationUrl:url(raw.destinationUrl),badgeText:text(raw.badgeText||'Sponsored',70),durationDays:raw.durationDays,paymentReference:text(raw.paymentReference,120),amountInr:raw.durationDays===30?2999:SLOTS[raw.slotType],status:'pending_review',expiresAt:null};
 }
-const activeAd=a=>a.status==='active'&&Date.parse(a.expiresAt)>Date.now();
+const activeAd=a=>a.status==='active'&&Date.parse(a.expiresAt)>Date.now()&&(a.paymentMode!=='sandbox'||['test','local','staging'].includes(process.env.APP_ENV));
 async function ads(){return (await documents('ad')).filter(activeAd).map(({id,slotType,targetCategory,headline,subtext,ctaLabel,destinationUrl,badgeText,expiresAt})=>({id,slotType,targetCategory,headline,subtext,ctaLabel,destinationUrl,badgeText,expiresAt}));}
 async function track(kind,id,raw){
  if(!['impression','click'].includes(raw.event)||!/^[a-f0-9-]{36}$/i.test(raw.sessionId||''))throw fail('Invalid telemetry');
  const d=await document(kind,id);if(!d||(kind==='ad'?!activeAd(d):!d.active))throw fail('Placement unavailable',404);
  await db.query('INSERT INTO monetization_metrics(kind,id,event,session_id) VALUES($1,$2,$3,$4) ON CONFLICT DO NOTHING',[kind,id,raw.event,raw.sessionId]);return {recorded:true};
 }
-async function adAction(id,action,verified){
- return transaction(async c=>{
-  const r=await c.query("SELECT document FROM monetization_documents WHERE kind='ad' AND id=$1 FOR UPDATE",[id]);if(!r.rowCount)throw fail('Ad not found',404);const d=r.rows[0].document;
-  if(action==='delete'){await c.query("DELETE FROM monetization_documents WHERE kind='ad' AND id=$1",[id]);return {deleted:true};}
-  if(action==='approve'){if(verified!==true)throw fail('Confirm payment and creative review first');d.status='active';d.expiresAt=new Date(Date.now()+d.durationDays*86400000).toISOString();}
-  else if(action==='pause')d.status='paused';
-  else if(action==='extend'){if(verified!==true)throw fail('Confirm renewal payment');d.status='active';d.expiresAt=new Date(Math.max(Date.now(),Date.parse(d.expiresAt)||0)+7*86400000).toISOString();}
-  else throw fail('Invalid action');
-  await c.query("UPDATE monetization_documents SET document=$2::jsonb,updated_at=now() WHERE kind='ad' AND id=$1",[id,JSON.stringify(d)]);return d;
- });
-}
+async function adAction(id,raw,user){return require('./advertising-verification.service').action(id,raw,user);}
 async function save(kind,id,r){
  slug(id);let d;
  if(kind==='institute'){

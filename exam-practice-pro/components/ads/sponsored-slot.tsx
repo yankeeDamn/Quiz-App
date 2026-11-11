@@ -9,7 +9,7 @@ export function useAdPermission(userPlan?:string,completed=false){
  const [access,setAccess]=useState<{email:string;adFree:boolean}|null>(null);
  useEffect(()=>{if(!email||!monetizationEnabled)return;let active=true;void monetization<{adFree:boolean}>('/monetization/me').then(r=>{if(active&&r.success&&r.data)setAccess({email,adFree:r.data.adFree});});return()=>{active=false;};},[email]);
  // Block every runner route, even before its timer or entitlement loads.
- return monetizationEnabled && status!=='loading' && plan.loaded && !plan.active && !['pro','institute'].includes(userPlan||'') && (!email||(access?.email===email&&!access.adFree)) && (completed || !/^\/(india-mocks\/|quiz\/|exampro|certifications\/exam|practice\/)/.test(path));
+ return !/^\/institute(?:\/|$)/.test(path) && monetizationEnabled && status!=='loading' && plan.loaded && !plan.active && !['pro','institute'].includes(userPlan||'') && (!email||(access?.email===email&&!access.adFree)) && (completed || !/^\/(india-mocks\/|quiz\/|exampro|certifications\/exam|practice\/)/.test(path));
 }
 export function SponsoredSlot({slot,category='ALL',userPlan,completed=false}:{slot:Slot;category?:string;userPlan?:string;completed?:boolean}){
  const allowed=useAdPermission(userPlan,completed),[ads,setAds]=useState<Ad[]>([]),ref=useRef<HTMLElement>(null);
