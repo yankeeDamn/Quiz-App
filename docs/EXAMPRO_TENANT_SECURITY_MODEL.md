@@ -50,3 +50,7 @@ The optional expiry worker has no HTTP endpoint. It locks eligible pending attem
 ### Sandbox billing and quota boundary
 
 Only the platform owner configures plans/quotes. Only the current institute owner can read billing or create/reconcile its orders. The quote's verified purchaser identity, price, currency and environment must match the independent provider order. Raw signed webhook verification precedes any reconciliation. A webhook never calls the consumer entitlement grant service. Receipts and paid order terms are immutable. Quota operations use an institute-specific advisory transaction lock; role/institute authorization still runs for every request. Subscription expiry cannot modify an already-started attempt or erase historical results. All live institute billing is explicitly disabled pending provider and commercial acceptance.
+
+### Private student ranking boundary
+
+Only the verified current student assigned to a published institute exam may read its ranking, and only after the scheduled end time. The cohort is the distinct set of current active student memberships across batches assigned to that exam. Results come from immutable server-graded institute attempts. The response omits account IDs, names, emails, answer keys and explanations; it exposes exact rank and percentages within that authorized cohort, which may permit inference in a small group. It is not a public or differential-privacy leaderboard.

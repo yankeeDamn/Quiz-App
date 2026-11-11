@@ -367,3 +367,20 @@ test('ad analytics deduplicate sessions; pause/resume, verified renewal, rejecti
  const rejected=(await expectCall('/ads/submit',null,'POST',adFixture,201)).id;await expectCall('/admin/monetization/ads/'+rejected,undefined,'POST',{action:'reject'});
  assert.ok((await db.query('SELECT plan,payment_status FROM users')).rows.every(u=>u.plan==='free'&&u.payment_status==='unpaid'));
 });
+
+test('students receive private anonymized exam rankings only after the exam window closes',async()=>{
+ const end=new Date(Date.now()+5000).toISOString(),e=await expectCall(at(A)+'/exams','teacher-a@example.test','POST',examInput(A,{endsAt:end}),201);
+ await expectCall(at(A)+'/exams/'+e.id+'/assignments','owner-a@example.test','POST',{batchId:A.deliveryBatch});await expectCall(at(A)+'/exams/'+e.id+'/publish','owner-a@example.test','POST',{});
+ const url=at(A)+'/exams/'+e.id+'/leaderboard';
+ await expectCall(url,'student-a-4@example.test','GET',undefined,409);await expectCall(url,'teacher-a@example.test','GET',undefined,403);
+ await expectCall(at(B)+'/exams/'+e.id+'/leaderboard','student-a-4@example.test','GET',undefined,404);
+ const first=await expectCall(at(A)+'/exams/'+e.id+'/start','student-a-4@example.test','POST',{}),second=await expectCall(at(A)+'/exams/'+e.id+'/start','student-a-5@example.test','POST',{});
+ await expectCall(at(A)+'/attempts/'+first.id+'/submit','student-a-4@example.test','POST',{revision:0,responses:{[A.deliveryQ.id]:0}});
+ await expectCall(at(A)+'/attempts/'+second.id+'/submit','student-a-5@example.test','POST',{revision:0,responses:{[A.deliveryQ2.id]:3}});
+ await new Promise(resolve=>setTimeout(resolve,Math.max(0,+new Date(end)-Date.now()+50)));
+ const board=await expectCall(url,'student-a-4@example.test');assert.equal(board.ranking.participants,7);assert.equal(board.ranking.selfRank,1);assert.equal(board.ranking.leaders[0].label,'You');assert.equal(board.ranking.leaders[0].percentage,50);
+ assert.equal(board.ranking.leaders.length,7);assert.equal(JSON.stringify(board).includes('student-a-5'),false);assert.equal(JSON.stringify(board).includes(A.students[4]),false);
+ assert.equal((await expectCall(url,'student-a-5@example.test')).ranking.selfRank,2);
+ await expectCall(url,'student-a-0@example.test','GET',undefined,404);
+ assert.equal((await expectCall(at(A)+'/batches/'+A.deliveryBatch+'/analytics','owner-a@example.test')).summary.eligible_assignments,28);
+});

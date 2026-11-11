@@ -10,7 +10,7 @@ async function scope(c,t,batchId) {
 // Each current active student and assigned published exam appears once. Legacy
 // snapshots are excluded; reports never consume client-reported practice scores.
 const population = `WITH population AS (
- SELECT e.id exam_id,e.title,bs.user_id student_id,a.id attempt_id,a.submitted_at,a.result,a.snapshot,a.responses
+ SELECT DISTINCT e.id exam_id,e.title,bs.user_id student_id,a.id attempt_id,a.submitted_at,a.result,a.snapshot,a.responses
  FROM pilot_exam_assignments ea
  JOIN pilot_exams e ON e.institute_id=ea.institute_id AND e.id=ea.exam_id AND e.status='published' AND e.snapshot IS NOT NULL
  JOIN pilot_batch_students bs ON bs.institute_id=ea.institute_id AND bs.batch_id=ea.batch_id
@@ -41,6 +41,35 @@ async function analytics(user,slug,batchId) {
     return {summary,performance,scope:'Current active batch members and assigned published exams',generatedAt:new Date().toISOString()};
   });
 }
+async function leaderboard(user,slug,examId) {
+  p.uuid(examId);
+  return f.within(user,slug,'assigned:take',async(c,t)=>{
+    if(t.role!=='student')throw p.fail('Student membership required',403);
+    const row=(await c.query(`WITH selected AS (
+      SELECT e.id,e.title,e.ends_at FROM pilot_exams e WHERE e.institute_id=$1 AND e.id=$2 AND e.status='published' AND e.snapshot IS NOT NULL
+       AND EXISTS(SELECT 1 FROM pilot_exam_assignments ea JOIN pilot_batch_students bs ON bs.institute_id=ea.institute_id AND bs.batch_id=ea.batch_id
+        WHERE ea.institute_id=e.institute_id AND ea.exam_id=e.id AND bs.user_id=$3)
+    ), eligible AS (
+      SELECT DISTINCT bs.user_id FROM selected e JOIN pilot_exam_assignments ea ON ea.institute_id=$1 AND ea.exam_id=e.id
+       JOIN pilot_batch_students bs ON bs.institute_id=ea.institute_id AND bs.batch_id=ea.batch_id
+       JOIN pilot_memberships m ON m.institute_id=bs.institute_id AND m.user_id=bs.user_id AND m.status='active' AND m.role='student'
+    ), scores AS (
+      SELECT eligible.user_id,MAX((a.result->>'percentage')::numeric) AS percentage
+       FROM eligible LEFT JOIN pilot_attempts a ON a.institute_id=$1 AND a.exam_id=$2 AND a.student_id=eligible.user_id
+        AND a.snapshot IS NOT NULL AND a.submitted_at IS NOT NULL GROUP BY eligible.user_id
+    ), ranked AS (
+      SELECT user_id,percentage,DENSE_RANK() OVER(ORDER BY percentage DESC NULLS LAST) AS place,
+       row_number() OVER(ORDER BY percentage DESC NULLS LAST,user_id) AS position,count(*) OVER() AS participants
+       FROM scores
+    ) SELECT selected.ends_at,ranked.user_id,ranked.percentage,ranked.place,ranked.position,ranked.participants
+      FROM selected LEFT JOIN ranked ON true ORDER BY ranked.position LIMIT 51`,[t.institute.id,examId,user.id])).rows;
+    if(!row.length||!row[0].ends_at)throw p.fail('Assigned exam unavailable',404);
+    if(new Date(row[0].ends_at)>new Date())throw p.fail('Rankings unlock after the exam window closes',409);
+    const ranked=row.filter(x=>x.user_id),self=ranked.find(x=>x.user_id===user.id);
+    const leaders=ranked.filter(x=>x.position<=50||x.user_id===user.id).map(x=>({rank:Number(x.place),label:x.user_id===user.id?'You':`Learner ${x.position}`,percentage:x.percentage===null?null:Number(x.percentage),you:x.user_id===user.id}));
+    return {participants:Number(ranked[0]?.participants||0),selfRank:self?Number(self.place):null,leaders,method:'Dense rank by best server-graded percentage across current active members assigned to this exam. Names and account identifiers are hidden.'};
+  });
+}
 function csvCell(value) {
   let s=String(value??'');
   // Quote alone does not prevent spreadsheet formula injection (including hidden whitespace).
@@ -61,4 +90,4 @@ async function exportPage(user,slug,batchId,rawOffset) {
     return {csv,filename:`batch-report-${batchId}-${page}.csv`,count:exported.length,nextOffset:rows.length>500?page+500:null};
   });
 }
-module.exports={analytics,exportPage,csvCell,offset};
+module.exports={analytics,exportPage,leaderboard,csvCell,offset};

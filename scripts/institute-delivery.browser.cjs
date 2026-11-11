@@ -5,7 +5,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 const root=path.resolve(__dirname,'..'),frontend=path.join(root,'exam-practice-pro'),origin='http://127.0.0.1:3022';
 const output=path.join(root,'test-results','institute-delivery');fs.mkdirSync(output,{recursive:true});
 const apiBase='/api/v1/institutes/synthetic-alpha';
-let server,browser,page,role='teacher',banks=[],questions=[],exams=[],attempt=null,paid=false,cancelled=false;
+let server,browser,page,role='teacher',banks=[],questions=[],exams=[],attempt=null,paid=false,cancelled=false,rankingReady=false;
 const calls=[],errors=[];
 const perms={owner:['workspace:read','members:read','members:invite','settings:write','banks:write','questions:write','questions:review','batches:write','exams:write','exams:publish','reports:read','billing:read'],teacher:['workspace:read','banks:write','questions:write','exams:write','assigned:reports'],student:['workspace:read','assigned:take','own:results']};
 async function intercept(route){
@@ -36,6 +36,7 @@ async function intercept(route){
   }
   if(p===apiBase+'/exams/exam-a/assignments'){assert.equal(request.postDataJSON().batchId,'batch-a');return ok({updated:true});}
   if(p===apiBase+'/exams/exam-a/publish'){assert.equal(questions[0].review_status,'approved');exams[0].status='published';return ok({status:'published'});}
+  if(p===apiBase+'/exams/exam-a/leaderboard'){if(!rankingReady)return reply({success:false,error:{message:'Rankings unlock after the exam window closes'}},409);return ok({ranking:{participants:10,selfRank:1,leaders:[{rank:1,label:'You',percentage:100,you:true},{rank:2,label:'Learner 2',percentage:90,you:false}],method:'Dense rank by synthetic fixture.'}});}
   if(p===apiBase+'/assigned-exams')return ok({exams:exams.filter(e=>e.status==='published').map(e=>({...e,duration_minutes:10,question_count:1,starts_at:new Date(Date.now()-60000).toISOString(),ends_at:new Date(Date.now()+3600000).toISOString(),attempt_id:attempt?.id||null,submitted_at:attempt?.submittedAt||null}))});
   if(p===apiBase+'/exams/exam-a/start'){
    if(!attempt)attempt={id:'attempt-a',title:'Synthetic private exam',revision:0,responses:{},startedAt:new Date().toISOString(),deadlineAt:new Date(Date.now()+600000).toISOString(),serverNow:new Date().toISOString(),submittedAt:null,result:null,test:{sections:['Arithmetic'],marksPerCorrect:2,negativeMarks:0,questions:[{id:'q-a',section:'Arithmetic',question:'Synthetic browser question',options:['Alpha','Beta','Gamma','Delta']}]}};
@@ -79,6 +80,7 @@ async function intercept(route){
  await page.reload();await page.getByRole('button',{name:'Resume exam',exact:true}).click();assert.equal(await page.getByRole('radio',{name:'A. Alpha',exact:true}).isChecked(),true);
  await page.setViewportSize({width:390,height:844});await page.evaluate(()=>document.documentElement.classList.add('dark'));await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({animations:'disabled',path:path.join(output,'student-exam-mobile-dark.png'),fullPage:true});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),'private runner must fit mobile width');
  await page.getByRole('button',{name:'Submit institute exam',exact:true}).click();await page.getByRole('button',{name:'Confirm exam submission',exact:true}).click();await page.getByText('2 / 2 marks (100%)',{exact:true}).waitFor();assert.equal(await page.getByText('Synthetic private explanation',{exact:true}).count(),0,'review remains withheld before exam window closes');
+ await page.getByRole('button',{name:'Return to institute exams',exact:true}).click();await page.getByRole('link',{name:'Batch rankings',exact:true}).click();await page.getByLabel('Choose an assigned exam for rankings',{exact:true}).selectOption('exam-a');await page.getByText('Rankings unlock after the exam window closes',{exact:true}).waitFor();rankingReady=true;await page.reload();await page.getByLabel('Choose an assigned exam for rankings',{exact:true}).selectOption('exam-a');await page.getByText('Your rank: 1',{exact:true}).waitFor();await page.getByText('Learner 2',{exact:true}).waitFor();
  await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({animations:'disabled',path:path.join(output,'student-result-mobile-dark.png'),fullPage:true});role='owner';await page.goto(origin+'/institute/synthetic-alpha/analytics');await page.getByLabel('Report batch',{exact:true}).selectOption('batch-a');
  await page.getByRole('heading',{name:'Topic and section performance',exact:true}).waitFor();await page.getByText('100%',{exact:true}).waitFor();
  const downloaded=page.waitForEvent('download');await page.getByRole('button',{name:'Download batch report CSV',exact:true}).click();assert.equal((await downloaded).suggestedFilename(),'synthetic-batch-report.csv');

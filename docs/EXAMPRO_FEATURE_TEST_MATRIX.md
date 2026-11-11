@@ -54,3 +54,10 @@ Advertising full local unit run: **304/304 PASS**, no failures/skips. Added synt
 - CI adds an independent PostgreSQL 16 consumer job with loopback/name guard. No production/staging connection is accepted by the test.
 - Coverage: anonymous denial, no-store, concurrent bookmark upserts, reload persistence, two-account isolation, notes CRUD/length validation, encrypted/masked/revealed job references, safe reference removal, ownership foreign keys and missing-key fail-closed behavior.
 - Browser login/session recovery and deployed acceptance remain separate unverified gates.
+
+### Institute learner rankings — 12 November 2026 (IST)
+
+- Disposable PostgreSQL 18 institute suite: **24/24 PASS**, including rankings before/after the scheduled end, current active membership, denied teacher/cross-tenant/revoked access, participant counts, score ordering, self rank and no account identifiers.
+- Next.js production build: **PASS** with learner Batch rankings menu/section.
+- Institute browser journey now asserts ranking lock before close and anonymous ranking display after close; CI run pending.
+- Names are hidden but exact scores/ranks can still identify a person in a small cohort; this is permission-limited pseudonymous display, not statistical de-identification.

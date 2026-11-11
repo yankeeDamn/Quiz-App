@@ -29,3 +29,7 @@ Follow `EXAMPRO_INSTITUTE_BILLING_ACCEPTANCE.md` after separately approving the 
 ### Consumer record regression acceptance
 
 With two approved synthetic accounts, save/remove/reload bookmarks and notes, then create/edit/reveal/delete a synthetic Government Jobs application. Verify account B cannot read, edit, reveal or delete account A's record by changing IDs. Confirm references are masked except on explicit own-record reveal; all tracking status is self-reported. Confirm no-store headers and validation messages for IDs over 100 characters, bookmark notes over 5,000 and note content over 10,000. Existing longer stored content remains readable; no data migration is introduced by these validation changes.
+
+### Private institute leaderboard acceptance
+
+Use a synthetic exam with at least three active students and a published immutable snapshot. Confirm rankings return 409 before the common end time; after close, verify rank ties, current active cohort count and the learner's own rank. Responses contain no student IDs, names, email, answer keys or explanations. A student from another institute, a revoked member, a teacher without a report permission and an unassigned student must fail. Removing a learner from the active batch changes current cohort visibility but preserves historical attempt/result data. This is an anonymous in-cohort score table, not anonymization against re-identification from distinctive scores or external knowledge.
