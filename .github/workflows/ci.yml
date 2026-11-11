@@ -220,3 +220,32 @@ jobs:
         run: node --test test/institutes-postgres.integration.js
         env:
           INSTITUTE_TEST_DATABASE_URL: postgresql://postgres:institute-ci-only@127.0.0.1:5432/institute_tests
+
+  consumer-postgres:
+    name: Consumer bookmarks, notes and application privacy (PostgreSQL)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: consumer-ci-only
+          POSTGRES_DB: consumer_tests
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Test two synthetic consumer accounts on disposable PostgreSQL
+        run: node --test test/consumer-postgres.integration.js
+        env:
+          CONSUMER_TEST_DATABASE_URL: postgresql://postgres:consumer-ci-only@127.0.0.1:5432/consumer_tests
