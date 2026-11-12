@@ -91,6 +91,20 @@ jobs:
         env:
           PLAYWRIGHT_MODULE: ${{ runner.temp }}/exampro-ui-tools/node_modules/playwright
 
+      - name: Test synthetic institute teaching and exam journey
+        run: node scripts/institute-delivery.browser.cjs
+        env:
+          PLAYWRIGHT_MODULE: ${{ runner.temp }}/exampro-ui-tools/node_modules/playwright
+
+      - name: Upload synthetic institute delivery screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: institute-delivery-ui
+          path: test-results/institute-delivery
+          if-no-files-found: ignore
+          retention-days: 7
+
       - name: Upload synthetic institute UI screenshots
         if: always()
         uses: actions/upload-artifact@v4

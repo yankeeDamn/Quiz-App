@@ -17,6 +17,7 @@ router.post('/institutes/:slug/questions/:id/retire',wrap(async(q,r)=>ok(r,await
 router.get('/institutes/:slug/questions/:id/versions',wrap(async(q,r)=>ok(r,{versions:await teaching.versions(q.user,q.params.slug,q.params.id)})));
 router.get('/institutes/:slug/batches',wrap(async(q,r)=>ok(r,{batches:await teaching.batches(q.user,q.params.slug)})));
 router.post('/institutes/:slug/batches',wrap(async(q,r)=>ok(r,await teaching.batches(q.user,q.params.slug,q.body),201)));
+router.get('/institutes/:slug/batches/:id/members',wrap(async(q,r)=>ok(r,{members:await teaching.batchMembers(q.user,q.params.slug,q.params.id)})));
 router.put('/institutes/:slug/batches/:id/members/:memberId',wrap(async(q,r)=>ok(r,await teaching.batchMember(q.user,q.params.slug,q.params.id,q.params.memberId,q.body.role))));
 router.delete('/institutes/:slug/batches/:id/members/:memberId',wrap(async(q,r)=>ok(r,await teaching.batchMember(q.user,q.params.slug,q.params.id,q.params.memberId,q.body.role,true))));
 router.get('/institutes/:slug/exams',wrap(async(q,r)=>ok(r,{exams:await teaching.exams(q.user,q.params.slug)})));

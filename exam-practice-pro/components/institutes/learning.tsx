@@ -1,0 +1,58 @@
+'use client';
+import {useCallback,useEffect,useRef,useState} from 'react';
+import {api} from '@/lib/api';
+import {Button} from '@/components/ui/button';
+import {Dialog,DialogContent,DialogHeader,DialogTitle,DialogDescription} from '@/components/ui/dialog';
+
+type Review={id:string;question:string;options:string[];selected:number;correctAnswer:number;explanation:string};
+type Result={score:number;total:number;percentage:number;correct:number;incorrect:number;skipped:number;review?:Review[]};
+type Attempt={id:string;title:string;revision:number;responses:Record<string,number>;startedAt:string;deadlineAt:string;serverNow:string;submittedAt:string|null;result:Result|null;test:{sections:string[];marksPerCorrect:number;negativeMarks:number;questions:{id:string;section:string;question:string;options:string[]}[]}};
+type Assigned={id:string;title:string;duration_minutes:number;question_count:number;starts_at:string;ends_at:string;attempt_id:string|null;submitted_at:string|null};
+type SavedResult={id:string;title:string;submitted_at:string|null;result:Result|null};
+const card='space-y-4 rounded-xl border bg-card p-4';
+export function InstituteLearning({base,resultsOnly}:{base:string;resultsOnly:boolean}){
+ const [exams,setExams]=useState<Assigned[]>([]),[results,setResults]=useState<SavedResult[]>([]),[active,setActive]=useState<Attempt|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false),[loading,setLoading]=useState(true),[reload,setReload]=useState(0);
+ useEffect(()=>{const c=new AbortController();setLoading(true);setError('');void api<{exams?:Assigned[];results?:SavedResult[]}>(base+(resultsOnly?'/results':'/assigned-exams'),{signal:c.signal}).then(r=>{if(c.signal.aborted)return;setLoading(false);if(r.success){setExams(r.data?.exams||[]);setResults(r.data?.results||[]);}else setError(r.error?.message||'Unable to load exams');});return()=>c.abort();},[base,resultsOnly,reload]);
+ async function open(id:string,attempt=false){setBusy(true);setError('');const r=await api<Attempt>(base+(attempt?'/attempts/'+id:'/exams/'+id+'/start'),{method:attempt?'GET':'POST',...(!attempt?{body:{}}:{})});setBusy(false);if(r.success&&r.data)setActive(r.data);else setError(r.error?.message||'Exam unavailable');}
+ if(active)return <InstituteRunner key={active.id} initial={active} base={base} onBack={()=>{setActive(null);setReload(v=>v+1);}}/>;
+ return <section className={card}><h2 className="text-2xl font-semibold">{resultsOnly?'Your institute results':'Your assigned exams'}</h2>{loading&&<p role="status">Loading your records…</p>}{error&&<p role="alert">{error}</p>}{resultsOnly?results.map(r=><article key={r.id} className="space-y-2 border-b pb-3"><h3 className="font-semibold">{r.title}</h3><p>{r.result?`${r.result.score} / ${r.result.total} marks`:'In progress'}</p><Button disabled={busy} variant="outline" onClick={()=>void open(r.id,true)}>{r.submitted_at?'View result':'Recover attempt'}</Button></article>):exams.map(e=><article key={e.id} className="space-y-3 border-b pb-3"><h3 className="font-semibold">{e.title}</h3><p>{e.question_count} questions · {e.duration_minutes} minutes</p><p className="text-sm text-muted-foreground">{new Date(e.starts_at).toLocaleString()} — {new Date(e.ends_at).toLocaleString()}</p><Button disabled={busy} onClick={()=>void open(e.id)}>{e.submitted_at?'View result':e.attempt_id?'Resume exam':'Start exam'}</Button></article>)}{!loading&&!error&&!(resultsOnly?results:exams).length&&<p>{resultsOnly?'No saved institute attempts yet.':'No exams are assigned to your current batches.'}</p>}<p className="text-sm text-muted-foreground">Access and availability are checked by the server. Refresh recovery restores answers that were successfully saved.</p></section>;
+}
+function InstituteRunner({initial,base,onBack}:{initial:Attempt;base:string;onBack:()=>void}){
+ const [attempt,setAttempt]=useState(initial),[responses,setResponses]=useState(initial.responses),[current,setCurrent]=useState(0),[saved,setSaved]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[conflict,setConflict]=useState(false),[confirm,setConfirm]=useState(false),[seconds,setSeconds]=useState(0);
+ const latest=useRef(initial.responses),record=useRef(initial),dirty=useRef(false),conflicted=useRef(false),request=useRef<Promise<void>|null>(null),alive=useRef(true),clock=useRef({server:+new Date(initial.serverNow),local:0}),heading=useRef<HTMLHeadingElement>(null),lastExpiry=useRef(0);
+ useEffect(()=>{alive.current=true;clock.current.local=performance.now();return()=>{alive.current=false;};},[]);
+ const accept=useCallback((next:Attempt)=>{if(!alive.current)return;record.current=next;clock.current={server:+new Date(next.serverNow),local:performance.now()};setAttempt(next);},[]);
+ const persist=useCallback(async(submit=false)=>{
+  if(request.current){await request.current;if(!submit)return;}
+  if(!alive.current||record.current.submittedAt||conflicted.current)return;
+  if(!submit&&!dirty.current)return;
+  const send=async()=>{
+   if(submit)setBusy(true);setError('');const snapshot=latest.current;
+   const r=await api<Attempt>(base+'/attempts/'+record.current.id+(submit?'/submit':''),{method:submit?'POST':'PUT',body:{revision:record.current.revision,responses:snapshot}});
+   if(!alive.current)return;
+   if(r.success&&r.data){accept(r.data);if(snapshot===latest.current||r.data.submittedAt){dirty.current=false;setSaved(true);}if(r.data.submittedAt){latest.current=r.data.responses;setResponses(r.data.responses);setConfirm(false);}}
+   else{setError(r.error?.message||'Your answers have not been saved. Retry before leaving.');if(r.error?.status===409){conflicted.current=true;setConflict(true);}}
+   setBusy(false);
+  };
+  request.current=send();try{await request.current;}finally{request.current=null;}
+ },[base,accept]);
+ useEffect(()=>{
+  if(attempt.submittedAt)return;
+  const tick=()=>{const now=clock.current.server+performance.now()-clock.current.local;const left=Math.max(0,Math.ceil((+new Date(record.current.deadlineAt)-now)/1000));setSeconds(left);if(!left&&performance.now()-lastExpiry.current>5000){lastExpiry.current=performance.now();void persist(true);}};
+  tick();const timer=window.setInterval(tick,1000),save=window.setInterval(()=>{void persist();},3000);
+  const leaving=(e:BeforeUnloadEvent)=>{if(dirty.current){e.preventDefault();e.returnValue='';}};window.addEventListener('beforeunload',leaving);
+  return()=>{window.clearInterval(timer);window.clearInterval(save);window.removeEventListener('beforeunload',leaving);};
+ },[attempt.submittedAt,persist]);
+ useEffect(()=>{heading.current?.focus();},[current]);
+ function choose(id:string,value:number){if(busy||conflict||attempt.submittedAt||!seconds)return;const next={...latest.current};if(value<0)delete next[id];else next[id]=value;latest.current=next;setResponses(next);dirty.current=true;setSaved(false);}
+ async function recover(){if(request.current)await request.current;setBusy(true);const r=await api<Attempt>(base+'/attempts/'+record.current.id);if(!alive.current)return;setBusy(false);if(r.success&&r.data){accept(r.data);latest.current=r.data.responses;setResponses(r.data.responses);dirty.current=false;setSaved(true);setConflict(false);conflicted.current=false;setError('');}else setError(r.error?.message||'Recovery failed');}
+ if(attempt.submittedAt&&attempt.result)return <section className={card}><h2 className="text-2xl font-semibold">{attempt.title} — Result</h2><p className="text-xl font-semibold">{attempt.result.score} / {attempt.result.total} marks ({attempt.result.percentage}%)</p><p>{attempt.result.correct} correct · {attempt.result.incorrect} incorrect · {attempt.result.skipped} skipped</p><Button variant="outline" onClick={onBack}>Return to institute exams</Button>{attempt.result.review?attempt.result.review.map(q=><article key={q.id} className="space-y-2 border-t pt-4"><h3 className="font-semibold">{q.question}</h3><p>Your choice: {q.selected<0?'Skipped':q.options[q.selected]} · Correct: {q.options[q.correctAnswer]}</p><p>{q.explanation}</p></article>):<p className="text-sm text-muted-foreground">Explanations become available after the exam window closes. Reopen your result then.</p>}</section>;
+ const q=attempt.test.questions[current];
+ return <section className="space-y-4"><header className={card}><div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-xl font-semibold">{attempt.title}</h2><span role="timer" aria-label="Time remaining" className="font-mono text-xl">{Math.floor(seconds/60)}:{String(seconds%60).padStart(2,'0')}</span></div><p role="status">{Object.keys(responses).length} / {attempt.test.questions.length} answered · {saved?'Saved to your account':'Unsaved changes'}</p><p className="text-sm text-muted-foreground">+{attempt.test.marksPerCorrect} per correct answer · −{attempt.test.negativeMarks} per wrong answer. The server enforces the deadline.</p></header>
+ {error&&<div className="space-y-2 rounded-lg border border-red-500 p-3" role="alert"><p>{error}</p>{conflict?<><p>Another device saved newer answers. Reloading replaces this tab’s unsaved choices with the server copy.</p><Button disabled={busy} onClick={()=>void recover()}>Reload saved answers</Button></>:<Button disabled={busy} variant="outline" onClick={()=>void persist()}>Retry save</Button>}</div>}
+ <nav className="flex flex-wrap gap-2" aria-label="Exam sections">{attempt.test.sections.map(s=><Button key={s} variant={q.section===s?'default':'outline'} onClick={()=>setCurrent(attempt.test.questions.findIndex(q=>q.section===s))}>{s}</Button>)}</nav>
+ <article className={card}><p className="text-sm text-muted-foreground">Question {current+1} · {q.section}</p><h3 ref={heading} tabIndex={-1} className="text-lg font-semibold focus-visible:outline-2">{q.question}</h3><fieldset disabled={busy||conflict||seconds===0} className="space-y-2"><legend className="sr-only">Choose your answer</legend>{q.options.map((option,i)=><label key={i} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border p-3"><input type="radio" name={q.id} checked={responses[q.id]===i} onChange={()=>choose(q.id,i)}/><span>{String.fromCharCode(65+i)}. {option}</span></label>)}</fieldset><div className="flex flex-wrap gap-2"><Button variant="outline" disabled={busy||conflict} onClick={()=>choose(q.id,-1)}>Clear answer</Button><Button variant="outline" disabled={!current} onClick={()=>setCurrent(c=>c-1)}>Previous question</Button><Button variant="outline" disabled={current===attempt.test.questions.length-1} onClick={()=>setCurrent(c=>c+1)}>Next question</Button><Button variant="outline" disabled={busy||saved||conflict} onClick={()=>void persist()}>Save now</Button></div></article>
+ <div className="flex flex-wrap gap-2" role="group" aria-label="Question navigation">{attempt.test.questions.map((question,i)=><Button key={question.id} size="sm" variant={i===current?'default':'outline'} aria-label={`Question ${i+1}${question.id in responses?', answered':''}`} aria-pressed={i===current} onClick={()=>setCurrent(i)}>{i+1}{question.id in responses?' ✓':''}</Button>)}</div><Button disabled={busy||conflict} onClick={()=>setConfirm(true)}>Submit institute exam</Button>
+ <Dialog open={confirm} onOpenChange={setConfirm}><DialogContent><DialogHeader><DialogTitle>Submit your exam?</DialogTitle><DialogDescription>You have answered {Object.keys(responses).length} of {attempt.test.questions.length} questions. The server will save your current choices and calculate the final score. Submission cannot be changed.</DialogDescription></DialogHeader><Button disabled={busy||conflict} onClick={()=>void persist(true)}>Confirm exam submission</Button></DialogContent></Dialog>
+ </section>;
+}
