@@ -11,3 +11,10 @@ Foundation endpoints are implemented, disabled by default. A complete self-servi
 7. Revocation immediately denies new requests, preserving results. Platform suspension also denies private requests and hides public branding. Owner transfer and membership restoration require a future explicit workflow.
 
 Teaching/batch/exam delivery, plan quotas and verified institute payment are not completed by this foundation. Do not use personal Pro grants or advertising membership as a substitute.
+
+
+## Workspace slice
+
+The opt-in frontend (`NEXT_PUBLIC_INSTITUTES_ENABLED=true`) now provides `/institute` for onboarding/invitation acceptance, `/institute/:slug/dashboard`, `/institute/:slug/students`, `/institute/:slug/settings` and `/admin/institutes` for platform review. The new public portal uses `/institute-portal/:slug` to preserve legacy `/c/:slug` coaching profiles without slug collisions. Staff can issue/revoke invitations, paginate/search members, confirm revocation, save branding and view actual counts. Unsupported teaching/billing modules are explicitly disclosed. The existing public `/institute-admin` demo remains labelled as such.
+
+Synthetic browser tests validate controls with intercepted APIs. They do not prove provider OAuth callbacks or database persistence. The foundation PostgreSQL CI job passed all seven integration tests. The broader CI initially failed an existing mobile-width assertion after closing an animated admin popup; the workspace slice adds a wait for popup detachment before resizing and reruns that acceptance.

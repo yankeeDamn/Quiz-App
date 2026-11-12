@@ -11,6 +11,7 @@ export default function InstitutesPage() {
     <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-14">
       <p className="font-semibold text-indigo-600">ExamPro for coaching institutes</p>
       <h1 className="mt-3 text-4xl font-extrabold">Your institute. Your identity. One exam platform.</h1>
+      {process.env.NEXT_PUBLIC_INSTITUTES_ENABLED==='true' && <Link className="mt-4 inline-block rounded-lg bg-indigo-700 px-5 py-3 font-semibold text-white" href="/institute">Open institute workspace</Link>}
       <p className="mt-4 max-w-3xl text-lg text-muted-foreground">
         Try the branding and batch-preview features from the original Exampro.html without maintaining a separate site.
         The live mock tests continue to run on the existing secure Render and Neon services.
