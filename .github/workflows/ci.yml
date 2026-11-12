@@ -73,6 +73,7 @@ jobs:
           AUTH_SECRET: ci-test-auth-secret
           NEXT_PUBLIC_API_URL: http://localhost:3001
           NEXT_PUBLIC_APP_ENV: local
+          NEXT_PUBLIC_INSTITUTES_ENABLED: "true"
 
       - name: Install isolated UI acceptance browser
         run: |
@@ -84,6 +85,20 @@ jobs:
         env:
           PLAYWRIGHT_MODULE: ${{ runner.temp }}/exampro-ui-tools/node_modules/playwright
           ADMIN_UI_ARTIFACT_DIR: ${{ github.workspace }}/test-results/admin-workflow
+
+      - name: Test synthetic institute workspace interactions
+        run: node scripts/institute-workspace.browser.cjs
+        env:
+          PLAYWRIGHT_MODULE: ${{ runner.temp }}/exampro-ui-tools/node_modules/playwright
+
+      - name: Upload synthetic institute UI screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: institute-workspace-ui
+          path: test-results/institute-workspace
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Upload synthetic admin UI screenshots
         if: always()

@@ -37,7 +37,7 @@ export function WhatsAppButton({ text, label = 'Chat on WhatsApp', variant = 'so
 /** Admin actions need an unobstructed workspace; its footer retains the support link. */
 export function FloatingWhatsApp() {
   const pathname = usePathname();
-  if (pathname === '/admin' || pathname.startsWith('/admin/')) return null;
+  if (pathname === '/admin' || pathname.startsWith('/admin/') || pathname === '/institute' || pathname.startsWith('/institute/')) return null;
   return (
     <a
       href={whatsappLink('Hi, I have a question about Exam Practice Pro.')}

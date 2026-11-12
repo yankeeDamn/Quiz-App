@@ -77,7 +77,7 @@ async function intercept(route){
   let available=false;
   for(let i=0;i<80;i++){try{if((await fetch(origin+'/admin')).ok){available=true;break;}}catch{}await delay(250);}
   assert.ok(available,'Local production app did not start: '+serverLogs);
-  browser=await chromium.launch({headless:true,args:['--disable-dev-shm-usage']});
+  browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE}:{}),args:['--disable-dev-shm-usage']});
   const context=await browser.newContext({viewport:{width:1440,height:1100},reducedMotion:'reduce'});
   await context.route('**/*',intercept);
   const page=await context.newPage();page.on('pageerror',e=>browserErrors.push(e.message));
