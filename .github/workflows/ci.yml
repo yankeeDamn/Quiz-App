@@ -72,6 +72,7 @@ jobs:
         env:
           AUTH_SECRET: ci-test-auth-secret
           NEXT_PUBLIC_API_URL: http://localhost:3001
+          NEXT_PUBLIC_APP_ENV: local
 
       - name: Install isolated UI acceptance browser
         run: |
