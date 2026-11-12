@@ -17,7 +17,7 @@ const liveMock={...fixtureMock,id:'live-synthetic',name:'Live Synthetic SSC',exa
 const blockedMock={...fixtureMock,id:'blocked-synthetic',name:'Blocked Synthetic Railways',exam:'Railways',active:true,hiddenReason:'One source question is missing.'};
 const mockRows=[fixtureMock,liveMock,blockedMock,...Array.from({length:10},(_,i)=>({...fixtureMock,id:`training-${i}`,name:i===0?'=SUM(1,1)':`Training Draft ${i}`,tier:'free',minutes:20+i,configuredQuestionCount:10+i}))];
 const calls=[],mockCalls=[],browserErrors=[];
-let revision=30,serverLogs='',browser,server;
+let revision=30,serverLogs='',browser,server,sessionEmail='owner@example.test',adminChecks=0;
 const topicRows=()=>[{id:'computer',name:'Computer Training',category:'Synthetic',active:true,total:12,live:questions.filter(q=>q.active&&q.review_status==='published').length},{id:'other',name:'Other Training',category:'Synthetic',active:true,total:1,live:0}];
 function checklist(){
  const selected=questions.slice(0,3),ready=selected.filter(q=>q.active&&q.reviewed_at&&q.review_status==='published').length;
@@ -28,11 +28,11 @@ async function intercept(route){
  const headers={'access-control-allow-origin':'*','access-control-allow-headers':'Content-Type,Authorization','access-control-allow-methods':'GET,POST,PUT,OPTIONS'};
  const reply=(data,status=200)=>route.fulfill({status,headers,contentType:'application/json',body:JSON.stringify(data)});
  if(request.method()==='OPTIONS')return route.fulfill({status:204,headers});
- if(url.pathname==='/api/auth/session')return reply({user:{id:'synthetic-owner',name:'Review Owner',email:'owner@example.test'},expires:'2099-01-01T00:00:00.000Z'});
+ if(url.pathname==='/api/auth/session'){await delay(150);return reply(sessionEmail?{user:{id:'synthetic-owner',name:'Review Owner',email:sessionEmail},expires:'2099-01-01T00:00:00.000Z'}:null);}
  if(url.pathname==='/api/auth/backend-token')return reply({token:'synthetic-bridge-token'});
  if(url.pathname.startsWith('/api/v1/')){
   const p=url.pathname.replace('/api/v1','');
-  if(p==='/admin/me')return reply({success:true,data:{via:'account',email:'owner@example.test'}});
+  if(p==='/admin/me'){adminChecks++;return sessionEmail==='owner@example.test'?reply({success:true,data:{via:'account',email:sessionEmail}}):reply({success:false,error:{message:'Not an admin'}},403);}
   if(p==='/admin/command-center')return reply({success:true,data:{questions:{total:13,active:12,topics:2},publication:{published:0,drafts:1},catalogue:{total:1,free:1,pro:0},attempts:{submitted:0,accuracy:null},plans:{active:0,manualGrants:0},checkedAt:'2026-11-02T00:00:00Z'}});
   if(p==='/admin/tests')return reply({success:true,data:{tests:mockRows}});
   if(p==='/admin/tests/publication-candidates')return reply({success:true,data:{candidates:[{id:'bank1',name:fixtureMock.name,ready:false,blocker:'Questions need review.'}]}});
@@ -120,6 +120,15 @@ async function intercept(route){
   assert.equal(await page.getByRole('menuitem',{name:'Test draft privately',exact:true}).getAttribute('href'),'/admin/draft-test/bank1');
   await page.getByRole('menuitem',{name:'Edit mock settings',exact:true}).click();
   await page.getByRole('heading',{name:'Edit bank1',exact:true}).waitFor();
+  await page.getByLabel('Name',{exact:true}).fill('Unsaved draft survives focus refresh');
+  const checksBeforeFocus=adminChecks;
+  for(let n=0;n<3;n++){
+   const refreshed=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/auth/session');
+   await page.evaluate(()=>document.dispatchEvent(new Event('visibilitychange')));
+   await refreshed;
+   assert.equal(await page.getByLabel('Name',{exact:true}).inputValue(),'Unsaved draft survives focus refresh','same-account session refresh must preserve the editor');
+  }
+  assert.equal(adminChecks,checksBeforeFocus,'same-account focus must not restart the admin gate');
   await page.getByRole('button',{name:'Cancel',exact:true}).click();
   await manager.getByRole('button',{name:'More actions for Synthetic Bank Mock',exact:true}).click();
   await page.getByRole('menuitem',{name:'Duplicate as a draft',exact:true}).click();
@@ -222,8 +231,18 @@ async function intercept(route){
   await page.screenshot({animations:'disabled',path:path.join(output,'question-workspace-mobile-dark.png'),fullPage:true});
   await page.goto(origin+'/contact');
   await page.getByRole('link',{name:'Chat on WhatsApp',exact:true}).waitFor();
+  await page.goto(origin+'/admin');await page.getByRole('region',{name:'Mock definitions manager',exact:true}).waitFor();
+  sessionEmail='different-account@example.test';
+  const switched=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/auth/session');
+  await page.evaluate(()=>document.dispatchEvent(new Event('visibilitychange')));await switched;
+  await page.getByText('This account does not have admin access.',{exact:true}).waitFor();
+  assert.equal(await page.getByRole('region',{name:'Mock definitions manager',exact:true}).count(),0,'switching account removes private admin controls');
+  sessionEmail=null;
+  const signedOut=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/auth/session');
+  await page.evaluate(()=>document.dispatchEvent(new Event('visibilitychange')));await signedOut;
+  await page.getByRole('link',{name:'Sign in to workspace',exact:true}).waitFor();
   assert.deepEqual(browserErrors,[],'No unhandled browser errors');
-  console.log('Admin UI acceptance passed: mock filters, sorting, pagination, CSV export, action menu, preview, editing/duplication/cancel, tier confirmation, blocked publication, mobile cards; acknowledgement reset, review/publish, access cancel/confirm, pagination, topic isolation, mock return, publication guard and mobile width.');
+  console.log('Admin UI acceptance passed: unsaved draft retained across three session focus refreshes, account-switch denial, sign-out removal; mock filters, sorting, pagination, CSV export, action menu, preview, editing/duplication/cancel, tier confirmation, blocked publication, mobile cards; acknowledgement reset, review/publish, access cancel/confirm, pagination, topic isolation, mock return, publication guard and mobile width.');
  }catch(error){
   if(browser){for(const c of browser.contexts())for(const p of c.pages())await p.screenshot({animations:'disabled',path:path.join(output,'failure.png'),fullPage:true}).catch(()=>{});}
   console.error(error);console.error(serverLogs);process.exitCode=1;
