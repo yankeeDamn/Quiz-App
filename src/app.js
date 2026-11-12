@@ -46,6 +46,8 @@ app.use(
 // The admin page can import many questions at once, so it gets a larger limit.
 app.use('/api/v1/admin/ebooks/:slug/pdf', express.raw({ type: 'application/pdf', limit: '3mb' }));
 app.use('/api/v1/admin', express.json({ limit: '1mb' }));
+// Bounded institute CSV/logo payloads. Authorization still occurs before service writes.
+app.use('/api/v1/institutes', express.json({ limit: '256kb' }));
 // Raw bytes are mandatory for Cashfree webhook HMAC verification.
 app.use('/api/v1/cashfree/webhook', express.raw({ type: 'application/json', limit: '64kb' }));
 app.use('/api/v1/payments/webhook', express.raw({ type: 'application/json', limit: '64kb' }));

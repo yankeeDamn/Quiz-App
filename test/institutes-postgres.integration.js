@@ -32,7 +32,7 @@ async function join(i,email,role,owner){
 }
 test.before(async()=>{
  await db.query(`CREATE TABLE IF NOT EXISTS users(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),email text UNIQUE,name text,image text,provider text,provider_id text,role text DEFAULT 'user',payment_status text DEFAULT 'unpaid',plan text DEFAULT 'free',plan_expires_at timestamptz,created_at timestamptz DEFAULT now(),updated_at timestamptz DEFAULT now())`);
- for(let n=0;n<2;n++) { await db.query(fs.readFileSync('src/db/pilot-schema.sql','utf8'));await db.query(fs.readFileSync('src/db/institute-foundation.sql','utf8')); }
+ for(let n=0;n<2;n++) { await db.query(fs.readFileSync('src/db/pilot-schema.sql','utf8'));await db.query(fs.readFileSync('src/db/institute-foundation.sql','utf8'));await db.query(fs.readFileSync('src/db/institute-delivery.sql','utf8')); }
  server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));base='http://127.0.0.1:'+server.address().port;
 });
 test.after(async()=>{if(server){server.closeAllConnections();await new Promise(r=>server.close(r));}await db.end();});
@@ -97,4 +97,112 @@ test('revocation and suspension invalidate subsequent requests; student-selected
  assert.equal((await call('/institutes/public/'+B.slug,null)).status,404);
  assert.equal((await call('/platform/institutes/'+B.id+'/lifecycle',undefined,'POST',{status:'active'})).status,200);
  const logs=(await db.query('SELECT action FROM pilot_audit_logs')).rows;assert.ok(logs.some(x=>x.action==='membership.revoked'));
+});
+
+const questionInput=(id='original')=>({external_id:id,topic:'Synthetic arithmetic',difficulty:'Easy',prompt:'Synthetic '+id+': select the first option',options:['First','Second','Third','Fourth'],correct_option:'A',explanation:'Synthetic private explanation',language:'en'});
+const at=i=>'/institutes/'+i.slug;
+async function expectCall(path,email,method,body,status=200){const r=await call(path,email,method,body);assert.equal(r.status,status,JSON.stringify(r.json));return r.json.data;}
+function examInput(i,extra={}){return {bankId:i.deliveryBank,title:'Synthetic assigned exam',minutes:10,marksPerCorrect:2,negativeMarks:0.5,passPercent:50,startsAt:new Date(Date.now()-1000).toISOString(),endsAt:new Date(Date.now()+3600000).toISOString(),sections:[{name:'Section one',questionIds:[i.deliveryQ.id]},{name:'Section two',questionIds:[i.deliveryQ2.id]}],...extra};}
+test('private teaching APIs create two reviewed banks, assigned batches and published snapshots',async()=>{
+ process.env.INSTITUTE_DELIVERY_ENABLED='true';
+ for(const [i,letter] of [[A,'a'],[B,'b']]) {
+  const teacher=`teacher-${letter}@example.test`,owner=`owner-${letter}@example.test`;
+  i.deliveryBank=(await expectCall(at(i)+'/banks',teacher,'POST',{title:'Synthetic private bank',examCode:'SYN'},201)).id;
+  i.deliveryQ=await expectCall(at(i)+'/banks/'+i.deliveryBank+'/questions',teacher,'POST',questionInput('q1'),201);
+  i.deliveryQ2=await expectCall(at(i)+'/banks/'+i.deliveryBank+'/questions',teacher,'POST',questionInput('q2'),201);
+  i.deliveryBatch=(await expectCall(at(i)+'/batches',owner,'POST',{name:'Synthetic assigned batch'},201)).id;
+  for(const id of i.students.slice(1))await expectCall(at(i)+'/batches/'+i.deliveryBatch+'/members/'+id,owner,'PUT',{role:'student'});
+  await expectCall(at(i)+'/batches/'+i.deliveryBatch+'/members/'+i.teacher,owner,'PUT',{role:'teacher'});
+  i.deliveryDraft=await expectCall(at(i)+'/exams',teacher,'POST',examInput(i),201);
+  i.deliveryExam=await expectCall(at(i)+'/exams',teacher,'POST',examInput(i),201);
+  await expectCall(at(i)+'/exams/'+i.deliveryExam.id+'/assignments',owner,'POST',{batchId:i.deliveryBatch});
+  await expectCall(at(i)+'/exams/'+i.deliveryExam.id+'/publish',owner,'POST',{},409);
+  for(const q of [i.deliveryQ,i.deliveryQ2])await expectCall(at(i)+'/questions/'+q.id+'/review',owner,'POST',{action:'approve'});
+  await expectCall(at(i)+'/exams/'+i.deliveryExam.id+'/publish',owner,'POST',{});
+  await expectCall(at(i)+'/exams/'+i.deliveryExam.id,teacher,'PUT',examInput(i),409);
+ }
+ assert.equal((await db.query('SELECT count(*)::int n FROM pilot_exams WHERE snapshot IS NOT NULL')).rows[0].n,2);
+});
+test('tenant and teacher boundaries deny banks, questions, versions, batches and assignments by substituted IDs',async()=>{
+ await expectCall(at(A)+'/banks/'+B.deliveryBank+'/questions','owner-a@example.test','GET',undefined,404);
+ await expectCall(at(A)+'/questions/'+B.deliveryQ.id,'owner-a@example.test','PUT',{...questionInput('q1'),institute_id:B.id},404);
+ await expectCall(at(B)+'/questions/'+B.deliveryQ.id+'/versions','teacher-a@example.test','GET',undefined,404);
+ await expectCall(at(A)+'/banks/'+A.deliveryBank+'/questions','student-a-1@example.test','GET',undefined,403);
+ await expectCall(at(A)+'/batches/'+A.deliveryBatch+'/members/'+B.students[1],'owner-a@example.test','PUT',{role:'student'},404);
+ await expectCall(at(A)+'/exams/'+A.deliveryDraft.id+'/assignments','owner-a@example.test','POST',{batchId:B.deliveryBatch},404);
+ const privateBank=await expectCall(at(A)+'/banks','owner-a@example.test','POST',{title:'Owner restricted bank',examCode:'SYN'},201);
+ await expectCall(at(A)+'/banks/'+privateBank.id+'/questions','teacher-a@example.test','GET',undefined,404);
+ const own=await expectCall(at(A)+'/banks/'+privateBank.id+'/questions','owner-a@example.test','POST',questionInput('owner-question'),201);
+ await expectCall(at(A)+'/questions/'+own.id+'/review','owner-a@example.test','POST',{action:'approve'},409);
+});
+test('CSV is atomic, preserves external IDs, detects reordered duplicate content and records versions',async()=>{
+ const prefix=at(A)+'/banks/'+A.deliveryBank;
+ const header='external_id,topic,difficulty,prompt,option_a,option_b,option_c,option_d,correct_option,explanation,language\n';
+ const source=header+'csv-one,topic,Easy,"Synthetic, quoted prompt",one,two,three,four,A,"Line one\nline two",en\n';
+ const imported=await expectCall(prefix+'/import','teacher-a@example.test','POST',{csv:source},201);assert.equal(imported.count,1);
+ const before=(await db.query('SELECT count(*) n FROM pilot_questions WHERE bank_id=$1',[A.deliveryBank])).rows[0].n;
+ const bad=header+'csv-new,topic,Easy,New synthetic prompt,one,two,three,four,A,Explanation,en\n'+'csv-one,topic,Easy,Other prompt,one,two,three,four,A,Explanation,en';
+ await expectCall(prefix+'/import','teacher-a@example.test','POST',{csv:bad},409);
+ assert.equal((await db.query('SELECT count(*) n FROM pilot_questions WHERE bank_id=$1',[A.deliveryBank])).rows[0].n,before);
+ await expectCall(prefix+'/questions','teacher-a@example.test','POST',{...questionInput('q1'),external_id:'duplicate',options:['Fourth','Third','Second','First']},409);
+ const versions=await expectCall(at(A)+'/questions/'+A.deliveryQ.id+'/versions','owner-a@example.test');assert.equal(versions.versions.length,2);
+ assert.equal(versions.versions[1].content.external_id,'q1');
+});
+test('draft/private exams cannot be started through another tenant, role or caller-selected tenant ID',async()=>{
+ await expectCall(at(B)+'/exams/'+B.deliveryExam.id+'/start','student-a-1@example.test','POST',{},404);
+ await expectCall(at(A)+'/exams/'+B.deliveryExam.id+'/start','student-a-1@example.test','POST',{institute_id:B.id},404);
+ await expectCall(at(A)+'/exams/'+A.deliveryDraft.id+'/start','student-a-1@example.test','POST',{},404);
+ await expectCall(at(A)+'/exams/'+A.deliveryExam.id+'/start','teacher-a@example.test','POST',{},403);
+ await expectCall(at(A)+'/exams/'+A.deliveryExam.id+'/start','dual@example.test','POST',{},404);
+ const list=await expectCall(at(A)+'/assigned-exams','student-a-1@example.test');assert.equal(list.exams.length,1);
+ assert.equal(JSON.stringify(list).includes('correct_option'),false);assert.equal(JSON.stringify(list).includes('Synthetic private explanation'),false);
+});
+test('concurrent starts create one attempt, never expose keys, and retain the original published question',async()=>{
+ const started=await Promise.all([call(at(A)+'/exams/'+A.deliveryExam.id+'/start','student-a-1@example.test','POST',{}),call(at(A)+'/exams/'+A.deliveryExam.id+'/start','student-a-1@example.test','POST',{})]);
+ assert.ok(started.every(x=>x.status===200),JSON.stringify(started));assert.equal(started[0].json.data.id,started[1].json.data.id);A.attempt=started[0].json.data;
+ assert.equal(A.attempt.test.questions.length,2);assert.equal(A.attempt.result,null);assert.ok(new Date(A.attempt.deadlineAt)>new Date(A.attempt.serverNow));
+ assert.equal(Object.hasOwn(A.attempt.test.questions[0],'answer'),false);assert.equal(JSON.stringify(A.attempt).includes('Synthetic private explanation'),false);
+ await expectCall(at(A)+'/questions/'+A.deliveryQ.id,'teacher-a@example.test','PUT',{...questionInput('q1'),prompt:'Changed draft source after publication'});
+ const reloaded=await expectCall(at(A)+'/attempts/'+A.attempt.id,'student-a-1@example.test');assert.equal(reloaded.test.questions[0].question,questionInput('q1').prompt);
+ await assert.rejects(db.query("UPDATE pilot_exams SET snapshot='{}' WHERE id=$1",[A.deliveryExam.id]),e=>e.code==='23514');
+ await assert.rejects(db.query("UPDATE pilot_attempts SET deadline_at=deadline_at+interval '1 hour' WHERE id=$1",[A.attempt.id]),e=>e.code==='23514');
+});
+test('autosave persists across refresh, rejects stale devices and ignores forged scores on idempotent submission',async()=>{
+ const endpoint=at(A)+'/attempts/'+A.attempt.id,email='student-a-1@example.test';
+ await expectCall(endpoint,email,'PUT',{revision:0,responses:{[B.deliveryQ.id]:0}},400);
+ const answers={[A.deliveryQ.id]:0,[A.deliveryQ2.id]:1};
+ const saves=await Promise.all([call(endpoint,email,'PUT',{revision:0,responses:answers}),call(endpoint,email,'PUT',{revision:0,responses:{}})]);
+ assert.deepEqual(saves.map(x=>x.status).sort(),[200,409]);
+ let reloaded=await expectCall(endpoint,email);assert.equal(reloaded.revision,1);
+ reloaded=await expectCall(endpoint,email,'PUT',{revision:1,responses:answers});assert.deepEqual(reloaded.responses,answers);
+ const submissions=await Promise.all([call(endpoint+'/submit',email,'POST',{revision:2,responses:answers,score:99999,result:{passed:true}}),call(endpoint+'/submit',email,'POST',{revision:2,responses:answers})]);
+ assert.ok(submissions.every(x=>x.status===200),JSON.stringify(submissions));assert.deepEqual(submissions[0].json.data.result,submissions[1].json.data.result);
+ assert.equal(submissions[0].json.data.result.score,1.5);assert.equal(submissions[0].json.data.result.total,4);assert.equal(submissions[0].json.data.result.review,undefined);
+ assert.equal((await expectCall(endpoint,email,'PUT',{revision:999,responses:{}})).result.score,1.5);
+ await assert.rejects(db.query('UPDATE pilot_attempts SET score=2 WHERE id=$1',[A.attempt.id]),e=>e.code==='23514');
+});
+test('only own results and assigned teacher batch reports are readable; removing membership revokes access',async()=>{
+ const endpoint=at(A)+'/attempts/'+A.attempt.id;
+ await expectCall(at(B)+'/attempts/'+A.attempt.id,'student-b-1@example.test','GET',undefined,404);
+ await expectCall(endpoint,'student-a-2@example.test','GET',undefined,404);
+ await expectCall(at(A)+'/batches/'+A.deliveryBatch+'/report','student-a-2@example.test','GET',undefined,403);
+ await expectCall(at(A)+'/batches/'+B.deliveryBatch+'/report','teacher-a@example.test','GET',undefined,404);
+ const report=await expectCall(at(A)+'/batches/'+A.deliveryBatch+'/report','teacher-a@example.test');assert.equal(report.attempts.length,1);assert.equal(report.attempts[0].result.review,undefined);
+ assert.equal((await expectCall(at(B)+'/results','student-b-1@example.test')).results.length,0);
+ await expectCall(at(A)+'/members/'+A.students[1]+'/revoke','owner-a@example.test','POST',{});
+ await expectCall(endpoint,'student-a-1@example.test','GET',undefined,404);
+ assert.equal((await expectCall(at(A)+'/results','dual@example.test')).results.length,0);
+ await expectCall(at(B)+'/results','dual@example.test','GET',undefined,403);
+});
+test('deadline uses database time; late answers are ignored and review unlocks only after the exam window',async()=>{
+ // q1 was edited and must be reviewed again before another publication.
+ await expectCall(at(A)+'/questions/'+A.deliveryQ.id+'/review','owner-a@example.test','POST',{action:'approve'});
+ const e=await expectCall(at(A)+'/exams','teacher-a@example.test','POST',examInput(A,{endsAt:new Date(Date.now()+2000).toISOString()}),201);
+ await expectCall(at(A)+'/exams/'+e.id+'/assignments','owner-a@example.test','POST',{batchId:A.deliveryBatch});
+ await expectCall(at(A)+'/exams/'+e.id+'/publish','owner-a@example.test','POST',{});
+ const a=await expectCall(at(A)+'/exams/'+e.id+'/start','student-a-2@example.test','POST',{});
+ await new Promise(resolve=>setTimeout(resolve,Math.max(0,+new Date(a.deadlineAt)-Date.now()+50)));
+ const expired=await expectCall(at(A)+'/attempts/'+a.id,'student-a-2@example.test','PUT',{revision:0,responses:{[A.deliveryQ.id]:0}});
+ assert.ok(expired.submittedAt);assert.equal(expired.result.score,0);assert.equal(expired.result.skipped,2);assert.equal(expired.result.review.length,2);
+ await expectCall(at(A)+'/exams/'+e.id+'/start','student-a-3@example.test','POST',{},409);
 });

@@ -31,3 +31,12 @@ Public branding permits validated hex colours and bounded raster data URLs; it d
 ## Required negative evidence
 
 The disposable PostgreSQL suite tests two separate teachers, ten students per tenant, altered URL/body IDs, role denial, email/token tampering, duplicate invite acceptance, revocation, suspension, immutability, composite FKs and rollback. Exam-start/question-edit/result-denial cases are not proved by foundation and must be added with delivery routes. No assertion of full tenant isolation may omit these gaps.
+# Delivery authorization and integrity
+
+Private banks are available to their creating teacher and institute owners/admins. Students never receive bank records, versions, answer keys or draft exam bodies. Question edits require a fresh independent owner/admin review. CSV imports validate all rows and use one transaction; a duplicate ID or normalized prompt/options fingerprint rolls back the entire import. This is likely-duplicate detection, not a claim of semantic plagiarism detection.
+
+Student exam starts resolve active membership and current batch assignment on the server. The database clock determines the deadline, capped by the published end time. Immutable snapshots are served with answer fields removed. Revision numbers reject stale cross-device saves; the client cannot set a score, deadline, membership or tenant. Row locks and unique exam/student constraints make concurrent starts and submissions idempotent. Late answers are ignored; the previously saved responses are graded. Submitted explanations are withheld until the common exam window closes.
+
+Own results require current membership, and teacher reports require an explicitly assigned batch. A removed batch assignment prevents further in-progress delivery; retained, submitted own results remain available while institute membership is active. Removed membership denies all private APIs. There is no public ranking endpoint. Teacher reports include permitted student identifiers and must not be described as anonymous leaderboards.
+
+Expiry currently finalizes on the next start/read/save/submit request. A durable background finalizer and operational recovery are still required before claiming unattended completion analytics. Existing global IP limits may throttle classrooms behind a shared NAT; measured capacity and adjusted layered limits remain release gates. Database credentials remain a trusted boundary; application isolation and composite FKs are tested, but no PostgreSQL RLS claim is made.
