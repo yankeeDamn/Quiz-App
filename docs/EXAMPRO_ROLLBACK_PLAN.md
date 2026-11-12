@@ -12,3 +12,7 @@ For an owner-approved future rollout:
 6. Recheck public readiness/catalogue, login, history and protected PDF access. Record rollback revision/time and support communications. Payment incidents need provider reconciliation; code rollback does not refund or reverse money.
 
 Irreversible actions, live payment changes and publication changes remain owner-gated. Never run a destructive down migration just to make schema match older code.
+
+### Reporting and expiry rollback
+
+Disable `INSTITUTE_EXPIRY_WORKER_ENABLED` and roll back the application revision after owner approval. Keep the additive index and all finalized results/audit rows. Submitted results remain immutable; do not undo grading by rewriting rows. Existing request-triggered grading still applies when a learner returns. Never drop institute tables to roll back a feature.

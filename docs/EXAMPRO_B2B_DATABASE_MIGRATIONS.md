@@ -32,3 +32,9 @@ Run `psql -v ON_ERROR_STOP=1 -f src/db/institute-delivery.sql` only after approv
 Local disposable PostgreSQL 18: all three SQL files applied twice and 15 API/integrity scenarios passed. CI runs the same suite on PostgreSQL 16. No staging/production database connection was used. Future subscriptions still need configurable plans/usage and a payment ledger; none of these migrations grants paid access.
 
 Rollback is feature disablement and code reversion, retaining additive tables and original data. A destructive down migration is intentionally not shipped.
+
+### Reporting and unattended exam expiry (manual fourth institute migration)
+
+After `pilot-schema.sql`, `institute-foundation.sql`, and `institute-delivery.sql`, review and apply `src/db/institute-reporting.sql` only to an approved target. It adds a partial index over pending snapshot attempts; it changes no questions, results, memberships, or plans. Disposable integration tests apply it twice. Leave automatic startup migration lists unchanged.
+
+Set `INSTITUTE_EXPIRY_WORKER_ENABLED=true` only together with the institute and delivery flags after migration acceptance. It grades expired, already-started institute snapshot attempts from saved responses every 15 seconds in batches of 25. Concurrent processes use row locks and `SKIP LOCKED`. Expiry finalizes attempts even after membership revocation; it does not restore access. Legacy attempts with no immutable snapshot are excluded. Monitor oldest pending deadline and worker errors. Scale worker throughput before admitting cohorts that exceed tested capacity.

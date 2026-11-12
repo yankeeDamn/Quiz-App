@@ -3,6 +3,7 @@
 const router=require('express').Router();
 const teaching=require('../services/institutes/teaching');
 const attempts=require('../services/institutes/attempts');
+const reporting=require('../services/institutes/reporting');
 const wrap=fn=>(req,res,next)=>Promise.resolve(fn(req,res)).catch(next);
 const ok=(res,data,status=200)=>res.status(status).json({success:true,data});
 router.use((_req,_res,next)=>process.env.INSTITUTE_DELIVERY_ENABLED==='true'?next():next('router'));
@@ -33,4 +34,6 @@ router.put('/institutes/:slug/attempts/:id',wrap(async(q,r)=>ok(r,await attempts
 router.post('/institutes/:slug/attempts/:id/submit',wrap(async(q,r)=>ok(r,await attempts.attempt(q.user,q.params.slug,q.params.id,q.body,true))));
 router.get('/institutes/:slug/results',wrap(async(q,r)=>ok(r,{results:await attempts.results(q.user,q.params.slug)})));
 router.get('/institutes/:slug/batches/:id/report',wrap(async(q,r)=>ok(r,{attempts:await attempts.report(q.user,q.params.slug,q.params.id)})));
+router.get('/institutes/:slug/batches/:id/analytics',wrap(async(q,r)=>ok(r,await reporting.analytics(q.user,q.params.slug,q.params.id))));
+router.get('/institutes/:slug/batches/:id/export',wrap(async(q,r)=>ok(r,await reporting.exportPage(q.user,q.params.slug,q.params.id,q.query.offset))));
 module.exports=router;
