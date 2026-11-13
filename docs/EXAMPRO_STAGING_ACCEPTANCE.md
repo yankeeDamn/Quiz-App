@@ -25,3 +25,7 @@ Foundation alone does not implement exam delivery/billing and cannot satisfy ste
 ### Institute billing sandbox
 
 Follow `EXAMPRO_INSTITUTE_BILLING_ACCEPTANCE.md` after separately approving the fifth manual migration and exact staging revision. No real-provider sandbox settlement has been verified by the synthetic test suite. Keep live payments disabled. Verify the existing consumer Free/Pro plans and advertising remain independent of an institute purchase.
+
+### Consumer record regression acceptance
+
+With two approved synthetic accounts, save/remove/reload bookmarks and notes, then create/edit/reveal/delete a synthetic Government Jobs application. Verify account B cannot read, edit, reveal or delete account A's record by changing IDs. Confirm references are masked except on explicit own-record reveal; all tracking status is self-reported. Confirm no-store headers and validation messages for IDs over 100 characters, bookmark notes over 5,000 and note content over 10,000. Existing longer stored content remains readable; no data migration is introduced by these validation changes.
