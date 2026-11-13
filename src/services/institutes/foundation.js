@@ -3,6 +3,7 @@ const {randomUUID}=require('node:crypto');
 const db=require('../../config/database');
 const config=require('../../config');
 const p=require('./policy');
+const quotas=require('./quotas');
 async function transaction(fn) {
  const c=await db.getClient();
  try { await c.query('BEGIN'); const result=await fn(c); await c.query('COMMIT'); return result; }
@@ -105,6 +106,7 @@ async function accept(user,token) {
   // Never let an older invite silently change an existing role or resurrect revoked membership.
   const exists=await c.query('SELECT 1 FROM pilot_memberships WHERE institute_id=$1 AND user_id=$2',[i.id,user.id]);
   if(exists.rowCount) throw p.fail('Membership already exists; ask the owner to review it',409);
+  if(inv.role==='student'||inv.role==='teacher')await quotas.requireCapacity(c,i.id,inv.role==='student'?'students':'teachers');
   await c.query('INSERT INTO pilot_memberships(institute_id,user_id,role) VALUES($1,$2,$3)',[i.id,user.id,inv.role]);
   await c.query('UPDATE pilot_invitations SET accepted_at=now(),accepted_by=$2 WHERE id=$1',[inv.id,user.id]);
   await audit(c,i.id,user,'invitation.accepted',inv.id); return {slug:i.slug,role:inv.role};
@@ -127,6 +129,6 @@ async function workspace(user,slug) { return within(user,slug,'workspace:read',a
  (SELECT count(*)::int FROM pilot_exams WHERE institute_id=$1 AND status='published') AS published_exams,
  (SELECT count(*)::int FROM pilot_attempts WHERE institute_id=$1 AND submitted_at IS NOT NULL) AS submitted_attempts`,[t.institute.id])).rows[0]:null;
  const activity=(t.role==='owner'||t.role==='admin')?(await c.query('SELECT action,created_at FROM pilot_audit_logs WHERE institute_id=$1 ORDER BY id DESC LIMIT 20',[t.institute.id])).rows:[];
- return {institute:{id:t.institute.id,slug:t.institute.slug,name:t.institute.name,status:t.institute.status,profile:t.institute.profile},role:t.role,permissions:t.permissions,counts,activity,modules:{delivery:process.env.INSTITUTE_DELIVERY_ENABLED==='true'}};
+ return {institute:{id:t.institute.id,slug:t.institute.slug,name:t.institute.name,status:t.institute.status,profile:t.institute.profile},role:t.role,permissions:t.permissions,counts,activity,modules:{delivery:process.env.INSTITUTE_DELIVERY_ENABLED==='true',billing:process.env.INSTITUTE_BILLING_ENABLED==='true'}};
  }); }
 module.exports={transaction,platform,audit,tenant,within,mine,publicProfile,apply,applications,review,lifecycle,settings,members,invite,invitations,revokeInvite,accept,revokeMember,workspace};

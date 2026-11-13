@@ -2,6 +2,7 @@
 const p=require('./policy');
 const v=require('./content-policy');
 const f=require('./foundation');
+const quotas=require('./quotas');
 
 async function bank(c,t,id) {
  p.uuid(id);
@@ -22,6 +23,7 @@ async function history(c,t,row) {
  await c.query('INSERT INTO pilot_question_versions(institute_id,question_id,version,changed_by,content) VALUES($1,$2,$3,$4,$5)',[t.institute.id,row.id,row.version,t.user.id,JSON.stringify(row)]);
 }
 async function insertQuestion(c,t,bankId,q) {
+ await quotas.requireCapacity(c,t.institute.id,'questions');
  const row=(await c.query(`INSERT INTO pilot_questions(institute_id,bank_id,external_id,topic,difficulty,prompt,options,correct_option,explanation,language,fingerprint,author_id)
  VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`,[t.institute.id,bankId,q.external_id,q.topic,q.difficulty,q.prompt,JSON.stringify(q.options),q.correct_option,q.explanation,q.language,q.fingerprint,t.user.id])).rows[0];
  await history(c,t,row);return row;
@@ -81,7 +83,7 @@ async function versions(user,slug,id) {
 }
 async function batches(user,slug,raw) {
  return f.within(user,slug,raw?'batches:write':'workspace:read',async(c,t)=>{
-  if(raw){const row=(await c.query('INSERT INTO pilot_batches(institute_id,name) VALUES($1,$2) RETURNING id,name',[t.institute.id,p.text(raw.name,160)])).rows[0];await f.audit(c,t.institute.id,user,'batch.created',row.id);return row;}
+  if(raw){await quotas.requireCapacity(c,t.institute.id,'batches');const row=(await c.query('INSERT INTO pilot_batches(institute_id,name) VALUES($1,$2) RETURNING id,name',[t.institute.id,p.text(raw.name,160)])).rows[0];await f.audit(c,t.institute.id,user,'batch.created',row.id);return row;}
   if(!['owner','admin','teacher'].includes(t.role))throw p.fail('Permission denied',403);
   return (await c.query(`SELECT b.id,b.name FROM pilot_batches b WHERE b.institute_id=$1 AND ($2::uuid IS NULL OR EXISTS
    (SELECT 1 FROM pilot_batch_teachers bt WHERE bt.institute_id=b.institute_id AND bt.batch_id=b.id AND bt.user_id=$2)) ORDER BY b.name LIMIT 100`,[t.institute.id,t.role==='teacher'?user.id:null])).rows;

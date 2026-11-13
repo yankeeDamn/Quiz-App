@@ -52,4 +52,4 @@ async function webhook(raw,signature,timestamp){
  if(event.type!=='PAYMENT_SUCCESS_WEBHOOK'||event.data?.payment?.payment_status!=='SUCCESS')return {ignored:true};
  return reconcile(event.data?.order?.order_id);
 }
-module.exports={settings,create,verify,reconcile,webhook};
+module.exports={settings,gateway,create,verify,reconcile,webhook};

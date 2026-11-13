@@ -5,18 +5,19 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 const root=path.resolve(__dirname,'..'),frontend=path.join(root,'exam-practice-pro'),origin='http://127.0.0.1:3022';
 const output=path.join(root,'test-results','institute-delivery');fs.mkdirSync(output,{recursive:true});
 const apiBase='/api/v1/institutes/synthetic-alpha';
-let server,browser,page,role='teacher',banks=[],questions=[],exams=[],attempt=null;
+let server,browser,page,role='teacher',banks=[],questions=[],exams=[],attempt=null,paid=false,cancelled=false;
 const calls=[],errors=[];
-const perms={owner:['workspace:read','members:read','members:invite','settings:write','banks:write','questions:write','questions:review','batches:write','exams:write','exams:publish','reports:read'],teacher:['workspace:read','banks:write','questions:write','exams:write','assigned:reports'],student:['workspace:read','assigned:take','own:results']};
+const perms={owner:['workspace:read','members:read','members:invite','settings:write','banks:write','questions:write','questions:review','batches:write','exams:write','exams:publish','reports:read','billing:read'],teacher:['workspace:read','banks:write','questions:write','exams:write','assigned:reports'],student:['workspace:read','assigned:take','own:results']};
 async function intercept(route){
  const request=route.request(),u=new URL(request.url()),method=request.method();
  const reply=(data,status=200)=>route.fulfill({status,contentType:'application/json',body:JSON.stringify(data)}),ok=data=>reply({success:true,data});
+ if(u.hostname==='sdk.cashfree.com')return route.fulfill({contentType:'application/javascript',body:"window.Cashfree=()=>({checkout:async args=>{window.syntheticCheckout=args.paymentSessionId;}});"});
  if(u.pathname==='/api/auth/session')return reply({user:{name:'Synthetic '+role,email:role+'@example.test'},expires:'2099-01-01T00:00:00Z'});
  if(u.pathname==='/api/auth/backend-token')return reply({token:'synthetic-ui-only'});
  if(u.pathname.startsWith('/api/v1/')){
   const p=u.pathname;calls.push({path:p,method});
   if(p==='/api/v1/institutes/my')return ok({institutes:[{id:'a',slug:'synthetic-alpha',name:'Synthetic Alpha',status:'trial',role}]});
-  if(p===apiBase+'/workspace')return ok({institute:{id:'a',slug:'synthetic-alpha',name:'Synthetic Alpha',status:'trial',profile:{}},role,permissions:perms[role],counts:null,activity:[],modules:{delivery:true}});
+  if(p===apiBase+'/workspace')return ok({institute:{id:'a',slug:'synthetic-alpha',name:'Synthetic Alpha',status:'trial',profile:{}},role,permissions:perms[role],counts:null,activity:[],modules:{delivery:true,billing:true}});
   if(p===apiBase+'/banks'){
    if(method==='POST'){banks=[{id:'bank-a',...request.postDataJSON()}];return ok(banks[0]);}return ok({banks});
   }
@@ -25,6 +26,11 @@ async function intercept(route){
   }
   if(p===apiBase+'/questions/q-a/review'){questions[0].review_status='approved';return ok(questions[0]);}
   if(p===apiBase+'/batches')return ok({batches:[{id:'batch-a',name:'Synthetic batch'}]});
+  if(p===apiBase+'/billing')return ok({subscription:paid?{plan_code:'SYNTHETIC',effectiveStatus:'active',limits:{students:10,teachers:1,batches:2,questions:100,monthlyAttempts:50},current_period_end:'2099-01-01',cancel_at_period_end:cancelled}:null,usage:{students:10,teachers:1,batches:1,questions:1,monthlyAttempts:1},quotasEnforced:true,orders:[{id:'order-a',plan_snapshot:{name:'Synthetic private quote',periodDays:30,limits:{students:10,teachers:1,batches:2,questions:100,monthlyAttempts:50}},amount_paise:12345,status:paid?'paid':'pending',expires_at:'2099-01-01'}],receipts:paid?[{id:'receipt-a',amount_paise:12345,currency:'INR',mode:'sandbox',period_start:'2026-11-11',period_end:'2026-12-11'}]:[]});
+  if(p===apiBase+'/billing/orders/order-a/checkout'){assert.equal(request.postDataJSON().phone,'9999999999');return ok({paymentSessionId:'synthetic-billing-session',mode:'sandbox'});}
+  if(p===apiBase+'/billing/orders/order-a/reconcile'){paid=true;return ok({status:'paid'});}
+  if(p===apiBase+'/billing/cancel'){cancelled=true;return ok({cancelAtPeriodEnd:true});}
+
   if(p===apiBase+'/exams'){
    if(method==='POST'){const d=request.postDataJSON();exams=[{id:'exam-a',title:d.title,status:'draft',definition:d}];return ok(exams[0]);}return ok({exams});
   }
@@ -78,6 +84,12 @@ async function intercept(route){
  const downloaded=page.waitForEvent('download');await page.getByRole('button',{name:'Download batch report CSV',exact:true}).click();assert.equal((await downloaded).suggestedFilename(),'synthetic-batch-report.csv');
  await page.getByText('Downloaded 1 permitted records. Export complete.',{exact:true}).waitFor();
  await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({animations:'disabled',path:path.join(output,'batch-analytics-mobile.png'),fullPage:true});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1));
+ await page.getByRole('link',{name:'Billing & usage',exact:true}).click();await page.getByText('No verified institute subscription.',{exact:true}).waitFor();
+ await page.getByLabel('Billing mobile number',{exact:true}).fill('9999999999');await page.getByRole('button',{name:'Test quoted checkout',exact:true}).click();await page.waitForFunction(()=>window.syntheticCheckout==='synthetic-billing-session');
+ assert.equal(paid,false,'checkout callback must not activate a subscription');await page.getByRole('button',{name:'Check provider status',exact:true}).click();await page.getByText('Receipt receipt-a',{exact:true}).waitFor();
+ await page.getByRole('button',{name:'Cancel at period end',exact:true}).click();await page.getByRole('button',{name:'Confirm period-end cancellation',exact:true}).click();await page.getByText('Cancellation recorded; there is no automatic renewal.',{exact:true}).waitFor();
+ await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({animations:'disabled',path:path.join(output,'institute-billing-mobile.png'),fullPage:true});
+ assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1));
  assert.deepEqual(errors,[]);
  assert.ok(calls.some(c=>c.path.endsWith('/submit')));console.log('PASS: synthetic question authoring, independent review controls, draft/assignment/publication, student autosave/refresh, mobile runner and result');
  }catch(error){if(page)await page.screenshot({animations:'disabled',path:path.join(output,'failure.png'),fullPage:true}).catch(()=>{});throw error;}finally{await browser?.close();server?.kill('SIGTERM');}})().catch(e=>{console.error(e);process.exitCode=1;});
