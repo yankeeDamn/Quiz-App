@@ -18,7 +18,7 @@ type Report={id:string;name:string;title:string;submitted_at:string;result:{scor
 function form(e:FormEvent<HTMLFormElement>){e.preventDefault();return Object.fromEntries(new FormData(e.currentTarget)) as Record<string,string>;}
 function useList<T>(path:string,key:string){
  const [rows,setRows]=useState<T[]>([]),[error,setError]=useState(''),[loading,setLoading]=useState(true),[version,setVersion]=useState(0);
- useEffect(()=>{setRows([]);setError('');if(!path){setLoading(false);return;}const c=new AbortController();setLoading(true);void api<Record<string,T[]>>(path,{signal:c.signal}).then(r=>{if(c.signal.aborted)return;setLoading(false);if(r.success)setRows(r.data?.[key]||[]);else setError(r.error?.message||'Could not load records');});return()=>c.abort();},[path,key,version]);
+ useEffect(()=>{setRows([]);setError('');if(!path){setLoading(false);return;}const c=new AbortController();setLoading(true);void api<Record<string,T[]|T>>(path,{signal:c.signal}).then(r=>{if(c.signal.aborted)return;setLoading(false);if(r.success){const records=r.data?.[key];setRows(Array.isArray(records)?records:records===undefined?[]:[records]);}else setError(r.error?.message||'Could not load records');});return()=>c.abort();},[path,key,version]);
  return {rows,error,loading,reload:useCallback(()=>setVersion(v=>v+1),[])};
 }
 function Status({loading,error}:{loading:boolean;error:string}){return loading?<p role="status">Loading records…</p>:error?<p role="alert" className="rounded-lg border border-red-400 p-3">{error}</p>:null;}
