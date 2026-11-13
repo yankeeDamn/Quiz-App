@@ -2,11 +2,13 @@
 
 This change prepares all six monetization surfaces. It does not enable billing, run a database migration, deploy a service, publish ads, or grant real users access. Both feature flags default off. Keep this PR in draft until staging acceptance is complete.
 
+For the current learner purchase flow, schema update, acceptance, production rollout and rollback, use [Cashfree prepaid checkout](CASHFREE_PREPAID_CHECKOUT.md). The learner WhatsApp/UTR purchase flow described in older releases has been removed. Existing owner administrative grants remain for support.
+
 ## What is implemented
 
 | Stream | Entry point | Behaviour |
 | --- | --- | --- |
-| Micro-passes / Pro | `/pricing`, locked-mock dialog | ₹49 SSC CGL 2026 full-mock pass (30 days), ₹99 premium ebook / assessment pass (60 days), ₹199 Pro (30 days), ₹999 Pro (365 days); server-priced Cashfree orders and verified manual UPI grants |
+| Micro-passes / Pro | `/pricing`, locked-mock dialog | ₹49 SSC CGL 2026 full-mock pass (30 days), ₹99 premium ebook / assessment pass (60 days), ₹199 Pro (30 days), ₹999 Pro (365 days); server-priced Cashfree checkout, automatic verified activation and account receipts |
 | Direct ads | `/advertise`, admin monetization panel | Submission drafts survive browser refresh; server submissions enter pending review; owner approval, pause, renewal, deletion, expiry and session-based view/click counts |
 | Coaching portals | `/c/[slug]`, `/exampro`, admin panel | Approved branding, published assigned tests, mentor contact, language selection, private anonymised batch leaderboard and member enrolment |
 | Ebook freemium | `/certifications/learn/[slug]` | Original premium ebook previews are rendered server-side; server strips paid chapters and blocks assessments/PDFs for unentitled readers; owner can configure preview count |
@@ -34,12 +36,14 @@ This change prepares all six monetization surfaces. It does not enable billing, 
    ```powershell
    # STAGING_DATABASE_URL must already be set privately in your terminal.
    psql "$env:STAGING_DATABASE_URL" -v ON_ERROR_STOP=1 -f src/db/monetization.sql
+   psql "$env:STAGING_DATABASE_URL" -v ON_ERROR_STOP=1 -f src/db/cashfree-checkout.sql
    ```
 
    Bash equivalent:
 
    ```bash
    psql "$STAGING_DATABASE_URL" -v ON_ERROR_STOP=1 -f src/db/monetization.sql
+   psql "$STAGING_DATABASE_URL" -v ON_ERROR_STOP=1 -f src/db/cashfree-checkout.sql
    ```
 
    No customer data is seeded. Tables are additive; existing attempts, questions and plan grants are preserved.
@@ -47,7 +51,8 @@ This change prepares all six monetization surfaces. It does not enable billing, 
 
    ```dotenv
    MONETIZATION_ENABLED=true
-   MONETIZATION_UPI_ID=<your verified merchant UPI ID, or leave unset>
+   MONETIZATION_CHECKOUT_ENABLED=true
+   APP_ENV=staging
    MONETIZATION_CASHFREE_MODE=sandbox
    MONETIZATION_CASHFREE_APP_ID=<sandbox app ID>
    MONETIZATION_CASHFREE_SECRET=<sandbox secret>

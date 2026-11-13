@@ -13,8 +13,8 @@ export function usePlan():PlanState{
     if(!key)return;
     let cancelled=false;
     const load=()=>{void fetchPlanState().then(state=>{if(!cancelled)setFetched({key,state});});};
-    load();window.addEventListener('focus',load);
-    return()=>{cancelled=true;window.removeEventListener('focus',load);};
+    load();window.addEventListener('focus',load);window.addEventListener('exampro:payment-verified',load);
+    return()=>{cancelled=true;window.removeEventListener('focus',load);window.removeEventListener('exampro:payment-verified',load);};
   },[key]);
   if(status==='loading')return LOADING;
   if(!key)return GUEST;

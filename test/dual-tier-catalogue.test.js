@@ -30,6 +30,7 @@ const noKeys=body=>assert.doesNotMatch(JSON.stringify(body),/"(?:answer|correctA
 const noContent=body=>assert.doesNotMatch(JSON.stringify(body),/"(?:questions|question|options|answer|explanation)"/);
 test.before(async()=>{
  db.query=async(sql)=>{
+  if(sql.includes('FROM monetization_grants'))return {rows:[],rowCount:0};
   if(sql.includes('AS manual_grants'))return {rows:[{active:2,manual_grants:3}]};
   if(sql.includes('COUNT(*) FILTER (WHERE active)'))return {rows:[{published:3,drafts:1}]};
   if(sql.includes('AS submitted'))return {rows:[{submitted:9,accuracy:'62.5'}]};

@@ -89,6 +89,7 @@ test('analytics strips search/hash/credentials, excludes private routes and norm
     '/dashboard',
     '/api/v1/ebooks',
     '/bookmarks',
+    '/account/payments?monetization_order=private',
   ])
     assert.equal(analyticsUrl('https://exampro.test' + path), null);
   assert.equal(

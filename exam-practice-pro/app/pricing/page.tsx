@@ -1,198 +1,241 @@
 'use client';
-
 import { MicroPasses, PaymentReturn } from '@/components/payments/micro-passes';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { track } from '@/lib/track';
 import Link from 'next/link';
-import { useSession } from 'next-auth/react';
-import { Check } from 'lucide-react';
+import { Check, ShieldCheck } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
-import { Button } from '@/components/ui/button';
-import { WhatsAppButton } from '@/components/mocks/whatsapp-button';
 import { usePlan } from '@/hooks/use-plan';
-import { CashfreeSandboxCheckout } from '@/components/payments/cashfree-sandbox-checkout';
-const sandboxCheckout=process.env.NEXT_PUBLIC_CASHFREE_SANDBOX_CHECKOUT==='true';
-import { PLANS, formatWhatsappNumber, inr, planMessage, planPrice, whatsappLink, type Plan } from '@/lib/plans';
+import { PLANS, planMessage, whatsappLink } from '@/lib/plans';
 
-const STEPS: [string, string][] = [
-  ['Pick a plan', 'Choose monthly or yearly. Pro yearly is ₹999.'],
-  ['Message us on WhatsApp', 'The chat opens with your plan and email already written.'],
-  ['Pay as we tell you there', 'We share the payment details in the chat and confirm when the money arrives.'],
-  ['Pro unlocks', 'Sign in with the same email. Your premium mocks open straight away.'],
+const STEPS = [
+  [
+    'Choose your access',
+    'Pick a focused pass or complete Pro access. Review the price and exact validity.',
+  ],
+  [
+    'Sign in securely',
+    'Your purchase is linked to your verified Google or GitHub account.',
+  ],
+  [
+    'Pay with Cashfree',
+    'Complete a one-time prepaid payment. There is no automatic renewal or auto-debit.',
+  ],
+  [
+    'Get verified access',
+    'Our server confirms payment with Cashfree, activates access and saves your receipt.',
+  ],
 ];
-
-const FAQ: [string, string][] = [
-  ['How do I pay?', 'Tap a plan and WhatsApp opens. We send the payment details there and confirm in the same chat. There is no card form on this site.'],
-  ['Which email should I use?', 'Sign in with Google or GitHub first, so the chat shows your account email. Guest accounts have no email, so we cannot attach a plan to them.'],
-  ['How long until my plan starts?', 'We unlock it by hand after the payment arrives, usually within a few hours during the day. You will get a WhatsApp message.'],
-  ['What if I renew early?', 'Renewals add to your current end date. You never lose paid days.'],
-  ['Can I get a refund?', 'Review our refund policy and contact us promptly with the payment reference.'],
-  ['We are an institute. What do we get?', 'Institute management is in development. A public branding preview is available. Contact us for a readiness review and a confirmed scope; an individual paid plan does not grant institute-wide access.'],
+const FAQ = [
+  [
+    'How do I pay?',
+    'Choose one of the four paid plans, sign in and review the purchase. Cashfree handles payment securely. Payment availability is confirmed by our server.',
+  ],
+  [
+    'When does access start?',
+    'Access starts after our server verifies a successful Cashfree payment. A redirect alone never confirms payment. Pending orders can be rechecked from your payment history.',
+  ],
+  [
+    'Does my plan renew automatically?',
+    'No. These are one-time prepaid purchases. You decide when to buy again; there is no recurring debit or payment mandate.',
+  ],
+  [
+    'What if I renew early?',
+    'A focused pass extends its own remaining validity. Pro monthly and annual purchases extend the same Pro balance. You keep valid paid days, including existing account access.',
+  ],
+  [
+    'I was debited but access is still pending. What should I do?',
+    'Open payment history and recheck the order. Avoid another payment while settlement is pending. Contact payment support with your order ID if it remains unresolved.',
+  ],
+  [
+    'Can I get a refund?',
+    'Review our refund policy and contact support promptly with your order ID.',
+  ],
 ];
-
 export default function PricingPage() {
-  const { data: session } = useSession();
-  const plan = usePlan();
-  const viewed = useRef(false);
-  useEffect(()=>{if(!viewed.current){viewed.current=true;track('pricing_viewed');}},[]);
-  const [yearly, setYearly] = useState(false);
-  const [segment, setSegment] = useState<'learner' | 'institute'>('learner');
-  const visible = PLANS.filter((p) => p.segment === segment || (segment === 'institute' && p.id === 'pro'));
-  const email = session?.user?.email ?? null;
-
+  const plan = usePlan(),
+    viewed = useRef(false);
+  useEffect(() => {
+    if (!viewed.current) {
+      viewed.current = true;
+      track('pricing_viewed');
+    }
+  }, []);
+  const free = PLANS.find((p) => p.id === 'free')!,
+    institute = PLANS.find((p) => p.id === 'institute')!;
   return (
     <>
       <Header />
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10">
-        <p className="text-sm font-semibold text-blue-700 dark:text-blue-400">Pricing</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">Start free. Upgrade when you are ready.</h1>
-        <p className="mt-3 max-w-2xl text-muted-foreground">
-          Free covers daily practice. Pro provides access to published Pro content. Check the current catalogue before paying. Pay through WhatsApp and we unlock your plan by hand. On the staging site, signed-in learners can also test the Cashfree sandbox checkout.
-        </p>
-
-        {sandboxCheckout && <p className="mt-3 rounded border border-amber-400 p-3 text-sm">Cashfree sandbox testing is available on staging only. This is not live billing.</p>}
-        {plan.active && (
-          <div className="mt-6 rounded-xl border border-emerald-600 bg-emerald-50 p-4 dark:bg-emerald-950/40" role="status">
-            <p className="font-semibold">Your {plan.plan === 'institute' ? 'Institute' : 'Pro'} plan is active.</p>
-            {plan.expiresAt && <p className="text-sm">Valid until {new Date(plan.expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}.</p>}
-          </div>
-        )}
-
-        <div className="mt-8 flex flex-wrap gap-3">
-          <div className="inline-flex overflow-hidden rounded-lg border" role="group" aria-label="Plan type">
-            {(['learner', 'institute'] as const).map((s) => (
-              <button
-                key={s}
-                aria-pressed={segment === s}
-                onClick={() => setSegment(s)}
-                className={`min-h-11 px-4 text-sm font-semibold ${segment === s ? 'bg-foreground text-background' : 'bg-card'}`}
-              >
-                {s === 'learner' ? 'For learners' : 'For institutes'}
-              </button>
-            ))}
-          </div>
-          <div className="inline-flex overflow-hidden rounded-lg border" role="group" aria-label="Billing period">
-            <button aria-pressed={!yearly} onClick={() => setYearly(false)} className={`min-h-11 px-4 text-sm font-semibold ${!yearly ? 'bg-foreground text-background' : 'bg-card'}`}>
-              Monthly
-            </button>
-            <button aria-pressed={yearly} onClick={() => setYearly(true)} className={`min-h-11 px-4 text-sm font-semibold ${yearly ? 'bg-foreground text-background' : 'bg-card'}`}>
-              Yearly · Pro ₹999
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {visible.map((p) => (
-            <PlanCard key={p.id} plan={p} yearly={yearly} email={email} name={session?.user?.name ?? null} current={plan.active && plan.plan === p.id} />
-          ))}
-        </div>
-
-        {!email && (
-          <p className="mt-4 text-sm text-muted-foreground">
-            <Link className="font-semibold underline" href="/auth/signin?callbackUrl=/pricing">
-              Sign in with Google or GitHub
-            </Link>{' '}
-            before you pay, so we can attach the plan to your email.
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:py-14">
+        <div className="max-w-3xl">
+          <p className="text-sm font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+            ExamPro plans
           </p>
+          <h1 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-5xl">
+            Your next milestone.
+            <br />
+            <span className="text-indigo-600 dark:text-indigo-400">
+              Your pace. Your plan.
+            </span>
+          </h1>
+          <p className="mt-5 text-base leading-relaxed text-muted-foreground">
+            Start free, focus on one goal, or unlock complete Pro access. Check
+            the published catalogue before purchasing. Every paid plan is a
+            one-time purchase with a clear expiry.
+          </p>
+        </div>
+        <div className="mt-6 flex flex-wrap items-center gap-4 text-sm">
+          <span className="flex items-center gap-2">
+            <ShieldCheck
+              className="h-4 w-4 text-emerald-600"
+              aria-hidden="true"
+            />
+            Verified payment. Automatic activation.
+          </span>
+          <Link
+            className="font-semibold underline underline-offset-4"
+            href="/account/payments"
+          >
+            Payment history & receipts
+          </Link>
+        </div>
+        {plan.active && (
+          <div
+            className="mt-6 rounded-2xl border border-emerald-600 bg-emerald-50 p-4 dark:bg-emerald-950/40"
+            role="status"
+          >
+            <p className="font-semibold">
+              Your {plan.plan === 'institute' ? 'Institute' : 'Pro'} plan is
+              active.
+            </p>
+            {plan.expiresAt && (
+              <p className="mt-1 text-sm">
+                Valid until{' '}
+                {new Date(plan.expiresAt).toLocaleDateString('en-IN', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                })}
+                . Renewals preserve your remaining days.
+              </p>
+            )}
+          </div>
         )}
-
-        <PaymentReturn/><MicroPasses/>
+        <PaymentReturn />
+        <MicroPasses />
+        <section
+          className="mt-8 grid gap-4 md:grid-cols-2"
+          aria-label="Free practice and institute enquiries"
+        >
+          <article className="flex flex-col gap-4 rounded-2xl border bg-card p-5 sm:p-6">
+            <div>
+              <h2 className="text-xl font-bold">Free</h2>
+              <p className="mt-2 text-3xl font-bold">
+                ₹0{' '}
+                <span className="text-sm font-normal text-muted-foreground">
+                  · no card needed
+                </span>
+              </p>
+            </div>
+            <ul className="flex-1 space-y-2 text-sm">
+              {free.features.map((f) => (
+                <li key={f} className="flex gap-2">
+                  <Check
+                    className="h-4 w-4 shrink-0 text-emerald-600"
+                    aria-hidden="true"
+                  />
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <Link
+              href="/india-mocks"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border px-4 py-2 font-semibold hover:bg-muted"
+            >
+              Start free
+            </Link>
+          </article>
+          <article className="flex flex-col gap-4 rounded-2xl border bg-muted/30 p-5 sm:p-6">
+            <h2 className="text-xl font-bold">For institutes</h2>
+            <p className="text-lg font-semibold">Discuss a pilot</p>
+            <ul className="flex-1 space-y-2 text-sm text-muted-foreground">
+              {institute.features.map((f) => (
+                <li key={f}>{f}</li>
+              ))}
+            </ul>
+            <a
+              href={whatsappLink(planMessage(institute, false))}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border px-4 py-2 font-semibold hover:bg-muted"
+            >
+              Discuss institute pilot
+            </a>
+            <p className="text-xs text-muted-foreground">
+              Enquiry only. Individual plans do not provide institute-wide
+              access.
+            </p>
+          </article>
+        </section>
         <section className="mt-14" aria-labelledby="how-pay">
           <h2 id="how-pay" className="text-2xl font-bold">
-            How paying works
+            From checkout to practice
           </h2>
-          <ol className="mt-5 grid gap-4 md:grid-cols-4">
+          <ol className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {STEPS.map(([title, text], i) => (
-              <li key={title} className="rounded-xl border bg-card p-4">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-orange-600 font-mono text-sm font-semibold text-orange-700 dark:text-orange-400">{i + 1}</span>
+              <li key={title} className="rounded-2xl border p-5">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-800">
+                  {i + 1}
+                </span>
                 <h3 className="mt-3 font-semibold">{title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{text}</p>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  {text}
+                </p>
               </li>
             ))}
           </ol>
         </section>
-
-        <section className="mt-14 grid gap-8 md:grid-cols-2" aria-labelledby="faq-h">
+        <section
+          className="mt-14 grid gap-8 md:grid-cols-[1.5fr_1fr]"
+          aria-labelledby="pricing-questions"
+        >
           <div>
-            <h2 id="faq-h" className="text-2xl font-bold">
-              Questions
+            <h2 id="pricing-questions" className="text-2xl font-bold">
+              Questions, answered
             </h2>
             <div className="mt-4 divide-y border-y">
               {FAQ.map(([q, a]) => (
-                <details key={q} className="py-3">
-                  <summary className="cursor-pointer font-semibold">{q}</summary>
-                  <p className="mt-2 text-sm text-muted-foreground">{a}</p>
+                <details key={q} className="py-4">
+                  <summary className="cursor-pointer pr-3 font-semibold">
+                    {q}
+                  </summary>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                    {a}
+                  </p>
                 </details>
               ))}
             </div>
           </div>
-          <div className="h-fit rounded-xl border bg-card p-6">
-            <h2 className="text-xl font-bold">Talk to us first</h2>
-            <p className="mt-2 text-sm text-muted-foreground">Not sure which plan fits? Ask on WhatsApp. A real person replies.</p>
-            <p className="mt-3 font-mono text-sm">{formatWhatsappNumber()}</p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <WhatsAppButton text="Hi, I have a question about the plans on ExamPro." label="Ask about plans" />
-              <WhatsAppButton text="Hi, I run a coaching institute and want ExamPro for my students." label="I run an institute" variant="outline" />
+          <aside className="h-fit rounded-2xl border bg-muted/40 p-6">
+            <h2 className="text-xl font-bold">Need a hand?</h2>
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              For a payment problem, have your order ID ready. Support can help
+              you check an order; payments are completed through Cashfree
+              checkout.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-4 text-sm font-semibold">
+              <Link className="underline" href="/contact">
+                Payment support
+              </Link>
+              <Link className="underline" href="/refunds">
+                Refund policy
+              </Link>
             </div>
-          </div>
+          </aside>
         </section>
       </main>
       <Footer />
     </>
-  );
-}
-
-function PlanCard({ plan, yearly, email, name, current }: { plan: Plan; yearly: boolean; email: string | null; name: string | null; current: boolean }) {
-  const price = planPrice(plan, yearly);
-  return (
-    <article className={`flex flex-col gap-4 rounded-xl border bg-card p-6 ${plan.highlight ? 'border-2 border-foreground' : ''}`}>
-      <header>
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="text-xl font-bold">{plan.name}</h2>
-          {plan.highlight && <span className="rounded bg-orange-100 px-2 py-1 text-xs font-semibold text-orange-900 dark:bg-orange-950/50 dark:text-orange-300">Recommended</span>}
-        </div>
-        <p className="text-sm text-muted-foreground">{plan.audience}</p>
-      </header>
-      <p className="text-4xl font-extrabold tabular-nums">
-        {plan.enquiryOnly ? 'Discuss a pilot' : price.amount === 0 ? '₹0' : inr(price.amount)}
-        <span className="mt-1 block text-sm font-normal text-muted-foreground">
-          {plan.enquiryOnly ? 'Not available for self-service purchase' : price.per}
-          {!plan.enquiryOnly && price.note ? ` · ${price.note}` : ''}
-        </span>
-      </p>
-      <p className="font-mono text-sm font-semibold text-orange-700 dark:text-orange-400">{plan.limit}</p>
-      <ul className="flex-1 space-y-2 text-sm">
-        {plan.features.map((f) => (
-          <li key={f} className="flex gap-2">
-            <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
-            <span>{f}</span>
-          </li>
-        ))}
-      </ul>
-      {plan.enquiryOnly ? (
-        <a href={whatsappLink(planMessage(plan, yearly))} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center justify-center rounded-lg border px-4 py-2 font-semibold">Discuss institute pilot</a>
-      ) : plan.monthlyInr === 0 ? (
-        <Button variant="outline" asChild>
-          <Link href="/india-mocks">Start free</Link>
-        </Button>
-      ) : sandboxCheckout && plan.id==='pro' && email ? (
-        <CashfreeSandboxCheckout period={yearly?'yearly':'monthly'}/>
-      ) : current ? (
-        <Button variant="outline" disabled>
-          Your current plan
-        </Button>
-      ) : (
-        <a
-          href={whatsappLink(planMessage(plan, yearly, email, name))}
-          onClick={()=>track('pro_requested_whatsapp',{plan_name:plan.id})}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex min-h-11 items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
-        >
-          Choose {plan.name} on WhatsApp
-        </a>
-      )}
-    </article>
   );
 }

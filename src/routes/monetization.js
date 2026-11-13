@@ -11,10 +11,11 @@ function createRouter(identity=authenticateNextAuth){
  const r=Router(),wrap=fn=>(req,res,next)=>Promise.resolve(fn(req,res)).catch(next),ok=(res,data)=>res.json({success:true,data});
  r.use((req,res,next)=>/^\/(monetization|ads|payments|admin\/monetization)(\/|$)/.test(req.path)?next():next('router'));
  r.use((_req,res,next)=>{res.set('Cache-Control','private, no-store');next();});
- r.use((req,res,next)=>m.enabled()?next():res.status(404).json({success:false,error:{message:'Monetization setup is not enabled yet.'}}));
+ r.use((req,res,next)=>m.enabled()||/^\/(payments|monetization\/(config|me))(\/|$)/.test(req.path)?next():res.status(404).json({success:false,error:{message:'Monetization setup is not enabled yet.'}}));
  const publicLimit=rateLimit({windowMs:60000,limit:60,standardHeaders:'draft-7',legacyHeaders:false});
+ const paymentLimit=rateLimit({windowMs:60000,limit:60,keyGenerator:req=>req.user.id,standardHeaders:'draft-7',legacyHeaders:false});
  const submitLimit=rateLimit({windowMs:3600000,limit:5,standardHeaders:'draft-7',legacyHeaders:false});
- r.get('/monetization/config',wrap(async(_req,res)=>ok(res,{products:m.PRODUCTS,upiId:process.env.MONETIZATION_UPI_ID||'',checkout:(()=>{try{return pay.settings().mode;}catch{return null;}})()})));
+ r.get('/monetization/config',wrap(async(_req,res)=>ok(res,{products:m.PRODUCTS,checkout:await pay.availability()})));
  r.get('/monetization/me',identity,wrap(async(req,res)=>ok(res,{adFree:await m.entitlement(req.user,'__PRO_ONLY__'),ssc:await m.entitlement(req.user,'SSC_PACK_49'),ebooks:await m.entitlement(req.user,'IT_EBOOK_PACK_99')})));
  r.get('/ads',publicLimit,wrap(async(_req,res)=>ok(res,{ads:await m.ads()})));
  r.post('/ads/submit',submitLimit,wrap(async(req,res)=>{const id=randomUUID();await m.put('ad',id,m.validateAd(req.body));res.status(201);ok(res,{id,status:'pending_review'});}));
@@ -50,9 +51,11 @@ function createRouter(identity=authenticateNextAuth){
   const rows=(await db.query(`SELECT a.user_id,MAX((a.result->>'percentage')::numeric) AS percentage FROM exam_attempts_v2 a JOIN monetization_members m ON m.user_id=a.user_id AND m.institute_id=$1 WHERE a.test_id=ANY($2::text[]) AND a.submitted_at IS NOT NULL GROUP BY a.user_id ORDER BY percentage DESC LIMIT 50`,[req.params.id,d.assignedTestIds])).rows;
   ok(res,{leaders:rows.map((x,i)=>({rank:i+1,name:x.user_id===req.user.id?'You':'Batch learner '+(i+1),percentage:Number(x.percentage)}))});
  }));
- r.post('/payments/create-order',identity,publicLimit,wrap(async(req,res)=>ok(res,await pay.create(req.user,req.body))));
+ r.post('/payments/create-order',identity,paymentLimit,wrap(async(req,res)=>ok(res,await pay.create(req.user,req.body))));
  r.post('/payments/webhook',wrap(async(req,res)=>ok(res,await pay.webhook(req.body,req.get('x-webhook-signature'),req.get('x-webhook-timestamp')))));
- r.get('/payments/orders/:id',identity,publicLimit,wrap(async(req,res)=>ok(res,await pay.reconcile(req.params.id,req.user.id))));
+ r.get('/payments/orders',identity,paymentLimit,wrap(async(req,res)=>ok(res,await pay.history(req.user.id,req.query.before))));
+ r.get('/payments/orders/:id',identity,paymentLimit,wrap(async(req,res)=>ok(res,await pay.reconcile(req.params.id,req.user.id))));
+ r.get('/payments/orders/:id/receipt',identity,paymentLimit,wrap(async(req,res)=>ok(res,await pay.ownOrder(req.params.id,req.user.id))));
  r.use('/admin/monetization',identity,(req,res,next)=>m.owner(req.user)?next():res.status(403).json({success:false,error:{message:'Owner admin access required'}}));
  r.get('/admin/monetization',wrap(async(req,res)=>{
   const [ads,institutes,events,affiliates,ebooks,metrics]=await Promise.all([m.documents('ad'),m.documents('institute'),m.documents('event'),m.documents('affiliate'),m.documents('ebook'),db.query("SELECT kind,id,event,count(*)::int AS count FROM monetization_metrics GROUP BY kind,id,event")]);

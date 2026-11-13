@@ -11,3 +11,18 @@ export function telemetry(path:string,event:'impression'|'click'){void monetizat
 export function safeDestination(raw:string){try{const u=new URL(raw);return u.protocol==='https:'&&!u.username&&!u.password?u.href:undefined;}catch{return undefined;}}
 export function cacheRead<T>(key:string):T|null{try{const r=JSON.parse(localStorage.getItem(key)||'null');return r&&Date.now()-r.savedAt<300000?r.data:null;}catch{return null;}}
 export function cacheWrite(key:string,data:unknown){try{localStorage.setItem(key,JSON.stringify({savedAt:Date.now(),data}));}catch{/* Private browsing: the API remains authoritative. */}}
+
+export interface PaymentOrder {
+  orderId: string;
+  code: ProductCode;
+  plan: string;
+  amountInr: number;
+  currency: 'INR';
+  validityDays: number;
+  automaticRenewal: false;
+  mode: 'sandbox' | 'production';
+  status: 'pending' | 'paid' | 'failed' | 'cancelled' | 'expired' | 'terminated';
+  createdAt: string;
+  paidAt: string | null;
+  accessExpiresAt: string | null;
+}

@@ -159,6 +159,65 @@ jobs:
       - name: Test real OAuth middleware, ACLs and persisted results
         run: node --test test/ebooks-postgres.integration.js test/content-review-postgres.integration.js test/question-workflow-postgres.integration.js
 
+  cashfree-checkout:
+    name: Cashfree prepaid checkout (synthetic provider, PostgreSQL, mobile browsers)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_PASSWORD: payment-ci-only
+          POSTGRES_DB: payment_tests
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PAYMENT_TEST_DATABASE_URL: postgresql://postgres:payment-ci-only@127.0.0.1:5432/payment_tests
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      NEXT_PUBLIC_APP_ENV: local
+      NEXT_PUBLIC_MONETIZATION_ENABLED: "true"
+      AUTH_SECRET: payment-ci-auth-only
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            exam-practice-pro/package-lock.json
+      - run: npm ci
+      - run: npm ci
+        working-directory: exam-practice-pro
+      - name: Check payment UI lint and types
+        working-directory: exam-practice-pro
+        run: |
+          npx eslint app/pricing/page.tsx app/account/payments/page.tsx components/payments/micro-passes.tsx components/payments/payment-history.tsx
+          npx tsc --noEmit
+      - run: node --test test/monetization-payments.test.js test/monetization.test.js test/monetization-payments-postgres.integration.js
+      - run: npm run build
+        working-directory: exam-practice-pro
+      - name: Install mobile browser engines
+        run: |
+          npm install --prefix "$RUNNER_TEMP/payment-ui-tools" --no-package-lock --no-save playwright@1.62.1
+          "$RUNNER_TEMP/payment-ui-tools/node_modules/.bin/playwright" install --with-deps chromium webkit
+      - name: Test four plans through real API and database
+        run: node scripts/cashfree-checkout.browser.cjs
+        env:
+          PLAYWRIGHT_MODULE: ${{ runner.temp }}/payment-ui-tools/node_modules/playwright
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cashfree-checkout-evidence
+          path: test-results/cashfree-checkout
+          if-no-files-found: ignore
+          retention-days: 7
+
   # ── Docker Build ──────────────────────────────
   docker:
     name: Docker Build
