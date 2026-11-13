@@ -28,3 +28,29 @@ Real OAuth sign-in is not simulated by using a synthetic signed token. The DB in
 - Browser script now checks mobile batch aggregates and authorized CSV download. New browser run pending CI; prior institute delivery UI CI #42872627737 passed before this change.
 - GitHub checks on external CI-setup commits for PRs #90/#94 are `action_required`, not passing runs. Earlier installation failures occurred in browser dependency installation. Do not infer browser acceptance from unit/build success.
 - No live migration, deployment, content publication, or paid entitlement change.
+
+### Institute billing continuation — 12 November 2026 (IST)
+
+- Unit suite: **302/302 PASS** locally; includes plan validation, expiry and production billing denial.
+- Disposable PostgreSQL 18: **21/21 PASS**; repeated five-migration sequence; real raw webhook HTTP/HMAC with simulated provider; concurrent webhook/polling, one receipt, consumer plan preservation, tenant denial, quota races, renewal and cancellation.
+- Next.js production build: **PASS**. Browser scripts parse successfully.
+- Local browser attempt: **BLOCKED**, Chromium `socket() failed: Operation not permitted`. GitHub PR #95 run 43096372117 was queued at the latest check. New billing/browser assertions have not yet run successfully.
+- Cashfree provider calls are stubbed only inside the integration test. No real payment, provider credentials, deployment or live migration was used.
+
+### Advertising verification continuation — 12 November 2026 (IST)
+
+- Disposable PostgreSQL 18: **23/23 PASS**, including payment-bound advertising moderation and session metric deduplication. All schemas reapplied twice.
+- Focused advertising + existing monetization unit tests: **18/18 PASS**.
+- Next.js production build: **PASS**.
+- Institute billing final bounded unit rerun: **302/302 PASS**, resolving the earlier unfinished rerun. New advertising full-suite run recorded separately when complete.
+- Actual Cashfree order tags/merchant workflow, settlements, ad UI browser checks and live acceptance: **NOT VERIFIED**.
+
+Advertising full local unit run: **304/304 PASS**, no failures/skips. Added synthetic browser assertions that publication remains disabled before provider verification, then uses a specific verified payment ID (never the legacy checkbox). Browser execution is pending CI; no screenshot pass is claimed yet.
+
+### Existing consumer workflows — 12 November 2026 (IST)
+
+- New disposable `consumer_tests` PostgreSQL 18 suite: **5/5 PASS**. Exact users/bookmarks/notes table definitions reused without executing content seeds; application migration applied twice.
+- Existing unit suite after bookmark validation/cache changes: **304/304 PASS**.
+- CI adds an independent PostgreSQL 16 consumer job with loopback/name guard. No production/staging connection is accepted by the test.
+- Coverage: anonymous denial, no-store, concurrent bookmark upserts, reload persistence, two-account isolation, notes CRUD/length validation, encrypted/masked/revealed job references, safe reference removal, ownership foreign keys and missing-key fail-closed behavior.
+- Browser login/session recovery and deployed acceptance remain separate unverified gates.
