@@ -5,6 +5,7 @@ const {randomUUID}=require('node:crypto');
 const db=require('../config/database');
 const m=require('../services/monetization.service');
 const pay=require('../services/monetization-payments.service');
+const advertising=require('../services/advertising-verification.service');
 const {authenticateNextAuth}=require('../middleware/nextauth');
 function createRouter(identity=authenticateNextAuth){
  const r=Router(),wrap=fn=>(req,res,next)=>Promise.resolve(fn(req,res)).catch(next),ok=(res,data)=>res.json({success:true,data});
@@ -53,12 +54,13 @@ function createRouter(identity=authenticateNextAuth){
  r.post('/payments/webhook',wrap(async(req,res)=>ok(res,await pay.webhook(req.body,req.get('x-webhook-signature'),req.get('x-webhook-timestamp')))));
  r.get('/payments/orders/:id',identity,publicLimit,wrap(async(req,res)=>ok(res,await pay.reconcile(req.params.id,req.user.id))));
  r.use('/admin/monetization',identity,(req,res,next)=>m.owner(req.user)?next():res.status(403).json({success:false,error:{message:'Owner admin access required'}}));
- r.get('/admin/monetization',wrap(async(_req,res)=>{
+ r.get('/admin/monetization',wrap(async(req,res)=>{
   const [ads,institutes,events,affiliates,ebooks,metrics]=await Promise.all([m.documents('ad'),m.documents('institute'),m.documents('event'),m.documents('affiliate'),m.documents('ebook'),db.query("SELECT kind,id,event,count(*)::int AS count FROM monetization_metrics GROUP BY kind,id,event")]);
-  ok(res,{ads:ads.map(a=>({...a,status:a.status==='active'&&!m.activeAd(a)?'expired':a.status,impressions:metrics.rows.find(x=>x.kind==='ad'&&x.id===a.id&&x.event==='impression')?.count||0,clicks:metrics.rows.find(x=>x.kind==='ad'&&x.id===a.id&&x.event==='click')?.count||0})),institutes,events,affiliates,ebooks});
+  ok(res,{advertisingPaymentVerification:advertising.enabled(),adPayments:await advertising.payments(req.user),ads:ads.map(a=>({...a,status:a.status==='active'&&!m.activeAd(a)?'expired':a.status,impressions:metrics.rows.find(x=>x.kind==='ad'&&x.id===a.id&&x.event==='impression')?.count||0,clicks:metrics.rows.find(x=>x.kind==='ad'&&x.id===a.id&&x.event==='click')?.count||0})),institutes,events,affiliates,ebooks});
  }));
  r.post('/admin/monetization/grants',wrap(async(req,res)=>ok(res,await m.manual(req.body,req.user))));
- r.post('/admin/monetization/ads/:id',wrap(async(req,res)=>ok(res,await m.adAction(req.params.id,req.body.action,req.body.paymentVerified))));
+ r.post('/admin/monetization/ads/:id',wrap(async(req,res)=>ok(res,await m.adAction(req.params.id,req.body,req.user))));
+ r.post('/admin/monetization/ads/:id/verify-payment',wrap(async(req,res)=>ok(res,await advertising.verify(req.params.id,req.body,req.user))));
  r.put('/admin/monetization/config/:kind/:id',wrap(async(req,res)=>ok(res,await m.save(req.params.kind,req.params.id,req.body))));
  r.post('/admin/monetization/institutes/:id/members',wrap(async(req,res)=>{
   if(!await m.document('institute',req.params.id))throw m.fail('Institute not found',404);

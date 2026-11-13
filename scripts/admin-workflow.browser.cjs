@@ -18,6 +18,8 @@ const blockedMock={...fixtureMock,id:'blocked-synthetic',name:'Blocked Synthetic
 const mockRows=[fixtureMock,liveMock,blockedMock,...Array.from({length:10},(_,i)=>({...fixtureMock,id:`training-${i}`,name:i===0?'=SUM(1,1)':`Training Draft ${i}`,tier:'free',minutes:20+i,configuredQuestionCount:10+i}))];
 const calls=[],mockCalls=[],browserErrors=[];
 let revision=30,serverLogs='',browser,server,sessionEmail='owner@example.test',adminChecks=0;
+const sponsor={id:'synthetic-ad',advertiserName:'Synthetic advertiser',headline:'Synthetic sponsor creative',subtext:'Synthetic review fixture',slotType:'HOME_TOP_BANNER',targetCategory:'SSC',destinationUrl:'https://example.test',amountInr:999,paymentReference:'UNVERIFIED',status:'pending_review',expiresAt:null};
+let adPayments=[];
 const topicRows=()=>[{id:'computer',name:'Computer Training',category:'Synthetic',active:true,total:12,live:questions.filter(q=>q.active&&q.review_status==='published').length},{id:'other',name:'Other Training',category:'Synthetic',active:true,total:1,live:0}];
 function checklist(){
  const selected=questions.slice(0,3),ready=selected.filter(q=>q.active&&q.reviewed_at&&q.review_status==='published').length;
@@ -32,6 +34,9 @@ async function intercept(route){
  if(url.pathname==='/api/auth/backend-token')return reply({token:'synthetic-bridge-token'});
  if(url.pathname.startsWith('/api/v1/')){
   const p=url.pathname.replace('/api/v1','');
+  if(p==='/admin/monetization')return reply({success:true,data:{advertisingPaymentVerification:true,adPayments,ads:[sponsor],institutes:[],events:[],affiliates:[],ebooks:[]}});
+  if(p==='/admin/monetization/ads/synthetic-ad/verify-payment'){const body=request.postDataJSON();assert.equal(body.orderId,'synthetic-merchant-order');assert.equal(body.purpose,'booking');adPayments=[{id:'verified-payment',ad_id:sponsor.id,purpose:'booking',mode:'sandbox',consumed_at:null}];return reply({success:true,data:adPayments[0]});}
+  if(p==='/admin/monetization/ads/synthetic-ad'){const body=request.postDataJSON();assert.equal(body.action,'approve');assert.equal(body.paymentId,'verified-payment');assert.equal(body.paymentVerified,undefined);sponsor.status='active';sponsor.expiresAt='2099-01-01';adPayments[0].consumed_at='2026-11-12';return reply({success:true,data:sponsor});}
   if(p==='/admin/me'){adminChecks++;return sessionEmail==='owner@example.test'?reply({success:true,data:{via:'account',email:sessionEmail}}):reply({success:false,error:{message:'Not an admin'}},403);}
   if(p==='/admin/command-center')return reply({success:true,data:{questions:{total:13,active:12,topics:2},publication:{published:0,drafts:1},catalogue:{total:1,free:1,pro:0},attempts:{submitted:0,accuracy:null},plans:{active:0,manualGrants:0},checkedAt:'2026-11-02T00:00:00Z'}});
   if(p==='/admin/tests')return reply({success:true,data:{tests:mockRows}});
@@ -229,6 +234,12 @@ async function intercept(route){
   await page.evaluate(()=>{document.documentElement.classList.add('dark');});
   assert.equal(await page.locator('#admin-section').evaluate(element=>element.scrollWidth<=element.clientWidth+1),true,'question workspace must fit mobile width');
   await page.screenshot({animations:'disabled',path:path.join(output,'question-workspace-mobile-dark.png'),fullPage:true});
+  await page.goto(origin+'/admin?section=monetization');await page.getByRole('heading',{name:'Sponsor review queue',exact:true}).waitFor();
+  assert.equal(await page.getByRole('button',{name:'Approve & publish',exact:true}).isDisabled(),true,'payment checkbox cannot authorize an ad');
+  await page.getByLabel('Merchant provider order ID',{exact:true}).fill('synthetic-merchant-order');await page.getByRole('button',{name:'Verify with provider',exact:true}).click();
+  await page.waitForFunction(()=>!Array.from(document.querySelectorAll('button')).find(b=>b.textContent==='Approve & publish')?.disabled);
+  page.once('dialog',dialog=>dialog.accept());await page.getByRole('button',{name:'Approve & publish',exact:true}).click();await page.getByText('active',{exact:true}).waitFor();
+  await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({animations:'disabled',path:path.join(output,'advertising-review-mobile.png'),fullPage:true});
   await page.goto(origin+'/contact');
   await page.getByRole('link',{name:'Chat on WhatsApp',exact:true}).waitFor();
   await page.goto(origin+'/admin');await page.getByRole('region',{name:'Mock definitions manager',exact:true}).waitFor();

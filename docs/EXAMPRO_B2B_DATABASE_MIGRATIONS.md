@@ -42,3 +42,7 @@ Set `INSTITUTE_EXPIRY_WORKER_ENABLED=true` only together with the institute and 
 ### Fifth manual migration: institute billing sandbox
 
 `src/db/institute-billing.sql` adds configurable plan, immutable quote/order and receipt tables; extends `pilot_subscriptions` with an explicitly managed billing marker, mode, limits, period start and cancellation preference. Existing subscriptions retain `billing_managed=false` and remain outside the new path. There are no prices, seeds or grants. Apply twice to disposable PostgreSQL first; production/staging application requires explicit approval. Follow `EXAMPRO_INSTITUTE_BILLING_ACCEPTANCE.md` for prerequisites and rollback.
+
+### Separate advertising migration
+
+`src/db/advertising-verification.sql` follows the existing `monetization.sql` migration and adds provider-verification/audit tables only. It does not modify existing ad documents. Review and explicitly approve its application before enabling advertising moderation. See `EXAMPRO_ADVERTISING_ACCEPTANCE.md`; no automatic migration or publication is included.

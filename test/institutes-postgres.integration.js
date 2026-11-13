@@ -13,7 +13,7 @@ process.env.INSTITUTE_INVITATION_SECRET='synthetic-institute-invitation-secret-o
 const jwt=require('jsonwebtoken'),express=require('express'),{randomUUID}=require('node:crypto');
 const db=require('../src/config/database');
 const router=require('../src/routes/institutes');
-const app=express();app.use('/api/v1/institute-billing',require('../src/routes/institute-billing-webhook'));app.use(express.json({limit:'128kb'}));app.use('/api/v1',router);
+const app=express();app.use('/api/v1/institute-billing',require('../src/routes/institute-billing-webhook'));app.use(express.json({limit:'128kb'}));app.use('/api/v1',router);app.use('/api/v1',require('../src/routes/monetization').router);
 app.use((err,_req,res,_next)=>res.status(err.statusCode||500).json({error:err.message}));
 app.use((_req,res)=>res.status(404).json({error:'Not found'}));
 let server,base,A,B;
@@ -33,7 +33,7 @@ async function join(i,email,role,owner){
 }
 test.before(async()=>{
  await db.query(`CREATE TABLE IF NOT EXISTS users(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),email text UNIQUE,name text,image text,provider text,provider_id text,role text DEFAULT 'user',payment_status text DEFAULT 'unpaid',plan text DEFAULT 'free',plan_expires_at timestamptz,created_at timestamptz DEFAULT now(),updated_at timestamptz DEFAULT now())`);
- for(let n=0;n<2;n++) { await db.query(fs.readFileSync('src/db/pilot-schema.sql','utf8'));await db.query(fs.readFileSync('src/db/institute-foundation.sql','utf8'));await db.query(fs.readFileSync('src/db/institute-delivery.sql','utf8'));await db.query(fs.readFileSync('src/db/institute-reporting.sql','utf8'));await db.query(fs.readFileSync('src/db/institute-billing.sql','utf8')); }
+ for(let n=0;n<2;n++) { await db.query(fs.readFileSync('src/db/pilot-schema.sql','utf8'));await db.query(fs.readFileSync('src/db/institute-foundation.sql','utf8'));await db.query(fs.readFileSync('src/db/institute-delivery.sql','utf8'));await db.query(fs.readFileSync('src/db/institute-reporting.sql','utf8'));await db.query(fs.readFileSync('src/db/institute-billing.sql','utf8'));await db.query(fs.readFileSync('src/db/monetization.sql','utf8'));await db.query(fs.readFileSync('src/db/advertising-verification.sql','utf8')); }
  server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));base='http://127.0.0.1:'+server.address().port;
 });
 test.after(async()=>{if(server){server.closeAllConnections();await new Promise(r=>server.close(r));}await db.end();});
@@ -323,4 +323,47 @@ test('expired subscriptions renew from current time and unstarted quotes can be 
   await expectCall(at(A)+'/billing/orders/'+replacement.id+'/cancel-quote','owner-a@example.test','POST',{});
   assert.equal((await db.query('SELECT status FROM pilot_billing_orders WHERE id=$1',[replacement.id])).rows[0].status,'cancelled');
  }finally{pay.gateway=original;}
+});
+
+let adId,adPayment;
+const adFixture={advertiserName:'Synthetic advertiser',contactEmail:'advertiser@example.test',whatsappNumber:'919999999999',slotType:'HOME_TOP_BANNER',targetCategory:'SSC',headline:'Synthetic booking only',subtext:'Not a real public advertisement',ctaLabel:'Learn more',destinationUrl:'https://example.test/synthetic',badgeText:'Sponsored',durationDays:7,paymentReference:'UNVERIFIED-SYNTHETIC'};
+test('ad approval requires independently verified provider evidence, not a checkbox or consumer payment',async()=>{
+ process.env.AD_PAYMENT_VERIFICATION_ENABLED='true';
+ adId=(await expectCall('/ads/submit',null,'POST',{...adFixture,status:'active'},201)).id;
+ await expectCall('/admin/monetization/ads/'+adId,'owner-a@example.test','POST',{action:'approve',paymentVerified:true},403);
+ await expectCall('/admin/monetization/ads/'+adId,undefined,'POST',{action:'approve',paymentVerified:true},400);
+ assert.equal((await expectCall('/ads',null)).ads.length,0);
+ const pay=require('../src/services/monetization-payments.service'),original=pay.gateway;
+ let bound=false;
+ pay.gateway=async(method,path)=>{assert.equal(method,'GET');return {order_id:'synthetic-ad-order',order_status:'PAID',order_currency:'INR',order_amount:999,order_tags:bound?{exampro_ad_id:adId,exampro_purpose:'booking'}:{exampro_ad_id:B.id,exampro_purpose:'institute'}};};
+ try{
+  await expectCall('/admin/monetization/ads/'+adId+'/verify-payment',undefined,'POST',{orderId:'synthetic-ad-order',purpose:'booking'},409);
+  bound=true;adPayment=await expectCall('/admin/monetization/ads/'+adId+'/verify-payment',undefined,'POST',{orderId:'synthetic-ad-order',purpose:'booking'});
+  assert.equal((await expectCall('/admin/monetization/ads/'+adId+'/verify-payment',undefined,'POST',{orderId:'synthetic-ad-order',purpose:'booking'})).id,adPayment.id);
+  const approvals=await Promise.all([call('/admin/monetization/ads/'+adId,undefined,'POST',{action:'approve',paymentId:adPayment.id}),call('/admin/monetization/ads/'+adId,undefined,'POST',{action:'approve',paymentId:adPayment.id})]);
+  assert.ok(approvals.every(r=>r.status===200),JSON.stringify(approvals));assert.equal(approvals[0].json.data.expiresAt,approvals[1].json.data.expiresAt);
+  assert.equal((await db.query("SELECT id FROM advertising_audit_logs WHERE ad_id=$1 AND action='ad.approve'",[adId])).rowCount,1);
+  const publicAds=await expectCall('/ads',null);assert.equal(publicAds.ads.length,1);assert.doesNotMatch(JSON.stringify(publicAds),/contactEmail|paymentReference|verified_by/);
+  process.env.APP_ENV='production';assert.equal((await expectCall('/ads',null)).ads.length,0);process.env.APP_ENV='test';
+ }finally{pay.gateway=original;process.env.APP_ENV='test';}
+});
+test('ad analytics deduplicate sessions; pause/resume, verified renewal, rejection and deletion preserve evidence',async()=>{
+ const sessionId=randomUUID();for(let n=0;n<2;n++)await expectCall('/ads/'+adId+'/track',null,'POST',{event:'impression',sessionId});
+ assert.equal((await db.query("SELECT 1 FROM monetization_metrics WHERE kind='ad' AND id=$1",[adId])).rowCount,1);
+ const paused=await expectCall('/admin/monetization/ads/'+adId,undefined,'POST',{action:'pause'});assert.equal((await expectCall('/ads',null)).ads.length,0);
+ await expectCall('/ads/'+adId+'/track',null,'POST',{event:'click',sessionId},404);
+ const resumed=await expectCall('/admin/monetization/ads/'+adId,undefined,'POST',{action:'resume'});assert.equal(resumed.expiresAt,paused.expiresAt);
+ await expectCall('/admin/monetization/ads/'+adId,undefined,'POST',{action:'extend',paymentId:adPayment.id},409);
+ const pay=require('../src/services/monetization-payments.service'),original=pay.gateway;
+ pay.gateway=async()=>({order_id:'synthetic-ad-renewal',order_status:'PAID',order_currency:'INR',order_amount:999,order_tags:{exampro_ad_id:adId,exampro_purpose:'renewal'}});
+ try{
+  const renewal=await expectCall('/admin/monetization/ads/'+adId+'/verify-payment',undefined,'POST',{orderId:'synthetic-ad-renewal',purpose:'renewal'});
+  const extended=await expectCall('/admin/monetization/ads/'+adId,undefined,'POST',{action:'extend',paymentId:renewal.id});assert.equal(Date.parse(extended.expiresAt)-Date.parse(resumed.expiresAt),7*86400000);
+  assert.equal((await expectCall('/admin/monetization/ads/'+adId,undefined,'POST',{action:'extend',paymentId:renewal.id})).expiresAt,extended.expiresAt);
+  await assert.rejects(db.query('UPDATE advertising_verified_payments SET amount_paise=1 WHERE id=$1',[renewal.id]),e=>e.code==='23514');
+ }finally{pay.gateway=original;}
+ await expectCall('/admin/monetization/ads/'+adId,undefined,'POST',{action:'delete'});
+ assert.equal((await expectCall('/ads',null)).ads.length,0);assert.equal((await db.query('SELECT id FROM advertising_verified_payments WHERE ad_id=$1',[adId])).rowCount,2);
+ const rejected=(await expectCall('/ads/submit',null,'POST',adFixture,201)).id;await expectCall('/admin/monetization/ads/'+rejected,undefined,'POST',{action:'reject'});
+ assert.ok((await db.query('SELECT plan,payment_status FROM users')).rows.every(u=>u.plan==='free'&&u.payment_status==='unpaid'));
 });
