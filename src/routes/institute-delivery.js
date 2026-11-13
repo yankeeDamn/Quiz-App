@@ -27,6 +27,7 @@ router.put('/institutes/:slug/exams/:id',wrap(async(q,r)=>ok(r,await teaching.sa
 router.post('/institutes/:slug/exams/:id/assignments',wrap(async(q,r)=>ok(r,await teaching.assign(q.user,q.params.slug,q.params.id,q.body.batchId))));
 router.delete('/institutes/:slug/exams/:id/assignments/:batchId',wrap(async(q,r)=>ok(r,await teaching.assign(q.user,q.params.slug,q.params.id,q.params.batchId,true))));
 router.post('/institutes/:slug/exams/:id/publish',wrap(async(q,r)=>ok(r,await teaching.publish(q.user,q.params.slug,q.params.id))));
+router.get('/institutes/:slug/exams/:id/leaderboard',wrap(async(q,r)=>ok(r,{ranking:await reporting.leaderboard(q.user,q.params.slug,q.params.id)})));
 router.get('/institutes/:slug/assigned-exams',wrap(async(q,r)=>ok(r,{exams:await attempts.assigned(q.user,q.params.slug)})));
 router.post('/institutes/:slug/exams/:id/start',wrap(async(q,r)=>ok(r,await attempts.start(q.user,q.params.slug,q.params.id))));
 router.get('/institutes/:slug/attempts/:id',wrap(async(q,r)=>ok(r,await attempts.attempt(q.user,q.params.slug,q.params.id))));
