@@ -34,6 +34,16 @@ async function navigate(page, url) {
   await page.waitForLoadState('networkidle');
   return page.goto(url);
 }
+async function fillPhone(page) {
+  // The dialog schedules initial focus on an animation frame; wait before typing.
+  await page.waitForFunction(() => {
+    const dialog = document.querySelector('[role="dialog"]');
+    return dialog?.contains(document.activeElement);
+  });
+  const phone = page.getByLabel('Indian mobile number', { exact: true });
+  await phone.fill('9986418638');
+  assert.equal(await phone.inputValue(), '9986418638');
+}
 async function run(name, type, device) {
   browser = await type.launch({
     headless: true,
@@ -172,9 +182,7 @@ async function run(name, type, device) {
     assert.equal(await dialog.getByLabel(/UTR/).count(), 0);
     assert.equal(await dialog.locator('a[href*="wa.me"]').count(), 0);
     await fits(page, name + ' dialog');
-    await dialog
-      .getByLabel('Indian mobile number', { exact: true })
-      .fill('9986418638');
+    await fillPhone(page);
     await dialog
       .getByRole('button', {
         name: `Pay ₹${amount} with Cashfree`,
@@ -262,9 +270,7 @@ async function run(name, type, device) {
     await page
       .getByRole('button', { name: 'Choose ' + title, exact: true })
       .click();
-    await page
-      .getByLabel('Indian mobile number', { exact: true })
-      .fill('9986418638');
+    await fillPhone(page);
     await page
       .getByRole('button', {
         name: `Pay ₹${amount} with Cashfree`,
@@ -315,9 +321,7 @@ async function run(name, type, device) {
   await page
     .getByRole('button', { name: 'Choose SSC CGL mock pass', exact: true })
     .click();
-  await page
-    .getByLabel('Indian mobile number', { exact: true })
-    .fill('9986418638');
+  await fillPhone(page);
   await page
     .getByRole('button', { name: 'Pay ₹49 with Cashfree', exact: true })
     .click();
@@ -330,9 +334,7 @@ async function run(name, type, device) {
   await page
     .getByRole('button', { name: 'Choose SSC CGL mock pass', exact: true })
     .click();
-  await page
-    .getByLabel('Indian mobile number', { exact: true })
-    .fill('9986418638');
+  await fillPhone(page);
   await page
     .getByRole('button', { name: 'Pay ₹49 with Cashfree', exact: true })
     .click();
