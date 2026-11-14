@@ -258,6 +258,9 @@ function AccountCheckout({ code, resourceId = '', label }: CheckoutProps) {
                       onChange={(e) =>
                         setPhone(e.target.value.replace(/\D/g, ''))
                       }
+                      onInput={(e) =>
+                        setPhone(e.currentTarget.value.replace(/\D/g, ''))
+                      }
                       placeholder="10-digit mobile number"
                     />
                   </label>
