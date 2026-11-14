@@ -122,7 +122,7 @@ function AccountCheckout({ code, resourceId = '', label }: CheckoutProps) {
       setOrderId(r.data.orderId);
       if (r.data.status === 'paid') {
         setCompleted(true);
-        setMessage('Payment verified. Your access is active.');
+        setMessage('Payment verified. Access was activated.');
         window.dispatchEvent(new Event('exampro:payment-verified'));
         return;
       }

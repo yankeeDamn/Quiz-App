@@ -196,7 +196,7 @@ async function run(name, type, device) {
       assert.equal(
         await page
           .getByRole('heading', {
-            name: 'Payment verified. Your access is active.',
+            name: 'Payment verified. Access was activated.',
             exact: true,
           })
           .count(),
@@ -226,7 +226,7 @@ async function run(name, type, device) {
     }
     await page
       .getByRole('heading', {
-        name: 'Payment verified. Your access is active.',
+        name: 'Payment verified. Access was activated.',
         exact: true,
       })
       .waitFor();
@@ -243,7 +243,7 @@ async function run(name, type, device) {
     await page.reload();
     await page
       .getByRole('heading', {
-        name: 'Payment verified. Your access is active.',
+        name: 'Payment verified. Access was activated.',
         exact: true,
       })
       .waitFor();

@@ -155,7 +155,7 @@ function ReturnForAccount({
             />
           )}
           {order?.status === 'paid'
-            ? 'Payment verified. Your access is active.'
+            ? 'Payment verified. Access was activated.'
             : busy
               ? 'Checking payment with Cashfree…'
               : 'Payment needs your attention'}
