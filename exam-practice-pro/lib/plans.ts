@@ -1,9 +1,6 @@
 /**
- * Plans, prices and the WhatsApp number used for coaching, doubts and payments.
- *
- * Payment works through WhatsApp: the visitor taps a plan, WhatsApp opens with
- * the plan and account email filled in, the owner shares payment details and,
- * once paid, unlocks the plan with POST /api/v1/admin/grant.
+ * Plans and the WhatsApp number used for support and institute enquiries.
+ * Learner purchases use verified Cashfree checkout on /pricing.
  *
  * Change the number with NEXT_PUBLIC_WHATSAPP_NUMBER (country code + number, digits only).
  */
@@ -98,7 +95,7 @@ export function inr(n: number): string {
   return `₹${n.toLocaleString('en-IN')}`;
 }
 
-/** Message that opens in WhatsApp when someone picks a paid plan. */
+/** Support and institute enquiry text; learner purchases use /pricing. */
 export function planMessage(plan: Plan, yearly: boolean, email?: string | null, name?: string | null): string {
   if (plan.enquiryOnly) return 'Hi, I would like to discuss an ExamPro institute pilot. Please confirm available features, limits and a reviewed quote before any payment.';
   const price = planPrice(plan, yearly);
@@ -106,7 +103,7 @@ export function planMessage(plan: Plan, yearly: boolean, email?: string | null, 
     `Hi, I want the ${plan.name} plan (${yearly ? 'yearly' : 'monthly'}, ${inr(price.amount)}) on ExamPro.`,
     email ? `Account email: ${email}` : 'I have not signed in yet.',
     name ? `Name: ${name}` : '',
-    'Please share the payment details.',
+    'I have a question about this plan. I will use the secure checkout on /pricing to purchase.',
   ]
     .filter(Boolean)
     .join('\n');

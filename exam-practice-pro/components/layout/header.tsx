@@ -133,6 +133,7 @@ export function Header() {
                     <DropdownMenuItem disabled className="text-xs text-muted-foreground">
                       {session.user.email || t('guest')}
                     </DropdownMenuItem>
+                    <DropdownMenuItem render={<Link href="/account/payments" />}>Payments & receipts</DropdownMenuItem>
                     <DropdownMenuItem onClick={() => { clearTokenCache(); signOut({ callbackUrl: '/' }); }}>
                       <LogOut className="mr-2 h-4 w-4" />
                       {t('signOut')}
@@ -188,6 +189,7 @@ export function Header() {
                   </Link>
                 ))}
                 <Link href="/advertise" className="rounded-lg px-3 py-2 text-sm">Advertise With Us</Link>
+                <Link href="/account/payments" onClick={() => setMobileMenuOpen(false)} className="flex min-h-11 items-center rounded-lg px-3 py-2 text-sm">Payments & receipts</Link>
               </nav>
               <div className="border-t border-border/70 px-5 pt-4">
                 {status === 'loading' ? (

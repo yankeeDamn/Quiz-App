@@ -22,6 +22,7 @@ const definitions=[definition('free','free',0,1),definition('pro','premium',1,3)
 let server,base,plan='free';
 test.before(async()=>{
  db.query=async(sql)=>{
+  if(sql.includes('FROM monetization_grants'))return {rows:[],rowCount:0};
   if(sql.includes('FROM mock_topics'))return {rows:[topic],rowCount:1};
   if(sql.includes('FROM mock_questions')){
    assert.match(sql,/review_status\s*=\s*'published'/,'public SQL must filter review status');

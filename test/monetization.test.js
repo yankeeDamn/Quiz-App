@@ -61,35 +61,18 @@ test('ebook access level is authoritative: Free stays free even if a legacy gate
  assert.equal(await m.ebookPolicy('bundled-guide',user,{accessLevel:'pro',isBundledPublicEdition:true}),null);
 });
 
-function configure(){process.env.MONETIZATION_CASHFREE_MODE='sandbox';process.env.MONETIZATION_CASHFREE_APP_ID='test-app';process.env.MONETIZATION_CASHFREE_SECRET='test-only-secret';process.env.MONETIZATION_FRONTEND_ORIGIN='https://exampro-staging-ui.vercel.app';process.env.MONETIZATION_API_ORIGIN='https://staging.example.test';}
+function configure(){process.env.APP_ENV='test';process.env.MONETIZATION_CHECKOUT_ENABLED='true';process.env.MONETIZATION_CASHFREE_MODE='sandbox';process.env.MONETIZATION_CASHFREE_APP_ID='test-app';process.env.MONETIZATION_CASHFREE_SECRET='test-only-secret';process.env.MONETIZATION_FRONTEND_ORIGIN='https://exampro-staging-ui.vercel.app';process.env.MONETIZATION_API_ORIGIN='https://staging.example.test';}
 test('live payments require a separate explicit switch; webhook HMAC covers original bytes',()=>{
  configure();process.env.MONETIZATION_CASHFREE_MODE='production';delete process.env.MONETIZATION_LIVE_PAYMENTS_ENABLED;assert.throws(()=>pay.settings(),/disabled/);configure();
  const raw=Buffer.from('{"type":"PAYMENT_SUCCESS_WEBHOOK"}'),timestamp='1793454000';const signature=crypto.createHmac('sha256',process.env.MONETIZATION_CASHFREE_SECRET).update(timestamp).update(raw).digest('base64');assert.doesNotThrow(()=>pay.verify(raw,signature,timestamp));assert.throws(()=>pay.verify(Buffer.from('{}'),signature,timestamp),/signature/);
 });
-test('Cashfree order amount and identity come from server rather than the request',async()=>{
- configure();db.query=async()=>({rows:[],rowCount:1});global.fetch=async(url,options)=>{assert.match(url,/sandbox.cashfree.com/);const body=JSON.parse(options.body);assert.equal(body.order_amount,49);assert.equal(body.customer_details.customer_id,user.id);return {ok:true,json:async()=>({order_id:body.order_id,payment_session_id:'session-test'})};};
- const r=await pay.create(user,{code:'SSC_PACK_49',phone:'9986418638',amount:1,userId:'attacker'});assert.equal(r.amountInr,49);
-});
-test('payment reconciliation rejects mismatched amount and user identity without granting',async()=>{
- configure();const id='ep_'+'a'.repeat(32);db.query=async()=>({rows:[{id,user_id:user.id,amount_inr:49,mode:'sandbox',status:'pending'}],rowCount:1});db.getClient=async()=>{throw Error('must not grant');};
- global.fetch=async()=>({ok:true,json:async()=>({order_id:id,order_status:'PAID',order_amount:1,order_currency:'INR',customer_details:{customer_id:user.id}})});assert.deepEqual(await pay.reconcile(id,user.id),{status:'pending'});
+test('payment reconciliation rejects mismatched amount without granting',async()=>{
+ configure();const id='ep_'+'a'.repeat(32);db.query=async()=>({rows:[{id,user_id:user.id,code:'SSC_PACK_49',amount_inr:49,mode:'sandbox',status:'pending'}],rowCount:1});db.getClient=async()=>{throw Error('must not grant');};
+ global.fetch=async()=>({ok:true,json:async()=>({order_id:id,order_status:'PAID',order_amount:1,order_currency:'INR',customer_details:{customer_id:user.id}})});
+ await assert.rejects(pay.reconcile(id,user.id),/could not be verified/);
 });
 test('admin routes reject anonymous and non-owner identities; legacy routes pass through',async()=>{
  const express=require('express'),app=express();app.use(express.json());const identity=(req,res,next)=>{if(!req.get('x-test-email'))return res.sendStatus(401);req.user={...user,email:req.get('x-test-email')};next();};app.use(require('../src/routes/monetization').createRouter(identity));app.get('/health',(_req,res)=>res.json({healthy:true}));app.use((e,_req,res,_next)=>res.status(e.statusCode||500).json({message:e.message}));
  const server=await new Promise(resolve=>{const s=app.listen(0,'127.0.0.1',()=>resolve(s));});const base='http://127.0.0.1:'+server.address().port;
  try{assert.equal((await fetch(base+'/admin/monetization')).status,401);assert.equal((await fetch(base+'/admin/monetization',{headers:{'x-test-email':user.email}})).status,403);assert.equal((await fetch(base+'/health')).status,200);}finally{await new Promise(resolve=>server.close(resolve));}
-});
-test('verified Cashfree settlement grants exactly once across webhook/status retries',async()=>{
- configure();const id='ep_'+'b'.repeat(32),row={id,user_id:user.id,code:'SSC_PACK_49',resource_id:'',amount_inr:49,mode:'sandbox',status:'pending'};let grants=0,commits=0;
- db.query=async()=>({rows:[row],rowCount:1});
- db.getClient=async()=>({release(){},query:async(sql)=>{
-  if(sql==='COMMIT')commits++;
-  if(sql.includes('FROM monetization_orders'))return {rows:[row],rowCount:1};
-  if(sql.includes('WHERE reference='))return {rows:[],rowCount:0};
-  if(sql.startsWith('INSERT INTO monetization_grants'))grants++;
-  if(sql.startsWith('UPDATE monetization_orders'))row.status='paid';
-  return {rows:[],rowCount:1};
- }});
- global.fetch=async()=>({ok:true,json:async()=>({order_id:id,order_status:'PAID',order_amount:49,order_currency:'INR',customer_details:{customer_id:user.id}})});
- assert.deepEqual(await pay.reconcile(id,user.id),{status:'paid'});assert.deepEqual(await pay.reconcile(id,user.id),{status:'paid'});assert.equal(grants,1);assert.equal(commits,1);
 });

@@ -19,19 +19,20 @@ const CATEGORIES=['ALL','SSC','Banking','Railways','UPSC','Campus','IT'];
 function text(v,max=140,required=true){if(typeof v!=='string'||v.length>max||(required&&!v.trim()))throw fail('Invalid text field');return v.trim();}
 function url(v){const s=text(v,2048);let u;try{u=new URL(s);}catch{throw fail('A valid HTTPS URL is required');}if(u.protocol!=='https:'||u.username||u.password||u.port||require('node:net').isIP(u.hostname.replace(/^\[|\]$/g,''))||!u.hostname.includes('.')||/(?:^|\.)(localhost|local|internal)$/i.test(u.hostname.replace(/\.+$/,'')))throw fail('Public HTTPS URL required');return u.href;}
 function slug(v){if(typeof v!=='string'||!/^[a-z0-9][a-z0-9-]{1,59}$/.test(v))throw fail('Invalid ID');return v;}
-function product(code){if(!Object.hasOwn(PRODUCTS,code))throw fail('Unknown product');return PRODUCTS[code];}
+function product(code){if(typeof code!=='string'||!Object.hasOwn(PRODUCTS,code))throw fail('Unknown product');return PRODUCTS[code];}
 async function documents(kind){return (await db.query('SELECT id,document FROM monetization_documents WHERE kind=$1 ORDER BY updated_at DESC',[kind])).rows.map(r=>({...r.document,id:r.id}));}
 async function document(kind,id){return (await db.query('SELECT document FROM monetization_documents WHERE kind=$1 AND id=$2',[kind,id])).rows[0]?.document||null;}
 async function put(kind,id,doc){await db.query(`INSERT INTO monetization_documents(kind,id,document) VALUES($1,$2,$3::jsonb) ON CONFLICT(kind,id) DO UPDATE SET document=EXCLUDED.document,updated_at=now()`,[kind,id,JSON.stringify(doc)]);return {...doc,id};}
-async function entitlement(user,code,resource=''){
- if(owner(user)||isPlanActive(user?.plan,user?.planExpiresAt))return true;
+async function entitlement(user,code,resource='',{ownerAccess=true}={}){
+ if((ownerAccess&&owner(user))||isPlanActive(user?.plan,user?.planExpiresAt))return true;
  if(!user?.id||user.id==='guest')return false;
  const r=await db.query(`SELECT 1 FROM monetization_grants WHERE user_id=$1 AND expires_at>now() AND (code IN ('PRO_MONTHLY','PRO_ANNUAL') OR (code=$2 AND resource_id=$3)) LIMIT 1`,[user.id,code,resource]);return r.rowCount>0;
 }
 async function mockAccess(user,summary){
  if(isPlanActive(user?.plan,user?.planExpiresAt))return true;
- if(!enabled())return false;
- return entitlement(user,isFullCglMock(summary)&&/^ssc-cgl-2026-/.test(summary.id)?'SSC_PACK_49':'__PRO_ONLY__');
+ // Student mock routes require a paid plan/grant even for an owner account.
+ // Dedicated admin draft routes have their own explicit authorization.
+ return entitlement(user,isFullCglMock(summary)&&/^ssc-cgl-2026-/.test(summary.id)?'SSC_PACK_49':'__PRO_ONLY__','',{ownerAccess:false});
 }
 async function grant(client,userId,code,resource,reference,actor){
  const p=product(code);
@@ -40,11 +41,19 @@ async function grant(client,userId,code,resource,reference,actor){
  const seen=await client.query('SELECT * FROM monetization_grants WHERE reference=$1',[reference]);
  if(seen.rowCount){if(seen.rows[0].user_id!==userId||seen.rows[0].code!==code||seen.rows[0].resource_id!==resource)throw fail('Reference already used for a different grant',409);return {duplicate:true};}
  await client.query('SELECT id FROM users WHERE id=$1 FOR UPDATE',[userId]);
+ const pro=code==='PRO_MONTHLY'||code==='PRO_ANNUAL';
+ // Monthly and annual share one Pro balance. Include valid legacy/institute
+ // access, and use the exact same expiry in the grant and the account record.
+ const expiry=(await client.query(`SELECT GREATEST(now(),
+   COALESCE((SELECT MAX(expires_at) FROM monetization_grants WHERE user_id=$1 AND resource_id=$3
+    AND (code=$2 OR ($4 AND code IN ('PRO_MONTHLY','PRO_ANNUAL')))),now()),
+   COALESCE((SELECT plan_expires_at FROM users WHERE id=$1 AND $4 AND plan IN ('pro','institute')),now()))
+   +($5*interval '24 hours') AS expires_at`,[userId,code,resource,pro,p.days])).rows[0].expires_at;
  await client.query(`INSERT INTO monetization_grants(user_id,code,resource_id,expires_at,reference,granted_by)
- VALUES($1,$2,$3,GREATEST(now(),COALESCE((SELECT MAX(expires_at) FROM monetization_grants WHERE user_id=$1 AND code=$2 AND resource_id=$3),now()))+($4*interval '1 day'),$5,$6)`,[userId,code,resource,p.days,reference,actor]);
- if(code==='PRO_MONTHLY'||code==='PRO_ANNUAL'){
+ VALUES($1,$2,$3,$4,$5,$6)`,[userId,code,resource,expiry,reference,actor]);
+ if(pro){
   // Preserve Institute membership; never downgrade it on a Pro purchase.
-  await client.query(`UPDATE users SET plan=CASE WHEN plan='institute' AND plan_expires_at>now() THEN plan ELSE 'pro' END,plan_expires_at=GREATEST(now(),COALESCE(plan_expires_at,now()))+($2*interval '1 day'),payment_status='paid',updated_at=now() WHERE id=$1`,[userId,p.days]);
+  await client.query(`UPDATE users SET plan=CASE WHEN plan='institute' AND plan_expires_at>now() THEN plan ELSE 'pro' END,plan_expires_at=$2,payment_status='paid',updated_at=now() WHERE id=$1`,[userId,expiry]);
  }
  return {granted:true};
 }

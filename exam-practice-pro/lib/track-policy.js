@@ -58,7 +58,7 @@ function analyticsUrl(raw, customEvent = false) {
   try {
     const url = new URL(raw);
     if (
-      /^\/(auth|api|admin|institute-admin|dashboard|bookmarks)(\/|$)/.test(
+      /^\/(auth|api|admin|institute-admin|dashboard|bookmarks|account)(\/|$)/.test(
         url.pathname,
       )
     ) {
