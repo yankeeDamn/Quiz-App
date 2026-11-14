@@ -35,7 +35,7 @@ function providerSettings() {
 }
 function settings() {
   const s = providerSettings();
-  if (!m.enabled() || process.env.MONETIZATION_CHECKOUT_ENABLED !== 'true')
+  if (!m.enabled())
     throw m.fail('New purchases are temporarily unavailable', 503);
   if (
     s.mode === 'production' &&
@@ -48,9 +48,15 @@ function settings() {
     backend: new URL(m.url(process.env.MONETIZATION_API_ORIGIN)).origin,
   };
 }
+function checkoutSettings() {
+  const s = settings();
+  if (process.env.MONETIZATION_CHECKOUT_ENABLED !== 'true')
+    throw m.fail('New purchases are temporarily unavailable', 503);
+  return s;
+}
 async function availability() {
   try {
-    const s = settings();
+    const s = checkoutSettings();
     await db.query(
       'SELECT checkout_key,checkout_retry_keys,customer_phone,provider_payment_id FROM monetization_orders LIMIT 0',
     );
@@ -63,9 +69,10 @@ async function gateway(method, path, body) {
   const s = providerSettings();
   // Cashfree requires a UUID, stable for every retry of this provider order.
   const hex = body?.order_id?.slice(3);
-  const key =
-    hex &&
-    `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  const key = UUID.test(body?.order_id || '')
+    ? body.order_id
+    : hex &&
+      `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
   const r = await fetch(s.base + path, {
     method,
     signal: AbortSignal.timeout(12000),
@@ -160,7 +167,7 @@ function validateOrder(remote, local) {
     throw m.fail('Order price mismatch', 409);
 }
 async function create(user, raw = {}) {
-  const s = settings(),
+  const s = checkoutSettings(),
     p = m.product(raw.code),
     resource = raw.resourceId || '';
   if (!user?.id || !user.email || user.id === 'guest')
@@ -382,6 +389,7 @@ async function webhook(raw, signature, timestamp) {
 }
 module.exports = {
   settings,
+  checkoutSettings,
   providerSettings,
   availability,
   gateway,

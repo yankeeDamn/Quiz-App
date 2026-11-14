@@ -177,7 +177,15 @@ function AccountCheckout({ code, resourceId = '', label }: CheckoutProps) {
     );
   return (
     <>
-      <button className={actionClass} onClick={() => setOpen(true)}>
+      <button
+        className={actionClass}
+        onClick={() => {
+          // A cached SDK can survive a route/dialog remount on mobile Safari.
+          // Its global is authoritative for readiness even if onReady is cached.
+          setReady(typeof window.Cashfree === 'function');
+          setOpen(true);
+        }}
+      >
         {label || `Choose ${p.title}`}
         <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
       </button>

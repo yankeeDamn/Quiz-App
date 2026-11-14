@@ -438,6 +438,24 @@ async function run(name, type, device) {
     );
   } catch (error) {
     if (page)
+      console.error(
+        'Checkout failure state:',
+        await page
+          .evaluate(() => ({
+            url: location.href,
+            sdk: typeof window.Cashfree,
+            inputs: Array.from(document.querySelectorAll('input')).map((x) => ({
+              value: x.value,
+              attribute: x.getAttribute('value'),
+            })),
+            dialog: document.querySelector('[role="dialog"]')?.textContent,
+            buttons: Array.from(
+              document.querySelectorAll('[role="dialog"] button'),
+            ).map((x) => ({ text: x.textContent, disabled: x.disabled })),
+          }))
+          .catch(() => null),
+      );
+    if (page)
       await page
         .screenshot({ path: path.join(output, 'failure.png'), fullPage: true })
         .catch(() => {});

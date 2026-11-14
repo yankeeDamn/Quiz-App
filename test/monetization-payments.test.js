@@ -36,6 +36,10 @@ test('sales availability fails closed without schema, live approval or isolated 
   assert.equal(await pay.availability(), 'sandbox');
   process.env.MONETIZATION_CHECKOUT_ENABLED = 'false';
   assert.equal(await pay.availability(), null);
+  // Institute billing and advertising share the provider helper, but keep
+  // their existing switches independent of learner checkout availability.
+  assert.equal(pay.settings().mode, 'sandbox');
+  assert.throws(() => pay.checkoutSettings(), /temporarily unavailable/);
   assert.equal(pay.providerSettings().mode, 'sandbox');
   config();
   process.env.APP_ENV = 'production';
@@ -70,18 +74,23 @@ test('raw-body signature rejects whitespace tampering, parsed JSON and malformed
 });
 test('Cashfree create uses a stable valid UUID idempotency header and server credentials', async () => {
   config();
-  let seen;
+  const seen = new Map();
   global.fetch = async (url, options) => {
     assert.match(url, /sandbox.cashfree.com/);
     assert.equal(options.headers['x-client-secret'], 'synthetic');
     assert.match(options.headers['x-idempotency-key'], /^[a-f0-9-]{36}$/);
-    if (seen) assert.equal(seen, options.headers['x-idempotency-key']);
-    seen = options.headers['x-idempotency-key'];
+    const id = JSON.parse(options.body).order_id;
+    if (seen.has(id))
+      assert.equal(seen.get(id), options.headers['x-idempotency-key']);
+    seen.set(id, options.headers['x-idempotency-key']);
     return { ok: true, json: async () => ({}) };
   };
   const body = { order_id: 'ep_' + crypto.randomUUID().replaceAll('-', '') };
   await pay.gateway('POST', '/orders', body);
   await pay.gateway('POST', '/orders', body);
+  const instituteId = crypto.randomUUID();
+  await pay.gateway('POST', '/orders', { order_id: instituteId });
+  assert.equal(seen.get(instituteId), instituteId);
 });
 test('invalid and cross-account orders are rejected before provider calls', async () => {
   config();

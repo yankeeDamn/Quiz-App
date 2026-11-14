@@ -1,6 +1,6 @@
 # Cashfree prepaid checkout: implementation and test evidence
 
-Run date: **14 November 2026 (IST)**. Base: `main@77307ef`. Runtime: Node **24.22.1**, npm **11.9.0**, Next.js **16.4.3**. Tests ran in the task's disposable workspace; production access was limited to read-only Neon table metadata. No deployment, charge, production credential change, production migration or recurring mandate occurred.
+Run date: **14 November 2026 (IST)**. Base: `main@77307ef`. Runtime: Node **24.22.1**, npm **11.9.0**, Next.js **16.4.3**. Tests ran in the task's disposable workspace; production access was limited to read-only Neon table metadata. No deployment commands, charges, production credential changes, production migrations or recurring mandates were performed. The repository’s existing Vercel integration automatically ran preview checks after the PR branch was pushed; production was not deployed.
 
 ## Changed-file summary
 
@@ -26,6 +26,7 @@ Run date: **14 November 2026 (IST)**. Base: `main@77307ef`. Runtime: Node **24.2
 | --- | --- |
 | `npm test` | **306 passed**, 0 failed/skipped |
 | Payment unit/regression suites | **18 passed** (also included in the 306 above) |
+| Institute/advertising PostgreSQL compatibility | **24 passed**; learner checkout flag stays independent of the shared provider helper and existing institute UUID order keys |
 | Payment PostgreSQL integration | **12 passed**; 30 total when run together with the 18 payment unit/regression tests |
 | Exact migrations | Existing monetization schema and additive checkout migration applied twice to disposable loopback PostgreSQL **18.6**; no production migrations |
 | Frontend production build | **Passed**, including `/pricing` and `/account/payments` |

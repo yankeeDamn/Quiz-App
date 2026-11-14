@@ -1,6 +1,6 @@
 # Cashfree prepaid checkout: acceptance and rollout
 
-This PR prepares one-time purchases only. It does not deploy, merge, enable charges, change production credentials, apply a production migration, or create subscription mandates. Existing institute billing and the separate legacy sandbox audit flow are outside this change.
+This PR prepares one-time purchases only. No deployment commands, merges, live charges, production credential changes, production migrations, or subscription mandates are authorized or performed by this change. Repository-managed PR preview checks run automatically; they do not deploy production. Existing institute billing and the separate legacy sandbox audit flow are outside this change.
 
 ## Product contract
 
@@ -10,6 +10,8 @@ This PR prepares one-time purchases only. It does not deploy, merge, enable char
 | IT_EBOOK_PACK_99 | 99 | 60 days | Premium IT ebooks, permitted PDFs and ebook assessments |
 | PRO_MONTHLY | 199 | 30 days | Published premium mocks and ebooks/assessments |
 | PRO_ANNUAL | 999 | 365 days | Same Pro access |
+
+The learner checkout kill switch applies only to learner create-order/availability. Shared provider settings and UUID order keys remain compatible with existing institute and advertising integrations.
 
 All purchases are prepaid. Automatic renewal is **off**. Existing Free/public editions and institute enquiries remain available. A purchase never overrides private/invite-only ebook permissions or PDF download policy. Learner checkout has no UTR field or manual-payment submission. The existing owner administrative grant tools remain available for legitimate support/legacy access; they are not a learner payment mechanism.
 
