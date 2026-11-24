@@ -7,6 +7,7 @@ import { UserStorageProvider } from '@/components/layout/user-storage-provider';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { PageAnalytics } from '@/components/telemetry/page-analytics';
 import { FloatingWhatsApp } from '@/components/mocks/whatsapp-button';
+import { PwaRegister } from '@/components/pwa/pwa-register';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -53,6 +54,7 @@ export default function RootLayout({
               <TooltipProvider delay={300}>
                 <div className="relative flex min-h-screen flex-col bg-background">
                   {children}
+                  <PwaRegister />
                   <FloatingWhatsApp />
                   <PageAnalytics />
                 </div>
