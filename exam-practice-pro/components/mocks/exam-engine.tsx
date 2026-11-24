@@ -175,6 +175,7 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
     setSecondsLeft(safeDurationSeconds(test.minutes));
     setElapsed(0);
     setTabSwitches(0);
+    submittingRef.current = false;
     setFinished(false);
   };
 
