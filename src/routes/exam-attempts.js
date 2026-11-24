@@ -11,7 +11,7 @@ const ok = (res,data) => res.json({ success:true, data });
 router.use(authenticateNextAuth);
 router.get('/', wrap(async (req,res) => ok(res, { attempts: await service.history(req.user.id) })));
 router.post('/start', wrap(async (req,res) => {
-  const attempt = await service.start(req.user, String(req.body?.testId || ''));
+  const attempt = await service.start(req.user, String(req.body?.testId || ''), false, req.body?.forceNew === true);
   return ok(res,{ attempt });
 }));
 router.get('/:id', wrap(async (req,res) => ok(res,{ attempt:await service.get(req.user.id,req.params.id) })));
