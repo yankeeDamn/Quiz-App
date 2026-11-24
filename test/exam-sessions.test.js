@@ -29,6 +29,11 @@ const client={ release(){}, async query(sql,params=[]){
     const found=row&&row.id===params[0]&&row.user_id===params[1]?[row]:[];
     return {rows:found,rowCount:found.length};
   }
+  if(sql.includes('SET submitted_at=NOW(), result=$2::jsonb')){
+    row.submitted_at=new Date().toISOString();
+    row.result=JSON.parse(params[1]);
+    return {rows:[row],rowCount:1};
+  }
   if(sql.startsWith('UPDATE exam_attempts_v2')){
     row.responses=JSON.parse(params[1]);row.submitted_at=params[2]?new Date().toISOString():null;
     row.result=params[3]?JSON.parse(params[3]):null;
@@ -63,6 +68,32 @@ test('start is recoverable and never includes answer keys',async()=>{
  assert.equal(one.test.questions[0].answer,undefined);
  assert.equal(JSON.stringify(one).includes('B is correct'),false);
 });
+test('expired attempts are finalized and replaced; forceNew also starts fresh',async()=>{
+ row=null;
+ const first=await exams.start(alice,'fixture');
+ const stale=row;
+ stale.deadline_at=new Date(Date.now()-1000).toISOString();
+ const fresh=await exams.start(alice,'fixture');
+ assert.equal(stale.submitted_at!==null,true,'expired attempt should be closed');
+ assert.equal(fresh.newlyCreated,true);
+ assert.ok(Date.parse(fresh.deadlineAt)>Date.now(),'new deadline must be in the future');
+ assert.equal(typeof fresh.serverNow,'string');
+ const replaced=row;
+ const forced=await exams.start(alice,'fixture',false,true);
+ assert.equal(replaced.submitted_at!==null,true,'forceNew should close the previous attempt');
+ assert.equal(forced.newlyCreated,true);
+});
+
+test('invalid exam duration defaults to twelve minutes',async()=>{
+ row=null;
+ const previousMinutes=testData.minutes;
+ testData.minutes=0;
+ const started=await exams.start(alice,'fixture');
+ testData.minutes=previousMinutes;
+ assert.equal(started.test.minutes,12);
+ assert.ok(Date.parse(started.deadlineAt)>Date.parse(started.startedAt));
+});
+
 test('saves progress and prevents student IDOR',async()=>{
  const saved=await exams.save(alice.id,id,{'topic:0':1},false);
  assert.equal(saved.responses['topic:0'],1);

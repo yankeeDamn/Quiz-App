@@ -12,7 +12,7 @@ const fail = (message, statusCode = 400) => Object.assign(new Error(message), { 
 const VALID_ID = /^[a-z0-9-]{1,60}$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-async function start(user, testId, adminDraft = false) {
+async function start(user, testId, adminDraft = false, forceNew = false) {
   if (!VALID_ID.test(testId)) throw fail('Invalid test ID');
   const found = adminDraft ? null : await mocks.findMock(testId);
   if (!adminDraft && !found) throw fail('Published test not found', 404);
@@ -32,8 +32,27 @@ async function start(user, testId, adminDraft = false) {
       [user.id, storedId]
     );
     if (existing.rowCount) {
-      await client.query('COMMIT');
-      return { ...visibleAttempt(existing.rows[0]), newlyCreated: false };
+      const current = existing.rows[0];
+      const sectionMinutes = Number(current.snapshot?.sectionTimingMinutes);
+      const fourSectionDeadline = [15, 20].includes(sectionMinutes) &&
+        Array.isArray(current.snapshot?.sections) && current.snapshot.sections.length === 4
+        ? new Date(current.started_at).getTime() + 4 * sectionMinutes * 60000
+        : NaN;
+      const deadlineMs = new Date(current.deadline_at).getTime();
+      const expired = (Number.isFinite(deadlineMs) && deadlineMs <= Date.now()) ||
+        (Number.isFinite(fourSectionDeadline) && Date.now() >= fourSectionDeadline);
+      if (!forceNew && !expired) {
+        await client.query('COMMIT');
+        return { ...visibleAttempt(current), newlyCreated: false, serverNow: new Date().toISOString() };
+      }
+      // Close expired attempts (or an explicitly replaced attempt) using only
+      // responses already saved on the server. Never accept late client answers.
+      const finalResponses = current.responses && typeof current.responses === 'object' ? current.responses : {};
+      const finalResult = grade(current.snapshot, finalResponses);
+      await client.query(
+        'UPDATE exam_attempts_v2 SET submitted_at=NOW(), result=$2::jsonb WHERE id=$1 AND submitted_at IS NULL',
+        [current.id, JSON.stringify(finalResult)]
+      );
     }
     const loadedTest = adminDraft ? test : found.build();
     // Never accept a requested timing profile from the client. Grant lives in
@@ -41,7 +60,8 @@ async function start(user, testId, adminDraft = false) {
     const sscFullMock = eligible(loadedTest);
     const approved = sscFullMock ? await accommodations.approvedMode(user.id,testId) : null;
     const sectionMinutes = sscFullMock ? (approved === 'scribe_compensatory' ? 20 : 15) : null;
-    const effectiveMinutes = sectionMinutes === 20 ? 80 : loadedTest.minutes;
+    const durationMinutes = Math.max(1, Number(loadedTest.minutes) || 12);
+    const effectiveMinutes = sectionMinutes === 20 ? 80 : sectionMinutes === 15 ? 60 : durationMinutes;
     const localizedTest = sscFullMock ? await quality.attachApprovedHindi(testId,loadedTest) : loadedTest;
     // Include stable text and key snapshot for reviews after edits or retirements.
     const snapshot = { underReview: loadedTest.underReview !== false, name: loadedTest.name, minutes: effectiveMinutes, tier: loadedTest.tier,
@@ -55,7 +75,7 @@ async function start(user, testId, adminDraft = false) {
       [user.id,storedId,JSON.stringify(snapshot),effectiveMinutes]
     );
     await client.query('COMMIT');
-    return { ...visibleAttempt(saved.rows[0]), newlyCreated: true };
+    return { ...visibleAttempt(saved.rows[0]), newlyCreated: true, serverNow: new Date().toISOString() };
   } catch (e) { await client.query('ROLLBACK'); throw e; }
   finally { client.release(); }
 }
