@@ -41,6 +41,12 @@ function writeSaved(list: string[]) {
 
 type PaletteState = 'unseen' | 'unanswered' | 'answered' | 'marked' | 'answered-marked';
 
+function safeDurationSeconds(minutes: unknown): number {
+  const value = Number(minutes);
+  const validMinutes = Number.isFinite(value) && value > 0 ? value : 12;
+  return Math.max(60, Math.floor(validMinutes * 60));
+}
+
 export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
   const practice = mode === 'practice';
   const [items, setItems] = useState<Shuffled[]>(() => shuffleTest(test, !practice));
@@ -50,7 +56,7 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
   const [checked, setChecked] = useState<boolean[]>(() => test.questions.map(() => false));
   const [current, setCurrent] = useState(0);
   const [startedAt, setStartedAt] = useState(() => Date.now());
-  const [secondsLeft, setSecondsLeft] = useState(test.minutes * 60);
+  const [secondsLeft, setSecondsLeft] = useState(() => safeDurationSeconds(test.minutes));
   const [elapsed, setElapsed] = useState(0);
   const [confirming, setConfirming] = useState(false);
   const [finished, setFinished] = useState(false);
@@ -62,12 +68,15 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
   const translated = useTranslatedTexts(visibleQuestion?[visibleQuestion.question,...visibleQuestion.options,visibleQuestion.explanation]:[]);
   const spent = useRef<number[]>(test.questions.map(() => 0));
   const submitRef = useRef<() => void>(() => {});
+  const submittingRef = useRef(false);
 
   const [spentSnapshot, setSpentSnapshot] = useState<number[]>([]);
   const metricStarted = useRef(false), metricCompleted = useRef(false);
   useEffect(()=>{if(!metricStarted.current){metricStarted.current=true;track('mock_started',{test_id:test.id});}},[test.id]);
 
   const submit = useCallback(() => {
+    if (submittingRef.current || finished) return;
+    submittingRef.current = true;
     if(!metricCompleted.current){metricCompleted.current=true;track('mock_completed',{test_id:test.id});}
     setSpentSnapshot([...spent.current]);
     setConfirming(false);
@@ -84,7 +93,7 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
       spent.current[current] += 1;
       setElapsed(Math.round((Date.now() - startedAt) / 1000));
       if (!practice) {
-        const left = Math.max(0, test.minutes * 60 - Math.round((Date.now() - startedAt) / 1000));
+        const left = Math.max(0, safeDurationSeconds(test.minutes) - Math.round((Date.now() - startedAt) / 1000));
         setSecondsLeft(left);
         if (left <= 0) submitRef.current();
       }
@@ -163,7 +172,7 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
     spent.current = test.questions.map(() => 0);
     setCurrent(0);
     setStartedAt(Date.now());
-    setSecondsLeft(test.minutes * 60);
+    setSecondsLeft(safeDurationSeconds(test.minutes));
     setElapsed(0);
     setTabSwitches(0);
     setFinished(false);
