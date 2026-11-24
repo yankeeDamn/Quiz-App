@@ -76,7 +76,7 @@ export function SecureExam({testId,draftMode=false,betaMode=false}:{testId:strin
 
  const update = useCallback((id:string,value:number) => {
    if(sectionMinutes && attempt){
-     const active=Math.floor((serverTimeNow-new Date(attempt.startedAt).getTime())/(sectionMinutes*60000));
+     const active=Math.floor((Date.now()+serverOffsetMs.current-new Date(attempt.startedAt).getTime())/(sectionMinutes*60000));
      const question=attempt.test.questions.find(q=>q.id===id);
      if(!question || active!==question.section)return;
    }
@@ -133,8 +133,8 @@ export function SecureExam({testId,draftMode=false,betaMode=false}:{testId:strin
      setClockNow(serverTimeNow);
      const minutes=attempt.test.sectionTimingMinutes;
      if((minutes===15 || minutes===20) && attempt.test.sections.length===4){
-       const active=Math.max(0,Math.floor((Date.now()-new Date(attempt.startedAt).getTime())/(minutes*60000)));
-       if(active>=4){setSeconds(0);void submit();return;}
+       const active=Math.max(0,Math.floor((serverTimeNow-new Date(attempt.startedAt).getTime())/(minutes*60000)));
+       if(active>=4){setSeconds(0);if(!submitLock.current)void submit();return;}
        if(lastSection.current!==active){
          lastSection.current=active;
          setAnnouncement('Section '+(active+1)+' of 4: '+attempt.test.sections[active].name+
@@ -148,7 +148,7 @@ export function SecureExam({testId,draftMode=false,betaMode=false}:{testId:strin
      }
      const left=Math.max(0,Math.ceil((new Date(attempt.deadlineAt).getTime()-serverTimeNow)/1000));
      setSeconds(left);
-     if(left===0)void submit();
+     if(left===0&&!submitLock.current)void submit();
    };
    clock();const interval=window.setInterval(clock,1000);return()=>window.clearInterval(interval);
  },[attempt,submit]);
