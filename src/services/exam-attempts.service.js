@@ -60,7 +60,8 @@ async function start(user, testId, adminDraft = false, forceNew = false) {
     const sscFullMock = eligible(loadedTest);
     const approved = sscFullMock ? await accommodations.approvedMode(user.id,testId) : null;
     const sectionMinutes = sscFullMock ? (approved === 'scribe_compensatory' ? 20 : 15) : null;
-    const durationMinutes = Math.max(1, Number(loadedTest.minutes) || 12);\n    const effectiveMinutes = sectionMinutes === 20 ? 80 : sectionMinutes === 15 ? 60 : durationMinutes;
+    const durationMinutes = Math.max(1, Number(loadedTest.minutes) || 12);
+    const effectiveMinutes = sectionMinutes === 20 ? 80 : sectionMinutes === 15 ? 60 : durationMinutes;
     const localizedTest = sscFullMock ? await quality.attachApprovedHindi(testId,loadedTest) : loadedTest;
     // Include stable text and key snapshot for reviews after edits or retirements.
     const snapshot = { underReview: loadedTest.underReview !== false, name: loadedTest.name, minutes: effectiveMinutes, tier: loadedTest.tier,
