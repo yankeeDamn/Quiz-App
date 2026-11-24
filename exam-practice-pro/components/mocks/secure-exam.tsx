@@ -16,7 +16,7 @@ import { ShareTestButtons } from '@/components/exampro/share-test-buttons';
 type Question = {id:string;topic:string;section:number;question:string;options:string[];hindi?:{question:string;options:string[]}|null};
 type Review = {id:string;question:string;options:string[];selected:number;correctAnswer:number;explanation:string;correct:boolean};
 type Attempt = {
- newlyCreated?:boolean;id:string;testId:string;title:string;startedAt:string;deadlineAt:string;submittedAt:string|null;
+ newlyCreated?:boolean;serverNow?:string;id:string;testId:string;title:string;startedAt:string;deadlineAt:string;submittedAt:string|null;
  responses:Record<string,number>;
  test:{underReview?:boolean;id:string;name:string;minutes:number;marksPerCorrect:number;negativeMarks:number;passPercent:number;questions:Question[];sections:{name:string;from:number;to:number}[];sectionTimingMinutes?:number|null};
  result:null|{score:number;total:number;percentage:number;passed:boolean;correct:number;incorrect:number;skipped:number;review:Review[]}
@@ -71,11 +71,12 @@ export function SecureExam({testId,draftMode=false,betaMode=false}:{testId:strin
  const displayed = attempt?.test.questions[current];
  const translated = useTranslatedTexts(displayed&&!(language==='hi'&&displayed.hindi)?[displayed.question,...displayed.options]:[],{exam:true});
  const submitLock=useRef(false);
+ const serverOffsetMs=useRef(0);
  const latest=useRef<Record<string,number>>({});
 
  const update = useCallback((id:string,value:number) => {
    if(sectionMinutes && attempt){
-     const active=Math.floor((Date.now()-new Date(attempt.startedAt).getTime())/(sectionMinutes*60000));
+     const active=Math.floor((serverTimeNow-new Date(attempt.startedAt).getTime())/(sectionMinutes*60000));
      const question=attempt.test.questions.find(q=>q.id===id);
      if(!question || active!==question.section)return;
    }
@@ -93,6 +94,9 @@ export function SecureExam({testId,draftMode=false,betaMode=false}:{testId:strin
     .then(r=>{
       if(cancelled)return;
       if(!r.success||!r.data){setStartErrorStatus(r.error?.status);throw Error(r.error?.message||'Cannot start your exam');}
+      const serverNowMs=Date.parse(r.data.attempt.serverNow || '');
+      serverOffsetMs.current=Number.isFinite(serverNowMs)?serverNowMs-Date.now():0;
+      setClockNow(Date.now()+serverOffsetMs.current);
       setAttempt(r.data.attempt);
       setResponses(r.data.attempt.responses);
       latest.current=r.data.attempt.responses;
@@ -101,10 +105,10 @@ export function SecureExam({testId,draftMode=false,betaMode=false}:{testId:strin
       if([15,20].includes(started.test.sectionTimingMinutes??0)){
         const minutes=started.test.sectionTimingMinutes!;
         const section=Math.min(started.test.sections.length-1,
-          Math.max(0,Math.floor((Date.now()-new Date(started.startedAt).getTime())/(minutes*60000))));
+          Math.max(0,Math.floor((Date.now()+serverOffsetMs.current-new Date(started.startedAt).getTime())/(minutes*60000))));
         setCurrent(started.test.sections[section].from);
       }else setCurrent(0);
-      setSeconds(Math.max(0,Math.ceil((new Date(started.deadlineAt).getTime()-Date.now())/1000)));
+      setSeconds(Math.max(0,Math.ceil((new Date(started.deadlineAt).getTime()-(Date.now()+serverOffsetMs.current))/1000)));
     }).catch(e=>{if(!cancelled)setError(e instanceof Error?e.message:'Cannot start your exam')});
    return ()=>{cancelled=true};
  },[status,session?.user?.email,testId,attemptStartUrl,draftMode,betaMode,retry]);
@@ -125,7 +129,8 @@ export function SecureExam({testId,draftMode=false,betaMode=false}:{testId:strin
  useEffect(()=>{
    if(!attempt||attempt.submittedAt)return;
    const clock=()=>{
-     setClockNow(Date.now());
+     const serverTimeNow=Date.now()+serverOffsetMs.current;
+     setClockNow(serverTimeNow);
      const minutes=attempt.test.sectionTimingMinutes;
      if((minutes===15 || minutes===20) && attempt.test.sections.length===4){
        const active=Math.max(0,Math.floor((Date.now()-new Date(attempt.startedAt).getTime())/(minutes*60000)));
@@ -136,12 +141,12 @@ export function SecureExam({testId,draftMode=false,betaMode=false}:{testId:strin
            '. Previous sections are now locked. '+minutes+' minutes for this section.');
        }
        const cutoff=new Date(attempt.startedAt).getTime()+(active+1)*minutes*60000;
-       setSeconds(Math.max(0,Math.ceil((cutoff-Date.now())/1000)));
+       setSeconds(Math.max(0,Math.ceil((cutoff-serverTimeNow)/1000)));
        const section=attempt.test.sections[active];
        setCurrent(old=>old<section.from||old>=section.to?section.from:old);
        return;
      }
-     const left=Math.max(0,Math.ceil((new Date(attempt.deadlineAt).getTime()-Date.now())/1000));
+     const left=Math.max(0,Math.ceil((new Date(attempt.deadlineAt).getTime()-serverTimeNow)/1000));
      setSeconds(left);
      if(left===0)void submit();
    };
