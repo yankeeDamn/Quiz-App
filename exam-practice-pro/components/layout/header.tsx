@@ -19,6 +19,7 @@ import {
 import { useState } from 'react';
 import { clearTokenCache } from '@/lib/api';
 import { LanguageSwitcher, useExamLanguage } from '@/components/exampro/exam-language';
+import { PwaInstallBanner } from '@/components/pwa/pwa-install-banner';
 
 export function Header() {
   const { setTheme, theme } = useTheme();
@@ -84,6 +85,7 @@ export function Header() {
         <div className="flex items-center gap-2">
           {/* Language selection persists across ExamPro and the exam hall. */}
           <LanguageSwitcher small />
+          <PwaInstallBanner />
 
           {/* Theme Toggle */}
           <DropdownMenu>
