@@ -81,7 +81,7 @@ export function ExamEngine({ test, mode }: { test: MockTest; mode: Mode }) {
     setSpentSnapshot([...spent.current]);
     setConfirming(false);
     setFinished(true);
-  }, [test.id]);
+  }, [test.id, finished]);
   useEffect(() => {
     submitRef.current = submit;
   }, [submit]);
