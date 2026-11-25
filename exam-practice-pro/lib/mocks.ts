@@ -2,6 +2,7 @@ import { api, getUserProfile } from '@/lib/api';
 import { IT_CERTS, buildCertTest } from '@/lib/it-certs';
 import { buildSeparatePractice, separateSummaries } from '@/lib/separate-exams';
 import { fetchPracticeLibrary } from '@/lib/practice-overrides';
+import { fetchStarterPacksOrNull } from '@/lib/starter-packs';
 
 export interface MockSummary {
   underReview?: boolean;
@@ -53,14 +54,20 @@ export async function fetchCatalog(): Promise<MockSummary[]> {
   const starters = IT_CERTS.map(cert=>buildCertTest(cert.id)).filter((t): t is MockTest=>!!t)
     .map(t=>({id:t.id,name:t.name,exam:t.exam,kind:t.kind,tier:t.tier,level:t.level,minutes:t.minutes,questionCount:t.questionCount,
       marksPerCorrect:t.marksPerCorrect,negativeMarks:t.negativeMarks,underReview:t.underReview,practiceOnly:true,sections:t.sections.map(s=>s.name)}));
-  const combined = [...res.data.tests,...separateSummaries().map(t=>({...t,practiceOnly:true})),...starters];
+  // Admin-edited starter packs (Free, practice-only); bundled questions are the fallback.
+  const savedPacks = await fetchStarterPacksOrNull();
+  const combined = [...res.data.tests,...separateSummaries(savedPacks).map(t=>({...t,practiceOnly:true})),...starters];
   return [...new Map(combined.map(t=>[t.id,t])).values()];
 }
 
 export async function fetchMock(id: string, mode: 'test' | 'practice' = 'test'): Promise<MockLoad> {
   // Free IT certification starters ship with the site and do not need the API.
   const separate = buildSeparatePractice(id);
-  if(separate) return mode==='practice'?{status:'ok',test:separate}:{status:'error',message:'Use Practice for this introductory question pack.'};
+  if(separate) {
+    if(mode!=='practice') return {status:'error',message:'Use Practice for this introductory question pack.'};
+    // Learners see admin edits; the bundled pack still loads if the API is offline.
+    return {status:'ok',test:buildSeparatePractice(id,await fetchStarterPacksOrNull())||separate};
+  }
   const cert = buildCertTest(id);
   if (cert && mode === 'practice') {
     try {

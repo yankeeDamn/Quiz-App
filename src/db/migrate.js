@@ -219,6 +219,7 @@ async function migrate() {
     await client.query(fs.readFileSync(path.join(__dirname, 'mock01-quality-accessibility.sql'), 'utf8'));
     await client.query(fs.readFileSync(path.join(__dirname, 'practice-overrides.sql'), 'utf8'));
     await client.query(fs.readFileSync(path.join(__dirname, 'question-review.sql'), 'utf8'));
+    await client.query(fs.readFileSync(path.join(__dirname, 'starter-packs.sql'), 'utf8'));
     const seeded = await seedStarterContent(client);
     console.log(`🌱 Starter content checked: ${seeded.topics} topics, ${seeded.questions} questions, ${seeded.mocks} mocks.`);
     const competitive = await seedCompetitiveContent(client);
