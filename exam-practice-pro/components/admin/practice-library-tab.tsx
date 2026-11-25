@@ -10,6 +10,7 @@ import type { Question } from '@/lib/types';
 import { admin } from '@/lib/admin';
 import { type PracticeOverride, type PracticeAddition } from '@/lib/practice-overrides';
 import { PracticeAddQuestion } from '@/components/admin/practice-add-question';
+import { StarterPacksEditor } from '@/components/admin/starter-packs-editor';
 import { Field, Notice, card, input } from '@/components/admin/ui';
 
 type Source = 'homepage' | 'certification';
@@ -29,7 +30,7 @@ function asDraft(question: EditableQuestion): Draft {
   return {text:question.question, options:[...question.options], answers:[question.correct_option], explanation:question.explanation};
 }
 
-export function PracticeLibraryTab() {
+function LegacyPracticeLibrary() {
   const [source, setSource] = useState<Source>('homepage');
   const [groupId, setGroupId] = useState('aws-clf-c02');
   const [questionId, setQuestionId] = useState('');
@@ -198,5 +199,21 @@ export function PracticeLibraryTab() {
         Previously started local practice attempts retain their question snapshots.
       </p>
     </section>}
+  </div>;
+}
+
+/** Practice Library: the older quizzes and certification starters, plus the Free exam starter packs. */
+export function PracticeLibraryTab() {
+  const [view, setView] = useState<'legacy' | 'packs'>('packs');
+  return <div className="grid gap-5">
+    <div className="flex flex-wrap gap-2" role="group" aria-label="Practice library section">
+      <Button variant={view === 'packs' ? 'default' : 'outline'} aria-pressed={view === 'packs'} onClick={() => setView('packs')}>
+        Exam starter packs (Railways, Banking, UPSC)
+      </Button>
+      <Button variant={view === 'legacy' ? 'default' : 'outline'} aria-pressed={view === 'legacy'} onClick={() => setView('legacy')}>
+        Homepage quizzes &amp; IT certifications
+      </Button>
+    </div>
+    {view === 'packs' ? <StarterPacksEditor /> : <LegacyPracticeLibrary />}
   </div>;
 }

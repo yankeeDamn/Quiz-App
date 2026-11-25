@@ -31,6 +31,7 @@ const SLUG = /^[a-z0-9-]{1,60}$/;
 
 const router = Router();
 const practiceOverrides = require('../services/practice-overrides.service');
+const starterPacks = require('../services/starter-packs.service');
 
 function keyMatches(given) {
   const a = Buffer.from(String(given || ''));
@@ -135,6 +136,17 @@ router.post('/practice/questions', wrap(async (req, res) => {
     throw error;
   }
 }));
+
+// ── Free exam starter packs (Railways RRB, Banking IBPS, UPSC GS) ──────────
+// Practice-only and Free for learners; only admins may change the content.
+const packActor = (req) => (req.admin && req.admin.email) || (req.admin && req.admin.via) || null;
+router.get('/practice/starter-packs', wrap(async (_req, res) => ok(res, { packs: await starterPacks.listForAdmin() })));
+router.post('/practice/starter-packs/:packId/questions', wrap(async (req, res) =>
+  ok(res, { question: await starterPacks.addQuestion(req.params.packId, req.body?.question, packActor(req)) })));
+router.put('/practice/starter-packs/:packId/questions/:questionId', wrap(async (req, res) =>
+  ok(res, { question: await starterPacks.saveQuestion(req.params.packId, req.params.questionId, req.body?.question, packActor(req)) })));
+router.delete('/practice/starter-packs/:packId/questions/:questionId', wrap(async (req, res) =>
+  ok(res, await starterPacks.removeQuestion(req.params.packId, req.params.questionId, packActor(req)))));
 
 // ── Plans ──────────────────────────────────────────────
 
