@@ -52,7 +52,12 @@ async function run(name, type, device) {
       : {}),
     ...(type === chromium ? { args: ['--disable-dev-shm-usage'] } : {}),
   });
-  const context = await browser.newContext(device);
+  // This test fulfils /api/auth/session, the Cashfree SDK and the API through
+  // context.route(). A registered service worker (the PWA shell worker) takes
+  // those requests out of Playwright's interception in WebKit, so the signed-in
+  // fixture never applies. Block service workers here; the PWA worker is
+  // exercised separately and never handles /api, /auth, /admin or Cashfree.
+  const context = await browser.newContext({ ...device, serviceWorkers: 'block' });
   let email = 'browser-' + crypto.randomUUID() + '@example.test',
     signedIn = true,
     denyConfig = false;
@@ -157,11 +162,20 @@ async function run(name, type, device) {
   // Explicit backend unavailability keeps production checkout disabled.
   signedIn = true;
   denyConfig = true;
-  await page.waitForLoadState('networkidle');
+  // Assert the auth fixture really switched to the signed-in account after the
+  // guest-flow reload; otherwise this test only verifies the sign-in gate.
+  const signedInSession = page.waitForResponse((response) => {
+    const url = new URL(response.url());
+    return url.origin === origin && url.pathname === '/api/auth/session' && response.ok();
+  });
   await page.reload();
+  const sessionResponse = await signedInSession;
+  const sessionPayload = await sessionResponse.json();
+  assert.equal(sessionPayload.user?.email, email, 'session fixture must be signed in before testing disabled checkout');
   await page
     .getByRole('button', { name: 'Choose Pro annual', exact: true })
     .click();
+  await page.getByText('Account: ' + email, { exact: true }).waitFor();
   await page.getByText(/New purchases are temporarily unavailable/).waitFor();
   assert.equal(
     await page

@@ -20,6 +20,7 @@ import { api } from '@/lib/api';
 import { IT_CERTS } from '@/lib/it-certs';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { DailyStreakWidget } from '@/components/streak/daily-streak-widget';
 
 const difficultyFilters = [
   { id: 'Easy', label: 'Easy' },
@@ -239,6 +240,8 @@ export default function HomePage() {
             </motion.div>
           </div>
         </section>
+
+        <DailyStreakWidget />
 
         <section id="live-tests" className="container mx-auto px-4 py-12 sm:py-16" aria-labelledby="live-tests-heading">
           <p className="ep-eyebrow">CHOOSE YOUR NEXT TEST</p>
