@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { Download, Smartphone, X } from 'lucide-react';
+import { INSTALL_AVAILABLE_EVENT } from '@/components/pwa/pwa-register';
 
-type InstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }> };
+type InstallPromptEvent = NonNullable<Window['__examproInstallPrompt']>;
 
 export function PwaInstallBanner() {
   const [promptEvent, setPromptEvent] = useState<InstallPromptEvent | null>(null);
@@ -14,10 +15,16 @@ export function PwaInstallBanner() {
   useEffect(() => {
     const check = () => setStandalone(window.matchMedia('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone === true);
     check();
-    const onPrompt = (event: Event) => { event.preventDefault(); setPromptEvent(event as InstallPromptEvent); };
-    window.addEventListener('beforeinstallprompt', onPrompt);
-    window.addEventListener('appinstalled', () => { setStandalone(true); setPromptEvent(null); });
-    return () => window.removeEventListener('beforeinstallprompt', onPrompt);
+    // PwaRegister captures beforeinstallprompt globally; read it on mount and on later changes.
+    const sync = () => setPromptEvent(window.__examproInstallPrompt ?? null);
+    const onInstalled = () => { setStandalone(true); setPromptEvent(null); };
+    sync();
+    window.addEventListener(INSTALL_AVAILABLE_EVENT, sync);
+    window.addEventListener('appinstalled', onInstalled);
+    return () => {
+      window.removeEventListener(INSTALL_AVAILABLE_EVENT, sync);
+      window.removeEventListener('appinstalled', onInstalled);
+    };
   }, []);
 
   if (standalone) return <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">⚡ App Mode Active</span>;

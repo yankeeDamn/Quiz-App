@@ -85,7 +85,8 @@ export function Header() {
         <div className="flex items-center gap-2">
           {/* Language selection persists across ExamPro and the exam hall. */}
           <LanguageSwitcher small />
-          <PwaInstallBanner />
+          {/* Wide screens only: on phones this control overflowed the 320px header. It lives in the menu below. */}
+          <div className="hidden empty:hidden 2xl:block"><PwaInstallBanner /></div>
 
           {/* Theme Toggle */}
           <DropdownMenu>
@@ -193,6 +194,7 @@ export function Header() {
                 <Link href="/advertise" className="rounded-lg px-3 py-2 text-sm">Advertise With Us</Link>
                 <Link href="/account/payments" onClick={() => setMobileMenuOpen(false)} className="flex min-h-11 items-center rounded-lg px-3 py-2 text-sm">Payments & receipts</Link>
               </nav>
+              <div className="px-5 pt-3 empty:hidden"><PwaInstallBanner /></div>
               <div className="border-t border-border/70 px-5 pt-4">
                 {status === 'loading' ? (
                   <p className="text-sm text-muted-foreground" role="status">{t('checking')}</p>
