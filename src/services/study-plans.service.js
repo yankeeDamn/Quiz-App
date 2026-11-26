@@ -178,8 +178,8 @@ function createService(db = database, books = require("./ebooks.service")) {
       [p.id, access],
     );
     const subjects = await rows(
-      "SELECT name FROM study_topics WHERE syllabus_id=$1 AND kind='subject' AND status='published' ORDER BY display_order",
-      [p.syllabus_id],
+      "SELECT name FROM study_topics WHERE syllabus_id=$1 AND kind='subject' AND (status='published' OR ($2 AND status='draft')) ORDER BY display_order",
+      [p.syllabus_id, !!previewId],
     );
     const summary = {
       id: p.id,
@@ -644,110 +644,143 @@ function createService(db = database, books = require("./ebooks.service")) {
       ),
     };
   }
+  // The checklist and the actual publish action use the same validation.
+  // Batch-load dependencies rather than issuing hundreds of per-task queries.
+  async function checkReadiness(p, c = db) {
+    const issues = [];
+    const add = (code, message, task) => issues.push({
+      code, message, ...(task ? { day: task.day, taskId: task.id, taskTitle: task.title } : {}),
+    });
+    const exam = (await rows("SELECT * FROM study_exams WHERE id=$1", [p.exam_id], c))[0];
+    const sy = (await rows("SELECT * FROM study_syllabuses WHERE id=$1 AND exam_id=$2", [p.syllabus_id, p.exam_id], c))[0];
+    const topics = await rows("SELECT * FROM study_topics WHERE syllabus_id=$1", [p.syllabus_id], c);
+    const byTopic = new Map(topics.map(t => [t.id, t]));
+    const tasks = await rows("SELECT * FROM study_tasks WHERE plan_id=$1 ORDER BY day,display_order,id", [p.id], c);
+    if (p.status !== "draft" || p.published_at) add("edition", "Only a never-published draft can be published.");
+    if (!exam || exam.status !== "published") add("exam", "Review and publish the exam record in Exams first.");
+    if (!sy?.verified_by || !sy?.verified_at) add("syllabus", "Verify the official syllabus source and version in Syllabuses.");
+    if (!tasks.some(t => t.required)) add("days", "Add at least one required task.");
+    const covered = new Set(tasks.map(t => t.day));
+    const missing = Array.from({length: p.duration}, (_, i) => i + 1).filter(d => !covered.has(d));
+    if (missing.length) add("days", "Add tasks to missing days: " + missing.join(", "));
+    const badTopics = new Set();
+    for (const t of tasks) {
+      const seen = new Set();
+      let id = t.topic_id;
+      while (id) {
+        const node = byTopic.get(id);
+        if (!node || seen.has(id)) {
+          add("topics", "Invalid syllabus hierarchy; review the task topic.", t);
+          break;
+        }
+        seen.add(id);
+        if (node.status !== "published") badTopics.add(node.id);
+        id = node.parent_id;
+      }
+    }
+    if (badTopics.size) add("topics", badTopics.size + " referenced syllabus nodes (including parents) are not published. Review Topics first.");
+    const resources = await rows("SELECT * FROM study_resources WHERE id IN (SELECT resource_id FROM study_tasks WHERE plan_id=$1)", [p.id], c);
+    const resourceMap = new Map(resources.map(r => [r.id, r]));
+    const resourceErrors = new Map();
+    for (const r of resources) {
+      if (r.status !== "published" || r.exam_id !== p.exam_id) {
+        resourceErrors.set(r.id, "Review the linked resource in Resources.");
+        continue;
+      }
+      try { await validateResource(r, c, true); }
+      catch (err) {
+        if (![400, 404, 409].includes(err.statusCode)) throw err;
+        resourceErrors.set(r.id, err.message === "Record not found" ? "The resource's ebook, PDF asset or topic is missing." : err.message);
+      }
+    }
+    const mocks = await rows("SELECT id,name,tier,active FROM mock_tests WHERE id IN (SELECT mock_id FROM study_tasks WHERE plan_id=$1)", [p.id], c);
+    const mockMap = new Map(mocks.map(m => [m.id, m]));
+    const validMocks = new Map();
+    for (const m of mocks) validMocks.set(m.id, m.active && !!(await require("./mocks.service").findMock(m.id)));
+    const questions = await rows("SELECT l.task_id,q.id,q.active,q.review_status,q.access_tier,py.verification,py.exam_id AS pyq_exam_id FROM study_task_questions l JOIN study_tasks t ON t.id=l.task_id JOIN mock_questions q ON q.id=l.question_id LEFT JOIN study_pyq_metadata py ON py.question_id=q.id WHERE t.plan_id=$1", [p.id], c);
+    const byTask = new Map();
+    for (const q of questions) {
+      if (!byTask.has(q.task_id)) byTask.set(q.task_id, []);
+      byTask.get(q.task_id).push(q);
+    }
+    for (const t of tasks) {
+      const free = t.preview || p.access_policy === "free";
+      if (t.resource_id) {
+        const r = resourceMap.get(t.resource_id);
+        if (!r || resourceErrors.has(t.resource_id)) add("resources", resourceErrors.get(t.resource_id) || "Linked resource is missing.", t);
+        if (r && free && r.access_policy === "pro") add("resources", "Free tasks cannot attach premium resources.", t);
+      } else if (t.kind === "pdf") add("resources", "PDF task requires a resource.", t);
+      if (t.mock_id) {
+        const m = mockMap.get(t.mock_id);
+        if (!validMocks.get(t.mock_id)) add("mocks", "Linked mock " + (m?.name || t.mock_id) + " is not available in the published catalogue. Review it in the existing mock editor or replace the link.", t);
+        if (m && free && m.tier !== "free") add("mocks", "Free tasks cannot link premium mocks.", t);
+      } else if (["mock","quiz"].includes(t.kind)) add("mocks", "Quiz/mock task requires an existing mock.", t);
+      const qs = byTask.get(t.id) || [];
+      if (t.kind === "pyq" && !qs.length) add("questions", "PYQ task requires linked questions.", t);
+      if (qs.some(q => !q.active || q.review_status !== "published")) add("questions", "Linked questions must be published and active.", t);
+      if (free && qs.some(q => q.access_tier !== "free")) add("questions", "Preview questions must be Free.", t);
+      if (t.kind === "pyq" && qs.some(q => q.verification !== "verified" || q.pyq_exam_id !== p.exam_id)) add("questions", "PYQ provenance must be verified before publication.", t);
+    }
+    const labels = {edition:"Draft edition",exam:"Exam review",syllabus:"Official syllabus",topics:"Topic hierarchy",days:"Daily tasks",resources:"Resources and PDF permissions",mocks:"Mock availability",questions:"Question and PYQ permissions"};
+    return {
+      ready: issues.length === 0, revision: p.revision,
+      checks: Object.entries(labels).map(([code,label]) => ({code,label,passed: !issues.some(i => i.code === code),issues: issues.filter(i => i.code === code)})),
+      review: {examStatus: exam?.status || "missing", syllabusVerified: !!(sy?.verified_by && sy?.verified_at), draftTopics: topics.filter(t => t.status === "draft").length, archivedTopics: topics.filter(t => t.status === "archived").length},
+    };
+  }
+  async function readiness(user, pid) {
+    admin(user);
+    const p = await one("SELECT * FROM study_plans WHERE id=$1", [v.id(pid)]);
+    return checkReadiness(p);
+  }
+  // Explicit admin review of prerequisites, scoped to the selected draft.
+  // Never publishes a plan, changes questions/mocks, or touches archived nodes.
+  async function reviewPrerequisites(user, pid, input) {
+    const actor = admin(user);
+    if (input?.acknowledged !== true) throw v.fail("Confirm you have reviewed the selected prerequisites.");
+    const fields = ["exam", "syllabus", "topics"];
+    if (fields.some(k => typeof input[k] !== "boolean") || !fields.some(k => input[k])) throw v.fail("Select at least one prerequisite to review.");
+    return tx(async c => {
+      const p = await mutable(pid, c);
+      if (p.revision !== input.revision) throw v.fail("Plan changed. Reload and review again.", 409);
+      const sy = await one("SELECT * FROM study_syllabuses WHERE id=$1 AND exam_id=$2 FOR UPDATE", [p.syllabus_id,p.exam_id], c);
+      const exam = await one("SELECT * FROM study_exams WHERE id=$1 FOR UPDATE", [p.exam_id], c);
+      if (input.exam && exam.status === "archived") throw v.fail("Archived exams require individual review.");
+      if (input.exam && !exam.source_url) throw v.fail("Add the official exam source before review.");
+      if (input.syllabus || input.topics) await syllabusEditable(sy.id, c);
+      if (input.syllabus && !sy.source_url) throw v.fail("Add the official syllabus source before verification.");
+      if (input.topics) {
+        if (!input.syllabus && !sy.verified_at) throw v.fail("Verify the syllabus before reviewing topics.");
+        const all = await rows("SELECT id,parent_id,kind,status FROM study_topics WHERE syllabus_id=$1 FOR UPDATE", [sy.id], c);
+        const byId = new Map(all.map(t => [t.id,t]));
+        const kinds = {stage:null,subject:"stage",chapter:"subject",topic:"chapter"};
+        for (const t of all.filter(t => t.status === "draft")) {
+          const parent = byId.get(t.parent_id);
+          if ((t.kind === "stage" && t.parent_id) || (t.kind !== "stage" && (!parent || parent.kind !== kinds[t.kind] || parent.status === "archived"))) throw v.fail("Resolve invalid or archived topic parents before bulk review.");
+        }
+        await c.query("UPDATE study_topics SET status='published' WHERE syllabus_id=$1 AND status='draft'", [sy.id]);
+      }
+      if (input.exam && exam.status === "draft") await c.query("UPDATE study_exams SET status='published',updated_at=now() WHERE id=$1 AND status='draft'", [exam.id]);
+      if (input.syllabus) await c.query("UPDATE study_syllabuses SET verified_by=$2,verified_at=now() WHERE id=$1", [sy.id,actor]);
+      const result = await update("study_plans", pid, {revision:p.revision+1}, c);
+      logger.info({actor,planId:pid,exam:input.exam,syllabus:input.syllabus,topics:input.topics}, "Study prerequisite review; plan remains draft");
+      return result;
+    });
+  }
   async function publish(user, pid, input) {
     const actor = admin(user);
-    if (input?.acknowledged !== true)
-      throw v.fail(
-        "Confirm syllabus, content, rights and preview review before publishing",
-      );
-    return tx(async (c) => {
-      const p = await mutable(pid, c);
-      if (p.revision !== input.revision)
-        throw v.fail(
-          "Plan changed. Reload and preview before publishing.",
-          409,
-        );
-      await one(
-        "SELECT id FROM study_exams WHERE id=$1 AND status='published'",
-        [p.exam_id],
-        c,
-      );
-      const sy = await one(
-        "SELECT * FROM study_syllabuses WHERE id=$1 FOR UPDATE",
-        [p.syllabus_id],
-        c,
-      );
-      if (!sy.verified_by || !sy.verified_at)
-        throw v.fail("Official syllabus verification is required");
-      const tasks = await rows(
-        "SELECT * FROM study_tasks WHERE plan_id=$1",
-        [pid],
-        c,
-      );
-      if (!tasks.length || !tasks.some((t) => t.required))
-        throw v.fail("Add required tasks before publishing");
-      for (let day = 1; day <= p.duration; day++)
-        if (!tasks.some((t) => t.day === day))
-          throw v.fail(`Day ${day} has no tasks`);
-      for (const t of tasks) {
-        if (t.topic_id) {
-          const ancestors = await rows(
-            "WITH RECURSIVE a AS (SELECT * FROM study_topics WHERE id=$1 UNION ALL SELECT st.* FROM study_topics st JOIN a ON st.id=a.parent_id) SELECT status FROM a",
-            [t.topic_id],
-            c,
-          );
-          if (ancestors.some((a) => a.status !== "published"))
-            throw v.fail("Publish each referenced topic and its parents first");
-        }
-        if (t.resource_id) {
-          const r = await one(
-            "SELECT * FROM study_resources WHERE id=$1 AND status='published'",
-            [t.resource_id],
-            c,
-          );
-          await validateResource(r, c, true);
-          if (
-            (t.preview || p.access_policy === "free") &&
-            r.access_policy === "pro"
-          )
-            throw v.fail("Free tasks cannot attach premium resources");
-        }
-        if (t.kind === "pdf" && !t.resource_id)
-          throw v.fail("PDF task requires a resource");
-        if (t.mock_id) {
-          if (!(await require("./mocks.service").findMock(t.mock_id)))
-            throw v.fail(
-              "Linked mock is not available in the published catalogue",
-            );
-          const m = await one(
-            "SELECT * FROM mock_tests WHERE id=$1 AND active",
-            [t.mock_id],
-            c,
-          );
-          if ((t.preview || p.access_policy === "free") && m.tier !== "free")
-            throw v.fail("Free tasks cannot link premium mocks");
-        }
-        if (["mock", "quiz"].includes(t.kind) && !t.mock_id)
-          throw v.fail("Quiz/mock task requires an existing mock");
-        const qs = await rows(
-          "SELECT q.*,py.verification,py.exam_id AS pyq_exam_id FROM study_task_questions l JOIN mock_questions q ON q.id=l.question_id LEFT JOIN study_pyq_metadata py ON py.question_id=q.id WHERE l.task_id=$1",
-          [t.id],
-          c,
-        );
-        if (t.kind === "pyq" && !qs.length)
-          throw v.fail("PYQ task requires linked questions");
-        for (const q of qs) {
-          if (!q.active || q.review_status !== "published")
-            throw v.fail("Linked questions must be published and active");
-          if (
-            (t.preview || p.access_policy === "free") &&
-            q.access_tier !== "free"
-          )
-            throw v.fail("Preview questions must be Free");
-          if (
-            t.kind === "pyq" &&
-            (q.verification !== "verified" || q.pyq_exam_id !== p.exam_id)
-          )
-            throw v.fail("PYQ provenance must be verified before publication");
-        }
+    if (input?.acknowledged !== true) throw v.fail("Confirm syllabus, content, rights and preview review before publishing");
+    return tx(async c => {
+      const p = await mutable(pid,c);
+      if (p.revision !== input.revision) throw v.fail("Plan changed. Reload and preview before publishing.",409);
+      await c.query("SELECT id FROM study_syllabuses WHERE id=$1 FOR UPDATE", [p.syllabus_id]);
+      const report = await checkReadiness(p,c);
+      if (!report.ready) {
+        const first = report.checks.find(check => !check.passed).issues[0];
+        throw v.fail("Not ready to publish: " + (first.day ? "Day " + first.day + " (" + first.taskTitle + "): " : "") + first.message + " See Publication readiness for all blockers.");
       }
-      const result = await update(
-        "study_plans",
-        pid,
-        { status: "published", published_at: new Date() },
-        c,
-      );
-      logger.info({ actor, planId: pid }, "Study plan published");
+      const result = await update("study_plans",pid,{status:"published",published_at:new Date()},c);
+      logger.info({actor,planId:pid},"Study plan published");
       return result;
     });
   }
@@ -850,6 +883,8 @@ function createService(db = database, books = require("./ebooks.service")) {
     savePlan,
     saveTask,
     detail,
+    readiness,
+    reviewPrerequisites,
     publish,
     archive,
     clone,
