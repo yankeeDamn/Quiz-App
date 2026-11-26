@@ -172,6 +172,39 @@ test("Study Plans lifecycle, API authorization and existing content integration"
       );
     },
   );
+  await t.test("readiness and explicit bulk review keep draft private", async () => {
+    const prefix = `/admin/study-plans/plans/${plan.id}`;
+    // Recreate the staging failure: exam and hierarchy have not been reviewed.
+    await db.query("UPDATE study_exams SET status='draft',source_url='https://ssc.gov.in/' WHERE id='ssc-cgl'");
+    await db.query("UPDATE study_topics SET status='draft' WHERE syllabus_id=$1", [sy.id]);
+    await db.query("UPDATE study_syllabuses SET verified_by=NULL,verified_at=NULL WHERE id=$1", [sy.id]);
+    assert.equal((await call(prefix+"/readiness","free")).status,403);
+    assert.equal((await call(prefix+"/readiness")).status,401);
+    const draftPreview = await call(prefix+"/preview","owner");
+    assert.equal(draftPreview.status,200);
+    assert.ok(draftPreview.data.data.subjects.some(x=>x.name==="Fixture subject"));
+    const r = await call(prefix+"/readiness","owner");
+    assert.equal(r.status,200);
+    assert.equal(r.data.data.ready,false);
+    assert.equal(r.data.data.review.draftTopics,4);
+    for (const code of ["exam","syllabus","days"]) assert.equal(r.data.data.checks.find(x=>x.code===code).passed,false);
+    const attempt = await call(prefix+"/publish","owner","POST",{revision:plan.revision,acknowledged:true});
+    assert.equal(attempt.status,400);
+    assert.match(attempt.data.error.message,/Not ready to publish:.*exam/i);
+    const review = {revision:plan.revision,exam:true,syllabus:true,topics:true,acknowledged:true};
+    assert.equal((await call(prefix+"/review-prerequisites","free","POST",review)).status,403);
+    assert.equal((await call(prefix+"/review-prerequisites","owner","POST",{...review,acknowledged:false})).status,400);
+    assert.equal((await call(prefix+"/review-prerequisites","owner","POST",{...review,revision:0})).status,409);
+    plan = await admin(`/plans/${plan.id}/review-prerequisites`,review);
+    assert.equal(plan.status,"draft");
+    assert.equal(plan.published_at,null);
+    const after = (await call(prefix+"/readiness","owner")).data.data;
+    assert.equal(after.review.draftTopics,0);
+    assert.equal(after.review.syllabusVerified,true);
+    assert.equal(after.ready,false); // empty plan cannot publish
+    assert.equal((await call("/study-plans/ssc-cgl","pro")).status,404);
+    assert.equal((await call("/study-plans")).data.data.plans.length,0);
+  });
   await t.test(
     "private PDF reuses Ebook Studio and remains Pro-only on every direct alias",
     async () => {
@@ -338,6 +371,9 @@ test("Study Plans lifecycle, API authorization and existing content integration"
     "explicit publication gates content and Free preview never returns premium tasks",
     async () => {
       const current = await admin("/plans/" + plan.id, undefined, "GET");
+      const readiness = await admin(`/plans/${plan.id}/readiness`,undefined,"GET");
+      assert.equal(readiness.ready,true,JSON.stringify(readiness.checks));
+
       assert.equal(
         (
           await call(

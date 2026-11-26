@@ -63,6 +63,7 @@ function StudyContent({
     let cancelled = false;
     async function load() {
       try {
+        setError("");
         if (previewId) {
           const r = await admin<StudyPlan>(
             `/study-plans/plans/${previewId}/preview`,
@@ -385,6 +386,9 @@ function StudyContent({
                   <p className="my-3 whitespace-pre-wrap text-sm leading-6">
                     {t.description}
                   </p>
+                  {t.resource && previewId && (
+                    <p className="my-3 rounded-lg border p-3 text-sm">Linked resource: {t.resource.title} · Preview only; student download is not enabled here.</p>
+                  )}
                   {t.resource && !previewId && (
                     <div className="my-4 flex flex-wrap gap-4 text-sm">
                       <a
@@ -405,7 +409,10 @@ function StudyContent({
                       </a>
                     </div>
                   )}
-                  {t.mock_id && (
+                  {t.mock_id && previewId && (
+                    <p className="my-3 rounded-lg border p-3 text-sm">Linked mock: {t.mock_id} · Preview only; availability is checked before publication.</p>
+                  )}
+                  {t.mock_id && !previewId && (
                     <Link
                       className="my-3 inline-block text-sm underline"
                       href={`/exampro?test=${encodeURIComponent(t.mock_id)}`}
