@@ -190,6 +190,14 @@ function createRouters(s = service, identity = authenticateNextAuth) {
     "/plans/:id",
     wrap(async (req, res) => ok(res, await s.detail(req.user, req.params.id))),
   );
+  adminRouter.get(
+    "/plans/:id/readiness",
+    wrap(async (req, res) => ok(res, await s.readiness(req.user, req.params.id))),
+  );
+  adminRouter.post(
+    "/plans/:id/review-prerequisites",
+    wrap(async (req, res) => ok(res, await s.reviewPrerequisites(req.user, req.params.id, req.body))),
+  );
   adminRouter.post(
     "/plans/:id/tasks",
     wrap(async (req, res) =>
