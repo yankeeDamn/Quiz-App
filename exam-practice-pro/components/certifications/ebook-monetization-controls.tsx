@@ -6,7 +6,7 @@ import type { EbookTrack } from "@/lib/ebooks";
 import { ebookFieldClass } from "./ebook-admin-ui";
 
 export type EbookAccessPatch = Partial<
-  Pick<EbookTrack, "accessLevel" | "freePreviewPages" | "allowFullPdfDownload">
+  Pick<EbookTrack, "studyProOnly" | "accessLevel" | "freePreviewPages" | "allowFullPdfDownload">
 >;
 
 export function EbookMonetizationControls({
@@ -53,13 +53,14 @@ export function EbookMonetizationControls({
       <div className={`grid gap-6 p-5 ${compact ? "xl:grid-cols-3" : "lg:grid-cols-3"}`}>
         <fieldset className="min-w-0 space-y-3" disabled={locked || bundled}>
           <legend className="mb-2 text-sm font-bold">Reader access</legend>
+          <label className="flex gap-2 text-sm"><input type="checkbox" checked={book.studyProOnly === true} disabled={locked || bundled || !!book.revision} onChange={event => onCommit({studyProOnly:event.target.checked, ...(event.target.checked ? {accessLevel:"pro" as const}: {})})}/>Study Plans: Pro subscribers only (choose before creating)</label>
           <div className="flex rounded-xl border border-slate-200 bg-slate-100 p-1 dark:border-slate-700 dark:bg-slate-900">
             {(["free", "pro"] as const).map((level) => (
               <button
                 key={level}
                 type="button"
                 aria-pressed={book.accessLevel === level}
-                disabled={locked || bundled}
+                disabled={locked || bundled || book.studyProOnly === true}
                 onClick={() => level !== book.accessLevel && onCommit({ accessLevel: level })}
                 className={`inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-3 text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-500/20 disabled:cursor-not-allowed disabled:opacity-50 ${book.accessLevel === level ? "bg-white text-indigo-700 shadow-md ring-1 ring-indigo-100 dark:bg-indigo-600 dark:text-white dark:ring-indigo-500" : "text-slate-600 hover:-translate-y-0.5 hover:bg-white hover:text-slate-900 hover:shadow-sm dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"}`}
               >

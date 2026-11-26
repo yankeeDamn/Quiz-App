@@ -48,6 +48,7 @@ export function Header() {
           lang={language}>
             {t('quizzes')}
           </Link>
+          <Link href="/study-plans" className="rounded-lg px-1 py-2 text-sm font-semibold text-indigo-700 dark:text-indigo-300">Study Plans</Link>
           <Link href="/government-jobs" className="rounded-lg px-1 py-2 text-sm font-semibold text-indigo-700 transition-colors hover:text-indigo-900 dark:text-indigo-300">{t('govtJobs')}</Link>
           <Link href="/certifications" className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:text-indigo-300"> {t('certifications')}</Link>
           <Link
@@ -191,6 +192,7 @@ export function Header() {
                     {t(label)}
                   </Link>
                 ))}
+                <Link href="/study-plans" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-3 text-sm font-semibold">Study Plans</Link>
                 <Link href="/advertise" className="rounded-lg px-3 py-2 text-sm">Advertise With Us</Link>
                 <Link href="/account/payments" onClick={() => setMobileMenuOpen(false)} className="flex min-h-11 items-center rounded-lg px-3 py-2 text-sm">Payments & receipts</Link>
               </nav>

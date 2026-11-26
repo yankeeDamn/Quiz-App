@@ -28,6 +28,8 @@ router.use('/practice', practiceRoutes);
 router.use('/exam-attempts', examAttemptRoutes);
 router.use('/ebooks', require('./ebooks').router);
 router.use('/admin/ebooks', require('./ebooks').adminRouter);
+router.use('/study-plans', require('./study-plans').router);
+router.use('/admin/study-plans', require('./study-plans').adminRouter);
 router.use('/admin', adminRoutes);
 router.use('/beta', betaRoutes);
 router.use('/cashfree', cashfreeRoutes);

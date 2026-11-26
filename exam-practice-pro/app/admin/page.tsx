@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect -- authorize the account when the session changes */
 'use client';
 
+import { StudyPlanManager } from '@/components/study-plans/manager';
 import { MonetizationTab } from '@/components/admin/monetization-tab';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
@@ -20,6 +21,7 @@ import { PracticeLibraryTab } from '@/components/admin/practice-library-tab';
 import { admin, type AdminSection } from '@/lib/admin';
 
 const SECTIONS = [
+  { id: 'study-plans', label: 'Study Plans', icon: GraduationCap, description: 'Build syllabus-based plans, preview daily tasks and manage publication.' },
   { id: 'monetization', label: 'Monetization, Ads & B2B', icon: CreditCard, description: 'Manage verified payments, sponsors, coaching portals and live events.' },
   { id: 'tests', label: 'Mocks & Tests Manager', icon: GraduationCap, description: 'Review, publish and manage Free and Pro mock tests.' },
   { id: 'questions', label: 'Question Bank', icon: FileQuestion, description: 'Search topics, import questions and maintain the practice library.' },
@@ -34,7 +36,7 @@ export default function AdminPage() {
   const { data: session, status } = useSession();
   const [gate, setGate] = useState<Gate>({ state: 'loading' });
   const [section, setSection] = useState<AdminSection>('tests');
-  useEffect(()=>{if(new URLSearchParams(window.location.search).get('section')==='monetization')setSection('monetization');},[]);
+  useEffect(()=>{const s=new URLSearchParams(window.location.search).get('section');if(s&&SECTIONS.some(x=>x.id===s))setSection(s as AdminSection);},[]);
   const [questionTopic,setQuestionTopic]=useState('');
   const [questionMock,setQuestionMock]=useState<string|undefined>();
   const [focusedMock,setFocusedMock]=useState('');
@@ -97,6 +99,7 @@ export default function AdminPage() {
                 <Button variant="outline" className="min-h-11 rounded-xl bg-card" asChild><Link href="/exampro">Open exam hall <ArrowUpRight /></Link></Button>
               </div>
               <CommandMetrics onNavigate={navigate}/><section id="admin-section" aria-label={selected.label} className="min-w-0">
+                {section === 'study-plans' && <StudyPlanManager/>}
                 {section === 'monetization' && <MonetizationTab/>}
                 {section === 'overview' && <AdminOverview onNavigate={navigate} />}
                 {(section === 'questions'||section === 'practice') && <div className="space-y-5"><div className="flex flex-wrap gap-2"><Button variant={section==='questions'?'default':'outline'} onClick={()=>navigate('questions')}>Database question bank</Button><Button variant={section==='practice'?'default':'outline'} onClick={()=>navigate('practice')}>Practice & IT library</Button></div>{section==='questions'?<QuestionsTab initialTopic={questionTopic} mockId={questionMock} onBackToMocks={()=>navigate('tests',questionMock??'')}/>:<PracticeLibraryTab/>}</div>}

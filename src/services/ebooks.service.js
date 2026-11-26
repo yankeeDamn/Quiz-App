@@ -3,6 +3,7 @@ const database = require("../config/database");
 const config = require("../config");
 const seeds = require("../../content/ebooks-starter.json");
 const CATEGORIES = [
+  "Competitive examinations",
   "Python",
   "AI with Copilot",
   "Python & Cheatcodes",
@@ -245,6 +246,7 @@ function validateBook(raw, slug) {
     pdfUrl = url.href;
   }
   return {
+    studyProOnly: raw.studyProOnly === true,
     passPercent,
     marksPerCorrect,
     negativeMarks,
@@ -550,6 +552,10 @@ function createEbooksService(db = database, clock = Date.now) {
           fail("Only the owner admin can change visibility.", 403);
       }
       const document = validateBook(raw, slug);
+      if (previous && document.studyProOnly !== (previous.document.studyProOnly === true))
+        fail("Study Pro-only scope is fixed at ebook creation; existing purchases must retain their scope.");
+      if (document.studyProOnly && (document.accessLevel !== "pro" || document.isBundledPublicEdition))
+        fail("Study Pro-only ebooks require Pro access and cannot be bundled public editions.");
       if (
         previous &&
         !isOwnerAdmin(user) &&
@@ -685,6 +691,7 @@ function createEbooksService(db = database, clock = Date.now) {
       const allowFullPdfDownload = input.allowFullPdfDownload === undefined
         ? previous.allowFullPdfDownload : input.allowFullPdfDownload;
 
+      if (row.document.studyProOnly && accessLevel !== "pro") fail("Study ebooks must retain Pro access.");
       if (!["free", "pro"].includes(accessLevel))
         fail("Choose Free or Pro access.");
       if (!Number.isInteger(freePreviewPages) || freePreviewPages < 1 || freePreviewPages > 20)

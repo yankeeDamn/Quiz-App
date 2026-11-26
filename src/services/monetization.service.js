@@ -110,6 +110,12 @@ async function save(kind,id,r){
  }else throw fail('Invalid configuration kind');return put(kind,id,d);
 }
 async function ebookPolicy(slug,user,book){
+ // Only new ebooks explicitly created for Study Plans use this narrower scope.
+ // Existing purchases and ebook passes retain their original scope.
+ if(book?.studyProOnly===true){
+  const active=owner(user)||await require('./study-plans.service').pro(user);
+  return {freePreviewChapters:0,freePreviewPages:book.freePreviewPages||2,requireProForPdf:true,accessLevel:'pro',hasActiveEbookPass:false,isProSubscriber:active,locked:!active};
+ }
  // Reader access is server-authoritative. The checkout feature flag controls sales,
  // never whether already-granted access remains valid.
  const bundled=book?.isBundledPublicEdition===true;

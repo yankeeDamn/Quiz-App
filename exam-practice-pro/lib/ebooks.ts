@@ -3,6 +3,7 @@ import type { MockTest } from "./mocks";
 
 export type EbookVisibility = "admin_only" | "invite_only" | "public";
 export const EBOOK_CATEGORIES = [
+  "Competitive examinations",
   "Python",
   "AI with Copilot",
   "Python & Cheatcodes",
@@ -59,6 +60,7 @@ export interface EbookTrack {
   category: EbookCategory;
   level: "Beginner to Pro" | "Intermediate" | "Advanced" | "Certification Cram";
   visibility: EbookVisibility;
+  studyProOnly?: boolean;
   accessLevel: "free" | "pro";
   freePreviewPages: number;
   allowFullPdfDownload: boolean;
