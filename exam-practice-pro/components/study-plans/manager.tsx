@@ -4,6 +4,12 @@ import Link from "next/link";
 import { admin } from "@/lib/admin";
 import { Button } from "@/components/ui/button";
 type Row = Record<string, unknown>;
+type Readiness = {
+  ready: boolean;
+  revision: number;
+  checks: { code: string; label: string; passed: boolean; issues: { code: string; message: string; day?: number; taskTitle?: string; taskId?: string }[] }[];
+  review: { examStatus: string; syllabusVerified: boolean; draftTopics: number; archivedTopics: number };
+};
 type Inventory = {
   exams: Row[];
   syllabuses: Row[];
@@ -53,6 +59,29 @@ export function StudyPlanManager() {
     [json, setJson] = useState(""),
     [report, setReport] = useState<Row | null>(null),
     [ack, setAck] = useState(false);
+  const [readiness, setReadiness] = useState<Readiness | null>(null);
+  const [review, setReview] = useState({ exam: false, syllabus: false, topics: false });
+  const [reviewAck, setReviewAck] = useState(false);
+  const [readinessError, setReadinessError] = useState("");
+  const [dayFilter, setDayFilter] = useState("");
+  const selectedId = asString(selected?.id);
+  const selectedRevision = selected?.revision;
+  const draftSelected = selected?.status === "draft";
+  useEffect(() => {
+    let cancelled = false;
+    if (!selectedId || !draftSelected) return;
+    void admin<Readiness>(`/study-plans/plans/${selectedId}/readiness`).then(r => {
+      if (cancelled) return;
+      if (r.ok) {
+        setReadiness(r.data);
+        setReadinessError("");
+      } else {
+        setReadiness(null);
+        setReadinessError(r.message);
+      }
+    });
+    return () => { cancelled = true; };
+  }, [selectedId, selectedRevision, draftSelected, reload]);
   useEffect(() => {
     let cancelled = false;
     void admin<Inventory>("/study-plans").then((r) => {
@@ -71,8 +100,12 @@ export function StudyPlanManager() {
     try {
       const r = await admin<Row>("/study-plans" + path, method, body);
       if (!r.ok) throw Error(r.message);
-      setReload((x) => x + 1);
-      setNotice("Saved. Draft changes are not published automatically.");
+      if (method !== "GET") {
+        setReadiness(null);
+        setAck(false);
+        setReload((x) => x + 1);
+        setNotice("Saved. Draft changes are not published automatically.");
+      }
       return r.data;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unable to save");
@@ -82,11 +115,18 @@ export function StudyPlanManager() {
     }
   }
   async function openPlan(p: Row) {
+    setReadiness(null);
+    setReadinessError("");
+    setReview({ exam: false, syllabus: false, topics: false });
+    setReviewAck(false);
+    setAck(false);
+    setDayFilter("");
     const r = await call("/plans/" + p.id, undefined, "GET");
     if (r) {
       setSelected(r);
       setTasks(r.tasks as Row[]);
       setDays(r.days as Row[]);
+      setReload(x => x + 1);
       setEdit({});
       setAck(false);
     }
@@ -289,6 +329,8 @@ export function StudyPlanManager() {
                 setEdit({});
                 setSelected(null);
                 setNotice("");
+                setError("");
+                setReadiness(null);
               }}
             >
               {t === "pyqs" ? "PYQs" : t[0].toUpperCase() + t.slice(1)}
@@ -473,11 +515,48 @@ export function StudyPlanManager() {
                   }}
                 />
               </details>
+              <section className="space-y-4 rounded-xl border p-4" aria-label="Publication readiness">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="font-bold">Publication readiness</h3>
+                  <Button variant="outline" disabled={busy} onClick={() => { setReadiness(null); setAck(false); setReload(x => x + 1); }}>Refresh checks</Button>
+                </div>
+                <p className="text-sm text-muted-foreground">Review all blockers before publishing. This checklist never publishes your plan.</p>
+                {readinessError && <p role="alert" className="text-sm">{readinessError}</p>}
+                {!readiness && !readinessError && <p role="status">Checking prerequisites…</p>}
+                {readiness && (
+                  <>
+                    <p role="status" className="font-semibold">{readiness.ready ? "Ready for final review" : `${readiness.checks.filter(c => !c.passed).length} checks need attention`}</p>
+                    <ul className="space-y-2">
+                      {readiness.checks.map(check => (
+                        <li key={check.code} className="rounded-lg border p-3 text-sm">
+                          <strong>{check.passed ? "Passed" : "Action required"} · {check.label}</strong>
+                          {!check.passed && <ul className="mt-2 list-disc space-y-1 pl-5">{check.issues.map((issue,i) => <li key={i}>{issue.day ? `Day ${issue.day} · ${issue.taskTitle}: ` : ""}{issue.message}{issue.taskId && <Button variant="outline" className="ml-2" onClick={() => { const t = tasks.find(t => t.id === issue.taskId); if (t) { setDayFilter(asString(t.day)); setEdit({...t,objectives:days.find(d=>d.day===t.day)?.objectives || ""}); } }}>Find task</Button>}</li>)}</ul>}
+                        </li>
+                      ))}
+                    </ul>
+                    <details className="rounded-lg border p-3">
+                      <summary className="cursor-pointer font-semibold">Bulk prerequisite review</summary>
+                      <p className="my-2 text-sm">Only select records you personally reviewed. Exam and topic review changes their prerequisite status to published, but does not publish this plan or activate any mocks. This applies to the selected syllabus version, including all its draft topics.</p>
+                      <div className="space-y-3">
+                        {([{key:"exam",label:`Mark exam reviewed (${readiness.review.examStatus})`,disabled:readiness.review.examStatus!=="draft"},{key:"syllabus",label:`Verify official syllabus (${readiness.review.syllabusVerified?"verified":"unverified"})`,disabled:readiness.review.syllabusVerified},{key:"topics",label:`Mark all ${readiness.review.draftTopics} draft syllabus nodes reviewed`,disabled:!readiness.review.draftTopics}] as const).map(item => (
+                          <label key={item.key} className="flex items-start gap-2 text-sm">
+                            <input type="checkbox" disabled={busy || item.disabled} checked={review[item.key]} onChange={e=>{setReview(old=>({...old,[item.key]:e.target.checked}));setReviewAck(false);}} />{item.label}
+                          </label>
+                        ))}
+                        {readiness.review.archivedTopics > 0 && <p className="text-sm">Archived topics are not changed by bulk review.</p>}
+                        <label className="flex gap-2 text-sm"><input type="checkbox" checked={reviewAck} onChange={e=>setReviewAck(e.target.checked)} />I have checked the selected records and understand this changes their prerequisite status, not the plan’s publication status.</label>
+                        <Button variant="outline" disabled={busy || !reviewAck || !Object.values(review).some(Boolean) || readiness.revision !== selected.revision} onClick={async()=>{const r=await call(`/plans/${selected.id}/review-prerequisites`,{...review,acknowledged:true,revision:readiness.revision});if(r)await openPlan(r);}}>Apply selected prerequisite reviews</Button>
+                      </div>
+                    </details>
+                  </>
+                )}
+              </section>
               <div className="rounded-lg border p-4">
                 <label className="flex gap-3 text-sm">
                   <input
                     type="checkbox"
                     checked={ack}
+                    disabled={!readiness?.ready || readiness.revision !== selected.revision}
                     onChange={(e) => setAck(e.target.checked)}
                   />
                   I reviewed the official syllabus, linked content, distribution
@@ -485,13 +564,15 @@ export function StudyPlanManager() {
                 </label>
                 <Button
                   className="mt-3"
-                  disabled={busy || !ack}
+                  disabled={busy || !ack || !readiness?.ready || readiness.revision !== selected.revision}
                   onClick={async () => {
+                    if (!window.confirm("Publish this edition to the student catalogue?")) return;
                     const r = await call(`/plans/${selected.id}/publish`, {
                       revision: selected.revision,
                       acknowledged: ack,
                     });
                     if (r) await openPlan(r);
+                    else { setAck(false); setReadiness(null); setReload(x => x + 1); }
                   }}
                 >
                   Publish reviewed edition
@@ -502,7 +583,13 @@ export function StudyPlanManager() {
           <div className="grid gap-5 xl:grid-cols-2">
             <div className="space-y-2">
               <h3 className="font-bold">Ordered daily tasks</h3>
-              {tasks.map((t) => (
+              <label className="block text-sm">Filter by day
+                <select className={input} value={dayFilter} onChange={e=>setDayFilter(e.target.value)}>
+                  <option value="">All days</option>
+                  {days.map(d=><option key={asString(d.day)} value={asString(d.day)}>Day {asString(d.day)}</option>)}
+                </select>
+              </label>
+              {tasks.filter(t=>!dayFilter || asString(t.day)===dayFilter).map((t) => (
                 <button
                   className="block w-full rounded-lg border p-3 text-left text-sm"
                   key={asString(t.id)}
