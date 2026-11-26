@@ -21,7 +21,8 @@ const identities = {};
 function token(who) {
   return jwt.sign(
     {
-      sub: who,
+      // Other integration suites share the CI database and use bare subjects.
+      sub: `study-${who}`,
       email: `study-${who}@example.test`,
       name: who,
       provider: "google",
@@ -67,13 +68,22 @@ test.before(async () => {
     "pass",
     "revoked",
   ]) {
-    await call("/user/profile", who);
-    identities[who] = (
-      await db.query("SELECT * FROM users WHERE email=$1", [
-        `study-${who}@example.test`,
-      ])
-    ).rows[0];
+    const email = `study-${who}@example.test`;
+    const profile = await call("/user/profile", who);
+    assert.equal(profile.status, 200, `Profile request failed for ${who}`);
+    assert.equal(profile.data.success, true, `Profile lookup failed for ${who}`);
+    assert.equal(profile.data.data?.isGuest, false, `Unexpected guest for ${who}`);
+    assert.equal(profile.data.data?.user?.email, email, `OAuth identity collision for ${who}`);
+    const { rows } = await db.query("SELECT * FROM users WHERE email=$1", [email]);
+    assert.equal(rows.length, 1, `Expected a persisted user for ${who}`);
+    const identity = rows[0];
+    assert.equal(identity.provider, "google");
+    assert.equal(identity.provider_id, `study-${who}`);
+    assert.ok(identity.id, `Missing persisted user ID for ${who}`);
+    assert.equal(profile.data.data.user.id, identity.id, `Profile ID mismatch for ${who}`);
+    identities[who] = identity;
   }
+  assert.equal(new Set(Object.values(identities).map((user) => user.id)).size, 7, "Study fixtures must have distinct user IDs");
   for (const who of ["pro", "other"])
     await db.query(
       "UPDATE users SET plan='pro',plan_expires_at=now()+interval '30 days' WHERE id=$1",
