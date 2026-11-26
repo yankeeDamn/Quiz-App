@@ -1,0 +1,19 @@
+{
+  "status": "draft",
+  "purpose": "Two-day authoring example only; not a complete syllabus or preparation roadmap. Not seeded or published automatically.",
+  "source": "https://ssc.gov.in/api/attachment/uploads/masterData/NoticeBoards/Notice_of_adv_cgl_2026.pdf",
+  "sourceReviewedOn": "2026-11-26",
+  "version": "CGL-2026-notice-2026-05-21-sample",
+  "exam": {"id":"ssc-cgl","name":"SSC CGL","category":"SSC","status":"draft","access_policy":"pro"},
+  "hierarchy": [
+    {"stage":"Tier I","subject":"General Intelligence & Reasoning","chapter":"Analogy practice","topic":"Analogies","reference":"13.10.1, page 30","objectives":"Identify relationships and apply them to a new pair."},
+    {"stage":"Tier II","subject":"Mathematical Abilities","chapter":"Number systems","topic":"Fractions","reference":"13.11.1.1, page 31","objectives":"Compare fractional values and explain arithmetic steps."}
+  ],
+  "plan": {"slug":"ssc-cgl","title":"SSC CGL — two-day sample for review","duration":2,"daily_minutes":30,"access_policy":"pro","description":"Authoring sample awaiting editorial expansion and approval."},
+  "tasks": [
+    {"day":1,"title":"Understand analogy relationships","description":"Use approved notes to identify the relationship in a pair. Write your own example and explain the relationship in a sentence.","kind":"reading","minutes":30,"preview":true,"required":true},
+    {"day":2,"title":"Review fraction arithmetic","description":"Use approved notes to compare fractions. Show each arithmetic step, then record which steps need further revision.","kind":"revision","minutes":30,"preview":false,"required":true}
+  ],
+  "editorialNotes": "Chapter grouping, objectives and task guidance are original authoring examples. Attach approved notes before publication. The source supports these two topic references; this file makes no claim to cover every paper, post-specific requirement or subsequent amendment.",
+  "questions": []
+}

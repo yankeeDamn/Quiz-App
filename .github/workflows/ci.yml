@@ -158,6 +158,10 @@ jobs:
           npm run db:migrate
       - name: Test real OAuth middleware, ACLs and persisted results
         run: node --test test/ebooks-postgres.integration.js test/content-review-postgres.integration.js test/question-workflow-postgres.integration.js
+      - name: Test Study Plans authorization, publication and progress
+        run: node --test test/study-plans-postgres.integration.js
+        env:
+          STUDY_TEST_DATABASE_URL: postgresql://postgres:ebook-ci-only@localhost:5432/ebook_tests
 
   cashfree-checkout:
     name: Cashfree prepaid checkout (synthetic provider, PostgreSQL, mobile browsers)
