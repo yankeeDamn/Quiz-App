@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import {
   study,
   type StudyPlan,
+  type StudyCatalogue,
+  type StudyTrack,
   type StudyDay,
   type StudyQuestion,
 } from "@/lib/study-plans";
@@ -48,10 +50,7 @@ function StudyContent({
   day?: number;
   previewId?: string;
 }) {
-  const [catalogue, setCatalogue] = useState<{
-    plans: StudyPlan[];
-    upcoming: { id: string; name: string; description: string }[];
-  } | null>(null);
+  const [catalogue, setCatalogue] = useState<StudyCatalogue | null>(null);
   const [plan, setPlan] = useState<StudyPlan | null>(null),
     [daily, setDaily] = useState<StudyDay | null>(null),
     [error, setError] = useState(""),
@@ -85,10 +84,7 @@ function StudyContent({
             if (!cancelled) setDaily(d);
           }
         } else {
-          const c = await study<{
-            plans: StudyPlan[];
-            upcoming: { id: string; name: string; description: string }[];
-          }>("");
+          const c = await study<StudyCatalogue>("");
           if (!cancelled) setCatalogue(c);
         }
       } catch (e) {
@@ -155,54 +151,7 @@ function StudyContent({
         </div>
       )}
       {loading && <p role="status">Loading study plans…</p>}
-      {catalogue && (
-        <div className="grid gap-5 md:grid-cols-2">
-          {catalogue.plans.map((p) => (
-            <article key={p.id} className={card}>
-              <BookOpen className="mb-4 text-indigo-600" />
-              <p className="text-sm text-muted-foreground">{p.name}</p>
-              <h2 className="text-xl font-bold">{p.title}</h2>
-              <p className="my-3 text-sm">{p.description}</p>
-              <p className="text-sm">
-                {p.duration} days · {p.modules} published tasks ·{" "}
-                {p.daily_minutes} min/day
-              </p>
-              <p className="my-2 text-sm text-muted-foreground">
-                {p.subjects
-                  .map((s) => (typeof s === "string" ? s : s.name))
-                  .join(" · ")}
-              </p>
-              <p className="mb-4 text-sm">
-                {p.preview ? "Free preview available" : "No free preview"} ·{" "}
-                {p.access_policy === "pro" ? "Pro required" : "Free plan"}
-              </p>
-              <Button asChild>
-                <Link href={"/study-plans/" + p.slug}>Open plan</Link>
-              </Button>
-              {!p.access && (
-                <Link className="ml-4 text-sm underline" href="/pricing">
-                  View Pro plans
-                </Link>
-              )}
-            </article>
-          ))}
-          {catalogue.upcoming.map((p) => (
-            <article key={p.id} className={card}>
-              <p className="mb-4 inline-block rounded-full bg-muted px-3 py-1 text-xs font-semibold">
-                Upcoming
-              </p>
-              <h2 className="text-xl font-bold">{p.name}</h2>
-              <p className="mt-3 text-sm text-muted-foreground">
-                {p.description}
-              </p>
-              <p className="mt-4 text-sm">
-                Duration, subjects and free preview will be announced after
-                content review.
-              </p>
-            </article>
-          ))}
-        </div>
-      )}
+      {catalogue && <StudyCatalogueView catalogue={catalogue} />}
       {plan && (
         <>
           <nav className="flex gap-4 text-sm">
@@ -529,5 +478,96 @@ function Question({
       )}
       {error && <p role="alert">{error}</p>}
     </fieldset>
+  );
+}
+
+const catalogueTracks: { id: StudyTrack; title: string; description: string }[] = [
+  { id: "government-exams", title: "Government Exams", description: "Structured preparation for competitive and recruitment examinations." },
+  { id: "it-certifications", title: "IT Certifications", description: "Build job-ready skills in cloud, endpoint administration, AI-assisted development, project management and information security." },
+];
+
+function StudyCatalogueView({ catalogue }: { catalogue: StudyCatalogue }) {
+  const [track, setTrack] = useState<StudyTrack>("government-exams");
+  const matches = (item: { track?: StudyTrack }, id: StudyTrack) =>
+    (item.track || "government-exams") === id;
+  const plans = catalogue.plans.filter((p) => matches(p, track));
+  const upcoming = catalogue.upcoming.filter((p) => matches(p, track));
+  const selected = catalogueTracks.find((item) => item.id === track)!;
+  return (
+    <div className="space-y-6">
+      <nav aria-label="Study plan categories" className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {catalogueTracks.map((item) => {
+          const count = catalogue.plans.filter((p) => matches(p, item.id)).length +
+            catalogue.upcoming.filter((p) => matches(p, item.id)).length;
+          return (
+            <button key={item.id} type="button" aria-pressed={track === item.id}
+              onClick={() => setTrack(item.id)}
+              className={"rounded-xl border p-4 text-left transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 " +
+                (track === item.id ? "border-indigo-500 bg-indigo-600 text-white shadow-sm" : "bg-card hover:border-indigo-400")}>
+              <span className="block text-lg font-bold">{item.title}</span>
+              <span className="mt-1 block text-sm">{count} {count === 1 ? "programme" : "programmes"}</span>
+            </button>
+          );
+        })}
+      </nav>
+      <section aria-labelledby="study-track-heading" className="space-y-4">
+        <div>
+          <h2 id="study-track-heading" className="text-2xl font-bold">{selected.title}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{selected.description}</p>
+        </div>
+        {plans.length + upcoming.length === 0 ? (
+          <p className={card}>No programmes are available in this category yet.</p>
+        ) : (
+          <div className="grid gap-5 md:grid-cols-2">
+          {plans.map((p) => (
+            <article key={p.id} className={card}>
+              <BookOpen className="mb-4 text-indigo-600" />
+              <p className="text-sm text-muted-foreground">{p.name}</p>
+              <h3 className="text-xl font-bold">{p.title}</h3>
+              <p className="my-3 text-sm">{p.description}</p>
+              <p className="text-sm">
+                {p.duration} days · {p.modules} published tasks ·{" "}
+                {p.daily_minutes} min/day
+              </p>
+              <p className="my-2 text-sm text-muted-foreground">
+                {p.subjects
+                  .map((s) => (typeof s === "string" ? s : s.name))
+                  .join(" · ")}
+              </p>
+              <p className="mb-4 text-sm">
+                {p.preview ? "Free preview available" : "No free preview"} ·{" "}
+                {p.access_policy === "pro" ? "Pro required" : "Free plan"}
+              </p>
+              <Button asChild>
+                <Link href={"/study-plans/" + p.slug}>Open plan</Link>
+              </Button>
+              {!p.access && (
+                <Link className="ml-4 text-sm underline" href="/pricing">
+                  View Pro plans
+                </Link>
+              )}
+            </article>
+          ))}
+          {upcoming.map((p) => (
+            <article key={p.id} className={card}>
+              <p className="mb-4 inline-block rounded-full bg-muted px-3 py-1 text-xs font-semibold">
+                Upcoming
+              </p>
+              {p.provider && <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{p.provider}</p>}
+              <h3 className="text-xl font-bold">{p.name}</h3>
+              <p className="mt-3 text-sm text-muted-foreground">
+                {p.description}
+              </p>
+              <p className="mt-4 text-sm">
+                Duration, subjects and free preview will be announced after
+                content review.
+              </p>
+            </article>
+          ))}
+
+          </div>
+        )}
+      </section>
+    </div>
   );
 }
