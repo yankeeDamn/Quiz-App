@@ -110,6 +110,23 @@ test.after(async () => {
 });
 test("Study Plans lifecycle, API authorization and existing content integration", async (t) => {
   let sy, topic, plan, preview, paid, resource, question;
+  await t.test("IT plans retain access policy and replace their own upcoming card", async () => {
+    const fixtures = [
+      { id: "published-md", exam_id: "microsoft-md-102", slug: "md-102", category: "", access_policy: "pro" },
+      { id: "published-custom", exam_id: "custom-it", slug: "custom-it", category: "IT Certifications", access_policy: "free" },
+    ];
+    const fake = service.createService({ query: async (sql) => {
+      assert.match(sql, /p\.status='published' AND e\.status='published'/);
+      return { rows: fixtures };
+    } }, {});
+    const catalogue = await fake.catalogue(null);
+    assert.ok(catalogue.plans.every(p => p.track === "it-certifications"));
+    assert.equal(catalogue.plans[0].access, false);
+    assert.equal(catalogue.plans[1].access, true);
+    assert.ok(!catalogue.upcoming.some(p => p.id === "microsoft-md-102"));
+    assert.equal(catalogue.upcoming.filter(p => p.track === "it-certifications").length, 9);
+    assert.equal(catalogue.upcoming.filter(p => p.track === "government-exams").length, 4);
+  });
   await t.test(
     "ordinary students and guests cannot manage content",
     async () => {
@@ -164,7 +181,16 @@ test("Study Plans lifecycle, API authorization and existing content integration"
         "PUT",
       );
       assert.equal((await call("/study-plans/ssc-cgl", "pro")).status, 404);
-      assert.equal((await call("/study-plans")).data.data.plans.length, 0);
+      const catalogue = (await call("/study-plans")).data.data;
+      assert.equal(catalogue.plans.length, 0);
+      assert.equal(catalogue.upcoming.filter(p => p.track === "government-exams").length, 4);
+      const it = catalogue.upcoming.filter(p => p.track === "it-certifications");
+      assert.deepEqual(it.map(p => p.id).sort(), [
+        "microsoft-md-102", "github-gh-300", "microsoft-az-104",
+        "aws-clf-c02", "aws-saa-c03", "prince2-foundation", "prince2-practitioner",
+        "isaca-cisa", "isaca-cism", "isaca-crisc",
+      ].sort());
+      assert.ok(it.every(p => p.status === "upcoming" && p.provider));
       assert.equal(
         (await call(`/admin/study-plans/plans/${plan.id}/preview`, "owner"))
           .status,
@@ -389,7 +415,11 @@ test("Study Plans lifecycle, API authorization and existing content integration"
         revision: current.revision,
         acknowledged: true,
       });
-      assert.equal((await call("/study-plans")).data.data.plans.length, 1);
+      const catalogue = (await call("/study-plans")).data.data;
+      assert.equal(catalogue.plans.length, 1);
+      assert.equal(catalogue.plans[0].track, "government-exams");
+      assert.ok(!catalogue.upcoming.some(p => p.id === "ssc-cgl"));
+      assert.equal(catalogue.upcoming.filter(p => p.track === "it-certifications").length, 10);
       for (const who of [undefined, "free", "expired", "pass", "revoked"]) {
         const d = await call("/study-plans/ssc-cgl/day/2", who);
         assert.equal(d.status, 200);
