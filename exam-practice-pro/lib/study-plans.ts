@@ -11,7 +11,21 @@ export interface StudyProgress {
   enrollment: { start_date: string; current_day: number };
   results: { id: string; test_id: string; submitted_at: string }[];
 }
+export type StudyTrack = "government-exams" | "it-certifications";
+export interface UpcomingStudyPlan {
+  id: string;
+  name: string;
+  description: string;
+  track?: StudyTrack;
+  provider?: string;
+}
+export interface StudyCatalogue {
+  plans: StudyPlan[];
+  upcoming: UpcomingStudyPlan[];
+}
 export interface StudyPlan {
+  exam_id?: string;
+  track?: StudyTrack;
   id: string;
   slug: string;
   edition: number;
