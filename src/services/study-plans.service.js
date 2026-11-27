@@ -25,7 +25,24 @@ const UPCOMING = [
     "Banking IBPS",
     "Preparation for banking recruitment examinations.",
   ],
+  ["microsoft-md-102", "Microsoft MD-102 — Endpoint Administrator", "Manage and secure Microsoft 365 endpoints with Intune.", "Microsoft"],
+  ["github-gh-300", "GitHub Copilot GH-300", "AI-assisted development, responsible use and developer workflows.", "GitHub"],
+  ["microsoft-az-104", "Microsoft AZ-104 — Azure Administrator", "Azure identity, governance, storage, compute and networking.", "Microsoft"],
+  ["aws-clf-c02", "AWS Certified Cloud Practitioner", "Cloud concepts, security, AWS services and billing.", "AWS"],
+  ["aws-saa-c03", "AWS Solutions Architect – Associate", "Design secure, resilient and cost-effective AWS solutions.", "AWS"],
+  ["prince2-foundation", "PRINCE2 Project Management Foundation (Version 7)", "Project management principles, practices and processes.", "PeopleCert"],
+  ["prince2-practitioner", "PRINCE2 Project Management Practitioner (Version 7)", "Apply and tailor the PRINCE2 method to project scenarios.", "PeopleCert"],
+  ["isaca-cisa", "ISACA CISA — Information Systems Auditor", "Information systems auditing, governance and controls.", "ISACA"],
+  ["isaca-cism", "ISACA CISM — Information Security Manager", "Information security governance, risk and programme management.", "ISACA"],
+  ["isaca-crisc", "ISACA CRISC — Risk and Information Systems Control", "IT risk identification, assessment, response and reporting.", "ISACA"],
 ];
+const IT_EXAM_IDS = new Set(UPCOMING.filter((entry) => entry[3]).map(([id]) => id));
+function catalogueTrack(examId, category = "") {
+  return IT_EXAM_IDS.has(examId) ||
+    /^(it(?:[ -]certifications?)?|technology|certifications?|microsoft|github|aws|peoplecert|prince2|isaca|cloud|cybersecurity)$/i.test(String(category).trim())
+    ? "it-certifications"
+    : "government-exams";
+}
 function createService(db = database, books = require("./ebooks.service")) {
   const rows = async (sql, args = [], c = db) =>
     (await c.query(sql, args)).rows;
@@ -132,7 +149,7 @@ function createService(db = database, books = require("./ebooks.service")) {
   }
   async function catalogue(user) {
     const plans =
-      await rows(`SELECT DISTINCT ON(p.slug) p.id,p.slug,p.edition,p.exam_id,p.title,p.description,p.duration,p.daily_minutes,p.access_policy,s.version AS syllabus_version,e.name,
+      await rows(`SELECT DISTINCT ON(p.slug) p.id,p.slug,p.edition,p.exam_id,p.title,p.description,p.duration,p.daily_minutes,p.access_policy,s.version AS syllabus_version,e.name,e.category,
    (SELECT count(*)::int FROM study_tasks t WHERE t.plan_id=p.id) AS modules,
    EXISTS(SELECT 1 FROM study_tasks t WHERE t.plan_id=p.id AND t.preview) AS preview,
    ARRAY(SELECT name FROM study_topics WHERE syllabus_id=p.syllabus_id AND kind='subject' AND status='published' ORDER BY display_order) AS subjects
@@ -142,14 +159,17 @@ function createService(db = database, books = require("./ebooks.service")) {
     return {
       plans: plans.map((p) => ({
         ...p,
+        track: catalogueTrack(p.exam_id, p.category),
         access: p.access_policy === "free" || hasPro,
       })),
       upcoming: UPCOMING.filter(
         ([id]) => !plans.some((p) => p.exam_id === id),
-      ).map(([id, name, description]) => ({
+      ).map(([id, name, description, provider]) => ({
         id,
         name,
         description,
+        track: catalogueTrack(id),
+        ...(provider ? { provider } : {}),
         status: "upcoming",
       })),
     };
