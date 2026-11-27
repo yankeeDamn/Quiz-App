@@ -110,6 +110,23 @@ test.after(async () => {
 });
 test("Study Plans lifecycle, API authorization and existing content integration", async (t) => {
   let sy, topic, plan, preview, paid, resource, question;
+  await t.test("IT plans retain access policy and replace their own upcoming card", async () => {
+    const fixtures = [
+      { id: "published-md", exam_id: "microsoft-md-102", slug: "md-102", category: "", access_policy: "pro" },
+      { id: "published-custom", exam_id: "custom-it", slug: "custom-it", category: "IT Certifications", access_policy: "free" },
+    ];
+    const fake = service.createService({ query: async (sql) => {
+      assert.match(sql, /p\.status='published' AND e\.status='published'/);
+      return { rows: fixtures };
+    } }, {});
+    const catalogue = await fake.catalogue(null);
+    assert.ok(catalogue.plans.every(p => p.track === "it-certifications"));
+    assert.equal(catalogue.plans[0].access, false);
+    assert.equal(catalogue.plans[1].access, true);
+    assert.ok(!catalogue.upcoming.some(p => p.id === "microsoft-md-102"));
+    assert.equal(catalogue.upcoming.filter(p => p.track === "it-certifications").length, 9);
+    assert.equal(catalogue.upcoming.filter(p => p.track === "government-exams").length, 4);
+  });
   await t.test(
     "ordinary students and guests cannot manage content",
     async () => {
