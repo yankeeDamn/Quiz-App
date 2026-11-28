@@ -429,4 +429,8 @@ router.post('/content-pdfs/:id/file',requireHumanReviewer,wrap(async(req,res)=>o
 router.get('/content-pdfs/:id/preview',requireHumanReviewer,wrap(async(req,res)=>{
  const bytes=await pdfDrafts.preview(req.params.id);res.type('application/pdf');res.set('Content-Disposition','inline; filename="preview.pdf"');res.set('X-Content-Type-Options','nosniff');res.send(bytes);
 }));
+const courseDrafts=require('../services/course-drafts.service');
+router.get('/content-courses',requireHumanReviewer,wrap(async(_req,res)=>ok(res,{items:await courseDrafts.list()})));
+router.post('/content-courses',requireHumanReviewer,wrap(async(req,res)=>ok(res,await courseDrafts.save(null,req.body))));
+router.put('/content-courses/:id',requireHumanReviewer,wrap(async(req,res)=>ok(res,await courseDrafts.save(req.params.id,req.body))));
 module.exports = router;
