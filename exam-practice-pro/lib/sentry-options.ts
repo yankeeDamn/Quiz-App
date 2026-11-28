@@ -1,4 +1,4 @@
-import { scrubEvent, scrubSpan } from '../../src/telemetry/scrub';
+import { scrubEvent, scrubSpan } from './telemetry/scrub';
 export const sentryOptions = {
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   tracesSampleRate: 0.1,
