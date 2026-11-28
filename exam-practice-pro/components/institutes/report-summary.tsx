@@ -6,7 +6,8 @@ type Analytics={summary:{eligible_assignments:number;students:number;exams:numbe
 type ExportPage={csv:string;filename:string;count:number;nextOffset:number|null};
 export function ReportSummary({base,batch}:{base:string;batch:string}){
  const [data,setData]=useState<Analytics|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false),[offset,setOffset]=useState<number|null>(0),[message,setMessage]=useState('');
- useEffect(()=>{const c=new AbortController();setData(null);setError('');setOffset(0);setMessage('');void api<Analytics>(base+'/batches/'+batch+'/analytics',{signal:c.signal}).then(r=>{if(c.signal.aborted)return;if(r.success&&r.data)setData(r.data);else setError(r.error?.message||'Could not load analytics');});return()=>c.abort();},[base,batch]);
+ const loadScope=base+':'+batch;const [previousLoadScope,setPreviousLoadScope]=useState(loadScope);if(previousLoadScope!==loadScope){setPreviousLoadScope(loadScope);setData(null);setError('');setOffset(0);setMessage('');}
+ useEffect(()=>{const c=new AbortController();void api<Analytics>(base+'/batches/'+batch+'/analytics',{signal:c.signal}).then(r=>{if(c.signal.aborted)return;if(r.success&&r.data)setData(r.data);else setError(r.error?.message||'Could not load analytics');});return()=>c.abort();},[base,batch]);
  async function download(){
   if(offset===null)return;setBusy(true);setError('');
   const r=await api<ExportPage>(base+'/batches/'+batch+'/export?offset='+offset);setBusy(false);

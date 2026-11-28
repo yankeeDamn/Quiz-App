@@ -1,4 +1,5 @@
 'use client';
+import {useClientReady} from '@/hooks/use-client-ready';
 
 import { ReportMistake } from '@/components/shared/content-review';
 import { useState, useEffect, useCallback, useMemo, use, useRef } from 'react';
@@ -52,7 +53,12 @@ interface PageProps {
 }
 
 export default function QuizTakePage({ params }: PageProps) {
-  const { id } = use(params);
+  const {id}=use(params),ready=useClientReady(),router=useRouter();
+  const {currentQuiz,session}=useQuizStore();
+  useEffect(()=>{if(ready&&(!session||!currentQuiz||session.quizId!==id))router.push(`/quiz/${id}/setup`);},[ready,session,currentQuiz,id,router]);
+  return ready&&currentQuiz&&session&&session.quizId===id ? <QuizTakeContent key={`${id}:${session.startTime}:${session.settings.shuffleAnswers}`} id={id}/> : <FullPageLoader message="Loading quiz..."/>;
+}
+function QuizTakeContent({id}:{id:string}) {
   const router = useRouter();
   const {
     currentQuiz,
@@ -75,9 +81,11 @@ export default function QuizTakePage({ params }: PageProps) {
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [shuffledOptionsMap, setShuffledOptionsMap] = useState<
-    Record<string, QuestionOption[]>
-  >({});
+  const [shuffledOptionsMap] = useState<Record<string,QuestionOption[]>>(()=>{
+    const optionsMap:Record<string,QuestionOption[]>={};
+    if(currentQuiz&&session?.settings.shuffleAnswers)currentQuiz.questions.forEach(q=>{optionsMap[q.id]=shuffleArray([...q.options]);});
+    return optionsMap;
+  });
 
   // Calculate time limit in seconds
   const timeLimitSeconds = session?.settings.timed
@@ -107,17 +115,6 @@ export default function QuizTakePage({ params }: PageProps) {
     },
     isPaused: session?.isPaused || !session?.settings.timed,
   });
-
-  // Shuffle options on mount if enabled
-  useEffect(() => {
-    if (currentQuiz && session?.settings.shuffleAnswers) {
-      const optionsMap: Record<string, QuestionOption[]> = {};
-      currentQuiz.questions.forEach((q) => {
-        optionsMap[q.id] = shuffleArray([...q.options]);
-      });
-      setShuffledOptionsMap(optionsMap);
-    }
-  }, [currentQuiz, session?.settings.shuffleAnswers]);
 
   // Get current question
   const currentQuestion = useMemo(() => {

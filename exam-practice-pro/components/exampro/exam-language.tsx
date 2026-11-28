@@ -109,26 +109,20 @@ export function useTranslatedTexts(texts:string[], options?:{exam?:boolean}) {
     if(language==='en'||texts.length===0)return;
     let cancelled=false;
     const storageKey='exampro:translated:v1:'+key;
-    try {
-      const cached=(exam ? readPrivateTranslation(key) : JSON.parse(localStorage.getItem(storageKey)||'null')) as {source?:string;translated?:string[]}|null;
-      if(cached?.source===serialized && cached.translated?.length===texts.length) {
-        setState({key,texts:cached.translated,warning:'',machine:true});return;
-      }
-    }catch{ /* no cache */ }
-    api<{texts:string[]}>(exam?'/api/v1/exampro/translate-exam':'/api/v1/exampro/translate', {public:!exam,method:'POST',body:{language,texts}})
-      .then(r=>{
-        if(cancelled)return;
-        if(!r.success||!r.data||r.data.texts.length!==texts.length){
-          setState({key,texts,warning:(r.error?.message||'Azure translation is unavailable.')+' Showing the original English text.',machine:false});
-          return;
-        }
-        setState({key,texts:r.data.texts,warning:'',machine:true});
-        try {
-          if(exam)rememberPrivateTranslation(key,serialized,r.data.texts);
-          else localStorage.setItem(storageKey,JSON.stringify({source:serialized,translated:r.data.texts}));
-        } catch { /* private browser */ }
-      })
-      .catch(()=>{if(!cancelled)setState({key,texts,warning:'Azure translation is unavailable. Showing English.',machine:false});});
+    async function resolveTranslation() {
+      try {
+        const cached=(exam ? readPrivateTranslation(key) : JSON.parse(localStorage.getItem(storageKey)||'null')) as {source?:string;translated?:string[]}|null;
+        if(cached?.source===serialized && cached.translated?.length===texts.length) return {key,texts:cached.translated,warning:'',machine:true};
+      } catch { /* cache unavailable */ }
+      const r=await api<{texts:string[]}>(exam?'/api/v1/exampro/translate-exam':'/api/v1/exampro/translate',{public:!exam,method:'POST',body:{language,texts}});
+      if(!r.success||!r.data||r.data.texts.length!==texts.length) return {key,texts,warning:(r.error?.message||'Azure translation is unavailable.')+' Showing the original English text.',machine:false};
+      try {
+        if(exam)rememberPrivateTranslation(key,serialized,r.data.texts);
+        else localStorage.setItem(storageKey,JSON.stringify({source:serialized,translated:r.data.texts}));
+      } catch { /* private browser */ }
+      return {key,texts:r.data.texts,warning:'',machine:true};
+    }
+    void resolveTranslation().then(result=>{if(!cancelled)setState(result);}).catch(()=>{if(!cancelled)setState({key,texts,warning:'Azure translation is unavailable. Showing English.',machine:false});});
     return()=>{cancelled=true;};
   // serialized is a stable representation of the content for this displayed question.
   // eslint-disable-next-line react-hooks/exhaustive-deps

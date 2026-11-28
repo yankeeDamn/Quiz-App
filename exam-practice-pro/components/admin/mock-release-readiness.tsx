@@ -18,19 +18,17 @@ export function MockReleaseReadiness({testId,onClose}:{testId:string;onClose:()=
  const [report,setReport]=useState<ReleaseReport|null>(null);
  const [error,setError]=useState('');
  const [loading,setLoading]=useState(true);
- const refresh=useCallback(async()=>{
-  setLoading(true);setError('');
-  const result=await admin<ReleaseReport>('/tests/'+encodeURIComponent(testId)+'/release-readiness');
-  if(result.ok)setReport(result.data);else setError(result.message);
+ const refresh=useCallback(()=>admin<ReleaseReport>('/tests/'+encodeURIComponent(testId)+'/release-readiness').then(result=>{
+  if(result.ok){setReport(result.data);setError('');}else setError(result.message);
   setLoading(false);
- },[testId]);
+ }),[testId]);
  useEffect(()=>{void refresh()},[refresh]);
  return <section aria-label="Mock release readiness" className="rounded-xl border bg-card p-5 space-y-4">
   <div className="flex flex-wrap justify-between gap-3 items-center">
    <div><h2 className="text-xl font-bold">Release readiness · {report?.name||testId}</h2>
     <p className="text-sm text-muted-foreground">Read-only report. This screen cannot approve questions, activate topics or publish a mock.</p></div>
    <div className="flex gap-2">
-    <button type="button" className="rounded border px-3 py-2 text-sm" disabled={loading} onClick={()=>void refresh()}>Refresh</button>
+    <button type="button" className="rounded border px-3 py-2 text-sm" disabled={loading} onClick={()=>{setLoading(true);setError('');void refresh();}}>Refresh</button>
     <button type="button" className="rounded border px-3 py-2 text-sm" onClick={onClose}>Close</button>
    </div>
   </div>

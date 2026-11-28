@@ -1,4 +1,5 @@
 'use client';
+import {useClientReady} from '@/hooks/use-client-ready';
 
 import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -43,7 +44,8 @@ function PortalContent(){
   const [tests,setTests]=useState<MockSummary[]>([]);
   const [state,setState]=useState<'loading'|'ready'|'error'>('loading');
   const [copyState,setCopyState]=useState<'idle'|'copied'|'manual'>('idle');
-  const [url,setUrl]=useState('');
+  const ready=useClientReady();
+  const url=ready?window.location.href:'';
 
   useEffect(()=>{
     let cancelled=false;
@@ -52,7 +54,6 @@ function PortalContent(){
       .catch(()=>{if(!cancelled)setState('error');});
     return()=>{cancelled=true;};
   },[]);
-  useEffect(()=>{setUrl(window.location.href);},[params]);
   const batches=brand.batches.split(',').map(s=>s.trim()).filter(Boolean).slice(0,6);
   const copy=async()=>setCopyState(await copyUrl(window.location.href)?'copied':'manual');
   const readableText = /^#[0-9A-Fa-f]{6}$/.test(brand.color) && parseInt(brand.color.slice(1,3),16)*299+
@@ -82,7 +83,7 @@ function PortalContent(){
             </div>
             {state==='loading' && <p className="mt-4 text-muted-foreground" role="status">Loading published tests…</p>}
             {state==='error' && <div role="alert" className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
-              Cannot connect to ExamPro's live question catalogue. Please try again from the main mock tests page.
+              Cannot connect to ExamPro&apos;s live question catalogue. Please try again from the main mock tests page.
               <Link href="/india-mocks" className="ml-2 underline">Open catalogue</Link>
             </div>}
             {state==='ready'&&!tests.length && <p className="mt-4 text-muted-foreground">No published tests are currently available.</p>}

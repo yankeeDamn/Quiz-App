@@ -11,7 +11,7 @@ export function CashfreeSandboxCheckout({period}:{period:'monthly'|'yearly'}){
  const [phone,setPhone]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
  const [ready,setReady]=useState(false),[history,setHistory]=useState<Row[]>([]);
  const [returnResult,setReturnResult]=useState<string>('');
- const refresh=async()=>{const r=await api<{orders:Row[]}>('/api/v1/cashfree/orders');if(r.success)setHistory(r.data?.orders||[]);};
+ const refresh=()=>api<{orders:Row[]}>('/api/v1/cashfree/orders').then(r=>{if(r.success)setHistory(r.data?.orders||[]);});
  useEffect(()=>{void refresh();},[]);
  // After Cashfree redirects back (?cashfree_return=1&order_id=...), never trust the
  // browser callback: reconcile the order against the server, which only marks paid

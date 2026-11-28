@@ -88,10 +88,7 @@ export default function QuizReviewPage({ params }: PageProps) {
       });
   }, [currentQuiz, session, filter]);
 
-  // Reset index when filter changes
-  useEffect(() => {
-    setCurrentIndex(0);
-  }, [filter]);
+
 
   if (!lastResult || !currentQuiz || !session) {
     return <FullPageLoader message="Loading review..." />;
@@ -142,7 +139,7 @@ export default function QuizReviewPage({ params }: PageProps) {
           <div className="mb-6">
             <Tabs
               value={filter}
-              onValueChange={(v) => setFilter(v as ReviewFilter)}
+              onValueChange={(v) => {setFilter(v as ReviewFilter);setCurrentIndex(0);}}
             >
               <TabsList className="grid w-full max-w-lg grid-cols-5">
                 <TabsTrigger value="all">

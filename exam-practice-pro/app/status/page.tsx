@@ -35,7 +35,7 @@ export default async function ExamProStatusPage(){
           <h2 className="font-bold">Frontend deployment</h2>
           <p className="mt-2 text-sm text-muted-foreground">Vercel Git commit:</p>
           <p className="mt-1 break-all font-mono text-sm">{commit}</p>
-          <p className="mt-3 text-sm text-muted-foreground">Compare this with GitHub's current main SHA. If they differ, redeploy and check Vercel Production Domains.</p>
+          <p className="mt-3 text-sm text-muted-foreground">Compare this with GitHub&apos;s current main SHA. If they differ, redeploy and check Vercel Production Domains.</p>
         </section>
         <section className="rounded-xl border p-5">
           <h2 className="font-bold">Backend API connection</h2>
@@ -46,7 +46,7 @@ export default async function ExamProStatusPage(){
           <p className="mt-1 text-sm text-muted-foreground">{details}</p>
         </section>
         <section className="rounded-xl border p-5">
-          <h2 className="font-bold">What is and isn't live</h2>
+          <h2 className="font-bold">What is and isn&apos;t live</h2>
           <p className="mt-2 text-sm text-muted-foreground">Published mock sharing, EN/हिं/বাং interface controls and topic practice require a working API and current frontend. Translation of question content additionally needs Azure Translator credentials on Render. The public branded practice portal is not a private institute dashboard. Payment availability depends on the separately configured checkout mode; this page does not verify billing readiness.</p>
         </section>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Check, Crown, FileText, LoaderCircle, LockKeyhole, ShieldCheck } from "lucide-react";
 import type { EbookTrack } from "@/lib/ebooks";
 import { ebookFieldClass } from "./ebook-admin-ui";
@@ -19,9 +19,12 @@ export function EbookMonetizationControls({
   compact?: boolean;
 }) {
   const [pages, setPages] = useState(book.freePreviewPages ?? 2);
-  useEffect(() => {
+  const scope = `${book.slug}:${book.revision}:${book.freePreviewPages}`;
+  const [previousScope, setPreviousScope] = useState(scope);
+  if (previousScope !== scope) {
+    setPreviousScope(scope);
     setPages(book.freePreviewPages ?? 2);
-  }, [book.slug, book.revision, book.freePreviewPages]);
+  }
 
   const locked = busy || !owner;
   const bundled = book.isBundledPublicEdition === true;

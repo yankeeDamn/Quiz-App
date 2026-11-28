@@ -1,4 +1,6 @@
 'use client';
+import {useClientReady} from '@/hooks/use-client-ready';
+import {useUserStorage} from '@/components/layout/user-storage-provider';
 
 import { SponsoredSlot } from '@/components/ads/sponsored-slot';
 import { ContextualResourceCard } from '@/components/ads/contextual-resource-card';
@@ -28,10 +30,10 @@ import { PerformanceChart } from '@/components/dashboard/performance-chart';
 import { RecentQuizzes } from '@/components/dashboard/recent-quizzes';
 import { AchievementGrid } from '@/components/dashboard/achievement-badge';
 import { loadDashboardStats, loadQuizHistory, loadAchievements } from '@/lib/storage';
-import { DashboardStats, QuizResult, Achievement } from '@/lib/types';
 
 type CloudAttempt = {id:string;testId:string;title:string;startedAt:string;submittedAt:string|null;result:{score:number;total:number;percentage:number;passed:boolean}|null};
-export default function DashboardPage() {
+export default function DashboardPage() { const ready=useClientReady(),storage=useUserStorage(); return ready&&storage.ready ? <DashboardContent key={storage.prefix}/> : <><Header/><main className="flex-1 p-8" role="status">Loading dashboard…</main><Footer/></>; }
+function DashboardContent() {
   const {data:session,status} = useSession();
   const [cloud,setCloud] = useState<CloudAttempt[]>([]);
   const [cloudError,setCloudError] = useState('');
@@ -42,33 +44,9 @@ export default function DashboardPage() {
       else setCloudError(r.error?.message||'Could not retrieve cloud history');
     });return()=>{active=false};
   },[status,session?.user?.email]);
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [history, setHistory] = useState<QuizResult[]>([]);
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const loadedStats = loadDashboardStats();
-    const loadedHistory = loadQuizHistory();
-    const loadedAchievements = loadAchievements();
-    setStats(loadedStats);
-    setHistory(loadedHistory);
-    setAchievements(loadedAchievements);
-    setIsLoading(false);
-  }, []);
-
-  if (isLoading) {
-    return (
-      <>
-        <Header />
-        <main className="flex-1 flex items-center justify-center">
-          <div className="animate-spin h-8 w-8 border-4 border-accent-ink border-t-transparent rounded-full" />
-        </main>
-        <Footer />
-      </>
-    );
-  }
-
+  const [stats] = useState(loadDashboardStats);
+  const [history] = useState(loadQuizHistory);
+  const [achievements] = useState(loadAchievements);
   const hasActivity = stats && (stats.totalAttempts > 0 || history.length > 0 || cloud.length > 0);
 
   return (

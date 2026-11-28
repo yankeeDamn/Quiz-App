@@ -79,9 +79,7 @@ export function ApplicationTracker({ seed, onSeedConsumed }: {
   const [search, setSearch] = useState('');
   const epoch = useRef(0);
 
-  const load = useCallback(async (currentEpoch: number) => {
-    setLoading(true);
-    const result = await api<{ applications: Application[] }>('/api/v1/government-job-applications');
+  const load = useCallback((currentEpoch: number) => api<{ applications: Application[] }>('/api/v1/government-job-applications').then(result => {
     if (epoch.current !== currentEpoch) return;
     if (result.success && result.data) {
       setApplications(result.data.applications);
@@ -91,34 +89,27 @@ export function ApplicationTracker({ seed, onSeedConsumed }: {
       setError(result.error?.message || 'Could not load your applications.');
     }
     setLoading(false);
-  }, []);
+  }), []);
 
-  // Never show prior-account records after switching OAuth identity or signing out.
-  useEffect(() => {
-    const current = ++epoch.current;
-    setApplications([]);
-    setForm(INITIAL);
-    setEditingId(null);
-    setShowForm(false);
-    setReveal(null);
-    setError('');
-    setMessage('');
-    if (authStatus === 'authenticated' && session?.user?.email) {
-      void load(current);
-    }
-  }, [authStatus, session?.user?.email, load]);
-
-  useEffect(() => {
-    if (seed && authStatus === 'authenticated') {
-      setForm(fromJob(seed));
-      setEditingId(null);
-      setClearReference(false);
-      setReveal(null);
-      setShowForm(true);
-      setMessage('Notice details copied into a draft. No government application has been submitted or tracked yet.');
-      onSeedConsumed();
-    }
-  }, [seed, authStatus, onSeedConsumed]);
+  // Reset before rendering a different account; in-flight reads are cancelled by epoch.
+  const scope = authStatus+':'+(session?.user?.email||'');
+  const [previousScope,setPreviousScope] = useState(scope);
+  if(previousScope!==scope){
+    setPreviousScope(scope);setApplications([]);setForm(INITIAL);setEditingId(null);
+    setShowForm(false);setReveal(null);setError('');setMessage('');
+    setLoading(authStatus==='authenticated');
+  }
+  useEffect(()=>{
+    const current=++epoch.current;
+    if(authStatus==='authenticated'&&session?.user?.email)void load(current);
+    return()=>{epoch.current++;};
+  },[authStatus,session?.user?.email,load]);
+  const [previousSeed,setPreviousSeed]=useState<GovernmentJob|null>(null);
+  if(seed!==previousSeed&&authStatus==='authenticated'){
+    setPreviousSeed(seed);
+    if(seed){setForm(fromJob(seed));setEditingId(null);setClearReference(false);setReveal(null);setShowForm(true);setMessage('Notice details copied into a draft. No government application has been submitted or tracked yet.');}
+  }
+  useEffect(()=>{if(seed&&seed===previousSeed&&authStatus==='authenticated')onSeedConsumed();},[seed,previousSeed,authStatus,onSeedConsumed]);
 
   const visible = useMemo(() => applications.filter(item => {
     if (filter !== 'all' && item.status !== filter) return false;
