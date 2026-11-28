@@ -28,8 +28,8 @@ export function Header() {
   const { language, t } = useExamLanguage();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-background/90 shadow-sm shadow-transparent/[0.025] backdrop-blur-xl supports-[backdrop-filter]:bg-background/75 dark:border-border/70">
-      <div className="container mx-auto flex h-16 items-center justify-between gap-3 px-4">
+    <header className="sticky top-0 z-50 w-full overflow-visible border-b border-border bg-background/95 shadow-sm shadow-black/10 backdrop-blur-xl supports-[backdrop-filter]:bg-background/90">
+      <div className="container mx-auto flex h-auto min-h-16 items-center justify-between gap-3 overflow-visible px-4 py-2 2xl:flex-wrap">
         {/* Logo */}
         <Link href="/" className="ep-link-motion flex shrink-0 items-center gap-2 rounded-lg transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-transparent/20">
@@ -41,7 +41,7 @@ export function Header() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav lang={language} aria-label="Primary navigation" className="hidden 2xl:flex items-center gap-3 whitespace-nowrap">
+        <nav lang={language} aria-label="Primary navigation" className="hidden min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1 whitespace-nowrap 2xl:flex">
           <Link
             href="/"
             className="rounded-lg px-1 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-accent-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring dark:hover:text-accent-ink"
@@ -83,7 +83,7 @@ export function Header() {
         </nav>
 
         {/* Right Side Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 shrink-0 items-center gap-2">
           {/* Language selection persists across ExamPro and the exam hall. */}
           <LanguageSwitcher small />
           {/* Wide screens only: on phones this control overflowed the 320px header. It lives in the menu below. */}

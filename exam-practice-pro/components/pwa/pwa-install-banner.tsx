@@ -44,11 +44,11 @@ export function PwaInstallBanner() {
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <button type="button" onClick={install} className="inline-flex min-h-9 items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-semibold text-accent-ink shadow-sm hover:bg-accent-soft dark:border-border dark:bg-surface-2 dark:text-accent-ink">
+    <div className="relative flex min-w-0 flex-wrap items-center gap-2 rounded-lg border border-border bg-card/80 p-1">
+      <button type="button" onClick={install} className="inline-flex min-h-9 shrink-0 items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-semibold text-accent-ink shadow-sm hover:bg-accent-soft dark:bg-surface-2">
         {isIos ? <Smartphone className="h-4 w-4" /> : <Download className="h-4 w-4" />} Install App
       </button>
-      <button type="button" aria-label="Dismiss install suggestion" onClick={() => setDismissed(true)} className="rounded p-1 text-muted-foreground hover:bg-muted"><X className="h-4 w-4" /></button>
+      <button type="button" aria-label="Dismiss install suggestion" onClick={() => setDismissed(true)} className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"><X className="h-4 w-4" /></button>
       {iosHelp && <p className="basis-full text-xs text-muted-foreground">In Safari, tap Share, then choose “Add to Home Screen”.</p>}
     </div>
   );

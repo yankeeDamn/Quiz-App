@@ -150,7 +150,7 @@ export default function HomePage() {
       <Header />
       <main className="flex-1">
         {/* Compact quick links; avoid crowding the mobile hero. */}
-        <div className="border-b border-border/70 bg-accent-soft/70 px-4 py-2.5 text-xs dark:border-border dark:bg-accent-soft/40">
+        <div className="border-b border-border bg-card px-4 py-2.5 text-xs dark:bg-[#111827]">
           <div className="container mx-auto flex flex-wrap items-center justify-between gap-x-5 gap-y-2">
             <span className="font-medium text-muted-foreground dark:text-muted-foreground">Practice quizzes · Mock tests · Skill-building</span>
             <div className="flex flex-wrap gap-x-5 gap-y-2 font-semibold text-accent-ink dark:text-accent-ink">
@@ -220,11 +220,11 @@ export default function HomePage() {
                         icon: GraduationCap,
                       },
                     ].map(stat => (
-                      <div key={stat.label} className="ep-home-stat min-w-0 rounded-2xl p-4 sm:p-5">
-                        <stat.icon aria-hidden="true" className="mb-3 h-5 w-5 text-accent-ink dark:text-accent-ink" />
+                      <div key={stat.label} className="ep-home-stat min-w-0 rounded-2xl border border-border bg-card p-4 backdrop-blur-sm transition-colors hover:border-sky-400/40 dark:border-slate-800/90 dark:bg-[#111827]/85 dark:hover:border-sky-400/40 dark:hover:bg-[#151E32] sm:p-5">
+                        <stat.icon aria-hidden="true" className="mb-3 h-9 w-9 rounded-lg border border-sky-400/20 bg-sky-400/10 p-2 text-accent-ink dark:text-sky-400" />
                         <div className="text-3xl font-extrabold tracking-tight tabular-nums text-foreground dark:text-white">{stat.value}</div>
                         <div className="mt-1 text-sm font-semibold text-foreground dark:text-foreground">{stat.label}</div>
-                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground dark:text-muted-foreground">{stat.note}</p>
+                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground dark:text-slate-400">{stat.note}</p>
                       </div>
                     ))}
                   </div>
