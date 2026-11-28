@@ -64,45 +64,45 @@
    The existing next-themes System option follows prefers-color-scheme. */
 :root, .dark {
   color-scheme: dark;
-  --bg: #0A0A0B;
-  --surface-1: #121214;
-  --surface-2: #1A1A1E;
-  --surface-3: #24242A;
-  --border: #2B2B33;
-  --text: #F5F5F0;
-  --text-muted: #A1A1AA;
-  --accent: #F5F03C;
-  --accent-hover: #E6E12A;
-  --accent-soft: rgba(245,240,60,0.12);
-  --accent-ink: #F5F03C;
-  --on-accent: #0A0A0B;
+  --bg: #0A0F1C;
+  --surface-1: #111827;
+  --surface-2: #1E293B;
+  --surface-3: #263449;
+  --border: #223047;
+  --text: #F8FAFC;
+  --text-muted: #94A3B8;
+  --accent: #FBBF24;
+  --accent-hover: #F59E0B;
+  --accent-soft: rgba(251,191,36,0.12);
+  --accent-ink: #FBBF24;
+  --on-accent: #0A0F1C;
   --success: #4ADE80;
   --warning: #FBBF24;
   --danger: #F87171;
   --info: #60A5FA;
-  --control-border: #72727E;
-  --on-danger: #0A0A0B;
+  --control-border: #64748B;
+  --on-danger: #0A0F1C;
   --overlay: rgba(0,0,0,0.7);
 }
 .light {
   color-scheme: light;
-  --bg: #FAFAF7;
+  --bg: #F8FAFC;
   --surface-1: #FFFFFF;
-  --surface-2: #F0F0EC;
-  --surface-3: #E6E6DF;
-  --border: #D4D4CB;
-  --text: #0A0A0B;
-  --text-muted: #575760;
-  --accent: #F5F03C;
-  --accent-hover: #E6E12A;
-  --accent-soft: rgba(245,240,60,0.18);
-  --accent-ink: #454300;
-  --on-accent: #0A0A0B;
+  --surface-2: #F1F5F9;
+  --surface-3: #E2E8F0;
+  --border: #CBD5E1;
+  --text: #0A0F1C;
+  --text-muted: #475569;
+  --accent: #FBBF24;
+  --accent-hover: #F59E0B;
+  --accent-soft: rgba(251,191,36,0.18);
+  --accent-ink: #92400E;
+  --on-accent: #0A0F1C;
   --success: #166534;
   --warning: #854D0E;
   --danger: #B91C1C;
   --info: #1D4ED8;
-  --control-border: #76766D;
+  --control-border: #64748B;
   --on-danger: #FFFFFF;
   --overlay: rgba(0,0,0,0.55);
 }
@@ -148,7 +148,7 @@
   :where(button, a, input, select, textarea, summary, [tabindex]):focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 3px;
-    /* Dark separator makes the yellow ring visible on light surfaces too. */
+    /* Dark separator makes the amber ring visible on light surfaces too. */
     box-shadow: 0 0 0 3px var(--on-accent);
   }
   :where(input, select, textarea) { accent-color: var(--accent); }
@@ -160,8 +160,8 @@
 }
 @layer components {
   .ep-hero { position: relative; isolation: isolate; overflow: hidden; background: var(--surface-1); }
-  .ep-hero-grid { position: absolute; inset: 0; pointer-events: none; opacity: .3;
-    background-image: linear-gradient(to right,var(--border) 1px,transparent 1px),linear-gradient(to bottom,var(--border) 1px,transparent 1px);
+  .ep-hero-grid { position: absolute; inset: 0; pointer-events: none; opacity: 1;
+    background-image: linear-gradient(to right,rgba(148, 163, 184, 0.04) 1px,transparent 1px),linear-gradient(to bottom,rgba(148, 163, 184, 0.04) 1px,transparent 1px);
     background-size: 48px 48px; mask-image: linear-gradient(to bottom,black,transparent 85%); }
   .ep-gradient-text { color: var(--accent-ink); }
   .ep-card, .ep-home-stat { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); }
