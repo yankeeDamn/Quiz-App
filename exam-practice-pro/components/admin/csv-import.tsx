@@ -35,6 +35,14 @@ function toRows(source:string):QuestionInput[]{
   return {question:fields[0].trim(),options:fields.slice(1,5).map(x=>x.trim()),answer:letter.charCodeAt(0)-65,explanation:fields[6].trim(),difficulty:fields[7].trim()||'Moderate'};
  });
 }
+function parseJsonRows(source:string):QuestionInput[]{
+ const data:unknown=JSON.parse(source);
+ if(!Array.isArray(data)||!data.length||data.length>200)throw Error('JSON must contain 1 to 200 question records.');
+ return data.map((row,i)=>{
+  if(!row||typeof row!=='object'||typeof row.question!=='string'||!Array.isArray(row.options)||row.options.length!==4||row.options.some((v:unknown)=>typeof v!=='string')||!Number.isInteger(row.answer)||row.answer<0||row.answer>3||typeof row.explanation!=='string')throw Error('Row '+(i+1)+': expected question, four options, answer index 0–3 and explanation.');
+  return {question:row.question,options:row.options,answer:row.answer,explanation:row.explanation,difficulty:typeof row.difficulty==='string'?row.difficulty:'Moderate'};
+ });
+}
 function downloadTemplate(){
  const quote=(text:string)=>'"'+text.replaceAll('"','""')+'"';
  const csv=[HEADER,EXAMPLE].map(row=>row.map(quote).join(',')).join('\r\n')+'\r\n';
@@ -53,9 +61,10 @@ export function CsvImport({topic,onSaved}:{topic:string;onSaved:()=>void}){
   setApproved(false);setErrors([]);setRows([]);setMessage('');setSelectedFile('');
   if(!file)return;
   try{
-   if(file.size>1024*1024)throw Error('Maximum CSV size is 1 MB');
-   if(!file.name.toLowerCase().endsWith('.csv'))throw Error('Choose a downloaded .csv file, not the GitHub HTML page.');
-   const parsed=toRows(await file.text());
+   if(file.size>1024*1024)throw Error('Maximum file size is 1 MB');
+   if(!/\.(csv|json)$/i.test(file.name))throw Error('Choose a CSV or JSON file. Excel workbooks can be saved as CSV.');
+   const source=await file.text();
+   const parsed=file.name.toLowerCase().endsWith('.json')?parseJsonRows(source):toRows(source);
    if(parsed.length>200)throw Error('Maximum 200 questions per import');
    setSelectedFile(file.name);
    setRows(parsed);setMessage(`${file.name}: ${parsed.length} rows parsed. Validate against the database before importing.`);
@@ -83,13 +92,14 @@ export function CsvImport({topic,onSaved}:{topic:string;onSaved:()=>void}){
   finally{setBusy(false)}
  };
  return <section className="rounded-xl border bg-card p-5">
-  <h2 className="text-lg font-bold">CSV question import</h2><p className="mt-1 text-sm text-muted-foreground">Download the original sample, edit it in a spreadsheet, then preview and validate before an all-or-nothing import. Existing questions are preserved.</p>
+  <h2 className="text-lg font-bold">CSV / JSON question import</h2><p className="mt-1 text-sm text-muted-foreground">Download the original sample, edit it in a spreadsheet, then preview and validate before an all-or-nothing import. Existing questions are preserved.</p>
   <div className="mt-3 flex flex-wrap gap-3"><Button type="button" variant="outline" onClick={downloadTemplate}>Download CSV template</Button>
-   <input aria-label="Choose CSV file" className="max-w-full rounded-lg border border-input px-3 py-2 text-sm file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-2 file:font-semibold" type="file" accept=".csv,text/csv"
+   <input aria-label="Choose question import file" className="max-w-full rounded-lg border border-input px-3 py-2 text-sm file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-2 file:font-semibold" disabled={busy} type="file" accept=".csv,.json,text/csv,application/json"
      onChange={e=>{const file=e.currentTarget.files?.[0];e.currentTarget.value='';void read(file)}}/></div>
-  <p className="mt-2 text-xs text-muted-foreground">Choose the downloaded raw .csv file for the selected topic (not the GitHub page). If the file dialog does not open, use Chrome or Edge on a desktop and try again.</p>
+  <p className="mt-2 text-xs text-muted-foreground">Choose a CSV or a JSON array of question records. Excel workbooks can be exported as CSV. If the file dialog does not open, use Chrome or Edge on a desktop and try again.</p>
   {selectedFile&&<p className="mt-2 text-sm font-semibold" aria-live="polite">Selected: {selectedFile} — {rows.length} rows</p>}
   {message&&<p className="mt-3 text-sm" role="status">{message}</p>}
+  {rows.length>0&&<details className="mt-3 rounded-lg border p-3"><summary className="cursor-pointer font-semibold">Preview parsed questions ({rows.length})</summary><ol className="mt-2 max-h-64 list-decimal space-y-2 overflow-auto pl-5 text-sm">{rows.map((r,i)=><li key={i}>{r.question}<span className="block text-xs text-muted-foreground">Correct option: {String.fromCharCode(65+r.answer)} · {r.difficulty}</span></li>)}</ol></details>}
   {errors.map((error,i)=><Notice key={i} kind="error">Row {error.row}: {error.message}</Notice>)}
   <div className="mt-4 flex gap-2"><Button type="button" disabled={!topic||busy||rows.length===0} onClick={()=>void preview()}>Validate {rows.length||''} rows</Button><Button type="button" disabled={!approved||busy} onClick={()=>void save()}>Import validated rows</Button></div>
  </section>
