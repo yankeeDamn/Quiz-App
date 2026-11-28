@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, Fragment, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { admin, type Call } from '@/lib/admin';
@@ -18,8 +18,8 @@ export function AdminAccess({ children }: { children: ReactNode }) {
     void admin('/me').then(result => { if (!cancelled) setCheck({ account, result }); });
     return () => { cancelled = true; };
   }, [account, status, retry]);
-  if (status === 'unauthenticated') return <section className="mx-auto max-w-xl space-y-4 rounded-xl border bg-card p-8"><h1 className="text-2xl">Owner administration</h1><p className="text-muted-foreground">Sign in with an authorized administrator account to view the design system.</p><Button asChild><Link href="/auth/signin?callbackUrl=/admin/design-system">Sign in</Link></Button></section>;
+  if (status === 'unauthenticated') return <section className="mx-auto max-w-xl space-y-4 rounded-xl border bg-card p-8"><h1 className="text-2xl">Owner administration</h1><p className="text-muted-foreground">Sign in with an authorized administrator account to view this workspace.</p><Button asChild><Link href="/auth/signin?callbackUrl=/admin">Sign in</Link></Button></section>;
   if (status === 'loading' || !account || check?.account !== account) return <div role="status" className="mx-auto max-w-xl space-y-4"><span className="sr-only">Checking admin access</span><Skeleton className="h-10 w-2/3" /><Skeleton className="h-36 w-full" /></div>;
   if (!check.result.ok) return <div role="alert" className="mx-auto max-w-xl space-y-4 rounded-xl border bg-card p-8"><h1 className="text-xl">Workspace unavailable</h1><p>{check.result.message}</p><Button variant="outline" onClick={() => { setCheck(null); setRetry(value => value + 1); }}>Try again</Button></div>;
-  return children;
+  return <Fragment key={account}>{children}</Fragment>;
 }
