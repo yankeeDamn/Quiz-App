@@ -44,6 +44,7 @@ app.use(
 // 3. Body parsing
 // ──────────────────────────────────────────────────────────
 // The admin page can import many questions at once, so it gets a larger limit.
+app.use('/api/v1/admin/content-pdfs/:id/file', express.raw({ type: 'application/pdf', limit: '3mb' }));
 app.use('/api/v1/admin/ebooks/:slug/pdf', express.raw({ type: 'application/pdf', limit: '3mb' }));
 app.use('/api/v1/admin', express.json({ limit: '1mb' }));
 // Bounded institute CSV/logo payloads. Authorization still occurs before service writes.
