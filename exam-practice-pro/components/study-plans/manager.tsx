@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { admin } from "@/lib/admin";
 import { Button } from "@/components/ui/button";
+import { PublicationPanel } from "./publication-panel";
 type Row = Record<string, unknown>;
 type Readiness = {
   ready: boolean;
@@ -580,6 +581,7 @@ export function StudyPlanManager() {
               </div>
             </>
           )}
+          {process.env.NEXT_PUBLIC_PUBLISHING_WORKFLOW_ENABLED==="true" && <PublicationPanel key={selectedId} id={selectedId} revision={Number(selected.revision)} draft={draftSelected} ready={readiness?.ready===true && readiness.revision===selected.revision} ack={ack}/>}
           <div className="grid gap-5 xl:grid-cols-2">
             <div className="space-y-2">
               <h3 className="font-bold">Ordered daily tasks</h3>
