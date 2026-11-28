@@ -819,6 +819,11 @@ function createService(db = database, books = require("./ebooks.service")) {
     return tx(async c => {
       const p = await mutable(pid,c);
       if (p.revision !== input.revision) throw v.fail("Plan changed. Reload and preview before publishing.",409);
+      if (input.scheduled === true) {
+        publishing.requireEnabled();
+        const job=await one("SELECT * FROM publishing_jobs WHERE content_type='study_plan' AND content_id=$1 FOR UPDATE",[pid],c);
+        if (job.expected_revision!==p.revision || new Date(job.publish_at).getTime()>Date.now()) throw v.fail("Schedule is not due or the draft has changed.",409);
+      }
       await c.query("SELECT id FROM study_syllabuses WHERE id=$1 FOR UPDATE", [p.syllabus_id]);
       const report = await checkReadiness(p,c);
       if (!report.ready) {
@@ -837,8 +842,11 @@ function createService(db = database, books = require("./ebooks.service")) {
   }
   async function archive(user, pid) {
     const actor = admin(user);
-    const result = await update("study_plans", v.id(pid), {
-      status: "archived",
+    const result = await tx(async c=>{
+      await one("SELECT id FROM study_plans WHERE id=$1 FOR UPDATE",[v.id(pid)],c);
+      const saved=await update("study_plans",v.id(pid),{status:"archived"},c);
+      if(publishing.enabled()){await publishing.cancel(c,pid,user);await publishing.event(c,pid,"archive",user);}
+      return saved;
     });
     logger.info({ actor, planId: pid }, "Study plan archived");
     return result;
