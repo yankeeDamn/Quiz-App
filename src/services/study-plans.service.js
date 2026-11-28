@@ -1,5 +1,6 @@
 "use strict";
 const database = require("../config/database");
+const publishing = require("./publishing-store");
 const v = require("./study-plans.validation");
 const { isPlanActive } = require("./plan.service");
 const { isOwnerAdmin } = require("./ebooks.service");
@@ -787,12 +788,42 @@ function createService(db = database, books = require("./ebooks.service")) {
       return result;
     });
   }
+  async function schedulePublication(user,pid,input) {
+    admin(user); publishing.requireEnabled();
+    return tx(async c=>{
+      const p=await mutable(pid,c);
+      const report=await checkReadiness(p,c);
+      return publishing.schedule(c,p,input,user,report.ready);
+    });
+  }
+  async function cancelPublication(user,pid) {
+    admin(user); publishing.requireEnabled();
+    return tx(async c=>{
+      await one("SELECT id FROM study_plans WHERE id=$1 FOR UPDATE",[v.id(pid)],c);
+      await publishing.cancel(c,pid,user);
+      return {cancelled:true};
+    });
+  }
+  async function publicationHistory(user,pid) {
+    admin(user); publishing.requireEnabled();
+    await one("SELECT id FROM study_plans WHERE id=$1",[v.id(pid)]);
+    return {
+      schedule:(await rows("SELECT expected_revision,publish_at FROM publishing_jobs WHERE content_type='study_plan' AND content_id=$1",[pid]))[0] || null,
+      versions:await rows("SELECT id,revision,created_at FROM publishing_versions WHERE content_type='study_plan' AND content_id=$1 ORDER BY id DESC LIMIT 50",[pid]),
+      events:await rows("SELECT id,action,created_at FROM publishing_events WHERE content_type='study_plan' AND content_id=$1 ORDER BY id DESC LIMIT 50",[pid])
+    };
+  }
   async function publish(user, pid, input) {
     const actor = admin(user);
     if (input?.acknowledged !== true) throw v.fail("Confirm syllabus, content, rights and preview review before publishing");
     return tx(async c => {
       const p = await mutable(pid,c);
       if (p.revision !== input.revision) throw v.fail("Plan changed. Reload and preview before publishing.",409);
+      if (input.scheduled === true) {
+        publishing.requireEnabled();
+        const job=await one("SELECT * FROM publishing_jobs WHERE content_type='study_plan' AND content_id=$1 FOR UPDATE",[pid],c);
+        if (job.requested_by!==user.id || job.expected_revision!==p.revision || new Date(job.publish_at).getTime()>Date.now()) throw v.fail("Schedule is not due or the draft has changed.",409);
+      }
       await c.query("SELECT id FROM study_syllabuses WHERE id=$1 FOR UPDATE", [p.syllabus_id]);
       const report = await checkReadiness(p,c);
       if (!report.ready) {
@@ -800,14 +831,22 @@ function createService(db = database, books = require("./ebooks.service")) {
         throw v.fail("Not ready to publish: " + (first.day ? "Day " + first.day + " (" + first.taskTitle + "): " : "") + first.message + " See Publication readiness for all blockers.");
       }
       const result = await update("study_plans",pid,{status:"published",published_at:new Date()},c);
-      logger.info({actor,planId:pid},"Study plan published");
+      if (publishing.enabled()) {
+        const tasks=await rows("SELECT t.*,ARRAY(SELECT question_id FROM study_task_questions WHERE task_id=t.id ORDER BY display_order) AS question_ids FROM study_tasks t WHERE plan_id=$1 ORDER BY day,display_order,id",[pid],c);
+        const days=await rows("SELECT * FROM study_days WHERE plan_id=$1 ORDER BY day",[pid],c);
+        await publishing.published(c,result,user,{plan:result,tasks,days});
+      }
+      logger.info({planId:pid},"Study plan published");
       return result;
     });
   }
   async function archive(user, pid) {
     const actor = admin(user);
-    const result = await update("study_plans", v.id(pid), {
-      status: "archived",
+    const result = await tx(async c=>{
+      await one("SELECT id FROM study_plans WHERE id=$1 FOR UPDATE",[v.id(pid)],c);
+      const saved=await update("study_plans",v.id(pid),{status:"archived"},c);
+      if(publishing.enabled()){await publishing.cancel(c,pid,user);await publishing.event(c,pid,"archive",user);}
+      return saved;
     });
     logger.info({ actor, planId: pid }, "Study plan archived");
     return result;
@@ -906,6 +945,9 @@ function createService(db = database, books = require("./ebooks.service")) {
     readiness,
     reviewPrerequisites,
     publish,
+    schedulePublication,
+    cancelPublication,
+    publicationHistory,
     archive,
     clone,
     questionSearch,

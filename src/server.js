@@ -4,6 +4,7 @@ const app = require('./app');
 const config = require('./config');
 const logger = require('./utils/logger');
 const db = require('./config/database');
+const stopPublishing = require('./services/publishing-worker').startPublishingWorker(logger);
 const stopInstituteExpiry = require('./services/institutes/expiry').startExpiryWorker(logger);
 
 // ──────────────────────────────────────────────────────────
@@ -29,6 +30,7 @@ async function gracefulShutdown(signal) {
   server.close(async () => {
     logger.info('HTTP server closed');
     await stopInstituteExpiry();
+    await stopPublishing();
     await db.end();
     logger.info('Database pool closed');
     process.exit(0);
