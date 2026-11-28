@@ -21,7 +21,7 @@ export function BetaFeedback(){
    <label className="text-sm">Impact<select className="ml-2 rounded border p-2" value={severity} onChange={e=>setSeverity(e.target.value)}>{['low','medium','high'].map(x=><option key={x}>{x}</option>)}</select></label>
   </div>
   <label className="block text-sm">Description<textarea required minLength={10} maxLength={1500} value={comment} onChange={e=>setComment(e.target.value)} className="mt-1 block w-full rounded border p-2" rows={3}/></label>
-  <button disabled={busy} className="rounded bg-indigo-700 px-4 py-2 text-white disabled:opacity-50" type="submit">Submit feedback</button>
+  <button disabled={busy} className="rounded bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50" type="submit">Submit feedback</button>
   {message&&<p role="status" className="text-sm">{message}</p>}
  </form>;
 }

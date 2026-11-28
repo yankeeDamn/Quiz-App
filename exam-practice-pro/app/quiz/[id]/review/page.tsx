@@ -120,7 +120,7 @@ export default function QuizReviewPage({ params }: PageProps) {
   return (
     <>
       <Header />
-      <main className="flex-1 bg-gray-50 dark:bg-background">
+      <main className="flex-1 bg-background dark:bg-background">
         <div className="container mx-auto px-4 py-8">
           {/* Back Button */}
           <Button variant="ghost" asChild className="mb-6">
@@ -235,7 +235,7 @@ export default function QuizReviewPage({ params }: PageProps) {
                     </div>
 
                     {/* Question Text */}
-                    <div className="rounded-xl bg-gray-50 p-6 dark:bg-gray-900/50 mb-6">
+                    <div className="rounded-xl bg-background p-6 dark:bg-surface-2/50 mb-6">
                       <p className="text-lg">{currentItem.question.question}</p>
                     </div>
 
@@ -250,7 +250,7 @@ export default function QuizReviewPage({ params }: PageProps) {
                           currentItem.question.correctAnswers.includes(option.id);
 
                         let optionClass =
-                          'border-gray-200 dark:border-gray-700';
+                          'border-border dark:border-border';
                         if (isCorrectAnswer) {
                           optionClass =
                             'border-green-500 bg-green-50 dark:bg-green-900/20';
@@ -270,7 +270,7 @@ export default function QuizReviewPage({ params }: PageProps) {
                                   ? 'bg-green-600 text-white'
                                   : isSelected
                                   ? 'bg-red-600 text-white'
-                                  : 'bg-gray-100 dark:bg-gray-800'
+                                  : 'bg-surface-2 dark:bg-surface-2'
                               }`}
                             >
                               {getAnswerLabel(index)}
@@ -288,11 +288,11 @@ export default function QuizReviewPage({ params }: PageProps) {
                     </div>
 
                     {/* Explanation */}
-                    <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-900 dark:bg-indigo-900/20">
-                      <h4 className="font-semibold text-indigo-900 dark:text-indigo-300 mb-2">
+                    <div className="rounded-xl border border-border bg-accent-soft p-4 dark:border-border dark:bg-accent-soft/20">
+                      <h4 className="font-semibold text-accent-ink dark:text-accent-ink mb-2">
                         Explanation
                       </h4>
-                      <p className="text-sm text-indigo-800 dark:text-indigo-200">
+                      <p className="text-sm text-accent-ink dark:text-accent-ink">
                         {currentItem.question.explanation}<ReportMistake questionId={currentItem.question.id}/>
                       </p>
                     </div>
@@ -321,7 +321,7 @@ export default function QuizReviewPage({ params }: PageProps) {
                           )
                         }
                         disabled={currentIndex === filteredQuestions.length - 1}
-                        className="bg-indigo-600 hover:bg-indigo-700"
+                        className="bg-primary hover:bg-primary-hover"
                       >
                         Next
                         <ChevronRight className="ml-2 h-4 w-4" />
@@ -346,7 +346,7 @@ export default function QuizReviewPage({ params }: PageProps) {
                       size="sm"
                       className={`w-10 h-10 p-0 ${
                         index === currentIndex
-                          ? 'bg-indigo-600 hover:bg-indigo-700'
+                          ? 'bg-primary hover:bg-primary-hover'
                           : item.isSkipped
                           ? 'border-yellow-300'
                           : item.isCorrect

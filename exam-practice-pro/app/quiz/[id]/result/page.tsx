@@ -55,7 +55,7 @@ export default function QuizResultPage({ params }: PageProps) {
   return (
     <>
       <Header />
-      <main className="flex-1 bg-gray-50 dark:bg-background">
+      <main className="flex-1 bg-background dark:bg-background">
         <div className="container mx-auto px-4 py-8">
           {/* Back Button */}
           <Button variant="ghost" asChild className="mb-6">
@@ -74,8 +74,8 @@ export default function QuizResultPage({ params }: PageProps) {
             >
               <Card className="sticky top-24">
                 <CardHeader className="text-center">
-                  <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/50">
-                    <Trophy className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                  <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-accent-soft dark:bg-accent-soft/50">
+                    <Trophy className="h-6 w-6 text-accent-ink dark:text-accent-ink" />
                   </div>
                   <CardTitle>{lastResult.quizTitle}</CardTitle>
                   <p className="text-sm text-muted-foreground">Quiz Complete!</p>
@@ -178,7 +178,7 @@ export default function QuizResultPage({ params }: PageProps) {
 
                 <Button
                   size="lg"
-                  className="h-auto py-4 bg-indigo-600 hover:bg-indigo-700"
+                  className="h-auto py-4 bg-primary hover:bg-primary-hover"
                   asChild
                 >
                   <Link href="/">
@@ -198,7 +198,7 @@ export default function QuizResultPage({ params }: PageProps) {
                 <CardContent>
                   <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
                     <div className="text-center">
-                      <p className="text-3xl font-bold text-indigo-600">
+                      <p className="text-3xl font-bold text-accent-ink">
                         {lastResult.totalQuestions}
                       </p>
                       <p className="text-sm text-muted-foreground">
@@ -221,7 +221,7 @@ export default function QuizResultPage({ params }: PageProps) {
                       <p className="text-sm text-muted-foreground">Time Spent</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-3xl font-bold text-purple-600">
+                      <p className="text-3xl font-bold text-accent-ink">
                         {lastResult.topicPerformance.length}
                       </p>
                       <p className="text-sm text-muted-foreground">

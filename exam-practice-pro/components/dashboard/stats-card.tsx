@@ -46,7 +46,7 @@ export function StatsCard({
               </p>
             )}
           </div>
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-soft text-accent-ink dark:bg-accent-soft/50 dark:text-accent-ink">
             <Icon className="h-6 w-6" />
           </div>
         </div>

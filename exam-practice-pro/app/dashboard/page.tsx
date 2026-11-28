@@ -62,7 +62,7 @@ export default function DashboardPage() {
       <>
         <Header />
         <main className="flex-1 flex items-center justify-center">
-          <div className="animate-spin h-8 w-8 border-4 border-indigo-600 border-t-transparent rounded-full" />
+          <div className="animate-spin h-8 w-8 border-4 border-accent-ink border-t-transparent rounded-full" />
         </main>
         <Footer />
       </>
@@ -74,7 +74,7 @@ export default function DashboardPage() {
   return (
     <>
       <Header />
-      <main className="flex-1 bg-gray-50 dark:bg-background">
+      <main className="flex-1 bg-background dark:bg-background">
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
           <div className="mb-8">
@@ -98,8 +98,8 @@ export default function DashboardPage() {
               animate={{ opacity: 1, y: 0 }}
               className="flex flex-col items-center justify-center py-16"
             >
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/50">
-                <BookOpen className="h-10 w-10 text-indigo-600 dark:text-indigo-400" />
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-accent-soft dark:bg-accent-soft/50">
+                <BookOpen className="h-10 w-10 text-accent-ink dark:text-accent-ink" />
               </div>
               <h2 className="mt-6 text-xl font-semibold">No activity yet</h2>
               <p className="mt-2 text-center text-muted-foreground max-w-md">
@@ -109,7 +109,7 @@ export default function DashboardPage() {
               <Button
                 asChild
                 size="lg"
-                className="mt-6 bg-indigo-600 hover:bg-indigo-700"
+                className="mt-6 bg-primary hover:bg-primary-hover"
               >
                 <Link href="/">
                   Start Your First Quiz
@@ -233,7 +233,7 @@ export default function DashboardPage() {
                         </div>
                       ) : (
                         <div className="flex items-start gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-2 dark:bg-surface-2">
                             <TrendingUp className="h-5 w-5 text-muted-foreground" />
                           </div>
                           <div>
@@ -263,7 +263,7 @@ export default function DashboardPage() {
                         </div>
                       ) : (
                         <div className="flex items-start gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-2 dark:bg-surface-2">
                             <TrendingDown className="h-5 w-5 text-muted-foreground" />
                           </div>
                           <div>

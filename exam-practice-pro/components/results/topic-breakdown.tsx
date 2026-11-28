@@ -27,9 +27,9 @@ export function TopicBreakdown({ data }: TopicBreakdownProps) {
   }));
 
   const getBarColor = (percentage: number) => {
-    if (percentage >= 70) return '#22c55e'; // green
-    if (percentage >= 50) return '#eab308'; // yellow
-    return '#ef4444'; // red
+    if (percentage >= 70) return 'var(--success)'; // green
+    if (percentage >= 50) return 'var(--warning)'; // yellow
+    return 'var(--danger)'; // red
   };
 
   return (

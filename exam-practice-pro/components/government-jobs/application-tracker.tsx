@@ -213,7 +213,7 @@ export function ApplicationTracker({ seed, onSeedConsumed }: {
   if (authStatus !== 'authenticated' || !session?.user?.email) {
     return (
       <div className="rounded-2xl border bg-card p-6 sm:p-8">
-        <LockKeyhole className="h-9 w-9 text-primary" aria-hidden="true" />
+        <LockKeyhole className="h-9 w-9 text-accent-ink" aria-hidden="true" />
         <h2 className="mt-4 text-2xl font-bold">Your applications, kept private</h2>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
           Sign in with Google or GitHub to manually save job applications and reference numbers. Job discovery and official source links remain free without signing in.
@@ -225,9 +225,9 @@ export function ApplicationTracker({ seed, onSeedConsumed }: {
 
   return (
     <div className="space-y-6" aria-label="Private government job application tracker">
-      <div className="flex flex-col justify-between gap-4 rounded-2xl border bg-gradient-to-r from-indigo-50 to-background p-5 dark:from-indigo-950/20 sm:flex-row sm:items-center sm:p-6">
+      <div className="flex flex-col justify-between gap-4 rounded-2xl border bg-gradient-to-r from-surface-1 to-background p-5 dark:from-surface-1/20 sm:flex-row sm:items-center sm:p-6">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-primary">Private application journal</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-accent-ink">Private application journal</p>
           <h2 className="mt-1 text-2xl font-bold tracking-tight">My Applications</h2>
           <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
             Track the applications you submit on official recruitment portals. All statuses are entered by you; ExamPro cannot verify your official application status.

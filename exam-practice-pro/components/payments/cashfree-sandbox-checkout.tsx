@@ -62,11 +62,11 @@ export function CashfreeSandboxCheckout({period}:{period:'monthly'|'yearly'}){
     placeholder="10-digit Indian mobile number" value={phone} onChange={e=>setPhone(e.target.value.replace(/\D/g,''))}/>
   </label>
   <button type="button" disabled={!ready||busy||!(/^[6-9][0-9]{9}$/.test(phone))}
-   className="w-full rounded bg-indigo-700 px-4 py-2 text-white disabled:opacity-50" onClick={()=>void start()}>
+   className="w-full rounded bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50" onClick={()=>void start()}>
    {busy?'Opening sandbox checkout…':'Test Cashfree checkout'}
   </button>
   {error&&<p role="alert" className="text-sm text-red-600">{error}</p>}
-  {returnResult&&<p role="status" className="text-sm text-indigo-700 dark:text-indigo-300">{returnResult}</p>}
+  {returnResult&&<p role="status" className="text-sm text-accent-ink dark:text-accent-ink">{returnResult}</p>}
   <button type="button" className="text-sm underline" onClick={()=>void refresh()}>Refresh payment history</button>
   {history.length>0&&<ul className="space-y-1 text-xs">{history.slice(0,5).map(row=><li key={row.id}>
    {row.billing_period} · ₹{row.amount_inr} · {row.status} · {new Date(row.created_at).toLocaleDateString('en-IN')}

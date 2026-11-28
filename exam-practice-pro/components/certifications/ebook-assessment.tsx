@@ -174,7 +174,7 @@ export function EbookAssessment({
         event.preventDefault();
         close();
       }}
-      className="m-auto max-h-[94dvh] w-[min(96vw,76rem)] overflow-y-auto rounded-2xl border bg-card p-0 text-foreground shadow-2xl backdrop:bg-slate-950/65"
+      className="m-auto max-h-[94dvh] w-[min(96vw,76rem)] overflow-y-auto rounded-2xl border bg-card p-0 text-foreground shadow-2xl backdrop:bg-background/65"
     >
       <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b bg-card p-5">
         <h2 className="text-lg font-bold">
@@ -210,7 +210,7 @@ export function EbookAssessment({
           </>
         ) : !attempt ? (
           <div className="mx-auto max-w-2xl space-y-5">
-            <Award className="h-10 w-10 text-indigo-600" /><ContentReviewBadge/>
+            <Award className="h-10 w-10 text-accent-ink" /><ContentReviewBadge/>
             <h3 className="text-2xl font-bold">
               Put your new skills to the test.
             </h3>
@@ -237,13 +237,13 @@ export function EbookAssessment({
                   type="button"
                   disabled={busy}
                   onClick={() => void start()}
-                  className="min-h-11 rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white disabled:opacity-50"
+                  className="min-h-11 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
                 >
                   {busy ? "Connecting…" : "Start timed assessment"}
                 </button>
               ) : (
                 <Link
-                  className="inline-flex min-h-11 items-center rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white"
+                  className="inline-flex min-h-11 items-center rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground"
                   href={`/auth/signin?callbackUrl=${encodeURIComponent("/certifications/learn/" + book.slug)}`}
                 >
                   Sign in for a saved assessment
@@ -267,7 +267,7 @@ export function EbookAssessment({
                   mode.
                 </p>
                 <Link
-                  className="mt-3 inline-block text-sm font-semibold text-indigo-600 underline"
+                  className="mt-3 inline-block text-sm font-semibold text-accent-ink underline"
                   href={`/india-mocks/${encodeURIComponent(book.linkedMockTestId)}${buildCertTest(book.linkedMockTestId) ? "?mode=practice" : ""}`}
                 >
                   Open linked test →
@@ -280,7 +280,7 @@ export function EbookAssessment({
             <div
               className={`rounded-2xl border p-6 sm:p-8 ${result.passed ? "border-emerald-300 bg-emerald-50/50 dark:bg-emerald-950/20" : "bg-muted/30"}`}
             >
-              <Award className="h-10 w-10 text-indigo-600" /><ContentReviewBadge/>
+              <Award className="h-10 w-10 text-accent-ink" /><ContentReviewBadge/>
               <p className="mt-4 text-xs font-bold uppercase tracking-widest">
                 {result.passed
                   ? "ExamPro Learning Practice Completion"
@@ -418,7 +418,7 @@ export function EbookAssessment({
                 <span className="text-sm font-semibold">
                   Question {index + 1} of {attempt.questions.length}
                 </span>
-                <span className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-2 text-sm font-bold tabular-nums text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+                <span className="inline-flex items-center gap-2 rounded-full bg-accent-soft px-4 py-2 text-sm font-bold tabular-nums text-accent-ink dark:bg-accent-soft dark:text-accent-ink">
                   <Clock3 className="h-4 w-4" />
                   {Math.floor(remaining / 60)}:
                   {String(remaining % 60).padStart(2, "0")}
@@ -435,7 +435,7 @@ export function EbookAssessment({
                 {attempt.questions[index].options.map((option, oi) => (
                   <label
                     key={oi}
-                    className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 text-sm leading-6 ${answers[attempt.questions[index].id] === oi ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/50" : ""}`}
+                    className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 text-sm leading-6 ${answers[attempt.questions[index].id] === oi ? "border-accent-ink bg-accent-soft dark:bg-accent-soft/50" : ""}`}
                   >
                     <input
                       type="radio"
@@ -468,7 +468,7 @@ export function EbookAssessment({
                 <button
                   type="button"
                   disabled={busy}
-                  className="min-h-11 rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white disabled:opacity-50"
+                  className="min-h-11 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
                   onClick={() => {
                     if (
                       window.confirm(
@@ -500,7 +500,7 @@ export function EbookAssessment({
                     type="button"
                     aria-label={`Question ${i + 1}${answers[q.id] >= 0 ? ", answered" : ""}`}
                     aria-current={index === i ? "step" : undefined}
-                    className={`min-h-10 rounded-lg border text-xs font-semibold ${index === i ? "ring-2 ring-indigo-500" : answers[q.id] >= 0 ? "bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200" : ""}`}
+                    className={`min-h-10 rounded-lg border text-xs font-semibold ${index === i ? "ring-2 ring-ring" : answers[q.id] >= 0 ? "bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200" : ""}`}
                     onClick={() => setIndex(i)}
                   >
                     {i + 1}

@@ -21,7 +21,7 @@ import {
 
 type Config = { checkout: 'sandbox' | 'production' | null };
 const actionClass =
-  'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-indigo-600 disabled:cursor-wait disabled:opacity-50';
+  'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring disabled:cursor-wait disabled:opacity-50';
 type CheckoutProps = { code: ProductCode; resourceId?: string; label?: string };
 export function CheckoutButton(props: CheckoutProps) {
   const { data: session } = useSession();
@@ -338,7 +338,7 @@ export function MicroPasses({ compact = false }: { compact?: boolean }) {
     <section className="my-8 space-y-5" aria-labelledby="paid-plans">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">
+          <p className="text-sm font-semibold text-accent-ink dark:text-accent-ink">
             A little more focus. A lot more practice.
           </p>
           <h2
@@ -359,9 +359,9 @@ export function MicroPasses({ compact = false }: { compact?: boolean }) {
         {codes.map((code) => (
           <article
             key={code}
-            className={`flex min-w-0 flex-col gap-4 rounded-2xl border bg-card p-5 ${code === 'PRO_ANNUAL' ? 'border-indigo-500 shadow-lg shadow-indigo-500/10' : ''}`}
+            className={`flex min-w-0 flex-col gap-4 rounded-2xl border bg-card p-5 ${code === 'PRO_ANNUAL' ? 'border-accent-ink shadow-lg shadow-transparent/10' : ''}`}
           >
-            <div className="flex min-h-6 items-center gap-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+            <div className="flex min-h-6 items-center gap-2 text-xs font-semibold text-accent-ink dark:text-accent-ink">
               {code === 'PRO_ANNUAL'
                 ? 'BEST VALUE'
                 : code.startsWith('PRO_')

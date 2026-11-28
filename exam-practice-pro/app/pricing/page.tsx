@@ -69,13 +69,13 @@ export default function PricingPage() {
       <Header />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:py-14">
         <div className="max-w-3xl">
-          <p className="text-sm font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+          <p className="text-sm font-semibold uppercase tracking-widest text-accent-ink dark:text-accent-ink">
             ExamPro plans
           </p>
           <h1 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-5xl">
             Your next milestone.
             <br />
-            <span className="text-indigo-600 dark:text-indigo-400">
+            <span className="text-accent-ink dark:text-accent-ink">
               Your pace. Your plan.
             </span>
           </h1>
@@ -185,7 +185,7 @@ export default function PricingPage() {
           <ol className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {STEPS.map(([title, text], i) => (
               <li key={title} className="rounded-2xl border p-5">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-800">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-accent-soft text-sm font-bold text-accent-ink">
                   {i + 1}
                 </span>
                 <h3 className="mt-3 font-semibold">{title}</h3>

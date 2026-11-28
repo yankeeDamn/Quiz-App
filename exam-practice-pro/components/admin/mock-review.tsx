@@ -113,7 +113,7 @@ export function MockReview({testId,onClose}:{testId:string;onClose:()=>void}) {
     <div className="max-h-96 space-y-1 overflow-y-auto rounded-lg border p-2" role="group" aria-label="Questions to review">
      {found.map(q=><button type="button" key={q.id} onClick={()=>{selectedIdRef.current=q.id;setSelectedId(q.id)}}
       aria-pressed={selectedId===q.id}
-      className={`block w-full rounded-lg px-3 py-2 text-left text-xs focus-visible:outline-2 focus-visible:outline-indigo-600 ${selectedId===q.id?'bg-indigo-100 text-indigo-950 dark:bg-indigo-950 dark:text-white':'hover:bg-muted'}`}>
+      className={`block w-full rounded-lg px-3 py-2 text-left text-xs focus-visible:outline-2 focus-visible:outline-ring ${selectedId===q.id?'bg-accent-soft text-accent-ink dark:bg-accent-soft dark:text-foreground':'hover:bg-muted'}`}>
       <span className="font-semibold">{q.topicId.replace('ssc26-m01-','')} #{q.position+1}</span>
       <span className="mt-1 block truncate">{statusText(q)}</span>
      </button>)}
@@ -139,9 +139,9 @@ export function MockReview({testId,onClose}:{testId:string;onClose:()=>void}) {
     </label>
     {entry.hindiRequired ? <>
      <h4 className="font-semibold">Hindi translation verification · required</h4>
-     <div className="rounded-lg border border-indigo-300 p-3">
+     <div className="rounded-lg border border-border p-3">
       <button type="button" disabled={saving||translating||!report?.draft}
-       className="rounded-lg bg-indigo-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+       className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
        onClick={()=>void translateDraft()}>{translating?'Translating with Azure…':'Generate Hindi draft with Azure'}</button>
       <p className="mt-2 text-xs text-muted-foreground">Fills question, four choices and explanation without a translation database. This is editable machine output, not human verification; approval stays Pending until independently checked.</p>
      </div>
@@ -162,7 +162,7 @@ export function MockReview({testId,onClose}:{testId:string;onClose:()=>void}) {
       </select>
      </label>
     </> : <p className="text-sm text-muted-foreground">English Comprehension: Hindi translation is not required by the SSC notice.</p>}
-    <button className="rounded-lg bg-indigo-700 px-5 py-3 font-semibold text-white disabled:opacity-50" type="button" disabled={saving||!report?.draft} onClick={()=>void save()}>
+    <button className="rounded-lg bg-primary px-5 py-3 font-semibold text-primary-foreground disabled:opacity-50" type="button" disabled={saving||!report?.draft} onClick={()=>void save()}>
      {saving?'Saving…':'Save reviewed status'}
     </button>
    </div>}
@@ -177,7 +177,7 @@ export function MockReview({testId,onClose}:{testId:string;onClose:()=>void}) {
      I have verified this account's eligibility outside ExamPro under the applicable SSC rules.
    </label>
    <div className="flex flex-wrap gap-2">
-    <button type="button" className="rounded-lg bg-indigo-700 px-4 py-2 font-semibold text-white disabled:opacity-50" disabled={!eligibilityChecked||saving} onClick={()=>void setAccommodation(true)}>Approve 20-min sections</button>
+    <button type="button" className="rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground disabled:opacity-50" disabled={!eligibilityChecked||saving} onClick={()=>void setAccommodation(true)}>Approve 20-min sections</button>
     <button type="button" className="rounded-lg border px-4 py-2 disabled:opacity-50" disabled={saving} onClick={()=>void setAccommodation(false)}>Revoke for future attempts</button>
    </div>
   </fieldset>

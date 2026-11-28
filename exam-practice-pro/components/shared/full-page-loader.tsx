@@ -1,5 +1,6 @@
 'use client';
 
+import { Skeleton } from '@/components/ui/content-primitives';
 import { cn } from '@/lib/utils';
 
 interface FullPageLoaderProps {
@@ -22,12 +23,8 @@ export function FullPageLoader({
       aria-busy="true"
     >
       <div className="text-center">
-        <div
-          className="animate-spin h-8 w-8 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto"
-          aria-hidden="true"
-        />
+        <div className="mx-auto w-64 space-y-3"><Skeleton className="h-5 w-2/3" /><Skeleton className="h-5 w-full" /><Skeleton className="h-5 w-4/5" /></div>
         <p className="mt-4 text-muted-foreground">{message}</p>
-        <span className="sr-only">{message}</span>
       </div>
     </div>
   );

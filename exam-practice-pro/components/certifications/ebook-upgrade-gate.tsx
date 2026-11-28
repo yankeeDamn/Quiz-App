@@ -12,11 +12,11 @@ export function EbookUpgradeGate({
 }) {
   return (
     <section
-      className={`rounded-2xl border border-indigo-300 bg-gradient-to-br from-indigo-50 to-white p-5 text-slate-900 shadow-sm dark:border-indigo-800 dark:from-indigo-950/50 dark:to-slate-950 dark:text-white ${compact ? "my-4" : "my-6"}`}
+      className={`rounded-2xl border border-border bg-gradient-to-br from-surface-1 to-white p-5 text-foreground shadow-sm dark:border-border dark:from-surface-1/50 dark:to-surface-2 dark:text-white ${compact ? "my-4" : "my-6"}`}
       role="region"
       aria-label="Unlock full ebook"
     >
-      <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">
+      <p className="text-xs font-bold uppercase tracking-widest text-accent-ink dark:text-accent-ink">
         Free preview complete
       </p>
       <h2 className="mt-2 text-xl font-bold">

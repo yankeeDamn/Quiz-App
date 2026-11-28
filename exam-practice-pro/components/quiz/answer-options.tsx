@@ -61,10 +61,10 @@ export function AnswerOptions({
     }
 
     if (selected) {
-      return 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20';
+      return 'border-accent-ink bg-accent-soft dark:bg-accent-soft/20';
     }
 
-    return 'border-gray-200 hover:border-indigo-300 hover:bg-gray-50 dark:border-gray-700 dark:hover:border-indigo-600 dark:hover:bg-gray-800';
+    return 'border-border hover:border-border hover:bg-background dark:border-border dark:hover:border-accent-ink dark:hover:bg-surface-2';
   };
 
   return (
@@ -105,8 +105,8 @@ export function AnswerOptions({
                 className={cn(
                   'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-medium text-sm transition-colors',
                   selected
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 group-hover:bg-indigo-100 group-hover:text-indigo-600',
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-surface-2 text-muted-foreground dark:bg-surface-2 dark:text-muted-foreground group-hover:bg-accent-soft group-hover:text-accent-ink',
                   showFeedback && correct && 'bg-green-600 text-white',
                   showFeedback && selected && !correct && 'bg-red-600 text-white'
                 )}
@@ -134,7 +134,7 @@ export function AnswerOptions({
                 <span
                   className={cn(
                     'shrink-0 pt-1',
-                    isMultiple ? 'text-indigo-600' : 'text-indigo-600'
+                    isMultiple ? 'text-accent-ink' : 'text-accent-ink'
                   )}
                 >
                   <Check className="h-5 w-5" />

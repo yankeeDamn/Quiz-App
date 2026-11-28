@@ -25,7 +25,7 @@ export function QuestionNavigator({
     const isCurrent = index === currentIndex;
 
     if (isCurrent) {
-      return 'bg-indigo-600 text-white hover:bg-indigo-700 ring-2 ring-indigo-600 ring-offset-2';
+      return 'bg-primary text-primary-foreground hover:bg-primary-hover ring-2 ring-ring ring-offset-2';
     }
 
     switch (status) {
@@ -35,7 +35,7 @@ export function QuestionNavigator({
         return 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400';
       case 'unanswered':
       default:
-        return 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400';
+        return 'bg-surface-2 text-muted-foreground hover:bg-surface-2 dark:bg-surface-2 dark:text-muted-foreground';
     }
   };
 
@@ -67,7 +67,7 @@ export function QuestionNavigator({
       {/* Legend */}
       <div className="mb-4 flex flex-wrap gap-3 text-xs">
         <div className="flex items-center gap-1.5">
-          <div className="h-3 w-3 rounded bg-indigo-600" />
+          <div className="h-3 w-3 rounded bg-primary" />
           <span>Current</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -79,7 +79,7 @@ export function QuestionNavigator({
           <span>Marked ({stats.marked || 0})</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="h-3 w-3 rounded bg-gray-300 dark:bg-gray-600" />
+          <div className="h-3 w-3 rounded bg-background dark:bg-background" />
           <span>Unanswered ({stats.unanswered || 0})</span>
         </div>
       </div>

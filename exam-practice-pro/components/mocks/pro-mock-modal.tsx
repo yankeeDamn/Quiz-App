@@ -38,7 +38,7 @@ export function ProMockModal({test,onClose}:{test:MockSummary;onClose:()=>void})
   return <Dialog open onOpenChange={open=>{if(!open)onClose();}}>
     <DialogContent className="max-h-[90dvh] overflow-y-auto rounded-3xl p-6 sm:max-w-2xl sm:p-8">
       <DialogHeader>
-        <span className="mb-2 inline-flex w-fit items-center gap-2 rounded-full bg-indigo-100 px-3 py-1 text-xs font-bold text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200"><Crown className="h-4 w-4"/>PRO · {test.exam}</span>
+        <span className="mb-2 inline-flex w-fit items-center gap-2 rounded-full bg-accent-soft px-3 py-1 text-xs font-bold text-accent-ink dark:bg-accent-soft dark:text-accent-ink"><Crown className="h-4 w-4"/>PRO · {test.exam}</span>
         <DialogTitle className="pr-6 text-2xl font-bold leading-snug">{test.name}</DialogTitle>
         <DialogDescription>{test.questionCount} questions · {test.minutes} minutes · Original exam practice</DialogDescription>
       </DialogHeader>
@@ -48,14 +48,14 @@ export function ProMockModal({test,onClose}:{test:MockSummary;onClose:()=>void})
           test.sectionTimingMinutes ? `${test.sectionTimingMinutes}-minute section locks for the standard timing profile` : `${test.minutes}-minute server-timed exam`,
           'Saved answers, server grading and text solutions after submission',
           'Section performance and topic analysis',
-        ].map(feature=><li key={feature} className="flex items-start gap-2"><CheckCircle2 className="h-4 w-4 shrink-0 text-indigo-600"/>{feature}</li>)}</ul>
+        ].map(feature=><li key={feature} className="flex items-start gap-2"><CheckCircle2 className="h-4 w-4 shrink-0 text-accent-ink"/>{feature}</li>)}</ul>
         <div className="grid gap-3 sm:grid-cols-2">
           {count>0&&<Button variant="outline" disabled={busy} className="min-h-12 whitespace-normal" onClick={()=>void load()}>{busy?'Loading preview…':`Take ${count}-Question Free Preview`}</Button>}
-          <Button asChild className="min-h-12 bg-gradient-to-r from-indigo-600 to-violet-600 text-white"><Link href="/pricing"><Lock className="h-4 w-4"/>Upgrade to Pro</Link></Button>
+          <Button asChild className="min-h-12 bg-gradient-to-r from-surface-1 to-surface-2 text-foreground"><Link href="/pricing"><Lock className="h-4 w-4"/>Upgrade to Pro</Link></Button>
         </div>
         <p className="text-xs text-muted-foreground">{inr(planPrice(pro,false).amount)}/month or {inr(planPrice(pro,true).amount)}/year. See current plans and payment options.</p>
       </> : <div className="space-y-5">
-        <p className="rounded-xl bg-indigo-50 p-3 text-sm text-indigo-900 dark:bg-indigo-950 dark:text-indigo-200">Free preview · {preview.questions.length} fixed sample questions · Untimed · Results are not saved as an exam attempt.</p>
+        <p className="rounded-xl bg-accent-soft p-3 text-sm text-accent-ink dark:bg-accent-soft dark:text-accent-ink">Free preview · {preview.questions.length} fixed sample questions · Untimed · Results are not saved as an exam attempt.</p>
         {preview.questions.map((q,index)=>{
           const solution=result?.solutions.find(s=>s.id===q.id);
           return <fieldset key={q.id} className="space-y-2 rounded-xl border p-4"><legend className="px-1 text-xs font-semibold">Question {index+1}</legend><p className="text-sm font-semibold">{q.question}</p>

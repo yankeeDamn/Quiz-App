@@ -39,7 +39,7 @@ function SummaryCard({ label, value, detail, icon: Icon }: {
 }) {
   return (
     <div className="flex min-w-0 items-center gap-3 rounded-2xl border bg-card p-4 sm:p-5">
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/5 text-primary">
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/5 text-accent-ink">
         <Icon className="h-5 w-5" aria-hidden="true" />
       </span>
       <div className="min-w-0">
@@ -77,10 +77,10 @@ function PortalCard({ portal }: { portal: RecruitmentPortal }) {
     >
       <span className="flex items-start justify-between gap-3 font-bold">
         {portal.name}
-        <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary" aria-hidden="true" />
+        <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-accent-ink" aria-hidden="true" />
       </span>
       <span className="mt-2 text-sm leading-6 text-muted-foreground">{portal.description}</span>
-      <span className="mt-auto pt-4 text-xs font-semibold text-primary">{portal.category} · official portal</span>
+      <span className="mt-auto pt-4 text-xs font-semibold text-accent-ink">{portal.category} · official portal</span>
       <span className="sr-only">(opens in a new tab)</span>
     </a>
   );
@@ -174,10 +174,10 @@ export default function GovernmentJobsPage() {
     <>
       <Header />
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 pb-12 pt-6 sm:px-6 sm:pt-10 lg:px-8">
-        <section className="relative overflow-hidden rounded-[2rem] border bg-gradient-to-br from-indigo-50 via-background to-teal-50 p-5 dark:from-indigo-950/40 dark:via-background dark:to-teal-950/30 sm:p-8 lg:p-10">
-          <div className="pointer-events-none absolute -right-20 -top-32 h-80 w-80 rounded-full bg-indigo-400/10 blur-3xl" />
+        <section className="relative overflow-hidden rounded-[2rem] border bg-gradient-to-br from-surface-1 via-background to-surface-2 p-5 dark:from-surface-1/40 dark:via-background dark:to-surface-2/30 sm:p-8 lg:p-10">
+          <div className="pointer-events-none absolute -right-20 -top-32 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
           <div className="relative max-w-3xl">
-            <p className="inline-flex items-center gap-2 rounded-full border bg-background/80 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-primary">
+            <p className="inline-flex items-center gap-2 rounded-full border bg-background/80 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-accent-ink">
               <ShieldCheck className="h-4 w-4" aria-hidden="true" /> ExamPro career desk
             </p>
             <h1 className="mt-5 max-w-2xl text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl">
@@ -250,7 +250,7 @@ export default function GovernmentJobsPage() {
                 <span>{loading && feed ? 'Checking…' : 'Refresh'}</span>
               </button>
               {(filter !== 'All' || search) && (
-                <button type="button" onClick={resetFilters} className="min-h-10 rounded-lg px-3 text-sm font-semibold text-primary hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Reset</button>
+                <button type="button" onClick={resetFilters} className="min-h-10 rounded-lg px-3 text-sm font-semibold text-accent-ink hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Reset</button>
               )}
             </div>
           </div>
@@ -320,7 +320,7 @@ export default function GovernmentJobsPage() {
         {feed && (
           <details className="mt-8 rounded-2xl border bg-card">
             <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 px-4 py-3 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-5">
-              <span className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-primary" aria-hidden="true" /> Source diagnostics</span>
+              <span className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-accent-ink" aria-hidden="true" /> Source diagnostics</span>
               <span className="text-sm font-normal text-muted-foreground">{healthyCount} of {feed.sources.length} sources healthy</span>
             </summary>
             <div className="grid gap-3 border-t p-4 sm:grid-cols-2 sm:p-5">

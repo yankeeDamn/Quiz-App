@@ -90,7 +90,7 @@ export default function InstituteAdminPreview() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-zinc-950 dark:text-zinc-100">
+    <main className="min-h-screen bg-background text-foreground dark:bg-background dark:text-foreground">
       <div className="mx-auto max-w-6xl px-4 py-8 sm:py-12">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <Link href="/" className="text-sm font-semibold text-blue-700 dark:text-blue-400">← Back to ExamPro</Link>
@@ -100,7 +100,7 @@ export default function InstituteAdminPreview() {
         <div className="mb-8">
           <p className="mb-2 text-sm font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">ExamPro · Institute workspace</p>
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Institute Admin Dashboard</h1>
-          <p className="mt-3 max-w-3xl text-slate-600 dark:text-zinc-400">A preview of the tools coaching institutes will use to manage IT certification exams. No accounts, uploads, or payments are created on this page.</p>
+          <p className="mt-3 max-w-3xl text-muted-foreground dark:text-muted-foreground">A preview of the tools coaching institutes will use to manage IT certification exams. No accounts, uploads, or payments are created on this page.</p>
         </div>
         <div role="note" className="mb-8 flex gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100">
           <ShieldAlert className="h-5 w-5 shrink-0" />
@@ -108,40 +108,40 @@ export default function InstituteAdminPreview() {
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {demoCards.map(({ title, detail, icon: Icon, state }) => (
-            <section key={title} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <section key={title} className="rounded-xl border border-border bg-card p-5 shadow-sm dark:border-border dark:bg-surface-2">
               <Icon className="mb-4 h-7 w-7 text-blue-600" />
               <h2 className="text-lg font-bold">{title}</h2>
-              <p className="mt-2 min-h-12 text-sm text-slate-600 dark:text-zinc-400">{detail}</p>
-              <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-zinc-400">{state}</p>
+              <p className="mt-2 min-h-12 text-sm text-muted-foreground dark:text-muted-foreground">{detail}</p>
+              <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground dark:text-muted-foreground">{state}</p>
             </section>
           ))}
         </div>
-        <section className="mt-10 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <section className="mt-10 rounded-xl border border-border bg-card p-5 shadow-sm dark:border-border dark:bg-surface-2">
           <h2 className="text-xl font-bold">IT certification starter bank</h2>
-          <p className="mt-2 text-sm text-slate-600 dark:text-zinc-400">Original sample questions from GitHub, awaiting subject-matter review. These are not institute-owned database records.</p>
+          <p className="mt-2 text-sm text-muted-foreground dark:text-muted-foreground">Original sample questions from GitHub, awaiting subject-matter review. These are not institute-owned database records.</p>
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             {counts.map(track => (
-              <Link key={track.code} href={`/india-mocks/${track.slug}`} className="rounded-lg border border-slate-200 p-4 hover:border-blue-500 dark:border-zinc-700">
-                <p className="font-semibold">{track.title}</p><p className="mt-1 text-sm text-slate-500">{track.count} practice questions · View practice →</p>
+              <Link key={track.code} href={`/india-mocks/${track.slug}`} className="rounded-lg border border-border p-4 hover:border-blue-500 dark:border-border">
+                <p className="font-semibold">{track.title}</p><p className="mt-1 text-sm text-muted-foreground">{track.count} practice questions · View practice →</p>
               </Link>
             ))}
           </div>
         </section>
-        <section className="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <section className="mt-6 rounded-xl border border-border bg-card p-5 shadow-sm dark:border-border dark:bg-surface-2">
           <h2 className="text-xl font-bold">Prepare a question upload</h2>
-          <p className="mt-2 text-sm text-slate-600 dark:text-zinc-400">Download the CSV template, fill in your own licensed or original questions, then check the structure here before the secure import API is ready.</p>
+          <p className="mt-2 text-sm text-muted-foreground dark:text-muted-foreground">Download the CSV template, fill in your own licensed or original questions, then check the structure here before the secure import API is ready.</p>
           <div className="mt-5 flex flex-wrap gap-3">
             <button type="button" onClick={downloadTemplate} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700"><Download size={18}/> Download CSV template</button>
-            <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 font-semibold hover:bg-slate-50 dark:border-zinc-700 dark:hover:bg-zinc-800">
+            <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-border px-4 py-2 font-semibold hover:bg-background dark:border-border dark:hover:bg-surface-2">
               <Upload size={18}/> {busy ? 'Checking…' : 'Validate CSV locally'}
               <input aria-label="Select CSV to validate locally" type="file" accept=".csv,text/csv" className="sr-only" onChange={e => { void inspectFile(e.target.files?.[0]); e.target.value = ''; }} />
             </label>
           </div>
-          {preview && <div role="status" className="mt-5 rounded-lg bg-slate-100 p-4 text-sm dark:bg-zinc-800">
+          {preview && <div role="status" className="mt-5 rounded-lg bg-surface-2 p-4 text-sm dark:bg-surface-2">
             <p className="flex items-center gap-2 font-semibold">{preview.errors.length ? 'CSV needs corrections' : <><CheckCircle2 className="h-5 w-5 text-green-600"/> CSV structure looks valid</>}</p>
             <p className="mt-1">{preview.count} rows · {preview.tracks.join(', ') || 'No certification tracks'}</p>
             {preview.errors.length > 0 && <ul className="mt-2 list-disc space-y-1 pl-5">{preview.errors.map((error, i) => <li key={i}>{error}</li>)}</ul>}
-            <p className="mt-2 text-slate-600 dark:text-zinc-400">Structural validation only. Answers and copyright permissions still require human review. No data was saved.</p>
+            <p className="mt-2 text-muted-foreground dark:text-muted-foreground">Structural validation only. Answers and copyright permissions still require human review. No data was saved.</p>
           </div>}
         </section>
       </div>

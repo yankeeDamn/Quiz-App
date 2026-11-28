@@ -26,7 +26,7 @@ export default async function ExamProStatusPage(){
     <Header/>
     <main className="mx-auto w-full max-w-3xl flex-1 space-y-8 px-4 py-12">
       <div>
-        <p className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">ExamPro operations</p>
+        <p className="text-sm font-semibold text-accent-ink dark:text-accent-ink">ExamPro operations</p>
         <h1 className="mt-2 text-3xl font-extrabold">Deployment and API status</h1>
         <p className="mt-3 text-muted-foreground">Use this page to confirm whether your Vercel production domain has the new frontend code and whether the Render API is available.</p>
       </div>
@@ -51,7 +51,7 @@ export default async function ExamProStatusPage(){
         </section>
       </div>
       <div className="flex flex-wrap gap-3">
-        <Link href="/exampro" className="rounded-lg bg-indigo-700 px-5 py-3 font-semibold text-white">Open ExamPro</Link>
+        <Link href="/exampro" className="rounded-lg bg-primary px-5 py-3 font-semibold text-primary-foreground">Open ExamPro</Link>
         <Link href="/india-mocks" className="rounded-lg border px-5 py-3 font-semibold">Browse mocks</Link>
       </div>
     </main>

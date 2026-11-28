@@ -4,12 +4,12 @@ import { formatWhatsappNumber, whatsappLink } from '@/lib/plans';
 
 export function Footer() {
   return (
-    <footer className="border-t border-slate-200/70 bg-gradient-to-b from-muted/20 to-indigo-50/40 dark:border-slate-800 dark:to-slate-900/40">
+    <footer className="border-t border-border/70 bg-gradient-to-b from-muted/20 to-surface-2/40 dark:border-border dark:to-surface-2/40">
       <div className="container mx-auto px-4 py-10">
         <div className="flex flex-col items-center justify-between gap-6 text-center lg:flex-row lg:text-left">
           {/* Logo and Tagline */}
           <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 via-violet-600 to-teal-500 text-white shadow-sm">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
               <GraduationCap className="h-4 w-4" />
             </div>
             <div className="flex flex-col">

@@ -1,4 +1,4 @@
-import { Loader2 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/content-primitives';
 import { cn } from '@/lib/utils';
 
 interface LoadingSpinnerProps {
@@ -15,7 +15,7 @@ export function LoadingSpinner({ size = 'md', className }: LoadingSpinnerProps) 
 
   return (
     <div className={cn('flex items-center justify-center', className)}>
-      <Loader2 className={cn('animate-spin text-indigo-600', sizeClasses[size])} />
+      <span role="status"><span className="sr-only">Loading</span><Skeleton className={sizeClasses[size]} /></span>
     </div>
   );
 }

@@ -65,7 +65,7 @@ export function QuestionPanel({
       </div>
 
       {/* Question Text */}
-      <div className="rounded-xl bg-gray-50 p-6 dark:bg-gray-900/50">
+      <div className="rounded-xl bg-background p-6 dark:bg-surface-2/50">
         <p className="text-lg leading-relaxed">{question.question}</p>
 
         {/* Optional Image */}

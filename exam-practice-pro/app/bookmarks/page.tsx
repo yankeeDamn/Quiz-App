@@ -73,7 +73,7 @@ export default function BookmarksPage() {
   return (
     <>
       <Header />
-      <main className="flex-1 bg-gray-50 dark:bg-background">
+      <main className="flex-1 bg-background dark:bg-background">
         <div className="container mx-auto px-4 py-8">
           {/* Back */}
           <Button variant="ghost" asChild className="mb-6">

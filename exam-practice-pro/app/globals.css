@@ -8,8 +8,8 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-heading: var(--font-space-grotesk), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -27,8 +27,19 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
+  --color-accent: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-primary-hover: var(--accent-hover);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -39,244 +50,147 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 0.75rem;
+  --radius-3xl: 0.75rem;
+  --radius-4xl: 1rem;
 }
 
-:root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+/* Brand source of truth. Dark is the initial appearance; .light is explicit.
+   The existing next-themes System option follows prefers-color-scheme. */
+:root, .dark {
+  color-scheme: dark;
+  --bg: #0A0A0B;
+  --surface-1: #121214;
+  --surface-2: #1A1A1E;
+  --surface-3: #24242A;
+  --border: #2B2B33;
+  --text: #F5F5F0;
+  --text-muted: #A1A1AA;
+  --accent: #F5F03C;
+  --accent-hover: #E6E12A;
+  --accent-soft: rgba(245,240,60,0.12);
+  --accent-ink: #F5F03C;
+  --on-accent: #0A0A0B;
+  --success: #4ADE80;
+  --warning: #FBBF24;
+  --danger: #F87171;
+  --info: #60A5FA;
+  --control-border: #72727E;
+  --on-danger: #0A0A0B;
+  --overlay: rgba(0,0,0,0.7);
 }
-
+.light {
+  color-scheme: light;
+  --bg: #FAFAF7;
+  --surface-1: #FFFFFF;
+  --surface-2: #F0F0EC;
+  --surface-3: #E6E6DF;
+  --border: #D4D4CB;
+  --text: #0A0A0B;
+  --text-muted: #575760;
+  --accent: #F5F03C;
+  --accent-hover: #E6E12A;
+  --accent-soft: rgba(245,240,60,0.18);
+  --accent-ink: #454300;
+  --on-accent: #0A0A0B;
+  --success: #166534;
+  --warning: #854D0E;
+  --danger: #B91C1C;
+  --info: #1D4ED8;
+  --control-border: #76766D;
+  --on-danger: #FFFFFF;
+  --overlay: rgba(0,0,0,0.55);
+}
+/* Repeat aliases in each theme scope so embedded light/dark examples also work. */
+:root, .dark, .light {
+  --background: var(--bg);
+  --foreground: var(--text);
+  --card: var(--surface-1);
+  --card-foreground: var(--text);
+  --popover: var(--surface-2);
+  --popover-foreground: var(--text);
+  --primary: var(--accent);
+  --primary-foreground: var(--on-accent);
+  --secondary: var(--surface-3);
+  --secondary-foreground: var(--text);
+  --muted: var(--surface-2);
+  --muted-foreground: var(--text-muted);
+  --accent-foreground: var(--accent-ink);
+  --destructive: var(--danger);
+  --destructive-foreground: var(--on-danger);
+  --input: var(--control-border);
+  --ring: var(--accent);
+  --chart-1: var(--accent-ink);
+  --chart-2: var(--text-muted);
+  --chart-3: var(--control-border);
+  --chart-4: var(--text);
+  --chart-5: var(--border);
+  --radius: 0.75rem;
+  --sidebar: var(--surface-1);
+  --sidebar-foreground: var(--text);
+  --sidebar-primary: var(--accent);
+  --sidebar-primary-foreground: var(--on-accent);
+  --sidebar-accent: var(--accent-soft);
+  --sidebar-accent-foreground: var(--accent-ink);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--accent);
+}
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-  html {
-    @apply font-sans;
-  }
-}
-
-/* ExamPro visual system — isolated from exam state and functional styles. */
-@layer components {
-  .ep-hero {
-    position: relative;
-    isolation: isolate;
-    overflow: hidden;
-    background:
-      radial-gradient(ellipse at 8% 15%, rgb(99 102 241 / 13%), transparent 38%),
-      radial-gradient(ellipse at 91% 10%, rgb(20 184 166 / 10%), transparent 33%),
-      linear-gradient(180deg, rgb(238 242 255 / 65%), transparent 84%);
-  }
-  .dark .ep-hero {
-    background:
-      radial-gradient(ellipse at 12% 12%, rgb(99 102 241 / 22%), transparent 38%),
-      radial-gradient(ellipse at 93% 14%, rgb(45 212 191 / 9%), transparent 35%),
-      linear-gradient(180deg, rgb(30 41 59 / 50%), transparent 86%);
-  }
-  .ep-hero-grid {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.35;
-    background-image: linear-gradient(to right, rgb(99 102 241 / 9%) 1px, transparent 1px), linear-gradient(to bottom, rgb(99 102 241 / 9%) 1px, transparent 1px);
-    background-size: 48px 48px;
-    mask-image: linear-gradient(to bottom, black, transparent 85%);
-  }
-  .ep-gradient-text {
-    background: linear-gradient(105deg, #4338ca 8%, #7c3aed 48%, #0f766e 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-  .dark .ep-gradient-text {
-    background-image: linear-gradient(105deg, #a5b4fc, #d8b4fe 52%, #5eead4);
-  }
-  .ep-card {
-    border: 1px solid rgb(148 163 184 / 24%);
-    background: var(--card);
-    box-shadow: 0 7px 26px rgb(15 23 42 / 4%);
-    transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
-  }
-  .ep-card:hover {
-    transform: translateY(-3px);
-    border-color: rgb(99 102 241 / 50%);
-    box-shadow: 0 18px 40px rgb(67 56 202 / 11%);
-  }
-  .ep-card:focus-within {
-    border-color: rgb(99 102 241 / 70%);
-  }
-  .dark .ep-card {
-    border-color: rgb(148 163 184 / 18%);
-    box-shadow: 0 10px 32px rgb(0 0 0 / 16%);
-  }
-  .dark .ep-card:hover {
-    border-color: rgb(165 180 252 / 50%);
-    box-shadow: 0 20px 44px rgb(0 0 0 / 28%);
-  }
-  .ep-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    font-size: 0.75rem;
-    font-weight: 750;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #4338ca;
-  }
-  .dark .ep-eyebrow { color: #a5b4fc; }
-  .ep-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    border-radius: 9999px;
-    border: 1px solid rgb(99 102 241 / 19%);
-    background: rgb(255 255 255 / 80%);
-    padding: 0.45rem 0.85rem;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #334155;
-    box-shadow: 0 4px 18px rgb(15 23 42 / 3%);
-  }
-  .dark .ep-chip {
-    background: rgb(30 41 59 / 78%);
-    border-color: rgb(165 180 252 / 20%);
-    color: #e2e8f0;
-  }
-  .ep-link-motion {
-    transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
-  }
-  .ep-link-motion:hover { transform: translateY(-2px); }
-  .ep-link-motion:focus-visible,
-  .ep-card a:focus-visible,
-  .ep-card button:focus-visible {
-    outline: 3px solid #818cf8;
+  * { @apply border-border; }
+  body { @apply bg-background text-foreground; }
+  html { @apply font-sans; }
+  h1, h2, h3, h4 { font-family: var(--font-space-grotesk),var(--font-inter),sans-serif; font-weight: 800; letter-spacing: -0.025em; }
+  :where(button, a, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--accent);
     outline-offset: 3px;
+    /* Dark separator makes the yellow ring visible on light surfaces too. */
+    box-shadow: 0 0 0 3px var(--on-accent);
   }
-  .ep-preview-surface {
-    box-shadow: 0 26px 62px rgb(15 23 42 / 13%);
-    transition: box-shadow 220ms ease;
+  :where(input, select, textarea) { accent-color: var(--accent); }
+  :where(button, a, input, select, textarea) {
+    transition-duration: 180ms;
+    transition-timing-function: ease-out;
   }
-  .ep-preview-surface:focus-within { box-shadow: 0 26px 62px rgb(15 23 42 / 20%); }
-  .ep-studio-panel {
-    background: linear-gradient(145deg, #101a33 4%, #1e315e 90%);
-  }
+  ::selection { background: var(--accent); color: var(--on-accent); }
 }
-
+@layer components {
+  .ep-hero { position: relative; isolation: isolate; overflow: hidden; background: var(--surface-1); }
+  .ep-hero-grid { position: absolute; inset: 0; pointer-events: none; opacity: .3;
+    background-image: linear-gradient(to right,var(--border) 1px,transparent 1px),linear-gradient(to bottom,var(--border) 1px,transparent 1px);
+    background-size: 48px 48px; mask-image: linear-gradient(to bottom,black,transparent 85%); }
+  .ep-gradient-text { color: var(--accent-ink); }
+  .ep-card, .ep-home-stat { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); }
+  .ep-card { transition: border-color 180ms ease-out, background-color 180ms ease-out; }
+  .ep-card:hover { border-color: var(--control-border); }
+  .ep-card:focus-within { border-color: var(--accent-ink); }
+  .ep-eyebrow { display:inline-flex;align-items:center;gap:.45rem;font-size:.75rem;font-weight:750;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-ink); }
+  .ep-chip { display:inline-flex;align-items:center;gap:.45rem;border-radius:9999px;border:1px solid var(--border);background:var(--surface-2);padding:.45rem .85rem;font-size:.8rem;font-weight:600;color:var(--text); }
+  .ep-link-motion { transition: color 180ms ease-out, background-color 180ms ease-out, border-color 180ms ease-out; }
+  .ep-preview-surface, .ep-studio-panel { background:var(--surface-2);border:1px solid var(--border);color:var(--text); }
+  .ep-admin table thead th { padding:.85rem .75rem;background:var(--surface-2);font-size:.7rem;letter-spacing:.04em;white-space:nowrap; }
+  .ep-admin table tbody td { padding:1rem .75rem; }
+  .ep-admin table tbody tr:hover { background:var(--surface-2); }
+  .ep-admin summary { padding-block:.6rem; }
+  .ep-admin table { min-width:36rem; }
+  .ep-table[data-density='compact'] :is(td, th) { padding:.5rem .75rem; }
+  .ep-table thead { position:sticky;top:0;z-index:1;background:var(--surface-2); }
+  .ep-skeleton { background:var(--surface-3);animation:ep-pulse 1.8s ease-in-out infinite; }
+  .ep-editor { min-height:12rem;font-family:var(--font-mono,ui-monospace,monospace); }
+  .ep-dropzone { border:2px dashed var(--control-border);border-radius:var(--radius);background:var(--surface-2); }
+  .ep-dropzone[data-dragging='true'] { border-color:var(--accent-ink);background:var(--accent-soft); }
+}
+@keyframes ep-pulse { 50% { opacity:.5; } }
 @media (prefers-reduced-motion: reduce) {
-  .ep-card, .ep-link-motion, .ep-preview-surface {
-    transition: none !important;
-    animation: none !important;
-  }
-  .ep-card:hover, .ep-link-motion:hover { transform: none !important; }
+  *, *::before, *::after { animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important; }
 }
-
-/* Home page — compact, readable design on mobile. Presentation only. */
-@layer components {
-  .ep-home-stat {
-    border: 1px solid rgb(148 163 184 / 23%);
-    background: rgb(255 255 255 / 80%);
-    box-shadow: 0 10px 30px rgb(30 41 59 / 5%);
-    backdrop-filter: blur(12px);
-  }
-  .dark .ep-home-stat {
-    background: rgb(15 23 42 / 70%);
-    border-color: rgb(148 163 184 / 24%);
-  }
-}
-
-/* Script-sensitive fonts are loaded locally through next/font, never browser CDNs. */
-html[data-exampro-lang="bn"] body { font-family: var(--font-bangla), var(--font-inter), sans-serif; }
-html[data-exampro-lang="hi"] body { font-family: var(--font-hindi), var(--font-inter), sans-serif; }
-
-/* Administration uses the same controls with more room for editing and review. */
-@layer components {
-  .ep-admin table thead th {
-    padding: 0.85rem 0.75rem;
-    background: var(--muted);
-    font-size: 0.7rem;
-    letter-spacing: 0.04em;
-    white-space: nowrap;
-  }
-  .ep-admin table tbody td { padding: 1rem 0.75rem; }
-  .ep-admin table tbody tr:hover { background: color-mix(in oklch, var(--muted) 45%, transparent); }
-  .ep-admin summary { padding-block: 0.6rem; }
-  .ep-admin input[type='checkbox'], .ep-admin input[type='radio'] { accent-color: #4f46e5; }
-  .ep-admin :is(input, select, textarea, button, summary):focus-visible { outline: 2px solid #818cf8; outline-offset: 3px; }
-  .ep-admin table { min-width: 36rem; }
-}
+/* Keep supported Indic reading fonts and print output independent of UI theme. */
+html[data-exampro-lang="bn"] body { font-family:var(--font-bangla),var(--font-inter),sans-serif; }
+html[data-exampro-lang="hi"] body { font-family:var(--font-hindi),var(--font-inter),sans-serif; }
 
 /* A4 ebook output: browser print dialog supplies the final PDF file. */
 .ebook-print .print-chapter { margin: 2rem 0; }
@@ -294,4 +208,10 @@ html[data-exampro-lang="hi"] body { font-family: var(--font-hindi), var(--font-i
  .ebook-cheatsheet .print-chapter { break-before:auto; margin:7mm 0; } .ebook-cheatsheet h2 { font-size:12pt!important; }
  .ebook-cheatsheet header { margin-bottom:4mm!important; padding-bottom:3mm!important; } .ebook-cheatsheet header h1 { font-size:16pt!important; }
  .ebook-cheatsheet .cheat-page:last-of-type { break-after:auto; }
+}
+
+/* Unlayered so primitive outline-none utilities cannot hide keyboard focus. */
+:where(button, a, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 3px;
+  box-shadow: 0 0 0 3px var(--on-accent);
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, Hind_Siliguri, Noto_Sans_Devanagari } from 'next/font/google';
+import { Inter, Space_Grotesk, JetBrains_Mono, Hind_Siliguri, Noto_Sans_Devanagari } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/layout/theme-provider';
 import { AuthProvider } from '@/components/layout/auth-provider';
@@ -13,6 +13,9 @@ const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
 });
+
+const heading = Space_Grotesk({ subsets: ['latin'], variable: '--font-space-grotesk' });
+const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains-mono' });
 
 const bangla = Hind_Siliguri({
   subsets:['bengali','latin'],
@@ -42,10 +45,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${bangla.variable} ${hindi.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${heading.variable} ${mono.variable} ${bangla.variable} ${hindi.variable} font-sans antialiased`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >

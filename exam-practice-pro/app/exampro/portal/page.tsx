@@ -78,7 +78,7 @@ function PortalContent(){
           <div>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-xl font-bold">Available mock tests</h2>
-              <Link href="/india-mocks" className="text-sm font-semibold text-indigo-700 underline dark:text-indigo-300">Browse all</Link>
+              <Link href="/india-mocks" className="text-sm font-semibold text-accent-ink underline dark:text-accent-ink">Browse all</Link>
             </div>
             {state==='loading' && <p className="mt-4 text-muted-foreground" role="status">Loading published tests…</p>}
             {state==='error' && <div role="alert" className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
