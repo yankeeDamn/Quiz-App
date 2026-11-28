@@ -65,6 +65,7 @@ export function StudyPlanManager() {
   const [reviewAck, setReviewAck] = useState(false);
   const [readinessError, setReadinessError] = useState("");
   const [dayFilter, setDayFilter] = useState("");
+  const [resourceIds,setResourceIds]=useState<string[]>([]);
   const selectedId = asString(selected?.id);
   const selectedRevision = selected?.revision;
   const draftSelected = selected?.status === "draft";
@@ -122,6 +123,7 @@ export function StudyPlanManager() {
     setReviewAck(false);
     setAck(false);
     setDayFilter("");
+    setResourceIds([]);
     const r = await call("/plans/" + p.id, undefined, "GET");
     if (r) {
       setSelected(r);
@@ -582,6 +584,8 @@ export function StudyPlanManager() {
             </>
           )}
           {process.env.NEXT_PUBLIC_PUBLISHING_WORKFLOW_ENABLED==="true" && <PublicationPanel key={selectedId} id={selectedId} revision={Number(selected.revision)} draft={draftSelected} ready={readiness?.ready===true && readiness.revision===selected.revision} ack={ack}/>}
+          <section className="space-y-3 rounded-xl border p-4"><h3 className="font-bold">Weekly workload</h3><div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{Array.from({length:Math.ceil(Number(selected.duration)/7)},(_,i)=>{const first=i*7+1;const last=Math.min(first+6,Number(selected.duration));const week=tasks.filter(t=>Number(t.day)>=first&&Number(t.day)<=last);const minutes=week.reduce((n,t)=>n+Number(t.minutes||0),0);const covered=new Set(week.map(t=>Number(t.day))).size;return <div key={i} className="rounded-lg border p-3 text-sm"><strong>Week {i+1}</strong><p>{minutes} minutes · {week.length} tasks</p><p className="text-muted-foreground">{last-first+1-covered} empty days · {Array.from({length:last-first+1},(_,d)=>first+d).filter(d=>week.filter(t=>Number(t.day)===d).reduce((n,t)=>n+Number(t.minutes||0),0)>Number(selected.daily_minutes)).length} overloaded days</p></div>;})}</div></section>
+          {draftSelected&&tasks.length===0&&<section className="space-y-3 rounded-xl border p-4"><h3 className="font-bold">Generate a resource-based draft</h3><p className="text-sm text-muted-foreground">Choose published resources. The generator fills empty days with reading and revision tasks; nothing is published.</p><div className="max-h-52 space-y-2 overflow-auto">{data.resources.filter(r=>r.exam_id===selected.exam_id&&r.status==="published"&&(selected.access_policy!=="free"||r.access_policy==="free")).map(r=><label key={asString(r.id)} className="flex gap-2 text-sm"><input type="checkbox" checked={resourceIds.includes(asString(r.id))} onChange={e=>setResourceIds(old=>e.target.checked?[...old,asString(r.id)]:old.filter(id=>id!==asString(r.id)))}/>{asString(r.title)}</label>)}</div><Button disabled={busy||!resourceIds.length||resourceIds.length>Number(selected.duration)} onClick={async()=>{if(!window.confirm("Generate tasks in this empty draft?"))return;const r=await call(`/plans/${selected.id}/generate-draft`,{resourceIds,revision:selected.revision,acknowledged:true});if(r)await openPlan(selected);}}>Generate draft tasks</Button></section>}
           <div className="grid gap-5 xl:grid-cols-2">
             <div className="space-y-2">
               <h3 className="font-bold">Ordered daily tasks</h3>
