@@ -71,10 +71,10 @@
   --border: #223047;
   --text: #F8FAFC;
   --text-muted: #94A3B8;
-  --accent: #FBBF24;
-  --accent-hover: #F59E0B;
-  --accent-soft: rgba(251,191,36,0.12);
-  --accent-ink: #FBBF24;
+  --accent: #38BDF8;
+  --accent-hover: #0EA5E9;
+  --accent-soft: rgba(56,189,248,0.12);
+  --accent-ink: #38BDF8;
   --on-accent: #0A0F1C;
   --success: #4ADE80;
   --warning: #FBBF24;
@@ -93,10 +93,10 @@
   --border: #CBD5E1;
   --text: #0A0F1C;
   --text-muted: #475569;
-  --accent: #FBBF24;
-  --accent-hover: #F59E0B;
-  --accent-soft: rgba(251,191,36,0.18);
-  --accent-ink: #92400E;
+  --accent: #38BDF8;
+  --accent-hover: #0EA5E9;
+  --accent-soft: rgba(56,189,248,0.18);
+  --accent-ink: #0369A1;
   --on-accent: #0A0F1C;
   --success: #166534;
   --warning: #854D0E;
@@ -148,7 +148,7 @@
   :where(button, a, input, select, textarea, summary, [tabindex]):focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 3px;
-    /* Dark separator makes the amber ring visible on light surfaces too. */
+    /* Dark separator makes the sky-blue ring visible on light surfaces too. */
     box-shadow: 0 0 0 3px var(--on-accent);
   }
   :where(input, select, textarea) { accent-color: var(--accent); }

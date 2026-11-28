@@ -210,7 +210,7 @@ export default function ExamProStudioPage() {
           <h2 className="mt-5 text-lg font-semibold">A shirt priced at ₹800 is sold at 25% off. What is the sale price?</h2>
           <div className="mt-5 grid gap-3">{['₹500','₹600','₹650','₹700'].map((value,i)=>
             <button key={value} type="button" disabled={picked!==null} onClick={()=>setPicked(i)}
-              className={'ep-link-motion flex min-h-12 items-center gap-3 rounded-xl border p-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ' + (picked!==null && i===1 ? 'border-green-600 bg-green-50 text-green-950' : picked===i ? 'border-red-600 bg-red-50 text-red-950' : 'border-border hover:border-amber-400/60 dark:border-border dark:bg-surface-2 dark:text-foreground')}>
+              className={'ep-link-motion flex min-h-12 items-center gap-3 rounded-xl border p-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ' + (picked!==null && i===1 ? 'border-green-600 bg-green-50 text-green-950' : picked===i ? 'border-red-600 bg-red-50 text-red-950' : 'border-border hover:border-sky-400/60 dark:border-border dark:bg-surface-2 dark:text-foreground')}>
               <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-current font-mono text-sm font-bold">{'ABCD'[i]}</span>{value}
             </button>)}
           </div>
@@ -229,7 +229,7 @@ export default function ExamProStudioPage() {
           </div>
           <div className="mt-8 grid gap-4 md:grid-cols-3">{ROLES[role].map((step,i)=>
             <article key={step.title} className="ep-link-motion rounded-2xl border border-border bg-card p-6 hover:border-border/60">
-              <span className="grid h-10 w-10 place-items-center rounded-full border border-amber-400/40 font-mono text-accent-ink">{i+1}</span>
+              <span className="grid h-10 w-10 place-items-center rounded-full border border-sky-400/40 font-mono text-accent-ink">{i+1}</span>
               <h3 className="mt-4 text-lg font-bold">{step.title}</h3><p className="mt-2 text-muted-foreground">{step.detail}</p>
             </article>)}
           </div>
@@ -251,7 +251,7 @@ export default function ExamProStudioPage() {
           </div>
           <div id="tgrid" className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">{shown.filter(t=>!competitive.some(c=>c.practiceTestId===t.id)).map(t=>
             <article key={t.id} className="ep-card flex h-full flex-col gap-3 rounded-2xl p-6 text-foreground dark:text-white">
-              <div className="flex justify-between gap-2"><h3 className="font-bold">{t.name}</h3><span className={'h-fit rounded px-2 py-1 text-xs font-semibold ' + (t.tier==='free'?'bg-emerald-100 text-emerald-900':'bg-amber-100 text-amber-900')}>{t.tier==='free'?'Free':'Pro'}</span></div>
+              <div className="flex justify-between gap-2"><h3 className="font-bold">{t.name}</h3><span className={'h-fit rounded px-2 py-1 text-xs font-semibold ' + (t.tier==='free'?'bg-emerald-100 text-emerald-900':'bg-accent-soft text-accent-ink')}>{t.tier==='free'?'Free':'Pro'}</span></div>
               <p className="text-sm text-muted-foreground dark:text-muted-foreground">{t.exam} · {t.questionCount} questions · {t.minutes} min</p>
               <p className="text-xs text-muted-foreground dark:text-muted-foreground">{t.sections.join(' · ')}</p>
               <Link href={'/india-mocks/'+encodeURIComponent(t.id)} className="mt-auto inline-flex min-h-10 items-center justify-center rounded-lg bg-surface-2 px-4 py-2 font-bold text-foreground dark:bg-surface-2 dark:text-foreground">Open test</Link>

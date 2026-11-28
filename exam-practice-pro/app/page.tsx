@@ -220,8 +220,8 @@ export default function HomePage() {
                         icon: GraduationCap,
                       },
                     ].map(stat => (
-                      <div key={stat.label} className="ep-home-stat min-w-0 rounded-2xl border border-border bg-card p-4 backdrop-blur-sm transition-colors hover:border-amber-400/40 dark:border-slate-800/90 dark:bg-[#111827]/85 dark:hover:border-amber-400/40 dark:hover:bg-[#151E32] sm:p-5">
-                        <stat.icon aria-hidden="true" className="mb-3 h-9 w-9 rounded-lg border border-amber-400/20 bg-amber-400/10 p-2 text-accent-ink dark:text-amber-400" />
+                      <div key={stat.label} className="ep-home-stat min-w-0 rounded-2xl border border-border bg-card p-4 backdrop-blur-sm transition-colors hover:border-sky-400/40 dark:border-slate-800/90 dark:bg-[#111827]/85 dark:hover:border-sky-400/40 dark:hover:bg-[#151E32] sm:p-5">
+                        <stat.icon aria-hidden="true" className="mb-3 h-9 w-9 rounded-lg border border-sky-400/20 bg-sky-400/10 p-2 text-accent-ink dark:text-sky-400" />
                         <div className="text-3xl font-extrabold tracking-tight tabular-nums text-foreground dark:text-white">{stat.value}</div>
                         <div className="mt-1 text-sm font-semibold text-foreground dark:text-foreground">{stat.label}</div>
                         <p className="mt-1 text-xs leading-relaxed text-muted-foreground dark:text-slate-400">{stat.note}</p>
