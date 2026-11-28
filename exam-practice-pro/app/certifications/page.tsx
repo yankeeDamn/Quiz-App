@@ -17,7 +17,7 @@ export default function CertificationsPage() {
     <>
       <Header />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-12">
-        <p className="text-sm font-semibold text-indigo-600">
+        <p className="text-sm font-semibold text-accent-ink">
           ExamPro certifications
         </p>
         <h1 className="mt-2 text-3xl font-bold">Build your IT career</h1>
@@ -42,7 +42,7 @@ export default function CertificationsPage() {
                     questions · explanations available
                   </p>
                   <Link
-                    className="mt-4 inline-block font-semibold text-indigo-600 underline"
+                    className="mt-4 inline-block font-semibold text-accent-ink underline"
                     href={`/india-mocks/${cert.id}?mode=practice`}
                   >
                     Start free practice

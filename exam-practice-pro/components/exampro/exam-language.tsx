@@ -75,7 +75,7 @@ export function LanguageSwitcher({small=false}:{small?:boolean}) {
   return <div role="group" aria-label={t('language')} className="inline-flex items-center gap-0.5 rounded-lg border border-border bg-background/80 p-0.5">
     {OPTIONS.map(option=><button key={option.id} type="button" aria-pressed={language===option.id}
       lang={option.id} onClick={()=>change(option.id)}
-      className={`min-h-9 rounded-md px-2 text-xs font-bold transition-colors ${language===option.id?'bg-indigo-600 text-white':'text-foreground hover:bg-muted'} ${small?'sm:px-2':'sm:px-3'}`}>
+      className={`min-h-9 rounded-md px-2 text-xs font-bold transition-colors ${language===option.id?'bg-primary text-primary-foreground':'text-foreground hover:bg-muted'} ${small?'sm:px-2':'sm:px-3'}`}>
       {option.label}
     </button>)}
   </div>;

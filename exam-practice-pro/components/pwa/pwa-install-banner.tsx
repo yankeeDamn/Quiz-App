@@ -45,7 +45,7 @@ export function PwaInstallBanner() {
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <button type="button" onClick={install} className="inline-flex min-h-9 items-center gap-2 rounded-lg border border-indigo-200 bg-white px-3 py-2 text-sm font-semibold text-indigo-700 shadow-sm hover:bg-indigo-50 dark:border-indigo-800 dark:bg-slate-900 dark:text-indigo-300">
+      <button type="button" onClick={install} className="inline-flex min-h-9 items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-semibold text-accent-ink shadow-sm hover:bg-accent-soft dark:border-border dark:bg-surface-2 dark:text-accent-ink">
         {isIos ? <Smartphone className="h-4 w-4" /> : <Download className="h-4 w-4" />} Install App
       </button>
       <button type="button" aria-label="Dismiss install suggestion" onClick={() => setDismissed(true)} className="rounded p-1 text-muted-foreground hover:bg-muted"><X className="h-4 w-4" /></button>

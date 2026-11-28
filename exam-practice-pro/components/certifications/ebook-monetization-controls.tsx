@@ -32,10 +32,10 @@ export function EbookMonetizationControls({
   };
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-gradient-to-r from-indigo-50 via-white to-white px-5 py-4 dark:border-slate-800 dark:from-indigo-950/50 dark:via-slate-950 dark:to-slate-950">
+    <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm dark:border-border dark:bg-background">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-gradient-to-r from-surface-1 via-white to-white px-5 py-4 dark:border-border dark:from-surface-1/50 dark:via-surface-2 dark:to-surface-2">
         <div className="flex items-center gap-3">
-          <div className="grid h-11 w-11 place-items-center rounded-xl bg-indigo-600 text-white shadow-sm">
+          <div className="grid h-11 w-11 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm">
             <ShieldCheck className="h-5 w-5" />
           </div>
           <div>
@@ -45,7 +45,7 @@ export function EbookMonetizationControls({
             </p>
           </div>
         </div>
-        <span aria-live="polite" className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${busy ? "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200" : book.revision ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200" : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200"}`}>
+        <span aria-live="polite" className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${busy ? "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200" : book.revision ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200" : "bg-surface-2 text-foreground dark:bg-surface-2 dark:text-foreground"}`}>
           {busy ? <LoaderCircle className="h-3.5 w-3.5 animate-spin"/> : book.revision ? <Check className="h-3.5 w-3.5"/> : <FileText className="h-3.5 w-3.5"/>}
           {busy ? "Saving access…" : book.revision ? "Server-backed settings" : "Unsaved new ebook"}
         </span>
@@ -54,7 +54,7 @@ export function EbookMonetizationControls({
         <fieldset className="min-w-0 space-y-3" disabled={locked || bundled}>
           <legend className="mb-2 text-sm font-bold">Reader access</legend>
           <label className="flex gap-2 text-sm"><input type="checkbox" checked={book.studyProOnly === true} disabled={locked || bundled || !!book.revision} onChange={event => onCommit({studyProOnly:event.target.checked, ...(event.target.checked ? {accessLevel:"pro" as const}: {})})}/>Study Plans: Pro subscribers only (choose before creating)</label>
-          <div className="flex rounded-xl border border-slate-200 bg-slate-100 p-1 dark:border-slate-700 dark:bg-slate-900">
+          <div className="flex rounded-xl border border-border bg-surface-2 p-1 dark:border-border dark:bg-surface-2">
             {(["free", "pro"] as const).map((level) => (
               <button
                 key={level}
@@ -62,7 +62,7 @@ export function EbookMonetizationControls({
                 aria-pressed={book.accessLevel === level}
                 disabled={locked || bundled || book.studyProOnly === true}
                 onClick={() => level !== book.accessLevel && onCommit({ accessLevel: level })}
-                className={`inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-3 text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-500/20 disabled:cursor-not-allowed disabled:opacity-50 ${book.accessLevel === level ? "bg-white text-indigo-700 shadow-md ring-1 ring-indigo-100 dark:bg-indigo-600 dark:text-white dark:ring-indigo-500" : "text-slate-600 hover:-translate-y-0.5 hover:bg-white hover:text-slate-900 hover:shadow-sm dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"}`}
+                className={`inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-3 text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-50 ${book.accessLevel === level ? "bg-card text-accent-ink shadow-md ring-1 ring-ring dark:bg-primary dark:text-primary-foreground dark:ring-ring" : "text-muted-foreground hover:-translate-y-0.5 hover:bg-white hover:text-foreground hover:shadow-sm dark:text-muted-foreground dark:hover:bg-surface-2 dark:hover:text-foreground"}`}
               >
                 {level === "free" ? <FileText className="h-4 w-4"/> : <Crown className="h-4 w-4"/>}
                 {level === "free" ? "Free" : "Pro"}
@@ -115,10 +115,10 @@ export function EbookMonetizationControls({
             aria-label="Allow authorized readers to download the full PDF"
             disabled={locked}
             onClick={() => onCommit({ allowFullPdfDownload: !book.allowFullPdfDownload })}
-            className="group inline-flex min-h-11 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 font-semibold shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-50 hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-500/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:hover:bg-indigo-950/30"
+            className="group inline-flex min-h-11 items-center gap-3 rounded-2xl border border-border bg-card px-4 font-semibold shadow-sm transition-all hover:-translate-y-0.5 hover:border-border hover:bg-accent-soft hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-border dark:bg-background dark:hover:bg-accent-soft/30"
           >
-            <span className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${book.allowFullPdfDownload ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-600"}`}>
-              <span className={`h-4.5 w-4.5 rounded-full bg-white shadow-sm transition-transform ${book.allowFullPdfDownload ? "translate-x-6" : "translate-x-1"}`} />
+            <span className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${book.allowFullPdfDownload ? "bg-primary" : "bg-background dark:bg-background"}`}>
+              <span className={`h-4.5 w-4.5 rounded-full bg-card shadow-sm transition-transform ${book.allowFullPdfDownload ? "translate-x-6" : "translate-x-1"}`} />
             </span>
             <span className="text-sm font-semibold">{book.allowFullPdfDownload ? "Allowed" : "Blocked"}</span>
             <LockKeyhole className="h-4 w-4 text-muted-foreground" />

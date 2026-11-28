@@ -32,8 +32,8 @@ export function FilterChips({
             className={cn(
               'cursor-pointer transition-all hover:scale-105',
               isSelected
-                ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                : 'hover:border-indigo-400 hover:text-indigo-600'
+                ? 'bg-primary hover:bg-primary-hover text-primary-foreground'
+                : 'hover:border-accent-ink hover:text-accent-ink'
             )}
             onClick={() => onToggle(chip.id)}
             onKeyDown={(e) => {

@@ -47,7 +47,7 @@ export function CertificationTabs({ children }: { children: React.ReactNode }) {
                   ?.focus();
               }
             }}
-            className={`flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition-colors sm:px-5 ${learning === (tab.id === "start-learning") ? "bg-card text-indigo-700 shadow-sm dark:text-indigo-300" : "text-muted-foreground hover:text-foreground"}`}
+            className={`flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition-colors sm:px-5 ${learning === (tab.id === "start-learning") ? "bg-card text-accent-ink shadow-sm dark:text-accent-ink" : "text-muted-foreground hover:text-foreground"}`}
           >
             <tab.icon className="hidden h-4 w-4 sm:block" />
             {tab.label}

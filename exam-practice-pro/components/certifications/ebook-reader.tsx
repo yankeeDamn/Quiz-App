@@ -46,7 +46,7 @@ function ConceptCheck({
     [checked, setChecked] = useState(false);
   return (
     <section className="mt-8 rounded-2xl border p-5 sm:p-6">
-      <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">
+      <p className="text-xs font-bold uppercase tracking-widest text-accent-ink dark:text-accent-ink">
         Pause & recall
       </p>
       <h2 className="mt-2 text-xl font-bold">Chapter concept check</h2>
@@ -103,7 +103,7 @@ function ConceptCheck({
           type="button"
           disabled={!checked && !complete}
           onClick={onComplete}
-          className="min-h-11 rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white disabled:opacity-40"
+          className="min-h-11 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground disabled:opacity-40"
         >
           {complete
             ? "Continue to next chapter →"
@@ -277,7 +277,7 @@ function ReaderSession({
     return (
       <main className="mx-auto w-full max-w-xl flex-1 px-4 py-16">
         <div className="rounded-2xl border bg-card p-7">
-          <LockKeyhole className="h-9 w-9 text-indigo-600" />
+          <LockKeyhole className="h-9 w-9 text-accent-ink" />
           <h1 className="mt-4 text-2xl font-bold">
             {loading
               ? "Opening learning track…"
@@ -291,7 +291,7 @@ function ReaderSession({
           {code === "EBOOK_ACCESS_REQUIRED" &&
             (identity === "guest" ? (
               <Link
-                className="mt-5 inline-block font-semibold text-indigo-600 underline"
+                className="mt-5 inline-block font-semibold text-accent-ink underline"
                 href={`/auth/signin?callbackUrl=${encodeURIComponent("/certifications/learn/" + slug)}`}
               >
                 Sign in with Google or GitHub to request access
@@ -326,7 +326,7 @@ function ReaderSession({
                 </label>
                 <button
                   type="submit"
-                  className="min-h-11 rounded-xl bg-indigo-600 px-4 text-sm font-semibold text-white"
+                  className="min-h-11 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
                 >
                   Request Access
                 </button>
@@ -373,7 +373,7 @@ function ReaderSession({
               <ChevronLeft className="h-3.5 w-3.5" />
               All learning tracks
             </Link>
-            <p className="mt-4 text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">
+            <p className="mt-4 text-xs font-bold uppercase tracking-widest text-accent-ink dark:text-accent-ink">
               {book.category}
             </p>
             <h2 className="mt-2 text-base font-bold leading-6">{book.title}</h2><ContentReviewBadge/>
@@ -411,7 +411,7 @@ function ReaderSession({
                     type="button"
                     aria-current={chapter.id === value.id ? "step" : undefined}
                     onClick={() => navigate(ci)}
-                    className={`flex min-h-12 w-full items-start gap-3 rounded-xl p-3 text-left text-xs leading-5 ${chapter.id === value.id ? "bg-indigo-50 font-semibold text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-200" : "text-muted-foreground hover:bg-muted"}`}
+                    className={`flex min-h-12 w-full items-start gap-3 rounded-xl p-3 text-left text-xs leading-5 ${chapter.id === value.id ? "bg-accent-soft font-semibold text-accent-ink dark:bg-accent-soft/60 dark:text-accent-ink" : "text-muted-foreground hover:bg-muted"}`}
                   >
                     {progress.completed.includes(value.id) ? (
                       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
@@ -426,7 +426,7 @@ function ReaderSession({
               </nav>
             )}
             <div className="mt-6 rounded-xl border bg-muted/30 p-4">
-              <Award className="h-6 w-6 text-indigo-600" />
+              <Award className="h-6 w-6 text-accent-ink" />
               <h3 className="mt-3 text-sm font-bold">Final skill assessment</h3>
               <p className="mt-2 text-xs leading-6 text-muted-foreground">
                 {percent >= 80
@@ -435,7 +435,7 @@ function ReaderSession({
               </p>
               <button
                 type="button"
-                className="mt-3 min-h-10 w-full rounded-lg bg-indigo-600 px-3 text-xs font-semibold text-white"
+                className="mt-3 min-h-10 w-full rounded-lg bg-primary px-3 text-xs font-semibold text-primary-foreground"
                 onClick={() => setExam(true)}
               >
                 {percent >= 80
@@ -516,7 +516,7 @@ function ReaderSession({
                 </p>
               )}
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">
+                <p className="text-xs font-bold uppercase tracking-widest text-accent-ink dark:text-accent-ink">
                   Chapter {index + 1} of {book.chapters.length}
                 </p>
                 <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -540,8 +540,8 @@ function ReaderSession({
                   <CodeExample key={chapter.id} {...chapter.codeSnippet} />
                 )}
               </div>
-              <section className="mt-8 rounded-2xl border border-indigo-200 bg-indigo-50/60 p-6 dark:border-indigo-900 dark:bg-indigo-950/25">
-                <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">
+              <section className="mt-8 rounded-2xl border border-border bg-accent-soft/60 p-6 dark:border-border dark:bg-accent-soft/25">
+                <p className="text-xs font-bold uppercase tracking-widest text-accent-ink dark:text-accent-ink">
                   Interview cheat-sheet
                 </p>
                 <h2 className="mt-2 text-xl font-bold">Key takeaways</h2>
@@ -551,7 +551,7 @@ function ReaderSession({
                       key={ti}
                       className="flex items-start gap-3 text-sm leading-7"
                     >
-                      <CheckCircle2 className="mt-1.5 h-4 w-4 shrink-0 text-indigo-600" />
+                      <CheckCircle2 className="mt-1.5 h-4 w-4 shrink-0 text-accent-ink" />
                       {tip}
                     </li>
                   ))}
@@ -605,7 +605,7 @@ function ReaderSession({
                           href={link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="break-all text-xs text-indigo-600 underline dark:text-indigo-300"
+                          className="break-all text-xs text-accent-ink underline dark:text-accent-ink"
                         >
                           {link}
                         </a>
@@ -641,7 +641,7 @@ function ReaderSession({
               className="flex min-h-11 w-full items-center gap-2 rounded-xl border p-3 text-xs font-semibold"
             >
               <Bookmark
-                className={`h-4 w-4 ${progress.bookmark === chapter.id ? "fill-indigo-600 text-indigo-600" : ""}`}
+                className={`h-4 w-4 ${progress.bookmark === chapter.id ? "fill-indigo-600 text-accent-ink" : ""}`}
               />
               {progress.bookmark === chapter.id
                 ? "Bookmarked"

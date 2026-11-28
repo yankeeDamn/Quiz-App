@@ -106,7 +106,7 @@ export default function QuizSetupPage({ params }: PageProps) {
   return (
     <>
       <Header />
-      <main className="flex-1 bg-gray-50 dark:bg-background">
+      <main className="flex-1 bg-background dark:bg-background">
         <div className="container mx-auto px-4 py-8">
           {/* Back Button */}
           <Button variant="ghost" asChild className="mb-6">
@@ -127,7 +127,7 @@ export default function QuizSetupPage({ params }: PageProps) {
                 <CardHeader className="pb-4">
                   <ContentReviewBadge/>
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent-soft text-accent-ink dark:bg-accent-soft/50 dark:text-accent-ink">
                       <GraduationCap className="h-6 w-6" />
                     </div>
                     <div>
@@ -217,8 +217,8 @@ export default function QuizSetupPage({ params }: PageProps) {
                         htmlFor="practice"
                         className={`flex cursor-pointer items-start gap-4 rounded-xl border-2 p-4 transition-all ${
                           settings.mode === 'practice'
-                            ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/30'
-                            : 'border-muted hover:border-indigo-300'
+                            ? 'border-accent-ink bg-accent-soft dark:bg-accent-soft/30'
+                            : 'border-muted hover:border-border'
                         }`}
                       >
                         <RadioGroupItem value="practice" id="practice" className="mt-1" />
@@ -236,8 +236,8 @@ export default function QuizSetupPage({ params }: PageProps) {
                         htmlFor="exam"
                         className={`flex cursor-pointer items-start gap-4 rounded-xl border-2 p-4 transition-all ${
                           settings.mode === 'exam'
-                            ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/30'
-                            : 'border-muted hover:border-indigo-300'
+                            ? 'border-accent-ink bg-accent-soft dark:bg-accent-soft/30'
+                            : 'border-muted hover:border-border'
                         }`}
                       >
                         <RadioGroupItem value="exam" id="exam" className="mt-1" />
@@ -262,7 +262,7 @@ export default function QuizSetupPage({ params }: PageProps) {
                       <Label className="text-base font-semibold">
                         Number of Questions
                       </Label>
-                      <span className="font-mono text-lg font-bold text-indigo-600">
+                      <span className="font-mono text-lg font-bold text-accent-ink">
                         {settings.questionCount}
                       </span>
                     </div>
@@ -395,7 +395,7 @@ export default function QuizSetupPage({ params }: PageProps) {
                   <div className="pt-4 space-y-3">
                     <Button
                       size="lg"
-                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-lg h-14"
+                      className="w-full bg-primary hover:bg-primary-hover text-lg h-14"
                       onClick={handleStartQuiz}
                     >
                       <Play className="mr-2 h-5 w-5" />

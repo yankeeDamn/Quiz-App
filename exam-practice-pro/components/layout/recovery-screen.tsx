@@ -4,11 +4,11 @@ import {
   ArrowLeft,
   BookOpen,
   LifeBuoy,
-  LoaderCircle,
   RefreshCw,
   SearchX,
   ShieldAlert,
 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/content-primitives';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { RecoveryHeader } from './recovery-header';
@@ -76,11 +76,7 @@ export function RecoveryScreen({
   const { language } = useExamLanguage();
   const copy = COPY[language];
   const Icon =
-    kind === 'missing'
-      ? SearchX
-      : kind === 'loading'
-        ? LoaderCircle
-        : ShieldAlert;
+    kind === 'missing' ? SearchX : ShieldAlert;
   const reference =
     typeof digest === 'string' && /^[a-z0-9-]{1,64}$/i.test(digest)
       ? digest
@@ -97,17 +93,14 @@ export function RecoveryScreen({
       >
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-8 top-8 h-64 rounded-full bg-indigo-100/60 blur-3xl dark:bg-indigo-950/40"
+          className="pointer-events-none absolute inset-x-8 top-8 h-64 rounded-full bg-accent-soft/60 blur-3xl dark:bg-accent-soft/40"
         />
-        <Card className="relative w-full max-w-2xl rounded-3xl border-border/80 bg-card shadow-xl shadow-indigo-500/5">
+        <Card className="relative w-full max-w-2xl rounded-3xl border-border/80 bg-card shadow-xl shadow-transparent/5">
           <CardContent className="p-7 text-center sm:p-12">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-300">
-              <Icon
-                aria-hidden="true"
-                className={`h-8 w-8 ${kind === 'loading' ? 'animate-spin motion-reduce:animate-none' : ''}`}
-              />
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-soft text-accent-ink dark:bg-accent-soft dark:text-accent-ink">
+              {kind === 'loading' ? <Skeleton className="h-8 w-8" /> : <Icon aria-hidden="true" className="h-8 w-8" />}
             </div>
-            <p className="mt-6 text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">
+            <p className="mt-6 text-xs font-bold uppercase tracking-widest text-accent-ink dark:text-accent-ink">
               {kind === 'missing' ? '404 · ' : ''}
               {copy.eyebrow}
             </p>
@@ -128,7 +121,7 @@ export function RecoveryScreen({
             )}
             {reset && (
               <Button
-                className="mt-7 min-h-11 bg-indigo-600 px-6 text-white hover:bg-indigo-700"
+                className="mt-7 min-h-11 bg-primary px-6 text-primary-foreground hover:bg-primary-hover"
                 onClick={reset}
               >
                 <RefreshCw className="mr-2 h-4 w-4" />

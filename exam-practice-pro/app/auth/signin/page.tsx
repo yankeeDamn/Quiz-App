@@ -37,10 +37,10 @@ function SignInForm() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-indigo-50 via-white to-white px-4 dark:from-indigo-950/30 dark:via-background dark:to-background">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-surface-1 via-white to-white px-4 dark:from-surface-1/30 dark:via-background dark:to-background">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-surface-1 to-surface-2 text-foreground">
             <GraduationCap className="h-7 w-7" />
           </div>
           <CardTitle className="text-2xl">Welcome to ExamPro</CardTitle>
@@ -130,7 +130,7 @@ function SignInForm() {
             </div>
             <Button
               type="submit"
-              className="w-full h-11 bg-indigo-600 hover:bg-indigo-700"
+              className="w-full h-11 bg-primary hover:bg-primary-hover"
               disabled={isLoading !== null}
             >
               {isLoading === 'guest' ? (
@@ -157,7 +157,7 @@ export default function SignInPage() {
     <Suspense
       fallback={
         <div className="flex min-h-screen items-center justify-center">
-          <span className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+          <span className="h-8 w-8 animate-spin rounded-full border-4 border-accent-ink border-t-transparent" />
         </div>
       }
     >

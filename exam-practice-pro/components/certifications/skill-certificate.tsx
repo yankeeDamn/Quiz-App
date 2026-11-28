@@ -25,8 +25,8 @@ export function SkillCertificate({ id }: { id: string }) {
   }, [id]);
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-5 py-16">
-      <section className="rounded-3xl border border-indigo-200 bg-gradient-to-br from-indigo-50 via-background to-emerald-50 p-8 sm:p-12 dark:border-indigo-900 dark:from-indigo-950/30 dark:to-emerald-950/20">
-        <Award className="h-14 w-14 text-indigo-600" />
+      <section className="rounded-3xl border border-border bg-gradient-to-br from-surface-1 via-background to-emerald-50 p-8 sm:p-12 dark:border-border dark:from-surface-1/30 dark:to-emerald-950/20">
+        <Award className="h-14 w-14 text-accent-ink" />
         <h1 className="mt-6 text-2xl font-bold">
           ExamPro Learning Practice Completion
         </h1>

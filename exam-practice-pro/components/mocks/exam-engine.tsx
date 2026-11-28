@@ -440,8 +440,8 @@ const PALETTE_STYLE: Record<string, string> = {
   unseen: 'bg-muted text-foreground',
   unanswered: 'bg-red-600 text-white',
   answered: 'bg-emerald-600 text-white',
-  marked: 'bg-violet-600 text-white rounded-full',
-  'answered-marked': 'bg-violet-600 text-white rounded-full ring-2 ring-emerald-500',
+  marked: 'bg-primary text-primary-foreground rounded-full',
+  'answered-marked': 'bg-primary text-primary-foreground rounded-full ring-2 ring-emerald-500',
   right: 'bg-emerald-600 text-white',
   wrong: 'bg-red-600 text-white',
 };
@@ -470,7 +470,7 @@ function PaletteLegend({ practice }: { practice: boolean }) {
         ['bg-emerald-600', 'Answered'],
         ['bg-red-600', 'Not answered'],
         ['bg-muted', 'Not visited'],
-        ['bg-violet-600 rounded-full', 'Marked'],
+        ['bg-primary rounded-full', 'Marked'],
       ];
   return (
     <ul className="grid grid-cols-2 gap-2 text-xs">

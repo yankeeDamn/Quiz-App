@@ -36,16 +36,16 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
           data={chartData}
           margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
         >
-          <CartesianGrid strokeDasharray="3 3" vertical={false} />
+          <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
           <XAxis
             dataKey="attempt"
-            tick={{ fontSize: 12 }}
+            tick={{ fontSize: 12, fill: 'var(--text-muted)' }}
             tickLine={false}
             axisLine={false}
           />
           <YAxis
             domain={[0, 100]}
-            tick={{ fontSize: 12 }}
+            tick={{ fontSize: 12, fill: 'var(--text-muted)' }}
             tickLine={false}
             axisLine={false}
             tickFormatter={(v) => `${v}%`}
@@ -58,7 +58,7 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
                   <div className="rounded-lg border bg-background p-3 shadow-lg">
                     <p className="font-medium">{data.quiz}</p>
                     <p className="text-sm text-muted-foreground">{data.date}</p>
-                    <p className="mt-1 text-lg font-bold text-indigo-600">
+                    <p className="mt-1 text-lg font-bold text-accent-ink">
                       {data.score}%
                     </p>
                   </div>
@@ -70,10 +70,10 @@ export function PerformanceChart({ data }: PerformanceChartProps) {
           <Line
             type="monotone"
             dataKey="score"
-            stroke="#6366f1"
+            stroke="var(--chart-1)"
             strokeWidth={3}
-            dot={{ fill: '#6366f1', strokeWidth: 2, r: 4 }}
-            activeDot={{ r: 6, fill: '#6366f1' }}
+            dot={{ fill: 'var(--chart-1)', strokeWidth: 2, r: 4 }}
+            activeDot={{ r: 6, fill: 'var(--chart-1)' }}
           />
         </LineChart>
       </ResponsiveContainer>

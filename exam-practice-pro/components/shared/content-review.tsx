@@ -12,5 +12,5 @@ export function ContentReviewBadge({ underReview = true }: { underReview?: boole
 
 export function ReportMistake({ questionId }: { questionId: string }) {
   const { language, t } = useExamLanguage();
-  return <a lang={language} href={whatsappLink(`ExamPro: please review question ID ${questionId}. I would like to report a mistake.`)} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex min-h-9 items-center text-sm font-medium text-indigo-700 underline underline-offset-4 dark:text-indigo-300">{t('reportMistake')}</a>;
+  return <a lang={language} href={whatsappLink(`ExamPro: please review question ID ${questionId}. I would like to report a mistake.`)} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex min-h-9 items-center text-sm font-medium text-accent-ink underline underline-offset-4 dark:text-accent-ink">{t('reportMistake')}</a>;
 }

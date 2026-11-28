@@ -150,10 +150,10 @@ export default function HomePage() {
       <Header />
       <main className="flex-1">
         {/* Compact quick links; avoid crowding the mobile hero. */}
-        <div className="border-b border-indigo-100/70 bg-indigo-50/70 px-4 py-2.5 text-xs dark:border-indigo-950 dark:bg-indigo-950/40">
+        <div className="border-b border-border/70 bg-accent-soft/70 px-4 py-2.5 text-xs dark:border-border dark:bg-accent-soft/40">
           <div className="container mx-auto flex flex-wrap items-center justify-between gap-x-5 gap-y-2">
-            <span className="font-medium text-slate-600 dark:text-slate-300">Practice quizzes · Mock tests · Skill-building</span>
-            <div className="flex flex-wrap gap-x-5 gap-y-2 font-semibold text-indigo-700 dark:text-indigo-300">
+            <span className="font-medium text-muted-foreground dark:text-muted-foreground">Practice quizzes · Mock tests · Skill-building</span>
+            <div className="flex flex-wrap gap-x-5 gap-y-2 font-semibold text-accent-ink dark:text-accent-ink">
               <Link href="/certifications" className="hover:underline">IT certifications</Link>
               <Link href="/india-mocks" className="hover:underline">Timed mocks</Link>
             </div>
@@ -161,11 +161,11 @@ export default function HomePage() {
         </div>
 
         {/* Compact mobile-first hero. Stats are verified from the live catalogue. */}
-        <section className="ep-hero border-b border-indigo-100/60 dark:border-slate-800">
+        <section className="ep-hero border-b border-border/60 dark:border-border">
           <div aria-hidden="true" className="ep-hero-grid" />
           <div className="container relative mx-auto px-4 py-10 sm:py-16 lg:py-20">
             <motion.div
-              initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+              initial={false}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: reduceMotion ? 0 : 0.4 }}
               className="mx-auto max-w-6xl"
@@ -173,22 +173,22 @@ export default function HomePage() {
               <div className="grid items-center gap-9 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
                 <div className="text-left">
                   <p className="ep-eyebrow"><Sparkles className="h-4 w-4" /> EXAMPRO · LEARN WITH CONFIDENCE</p>
-                  <h1 className="mt-4 max-w-3xl text-4xl font-extrabold leading-[1.12] tracking-tight text-slate-950 dark:text-white sm:text-5xl lg:text-6xl">
+                  <h1 className="mt-4 max-w-3xl text-4xl font-extrabold leading-[1.12] tracking-tight text-foreground dark:text-white sm:text-5xl lg:text-6xl">
                     Practice for your <span className="ep-gradient-text">next big exam.</span>
                   </h1>
-                  <p className="mt-4 max-w-xl text-base leading-relaxed text-slate-600 dark:text-slate-300 sm:text-lg">
+                  <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground dark:text-muted-foreground sm:text-lg">
                     Prepare for SSC, Banking, Railways and IT certifications. Choose a live test,
                     practise at your pace and learn from detailed explanations.
                   </p>
                   <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap">
-                    <Button size="lg" className="ep-link-motion min-h-12 bg-indigo-600 px-6 text-white shadow-md shadow-indigo-500/20 hover:bg-indigo-700" asChild>
+                    <Button size="lg" className="ep-link-motion min-h-12 bg-primary px-6 text-primary-foreground shadow-md shadow-transparent/20 hover:bg-primary-hover" asChild>
                       <Link href="/india-mocks"><Target className="mr-2 h-5 w-5" /> Browse live tests <ArrowUpRight className="ml-2 h-4 w-4" /></Link>
                     </Button>
-                    <Button size="lg" variant="outline" className="ep-link-motion min-h-12 border-indigo-200 bg-white/70 px-6 dark:border-slate-700 dark:bg-slate-900/70" asChild>
+                    <Button size="lg" variant="outline" className="ep-link-motion min-h-12 border-border bg-card/70 px-6 dark:border-border dark:bg-surface-2/70" asChild>
                       <Link href="#quizzes"><BookOpen className="mr-2 h-5 w-5" /> Free practice quizzes</Link>
                     </Button>
                   </div>
-                  <Link href="/dashboard" className="mt-5 inline-flex min-h-9 items-center gap-2 text-sm font-medium text-indigo-700 underline-offset-4 hover:underline dark:text-indigo-300">
+                  <Link href="/dashboard" className="mt-5 inline-flex min-h-9 items-center gap-2 text-sm font-medium text-accent-ink underline-offset-4 hover:underline dark:text-accent-ink">
                     <TrendingUp className="h-4 w-4" /> Track your progress in the dashboard
                   </Link>
                 </div>
@@ -221,14 +221,14 @@ export default function HomePage() {
                       },
                     ].map(stat => (
                       <div key={stat.label} className="ep-home-stat min-w-0 rounded-2xl p-4 sm:p-5">
-                        <stat.icon aria-hidden="true" className="mb-3 h-5 w-5 text-indigo-600 dark:text-indigo-300" />
-                        <div className="text-3xl font-extrabold tracking-tight tabular-nums text-slate-900 dark:text-white">{stat.value}</div>
-                        <div className="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-200">{stat.label}</div>
-                        <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{stat.note}</p>
+                        <stat.icon aria-hidden="true" className="mb-3 h-5 w-5 text-accent-ink dark:text-accent-ink" />
+                        <div className="text-3xl font-extrabold tracking-tight tabular-nums text-foreground dark:text-white">{stat.value}</div>
+                        <div className="mt-1 text-sm font-semibold text-foreground dark:text-foreground">{stat.label}</div>
+                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground dark:text-muted-foreground">{stat.note}</p>
                       </div>
                     ))}
                   </div>
-                  <p className="mt-3 text-center text-xs leading-relaxed text-slate-500 dark:text-slate-400" role="status">
+                  <p className="mt-3 text-center text-xs leading-relaxed text-muted-foreground dark:text-muted-foreground" role="status">
                     {statsUnavailable
                       ? 'Live database counts temporarily unavailable. The practice library still works.'
                       : homeStats
@@ -265,11 +265,11 @@ export default function HomePage() {
           </div>
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {INDIA_EXAMS.map((exam) => (
-              <Link key={exam.filter} href={'/india-mocks?exam=' + encodeURIComponent(exam.filter)} className="ep-card group flex h-full flex-col rounded-2xl p-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500">
-                <span aria-hidden="true" className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-300"><GraduationCap className="h-5 w-5" /></span>
+              <Link key={exam.filter} href={'/india-mocks?exam=' + encodeURIComponent(exam.filter)} className="ep-card group flex h-full flex-col rounded-2xl p-5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">
+                <span aria-hidden="true" className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accent-soft text-accent-ink dark:bg-accent-soft dark:text-accent-ink"><GraduationCap className="h-5 w-5" /></span>
                 <h3 className="font-semibold">{exam.name}</h3>
                 <p className="mt-2 text-sm text-muted-foreground">{exam.blurb}</p>
-                <span className="mt-auto inline-block pt-5 text-sm font-semibold text-indigo-700 transition-colors group-hover:text-indigo-600 dark:text-indigo-300">View tests →</span>
+                <span className="mt-auto inline-block pt-5 text-sm font-semibold text-accent-ink transition-colors group-hover:text-accent-ink dark:text-accent-ink">View tests →</span>
               </Link>
             ))}
           </div>
@@ -277,11 +277,11 @@ export default function HomePage() {
         </section>
 
         {/* Exam Providers Section */}
-        <section className="border-b bg-white/60 dark:bg-background">
+        <section className="border-b bg-card/60 dark:bg-background">
           <div className="container mx-auto px-4 py-12 sm:py-16">
             <div className="mb-8">
               <h2 className="text-2xl font-bold flex items-center gap-2">
-                <Building2 className="h-6 w-6 text-indigo-600" />
+                <Building2 className="h-6 w-6 text-accent-ink" />
                 Certification Providers
               </h2>
               <p className="text-muted-foreground mt-1">
@@ -309,7 +309,7 @@ export default function HomePage() {
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold flex items-center gap-2">
-                <Award className="h-6 w-6 text-indigo-600" />
+                <Award className="h-6 w-6 text-accent-ink" />
                 Practice Exams
               </h2>
               <p className="text-muted-foreground mt-1">

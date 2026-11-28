@@ -25,17 +25,6 @@ import { EbookShare } from "./ebook-share";
 import { EbookStudio } from "./ebook-studio";
 const STARTERS = STARTER_EBOOKS.map(summarize);
 const FILTERS = ["All Tracks", ...EBOOK_CATEGORIES];
-const covers: Record<string, string> = {
-  Python: "from-emerald-600 to-teal-800",
-  "Python & Cheatcodes": "from-teal-600 to-cyan-900",
-  "Machine Learning": "from-blue-600 to-indigo-900",
-  "LLMs & Hugging Face": "from-amber-600 to-orange-900",
-  "GitHub Copilot (GH-300)": "from-violet-600 to-fuchsia-900",
-  "Endpoint Admin (MD-102)": "from-sky-600 to-blue-900",
-  "AI with Copilot": "from-violet-600 to-indigo-900",
-  Java: "from-orange-600 to-rose-800",
-  "Cloud & DevOps": "from-sky-600 to-indigo-800",
-};
 export function StartLearningHub() {
   const { data: session } = useSession();
   const identity = session?.user?.email?.toLowerCase() || "guest";
@@ -99,7 +88,7 @@ export function StartLearningHub() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-300">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-accent-ink dark:text-accent-ink">
             Read. Build. Put it to the test.
           </p>
           <ContentReviewBadge/>
@@ -141,7 +130,7 @@ export function StartLearningHub() {
               type="button"
               aria-pressed={category === filter}
               onClick={() => setCategory(filter)}
-              className={`min-h-10 rounded-full px-4 text-xs font-semibold transition-colors ${category === filter ? "bg-indigo-600 text-white" : "border bg-background hover:bg-muted"}`}
+              className={`min-h-10 rounded-full px-4 text-xs font-semibold transition-colors ${category === filter ? "bg-primary text-primary-foreground" : "border bg-background hover:bg-muted"}`}
             >
               {filter}
             </button>
@@ -160,13 +149,13 @@ export function StartLearningHub() {
         {filtered.map((book) => (
           <article
             key={book.slug}
-            className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-sm transition-shadow hover:shadow-lg hover:shadow-indigo-500/5"
+            className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-sm transition-shadow hover:shadow-lg hover:shadow-transparent/5"
           >
             <div
-              className={`relative flex min-h-44 flex-col justify-between bg-gradient-to-br ${covers[book.category]} p-6 text-white`}
+              className={`relative flex min-h-44 flex-col justify-between bg-surface-2 p-6 text-foreground`}
             >
               <div className="flex items-center justify-between">
-                <span className="rounded-full border border-white/30 bg-white/10 px-3 py-1 text-[11px] font-semibold">
+                <span className="rounded-full border border-border bg-card/10 px-3 py-1 text-[11px] font-semibold">
                   {book.category}
                 </span>
                 <Code2 className="h-7 w-7 opacity-70" />
@@ -186,10 +175,10 @@ export function StartLearningHub() {
             </div>
             <div className="flex flex-1 flex-col p-6">
               <ContentReviewBadge/>
-              <div className="flex flex-wrap gap-2 text-[11px] font-semibold text-indigo-700 dark:text-indigo-300">
+              <div className="flex flex-wrap gap-2 text-[11px] font-semibold text-accent-ink dark:text-accent-ink">
                 <span>{book.level}</span>
                 {book.examBadgeCode && (
-                  <span className="rounded bg-indigo-50 px-2 dark:bg-indigo-950">
+                  <span className="rounded bg-accent-soft px-2 dark:bg-accent-soft">
                     {book.examBadgeCode}
                   </span>
                 )}
@@ -220,7 +209,7 @@ export function StartLearningHub() {
               {book.allowFullPdfDownload && (
                 <Link
                   href={`/certifications/learn/${book.slug}?view=pdf`}
-                  className="mt-4 text-xs font-semibold text-indigo-600 dark:text-indigo-300"
+                  className="mt-4 text-xs font-semibold text-accent-ink dark:text-accent-ink"
                 >
                   {book.isCheatSheet
                     ? "Printable ebook + cheat-sheet ↗"
@@ -238,13 +227,13 @@ export function StartLearningHub() {
                   aria-label={`${book.title} reading progress`}
                   max={100}
                   value={progress[book.slug] || 0}
-                  className="h-1.5 w-full accent-indigo-600"
+                  className="h-1.5 w-full accent-primary"
                 />
               </div>
               <div className="mt-5 flex items-center justify-between gap-2">
                 <Link
                   href={`/certifications/learn/${book.slug}`}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-indigo-600 px-4 text-sm font-semibold text-white hover:bg-indigo-700"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary-hover"
                 >
                   {progress[book.slug] ? "Continue learning" : "Start Learning"}
                   <ArrowUpRight className="h-4 w-4" />

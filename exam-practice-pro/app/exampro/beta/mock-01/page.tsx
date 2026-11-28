@@ -29,7 +29,7 @@ export default function StudentBetaPage(){
    <form onSubmit={redeem} className="space-y-3 rounded-xl border p-5">
     <label className="block text-sm font-medium" htmlFor="invitation-code">Private invitation code</label>
     <input id="invitation-code" className="w-full rounded border p-3 font-mono" required autoComplete="off" value={code} onChange={e=>setCode(e.target.value)} placeholder="Paste the 64-character invitation code"/>
-    <button className="rounded bg-indigo-700 px-4 py-2 font-semibold text-white disabled:opacity-50" disabled={busy} type="submit">{busy?'Verifying…':'Redeem invitation'}</button>
+    <button className="rounded bg-primary px-4 py-2 font-semibold text-primary-foreground disabled:opacity-50" disabled={busy} type="submit">{busy?'Verifying…':'Redeem invitation'}</button>
    </form>
    <button className="rounded border px-4 py-2" type="button" onClick={async()=>{
     setError('');const r=await api<{authorized:boolean}>('/api/v1/beta/access');

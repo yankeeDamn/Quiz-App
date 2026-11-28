@@ -20,7 +20,7 @@ export function RecentQuizzes({ quizzes }: RecentQuizzesProps) {
         <p className="text-sm text-muted-foreground mt-1">
           Start practicing to see your history here
         </p>
-        <Button asChild className="mt-4 bg-indigo-600 hover:bg-indigo-700">
+        <Button asChild className="mt-4 bg-primary hover:bg-primary-hover">
           <Link href="/">Browse Quizzes</Link>
         </Button>
       </div>

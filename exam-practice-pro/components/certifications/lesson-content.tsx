@@ -30,13 +30,13 @@ export function HighlightedCode({ code }: { code: string }) {
             key={index}
             className={
               token.startsWith("#")
-                ? "text-slate-400"
+                ? "text-muted-foreground"
                 : /^['"]/.test(token)
                   ? "text-emerald-300"
                   : /^\d+$/.test(token)
                     ? "text-amber-300"
                     : /^\w+$/.test(token)
-                      ? "text-violet-300"
+                      ? "text-accent-ink"
                       : ""
             }
           >
@@ -60,9 +60,9 @@ export function CodeExample({
     [output, setOutput] = useState(false),
     [error, setError] = useState("");
   return (
-    <div className="my-6 min-w-0 overflow-hidden rounded-2xl border border-slate-700 bg-slate-950 text-slate-100">
-      <div className="flex items-center justify-between border-b border-slate-800 px-5 py-2 text-xs">
-        <span className="font-mono text-slate-400">{language}</span>
+    <div className="my-6 min-w-0 overflow-hidden rounded-2xl border border-border bg-background text-foreground">
+      <div className="flex items-center justify-between border-b border-border px-5 py-2 text-xs">
+        <span className="font-mono text-muted-foreground">{language}</span>
         <button
           type="button"
           onClick={async () => {
@@ -74,7 +74,7 @@ export function CodeExample({
               setError("Select and copy the code below.");
             }
           }}
-          className="inline-flex min-h-9 items-center gap-2 rounded-lg px-2 hover:bg-slate-800"
+          className="inline-flex min-h-9 items-center gap-2 rounded-lg px-2 hover:bg-surface-2"
         >
           {copied ? (
             <Check className="h-3.5 w-3.5" />
@@ -86,19 +86,19 @@ export function CodeExample({
       </div>
       <HighlightedCode code={code} />
       {expectedOutput !== undefined && (
-        <div className="border-t border-slate-800 p-4">
+        <div className="border-t border-border p-4">
           <button
             type="button"
             onClick={() => setOutput(!output)}
             aria-expanded={output}
-            className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-slate-800 px-4 text-xs font-semibold hover:bg-slate-700"
+            className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-surface-2 px-4 text-xs font-semibold hover:bg-background"
           >
             <Terminal className="h-4 w-4" />
             {output ? "Hide output" : "Try example output"}
           </button>
           {output && (
             <div className="mt-4">
-              <p className="mb-2 text-xs text-slate-400">
+              <p className="mb-2 text-xs text-muted-foreground">
                 Expected output preview · this page does not execute code
               </p>
               <pre className="overflow-x-auto whitespace-pre-wrap text-sm text-emerald-300">
@@ -141,7 +141,7 @@ export function LessonMarkdown({ content }: { content: string }) {
                   return (
                     <aside
                       key={pi}
-                      className="rounded-xl border-l-4 border-indigo-500 bg-indigo-50/50 p-4 text-sm dark:bg-indigo-950/30"
+                      className="rounded-xl border-l-4 border-accent-ink bg-accent-soft/50 p-4 text-sm dark:bg-accent-soft/30"
                     >
                       {inline(paragraph.replace(/^> /gm, ""))}
                     </aside>

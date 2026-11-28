@@ -113,8 +113,8 @@ export function EbookInventory({
     <div className="space-y-5">
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5" aria-label="Ebook library metrics">
         {stats.map(([label, value], index) => (
-          <div key={label} className="relative overflow-hidden rounded-2xl border border-slate-200 bg-card p-5 shadow-sm dark:border-slate-800">
-            <div className="mb-4 grid h-10 w-10 place-items-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-300">
+          <div key={label} className="relative overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-sm dark:border-border">
+            <div className="mb-4 grid h-10 w-10 place-items-center rounded-xl bg-accent-soft text-accent-ink dark:bg-accent-soft/50 dark:text-accent-ink">
               {index === 0 ? <BookOpen className="h-5 w-5"/> : index === 1 ? <Layers3 className="h-5 w-5"/> : index === 2 ? <FileText className="h-5 w-5"/> : index === 3 ? <CheckCircle2 className="h-5 w-5"/> : <ShieldCheck className="h-5 w-5"/>}
             </div>
             <p className="text-xs font-semibold text-muted-foreground">{label}</p>
@@ -122,7 +122,7 @@ export function EbookInventory({
           </div>
         ))}
       </section>
-      <div className="grid gap-3 rounded-2xl border border-slate-200 bg-card p-4 shadow-sm dark:border-slate-800 sm:grid-cols-3">
+      <div className="grid gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm dark:border-border sm:grid-cols-3">
         <input
           type="search"
           aria-label="Search ebook inventory"
@@ -154,9 +154,9 @@ export function EbookInventory({
           ))}
         </select>
       </div>
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-card shadow-sm dark:border-slate-800">
+      <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-sm dark:border-border">
         <table className="w-full min-w-[980px] text-left text-sm">
-          <thead className="bg-slate-100/70 dark:bg-slate-900">
+          <thead className="bg-surface-2/70 dark:bg-surface-2">
             <tr>
               {["Ebook", "Publication", "Reader tier", "Content", "Actions"].map((label) => (
                 <th className="p-4" key={label}>
@@ -167,7 +167,7 @@ export function EbookInventory({
           </thead>
           <tbody>
             {shown.map((book) => (
-              <tr key={book.slug} className="border-t transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-900/50">
+              <tr key={book.slug} className="border-t transition-colors hover:bg-background/80 dark:hover:bg-surface-2/50">
                 <td className="max-w-sm p-4">
                   <p className="font-semibold">{book.title}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
@@ -177,7 +177,7 @@ export function EbookInventory({
                 <td className="p-4">
                   <select
                     aria-label={`Publication visibility for ${book.title}`}
-                    className="min-h-10 max-w-[180px] rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm outline-none transition-all hover:border-indigo-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+                    className="min-h-10 max-w-[180px] rounded-xl border border-border bg-card px-3 text-xs font-bold text-foreground shadow-sm outline-none transition-all hover:border-border focus:border-accent-ink focus:ring-4 focus:ring-ring/10 disabled:opacity-50 dark:border-border dark:bg-background dark:text-foreground"
                     value={book.visibility}
                     disabled={!owner || !!busySlug || book.isBundledPublicEdition}
                     onChange={(event) => void patchBook(book, "visibility", {
@@ -198,13 +198,13 @@ export function EbookInventory({
                       onChange={(event) => void patchBook(book, "access", {
                         accessLevel: event.target.value as "free" | "pro",
                       })}
-                      className={`min-h-10 rounded-xl border px-3 text-xs font-bold shadow-sm outline-none transition-all focus:ring-4 focus:ring-indigo-500/10 disabled:opacity-50 ${book.accessLevel === "pro" ? "border-violet-200 bg-violet-50 text-violet-900 hover:border-violet-300 dark:border-violet-800 dark:bg-violet-950 dark:text-violet-200" : "border-emerald-200 bg-emerald-50 text-emerald-900 hover:border-emerald-300 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"}`}
+                      className={`min-h-10 rounded-xl border px-3 text-xs font-bold shadow-sm outline-none transition-all focus:ring-4 focus:ring-ring/10 disabled:opacity-50 ${book.accessLevel === "pro" ? "border-border bg-accent-soft text-accent-ink hover:border-border dark:border-border dark:bg-accent-soft dark:text-accent-ink" : "border-emerald-200 bg-emerald-50 text-emerald-900 hover:border-emerald-300 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"}`}
                     >
                       <option value="free">Free</option>
                       <option value="pro">Pro</option>
                     </select>
-                    {busySlug === book.slug && <LoaderCircle className="h-4 w-4 animate-spin text-indigo-600"/>}
-                    {book.accessLevel === "pro" && <Crown className="h-4 w-4 text-violet-500"/>}
+                    {busySlug === book.slug && <LoaderCircle className="h-4 w-4 animate-spin text-accent-ink"/>}
+                    {book.accessLevel === "pro" && <Crown className="h-4 w-4 text-accent-ink"/>}
                   </div>
                 </td>
                 <td className="p-4 text-xs">
@@ -219,21 +219,21 @@ export function EbookInventory({
                     <button
                       type="button"
                       onClick={() => onSelect(book.slug, "content")}
-                      className="min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+                      className="min-h-10 rounded-xl border border-border bg-card px-3 text-xs font-bold text-foreground shadow-sm hover:-translate-y-0.5 hover:border-border hover:bg-accent-soft hover:text-accent-ink dark:border-border dark:bg-background dark:text-foreground"
                     >
                       Edit chapters
                     </button>
                     <button
                       type="button"
                       onClick={() => onSelect(book.slug, "pdf")}
-                      className="min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+                      className="min-h-10 rounded-xl border border-border bg-card px-3 text-xs font-bold text-foreground shadow-sm hover:-translate-y-0.5 hover:border-border hover:bg-accent-soft hover:text-accent-ink dark:border-border dark:bg-background dark:text-foreground"
                     >
                       Manage PDF
                     </button>
                     <button
                       type="button"
                       onClick={() => onSelect(book.slug, "exam")}
-                      className="min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+                      className="min-h-10 rounded-xl border border-border bg-card px-3 text-xs font-bold text-foreground shadow-sm hover:-translate-y-0.5 hover:border-border hover:bg-accent-soft hover:text-accent-ink dark:border-border dark:bg-background dark:text-foreground"
                     >
                       Edit exam
                     </button>
@@ -248,7 +248,7 @@ export function EbookInventory({
                             onMessage(String(error));
                           }
                         }}
-                        className="min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+                        className="min-h-10 rounded-xl border border-border bg-card px-3 text-xs font-bold text-foreground shadow-sm hover:-translate-y-0.5 hover:border-border hover:bg-accent-soft hover:text-accent-ink dark:border-border dark:bg-background dark:text-foreground"
                       >
                         Clone private draft
                       </button>
@@ -287,17 +287,17 @@ export function EbookExamSettings({
   ) => onQuestions(questions.map((q, j) => (j === i ? { ...q, ...patch } : q)));
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-50 via-white to-white p-6 shadow-sm dark:border-indigo-900 dark:from-indigo-950/40 dark:via-slate-950 dark:to-slate-950">
+      <div className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-border bg-gradient-to-r from-surface-1 via-white to-white p-6 shadow-sm dark:border-border dark:from-surface-1/40 dark:via-surface-2 dark:to-surface-2">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-indigo-700 dark:text-indigo-300">Exam Builder</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-accent-ink dark:text-accent-ink">Exam Builder</p>
           <h3 className="mt-2 text-2xl font-extrabold tracking-tight">Assessment & question studio</h3>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
             Author questions, correct answers, explanations, scoring and timing.
             Use Save changes to persist edits; new drafts can remain incomplete.
           </p>
         </div>
-        <div className="rounded-xl border border-indigo-200 bg-white px-4 py-3 text-center dark:border-indigo-800 dark:bg-slate-900">
-          <span className="block text-2xl font-extrabold text-indigo-700 dark:text-indigo-300">{questions.length}</span>
+        <div className="rounded-xl border border-border bg-card px-4 py-3 text-center dark:border-border dark:bg-surface-2">
+          <span className="block text-2xl font-extrabold text-accent-ink dark:text-accent-ink">{questions.length}</span>
           <span className="text-xs font-semibold text-muted-foreground">Questions</span>
         </div>
       </div>
@@ -354,7 +354,7 @@ export function EbookExamSettings({
       </Field>
       <div className="space-y-3">
         {questions.map((q, i) => (
-          <details key={i} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/[0.04] transition-shadow open:shadow-md dark:border-slate-800 dark:bg-slate-950">
+          <details key={i} className="rounded-2xl border border-border bg-card p-5 shadow-sm shadow-transparent/[0.04] transition-shadow open:shadow-md dark:border-border dark:bg-background">
             <summary className="cursor-pointer text-sm font-semibold">
               {i + 1}. {q.question || "New question"}
             </summary>
@@ -431,7 +431,7 @@ export function EbookExamSettings({
       </div>
       <button
         type="button"
-        className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-violet-50 px-5 text-sm font-bold text-indigo-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md dark:border-indigo-800 dark:from-indigo-950/50 dark:to-violet-950/40 dark:text-indigo-200"
+        className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-border bg-gradient-to-r from-surface-1 to-surface-2 px-5 text-sm font-bold text-accent-ink shadow-sm hover:-translate-y-0.5 hover:border-border hover:shadow-md dark:border-border dark:from-surface-1/50 dark:to-surface-2/40 dark:text-accent-ink"
         onClick={() =>
           onQuestions([
             ...questions,
@@ -537,9 +537,9 @@ export function EbookBackup({
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
   return (
-    <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+    <section className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-sm dark:border-border dark:bg-background">
       <div>
-        <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">Portability</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-accent-ink dark:text-accent-ink">Portability</p>
         <h3 className="mt-1 text-lg font-bold">Import / export</h3>
         <p className="mt-1 text-sm text-muted-foreground">Back up ebook content, restore drafts, or import Markdown into the selected chapter.</p>
       </div>
@@ -547,7 +547,7 @@ export function EbookBackup({
         <button
           type="button"
           disabled={!book}
-          className="min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+          className="min-h-10 rounded-xl border border-border bg-card px-3 text-sm font-semibold text-foreground shadow-sm hover:-translate-y-0.5 hover:border-border hover:bg-accent-soft hover:text-accent-ink dark:border-border dark:bg-background dark:text-foreground"
           onClick={() =>
             book &&
             download(
@@ -562,7 +562,7 @@ export function EbookBackup({
         <button
           type="button"
           disabled={!book}
-          className="min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+          className="min-h-10 rounded-xl border border-border bg-card px-3 text-sm font-semibold text-foreground shadow-sm hover:-translate-y-0.5 hover:border-border hover:bg-accent-soft hover:text-accent-ink dark:border-border dark:bg-background dark:text-foreground"
           onClick={() =>
             book &&
             download(
@@ -582,10 +582,10 @@ export function EbookBackup({
         </button>
       </div>
       {owner && (
-        <label className="flex min-h-11 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/70 px-3 text-sm font-medium dark:border-slate-800 dark:bg-slate-900/60">
+        <label className="flex min-h-11 items-center gap-3 rounded-xl border border-border bg-background/70 px-3 text-sm font-medium dark:border-border dark:bg-surface-2/60">
           <input
             type="checkbox"
-            className="h-4 w-4 rounded border-slate-300 accent-indigo-600"
+            className="h-4 w-4 rounded border-border accent-indigo-600"
             checked={replace}
             disabled={!book?.revision}
             onChange={(e) => setReplace(e.target.checked)}
@@ -599,7 +599,7 @@ export function EbookBackup({
           : "Import JSON as a new private draft"}
         <input
           type="file"
-          className={`${input} cursor-pointer file:mr-3 file:rounded-xl file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-xs file:font-bold file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-950/50 dark:file:text-indigo-200`}
+          className={`${input} cursor-pointer file:mr-3 file:rounded-xl file:border-0 file:bg-accent-soft file:px-3 file:py-2 file:text-xs file:font-bold file:text-accent-ink hover:file:bg-accent-soft dark:file:bg-accent-soft/50 dark:file:text-accent-ink`}
           accept=".json,application/json"
           disabled={!owner && !book?.revision}
           onChange={async (e) => {
@@ -678,7 +678,7 @@ export function EbookBackup({
         Import Markdown into selected chapter
         <input
           type="file"
-          className={`${input} cursor-pointer file:mr-3 file:rounded-xl file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-xs file:font-bold file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-950/50 dark:file:text-indigo-200`}
+          className={`${input} cursor-pointer file:mr-3 file:rounded-xl file:border-0 file:bg-accent-soft file:px-3 file:py-2 file:text-xs file:font-bold file:text-accent-ink hover:file:bg-accent-soft dark:file:bg-accent-soft/50 dark:file:text-accent-ink`}
           accept=".md,text/markdown"
           onChange={async (e) => {
             try {
@@ -697,7 +697,7 @@ export function EbookBackup({
         />
       </label>
       {error && (
-        <p role="status" className="rounded-xl border border-indigo-100 bg-indigo-50/60 px-3 py-2 text-xs font-medium text-indigo-900 dark:border-indigo-900 dark:bg-indigo-950/30 dark:text-indigo-100">
+        <p role="status" className="rounded-xl border border-border bg-accent-soft/60 px-3 py-2 text-xs font-medium text-accent-ink dark:border-border dark:bg-accent-soft/30 dark:text-accent-ink">
           {error}
         </p>
       )}

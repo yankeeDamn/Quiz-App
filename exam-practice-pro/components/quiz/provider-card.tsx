@@ -26,14 +26,14 @@ export function ProviderCard({
 
   return (
     <motion.div
-      initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+      initial={false}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: reduceMotion ? 0 : Math.min(index * 0.065, 0.3), duration: reduceMotion ? 0 : 0.35 }}
     >
       <Card
         onClick={onClick}
         className={cn(
-          'group cursor-pointer rounded-2xl border-indigo-100/80 bg-card transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-xl hover:shadow-indigo-500/10 motion-reduce:hover:translate-y-0 dark:border-slate-800 dark:hover:border-indigo-700',
+          'group cursor-pointer rounded-2xl border-border/80 bg-card transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-border hover:shadow-xl hover:shadow-transparent/10 motion-reduce:hover:translate-y-0 dark:border-border dark:hover:border-border',
           className
         )}
       >
@@ -46,7 +46,7 @@ export function ProviderCard({
               {provider.name.charAt(0)}
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold truncate group-hover:text-indigo-600 transition-colors">
+              <h3 className="font-semibold truncate group-hover:text-accent-ink transition-colors">
                 {provider.name}
               </h3>
               <p className="text-sm text-muted-foreground truncate">

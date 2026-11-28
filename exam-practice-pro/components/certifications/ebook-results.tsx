@@ -82,7 +82,7 @@ export function EbookResults() {
                     ? `${item.result.percentage}% · ${item.result.passed ? "Passed" : "Completed"}`
                     : "In progress"}
                   <Link
-                    className="ml-3 font-semibold text-indigo-600 underline dark:text-indigo-300"
+                    className="ml-3 font-semibold text-accent-ink underline dark:text-accent-ink"
                     href={`/certifications/learn/${item.slug}?attempt=${item.id}`}
                   >
                     {item.submitted_at ? "Review result" : "Resume"}
@@ -94,7 +94,7 @@ export function EbookResults() {
           {!state.error && state.attempts.length === 0 && (
             <Link
               href="/certifications?tab=start-learning"
-              className="mt-3 inline-block text-sm font-semibold text-indigo-600 underline dark:text-indigo-300"
+              className="mt-3 inline-block text-sm font-semibold text-accent-ink underline dark:text-accent-ink"
             >
               Start your first learning track →
             </Link>

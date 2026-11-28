@@ -432,35 +432,35 @@ export function EbookStudio({
         closeStudio();
       }}
       onClose={onClose}
-      className="m-auto max-h-[94dvh] w-[min(98vw,104rem)] overflow-y-auto rounded-[2rem] border border-slate-200/80 bg-slate-50/95 p-0 text-slate-950 shadow-[0_32px_90px_-28px_rgba(15,23,42,0.6)] backdrop:bg-slate-950/75 backdrop:backdrop-blur-sm dark:border-slate-800 dark:bg-slate-950/95 dark:text-white [&_button]:transition-all [&_button]:duration-200 [&_button]:focus-visible:outline-none [&_button]:focus-visible:ring-4 [&_button]:focus-visible:ring-indigo-500/20 [&_input]:transition-all [&_select]:transition-all [&_textarea]:transition-all"
+      className="m-auto max-h-[94dvh] w-[min(98vw,104rem)] overflow-y-auto rounded-[2rem] border border-border/80 bg-background/95 p-0 text-foreground shadow-[0_32px_90px_-28px_rgba(15,23,42,0.6)] backdrop:bg-background/75 backdrop:backdrop-blur-sm dark:border-border dark:bg-background/95 dark:text-white [&_button]:transition-all [&_button]:duration-200 [&_button]:focus-visible:outline-none [&_button]:focus-visible:ring-4 [&_button]:focus-visible:ring-ring/20 [&_input]:transition-all [&_select]:transition-all [&_textarea]:transition-all"
     >
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-gradient-to-r from-slate-950 via-indigo-950 to-slate-900 px-5 py-5 text-white shadow-lg sm:px-8">
+      <header className="sticky top-0 z-30 border-b border-white/10 bg-gradient-to-r from-surface-1 via-surface-2 to-surface-2 px-5 py-5 text-foreground shadow-lg sm:px-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-start gap-4">
-            <div className="hidden h-12 w-12 shrink-0 place-items-center rounded-2xl border border-white/20 bg-white/10 sm:grid">
-              <BookOpen className="h-6 w-6 text-indigo-200"/>
+            <div className="hidden h-12 w-12 shrink-0 place-items-center rounded-2xl border border-white/20 bg-card/10 sm:grid">
+              <BookOpen className="h-6 w-6 text-accent-ink"/>
             </div>
             <div>
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-indigo-200">
+              <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-accent-ink">
                 ExamPro / Content operations
               </p>
               <h2 className="mt-1 text-2xl font-extrabold tracking-tight sm:text-3xl">
                 Manage & Publish Ebooks
               </h2>
-              <p className="mt-1 text-xs leading-5 text-indigo-100/80">
+              <p className="mt-1 text-xs leading-5 text-accent-ink/80">
                 One workspace for learning content, editions, assessments and reader access.
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className="hidden rounded-full border border-white/20 bg-white/10 px-3 py-2 text-xs font-semibold text-indigo-100 sm:inline-flex">
+            <span className="hidden rounded-full border border-white/20 bg-card/10 px-3 py-2 text-xs font-semibold text-accent-ink sm:inline-flex">
               {adminBooks.length} ebooks · {proGatedCount} Pro
             </span>
             <button
               type="button"
               aria-label="Close ebook studio"
               onClick={closeStudio}
-              className="grid h-11 w-11 place-items-center rounded-xl border border-white/20 bg-white/10 text-white transition hover:bg-white/20"
+              className="grid h-11 w-11 place-items-center rounded-xl border border-white/20 bg-card/10 text-white transition hover:bg-white/20"
             >
               <X className="h-5 w-5" />
             </button>
@@ -470,7 +470,7 @@ export function EbookStudio({
       <div className="space-y-6 p-4 sm:p-7">
         <nav
           aria-label="Ebook command center"
-          className="flex gap-1.5 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+          className="flex gap-1.5 overflow-x-auto rounded-2xl border border-border bg-card p-2 shadow-sm dark:border-border dark:bg-surface-2"
         >
           {([
             ["inventory", "Library overview"],
@@ -484,7 +484,7 @@ export function EbookStudio({
               type="button"
               onClick={() => setTab(id)}
               aria-pressed={tab === id}
-              className={`inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold transition-all sm:text-sm ${tab === id ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"}`}
+              className={`inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold transition-all sm:text-sm ${tab === id ? "bg-primary text-primary-foreground shadow-md shadow-transparent/20" : "text-muted-foreground hover:bg-surface-2 hover:text-foreground dark:text-muted-foreground dark:hover:bg-surface-2 dark:hover:text-foreground"}`}
             >
               {id === "inventory" ? <LayoutDashboard className="h-4 w-4"/> :
                 id === "content" ? <LibraryBig className="h-4 w-4"/> :
@@ -496,9 +496,9 @@ export function EbookStudio({
           ))}
         </nav>
 
-        <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm dark:border-border dark:bg-surface-2 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0 flex-1 space-y-2">
-            <label htmlFor="ebook-studio-picker" className="block text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+            <label htmlFor="ebook-studio-picker" className="block text-xs font-bold uppercase tracking-widest text-muted-foreground dark:text-muted-foreground">
               Active ebook · switch workspace
             </label>
             <div className="relative max-w-xl">
@@ -516,7 +516,7 @@ export function EbookStudio({
                   </option>
                 ))}
               </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-4 h-4 w-4 text-slate-400"/>
+              <ChevronDown className="pointer-events-none absolute right-3 top-4 h-4 w-4 text-muted-foreground"/>
             </div>
             <p className="text-xs text-muted-foreground">
               {book?.revision
@@ -529,14 +529,14 @@ export function EbookStudio({
             {owner && (
               <button type="button" disabled={busy || accessBusy}
                 onClick={startNew}
-                className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-violet-50 px-4 text-sm font-bold text-indigo-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md disabled:opacity-50 dark:border-indigo-800 dark:from-indigo-950/50 dark:to-violet-950/40 dark:text-indigo-200">
+                className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-border bg-gradient-to-r from-surface-1 to-surface-2 px-4 text-sm font-bold text-accent-ink shadow-sm hover:-translate-y-0.5 hover:border-border hover:shadow-md disabled:opacity-50 dark:border-border dark:from-surface-1/50 dark:to-surface-2/40 dark:text-accent-ink">
                 <Plus className="h-4 w-4"/> New ebook
               </button>
             )}
             {book && tab !== "inventory" && (
               <button type="button" disabled={busy || accessBusy}
                 onClick={() => void handleSaveEbook()}
-                className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 hover:-translate-y-0.5 hover:from-indigo-700 hover:to-violet-700 hover:shadow-xl disabled:opacity-50">
+                className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-gradient-to-r from-surface-1 to-surface-2 px-5 text-sm font-bold text-foreground shadow-lg shadow-transparent/20 hover:-translate-y-0.5 hover:from-surface-1 hover:to-surface-2 hover:shadow-xl disabled:opacity-50">
                 {busy ? <LoaderCircle className="h-4 w-4 animate-spin"/> : <Save className="h-4 w-4"/>}
                 {busy ? "Saving…" : book.revision ? "Save changes" : "Create ebook"}
               </button>
@@ -600,7 +600,7 @@ export function EbookStudio({
             {owner && (
               <button
                 type="button"
-                className="min-h-11 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 hover:-translate-y-0.5 hover:from-indigo-700 hover:to-violet-700"
+                className="min-h-11 rounded-2xl bg-gradient-to-r from-surface-1 to-surface-2 px-5 text-sm font-bold text-foreground shadow-lg shadow-transparent/20 hover:-translate-y-0.5 hover:from-surface-1 hover:to-surface-2"
                 onClick={startNew}
             >
                 + Create new ebook
@@ -689,7 +689,7 @@ export function EbookStudio({
             </Field>
             <button
               type="button"
-              className="min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:border-indigo-800 dark:hover:bg-indigo-950/40"
+              className="min-h-10 rounded-xl border border-border bg-card px-3 text-sm font-semibold text-foreground shadow-sm hover:-translate-y-0.5 hover:border-border hover:bg-accent-soft hover:text-accent-ink dark:border-border dark:bg-background dark:text-foreground dark:hover:border-border dark:hover:bg-accent-soft/40"
               onClick={() => {
                 const parsed = parseBulk(bulk);
                 if (parsed.errors.length) {
@@ -772,16 +772,16 @@ export function EbookStudio({
         )}
         {tab === "content" && (
           <>
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/60 p-5 dark:border-indigo-900 dark:bg-indigo-950/20">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-accent-soft/60 p-5 dark:border-border dark:bg-accent-soft/20">
               <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-300">Authoring workspace</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-accent-ink dark:text-accent-ink">Authoring workspace</p>
                 <h3 className="mt-1 text-xl font-extrabold tracking-tight">Build your learning track</h3>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
                   Write chapters, preview lessons instantly, and define who can read the ebook.
                   Free/Pro controls save immediately for existing ebooks; chapter edits use Save changes.
                 </p>
               </div>
-              <span className="rounded-full border border-indigo-200 bg-white px-3 py-1.5 text-xs font-bold text-indigo-700 dark:border-indigo-800 dark:bg-slate-900 dark:text-indigo-200">
+              <span className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-bold text-accent-ink dark:border-border dark:bg-surface-2 dark:text-accent-ink">
                 {book?.chapters.length ?? 0} chapters
               </span>
             </div>
@@ -793,7 +793,7 @@ export function EbookStudio({
                 </span>
                 <button
                   type="button"
-                  className="min-h-10 rounded-xl px-3 text-sm font-semibold text-indigo-700 underline-offset-4 hover:bg-indigo-50 hover:underline dark:text-indigo-300 dark:hover:bg-indigo-950/40"
+                  className="min-h-10 rounded-xl px-3 text-sm font-semibold text-accent-ink underline-offset-4 hover:bg-accent-soft hover:underline dark:text-accent-ink dark:hover:bg-accent-soft/40"
                   onClick={() => {
                     setBook(restore);
                     setSelected(restore.revision ? restore.slug : "");
@@ -926,7 +926,7 @@ export function EbookStudio({
                       <button
                         key={c.id}
                         type="button"
-                        className={`block w-full rounded-2xl border p-3.5 text-left text-xs font-semibold shadow-sm ${i === chapterIndex ? "border-indigo-300 bg-indigo-50 text-indigo-800 ring-2 ring-indigo-500/10 dark:border-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-200" : "border-transparent bg-white text-slate-600 hover:border-indigo-100 hover:bg-indigo-50/70 hover:text-indigo-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:border-indigo-900 dark:hover:bg-indigo-950/30"}`}
+                        className={`block w-full rounded-2xl border p-3.5 text-left text-xs font-semibold shadow-sm ${i === chapterIndex ? "border-border bg-accent-soft text-accent-ink ring-2 ring-ring/10 dark:border-border dark:bg-accent-soft/60 dark:text-accent-ink" : "border-transparent bg-card text-muted-foreground hover:border-border hover:bg-accent-soft/70 hover:text-accent-ink dark:bg-background dark:text-muted-foreground dark:hover:border-border dark:hover:bg-accent-soft/30"}`}
                         onClick={() => setChapterIndex(i)}
                       >
                         {i + 1}. {c.title}
@@ -938,7 +938,7 @@ export function EbookStudio({
                       <h3 className="font-bold">Chapters</h3>
                       <button
                         type="button"
-                        className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+                        className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-border bg-card px-3 text-sm font-semibold text-foreground shadow-sm hover:-translate-y-0.5 hover:border-border hover:bg-accent-soft hover:text-accent-ink dark:border-border dark:bg-background dark:text-foreground"
                         onClick={() => {
                           change({
                             chapters: [...book.chapters, emptyChapter()],
@@ -976,7 +976,7 @@ export function EbookStudio({
                             aria-label="Move chapter earlier"
                             type="button"
                             disabled={chapterIndex === 0}
-                            className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
+                            className="grid h-10 w-10 place-items-center rounded-xl border border-border bg-card p-2 text-muted-foreground shadow-sm hover:-translate-y-0.5 hover:border-border hover:bg-accent-soft hover:text-accent-ink disabled:opacity-40 dark:border-border dark:bg-background dark:text-muted-foreground"
                             onClick={() => move(-1)}
                           >
                             <ArrowUp className="h-4 w-4" />
@@ -985,7 +985,7 @@ export function EbookStudio({
                             aria-label="Move chapter later"
                             type="button"
                             disabled={chapterIndex === book.chapters.length - 1}
-                            className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
+                            className="grid h-10 w-10 place-items-center rounded-xl border border-border bg-card p-2 text-muted-foreground shadow-sm hover:-translate-y-0.5 hover:border-border hover:bg-accent-soft hover:text-accent-ink disabled:opacity-40 dark:border-border dark:bg-background dark:text-muted-foreground"
                             onClick={() => move(1)}
                           >
                             <ArrowDown className="h-4 w-4" />
@@ -1001,7 +1001,7 @@ export function EbookStudio({
                               });
                               setChapterIndex(0);
                             }}
-                            className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+                            className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-border bg-card px-3 text-sm font-semibold text-foreground shadow-sm hover:-translate-y-0.5 hover:border-border hover:bg-accent-soft hover:text-accent-ink disabled:opacity-40 dark:border-border dark:bg-background dark:text-foreground"
                           >
                             <Trash2 className="h-4 w-4" />
                             Remove chapter
@@ -1060,7 +1060,7 @@ export function EbookStudio({
                             <button
                               key={label}
                               type="button"
-                              className="min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+                              className="min-h-10 rounded-xl border border-border bg-card px-3 text-xs font-bold text-foreground shadow-sm hover:-translate-y-0.5 hover:border-border hover:bg-accent-soft hover:text-accent-ink dark:border-border dark:bg-background dark:text-foreground"
                               onClick={() => {
                                 const area = markdownRef.current;
                                 const start =
@@ -1288,7 +1288,7 @@ export function EbookStudio({
                     )}
                   </section>
                   <aside className="min-w-0 rounded-2xl border p-5">
-                    <p className="mb-5 text-xs font-bold uppercase tracking-widest text-indigo-600">
+                    <p className="mb-5 text-xs font-bold uppercase tracking-widest text-accent-ink">
                       Live reader preview
                     </p>
                     {chapter && (
@@ -1321,7 +1321,7 @@ export function EbookStudio({
                 type="button"
                 disabled={busy || accessBusy}
                 onClick={() => void handleSaveEbook()}
-                className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 hover:-translate-y-0.5 hover:from-indigo-700 hover:to-violet-700 disabled:opacity-50"
+                className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-gradient-to-r from-surface-1 to-surface-2 px-5 text-sm font-bold text-foreground shadow-lg shadow-transparent/20 hover:-translate-y-0.5 hover:from-surface-1 hover:to-surface-2 disabled:opacity-50"
               >
                 {busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 {busy ? "Saving…" : book.revision ? "Save changes" : "Create ebook"}
@@ -1330,7 +1330,7 @@ export function EbookStudio({
                 type="button"
                 onClick={draft}
                 disabled={busy || accessBusy}
-                className="min-h-11 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+                className="min-h-11 rounded-2xl border border-border bg-card px-4 text-sm font-bold text-foreground shadow-sm hover:-translate-y-0.5 hover:border-border hover:bg-accent-soft hover:text-accent-ink dark:border-border dark:bg-background dark:text-foreground"
               >
                 Save local draft
               </button>
@@ -1356,14 +1356,14 @@ export function EbookStudio({
           </div>
         )}
         {archiveOpen && book?.revision && (
-          <div className="fixed inset-0 z-[90] grid place-items-center bg-slate-950/60 p-4" role="presentation">
+          <div className="fixed inset-0 z-[90] grid place-items-center bg-background/60 p-4" role="presentation">
             <section role="dialog" aria-modal="true" aria-labelledby="archive-ebook-title" className="w-full max-w-md rounded-2xl border bg-card p-6 shadow-2xl">
               <h3 id="archive-ebook-title" className="text-xl font-bold">Archive this ebook?</h3>
               <p className="mt-3 text-sm text-muted-foreground">
                 {book.title} will be removed from active authoring and learner listings. Existing attempts remain preserved.
               </p>
               <div className="mt-6 flex justify-end gap-3">
-                <button type="button" disabled={busy} className="min-h-11 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200" onClick={() => setArchiveOpen(false)}>
+                <button type="button" disabled={busy} className="min-h-11 rounded-2xl border border-border bg-card px-4 text-sm font-bold text-foreground shadow-sm hover:-translate-y-0.5 hover:border-border hover:bg-accent-soft hover:text-accent-ink dark:border-border dark:bg-background dark:text-foreground" onClick={() => setArchiveOpen(false)}>
                   Cancel
                 </button>
                 <button
@@ -1425,7 +1425,7 @@ export function EbookStudio({
                     key={role}
                     type="button"
                     disabled={!book?.revision || busy}
-                    className="min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+                    className="min-h-10 rounded-xl border border-border bg-card px-3 text-sm font-semibold text-foreground shadow-sm hover:-translate-y-0.5 hover:border-border hover:bg-accent-soft hover:text-accent-ink disabled:opacity-40 dark:border-border dark:bg-background dark:text-foreground"
                     onClick={() =>
                       book &&
                       void approve(book.slug, grantEmail, role, "approved")
@@ -1458,7 +1458,7 @@ export function EbookStudio({
                         "approved",
                       )
                     }
-                    className="min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+                    className="min-h-10 rounded-xl border border-border bg-card px-3 text-xs font-bold text-foreground shadow-sm hover:-translate-y-0.5 hover:border-border hover:bg-accent-soft hover:text-accent-ink dark:border-border dark:bg-background dark:text-foreground"
                   >
                     Approve as Reader
                   </button>
@@ -1473,7 +1473,7 @@ export function EbookStudio({
                         "approved",
                       )
                     }
-                    className="min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+                    className="min-h-10 rounded-xl border border-border bg-card px-3 text-xs font-bold text-foreground shadow-sm hover:-translate-y-0.5 hover:border-border hover:bg-accent-soft hover:text-accent-ink dark:border-border dark:bg-background dark:text-foreground"
                   >
                     Approve as Co-Editor
                   </button>

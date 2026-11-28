@@ -2,8 +2,8 @@
 
 import type { ReactNode } from 'react';
 
-export const input = 'min-h-11 w-full min-w-0 rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50';
-export const card = 'min-w-0 rounded-2xl border border-border/80 bg-card p-5 shadow-sm shadow-slate-900/[0.03] sm:p-6';
+export const input = 'min-h-11 w-full min-w-0 rounded-xl border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:border-accent-ink focus:outline-none focus:ring-2 focus:ring-ring/20 disabled:opacity-50';
+export const card = 'min-w-0 rounded-2xl border border-border/80 bg-card p-5 shadow-sm shadow-transparent/[0.03] sm:p-6';
 
 export function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string }) {
   return (

@@ -248,7 +248,7 @@ export default function QuizTakePage({ params }: PageProps) {
     currentAnswer.length > 0;
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-background">
+    <div className="flex min-h-screen flex-col bg-background dark:bg-background">
       {/* Top Bar */}
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-14 items-center justify-between gap-4 px-4">
@@ -322,7 +322,7 @@ export default function QuizTakePage({ params }: PageProps) {
 
             <Button
               size="sm"
-              className="bg-indigo-600 hover:bg-indigo-700 hidden sm:flex"
+              className="bg-primary hover:bg-primary-hover hidden sm:flex"
               onClick={openSubmitDialog}
             >
               <Send className="mr-2 h-4 w-4" />
@@ -354,7 +354,7 @@ export default function QuizTakePage({ params }: PageProps) {
                 </div>
                 <div className="mt-6">
                   <Button
-                    className="w-full bg-indigo-600 hover:bg-indigo-700"
+                    className="w-full bg-primary hover:bg-primary-hover"
                     onClick={() => {
                       setMobileNavOpen(false);
                       openSubmitDialog();
@@ -471,7 +471,7 @@ export default function QuizTakePage({ params }: PageProps) {
                           session.currentQuestionIndex ===
                           session.questionOrder.length - 1
                         }
-                        className="bg-indigo-600 hover:bg-indigo-700"
+                        className="bg-primary hover:bg-primary-hover"
                       >
                         Next
                         <ChevronRight className="ml-2 h-4 w-4" />
@@ -540,7 +540,7 @@ export default function QuizTakePage({ params }: PageProps) {
               Continue Quiz
             </Button>
             <Button
-              className="bg-indigo-600 hover:bg-indigo-700"
+              className="bg-primary hover:bg-primary-hover"
               onClick={handleSubmit}
             >
               Submit Quiz

@@ -47,7 +47,7 @@ export function AchievementBadge({
               sizeClasses[size],
               isUnlocked
                 ? 'bg-gradient-to-br from-yellow-400 to-orange-500 shadow-lg'
-                : 'bg-gray-200 dark:bg-gray-700 grayscale opacity-50'
+                : 'bg-surface-2 dark:bg-background grayscale opacity-50'
             )}
           >
             <span role="img" aria-label={achievement.name}>
@@ -57,9 +57,9 @@ export function AchievementBadge({
           
           {showProgress && !isUnlocked && achievement.target && (
             <div className="w-full mt-1">
-              <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-surface-2 dark:bg-background rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-indigo-600 transition-all duration-300"
+                  className="h-full bg-primary transition-all duration-300"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>

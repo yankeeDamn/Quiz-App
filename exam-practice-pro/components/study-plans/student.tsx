@@ -118,7 +118,7 @@ function StudyContent({
   return (
     <div className="space-y-7">
       <div>
-        <p className="mb-2 text-xs font-bold uppercase tracking-widest text-indigo-600">
+        <p className="mb-2 text-xs font-bold uppercase tracking-widest text-accent-ink">
           ExamPro • Learn with a plan
         </p>
         <h1 className="text-3xl font-bold sm:text-4xl">
@@ -181,7 +181,7 @@ function StudyContent({
           </div>
           {!plan.access && (
             <div className={card}>
-              <LockKeyhole className="mb-2 text-indigo-600" />
+              <LockKeyhole className="mb-2 text-accent-ink" />
               <h2 className="font-bold">Continue your preparation with Pro</h2>
               <p className="my-2 text-sm">
                 Explore the selected free tasks. Full guidance and progress
@@ -293,7 +293,7 @@ function StudyContent({
                   <Link
                     key={d.day}
                     href={link(d.day)}
-                    className={card + " transition hover:border-indigo-400"}
+                    className={card + " transition hover:border-accent-ink"}
                   >
                     <h2 className="font-bold">
                       Day {d.day}{" "}
@@ -327,7 +327,7 @@ function StudyContent({
               )}
               {daily.tasks.map((t, i) => (
                 <article key={t.id} className={card}>
-                  <p className="mb-2 text-xs font-semibold uppercase text-indigo-600">
+                  <p className="mb-2 text-xs font-semibold uppercase text-accent-ink">
                     {i + 1} · {t.kind} · {t.minutes} min ·{" "}
                     {t.required ? "Required" : "Optional"}
                   </p>
@@ -502,8 +502,8 @@ function StudyCatalogueView({ catalogue }: { catalogue: StudyCatalogue }) {
           return (
             <button key={item.id} type="button" aria-pressed={track === item.id}
               onClick={() => setTrack(item.id)}
-              className={"rounded-xl border p-4 text-left transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 " +
-                (track === item.id ? "border-indigo-500 bg-indigo-600 text-white shadow-sm" : "bg-card hover:border-indigo-400")}>
+              className={"rounded-xl border p-4 text-left transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring " +
+                (track === item.id ? "border-accent-ink bg-primary text-primary-foreground shadow-sm" : "bg-card hover:border-accent-ink")}>
               <span className="block text-lg font-bold">{item.title}</span>
               <span className="mt-1 block text-sm">{count} {count === 1 ? "programme" : "programmes"}</span>
             </button>
@@ -521,7 +521,7 @@ function StudyCatalogueView({ catalogue }: { catalogue: StudyCatalogue }) {
           <div className="grid gap-5 md:grid-cols-2">
           {plans.map((p) => (
             <article key={p.id} className={card}>
-              <BookOpen className="mb-4 text-indigo-600" />
+              <BookOpen className="mb-4 text-accent-ink" />
               <p className="text-sm text-muted-foreground">{p.name}</p>
               <h3 className="text-xl font-bold">{p.title}</h3>
               <p className="my-3 text-sm">{p.description}</p>

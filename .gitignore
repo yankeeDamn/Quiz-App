@@ -6,3 +6,6 @@ dist/
 # Paid/draft authoring source must never enter the public repository.
 .private-content/
 *.private-content.tar*
+
+# Local browser regression artifacts
+/test-results/

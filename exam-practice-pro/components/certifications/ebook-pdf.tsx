@@ -83,9 +83,9 @@ function PdfViewer({ book }: { book: EbookTrack }) {
       <iframe title={`${book.title} PDF`} src={url} className="h-[75dvh] w-full rounded-xl border" referrerPolicy="no-referrer"/>
       {preview&&<>
         <EbookUpgradeGate previewPages={book.freePreviewPages ?? 2}/>
-        <button className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-indigo-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 dark:border-slate-700 dark:bg-slate-950 dark:text-indigo-300" onClick={()=>setRefresh(n=>n+1)}><RefreshCw className="h-4 w-4"/> Already paid? Check access</button>
+        <button className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-border bg-card px-4 text-sm font-bold text-accent-ink shadow-sm hover:-translate-y-0.5 hover:border-border hover:bg-accent-soft dark:border-border dark:bg-background dark:text-accent-ink" onClick={()=>setRefresh(n=>n+1)}><RefreshCw className="h-4 w-4"/> Already paid? Check access</button>
       </>}
-      {book.allowFullPdfDownload&& !preview && <a className="inline-flex min-h-11 items-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-indigo-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 dark:border-slate-700 dark:bg-slate-950 dark:text-indigo-300" href={book.pdfUrl?.startsWith('https://')?book.pdfUrl:`/api/ebooks/${book.slug}/download`}>Download PDF</a>}
+      {book.allowFullPdfDownload&& !preview && <a className="inline-flex min-h-11 items-center rounded-2xl border border-border bg-card px-4 py-3 text-sm font-bold text-accent-ink shadow-sm hover:-translate-y-0.5 hover:border-border hover:bg-accent-soft dark:border-border dark:bg-background dark:text-accent-ink" href={book.pdfUrl?.startsWith('https://')?book.pdfUrl:`/api/ebooks/${book.slug}/download`}>Download PDF</a>}
     </>:!error&&<p role="status">Loading authorized PDF…</p>}
   </section>;
 }
@@ -121,13 +121,13 @@ export function EbookPrintView({
         <button
           type="button"
           onClick={() => window.print()}
-          className="rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 hover:-translate-y-0.5 hover:from-indigo-700 hover:to-violet-700"
+          className="rounded-2xl bg-gradient-to-r from-surface-1 to-surface-2 px-5 py-3 text-sm font-bold text-foreground shadow-lg shadow-transparent/20 hover:-translate-y-0.5 hover:from-surface-1 hover:to-surface-2"
         >
           Print / Save as PDF
         </button>
         <a
           href={`/certifications/learn/${book.slug}`}
-          className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+          className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-border bg-card px-4 py-3 text-sm font-bold text-foreground shadow-sm hover:-translate-y-0.5 hover:border-border hover:bg-accent-soft hover:text-accent-ink dark:border-border dark:bg-background dark:text-foreground"
         >
           Back to interactive tutorial
         </a>
@@ -296,24 +296,24 @@ export function PdfSettings({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 p-6 text-white shadow-lg sm:p-7">
+      <div className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-border bg-gradient-to-br from-surface-1 via-surface-2 to-surface-2 p-6 text-foreground shadow-lg sm:p-7">
         <div className="max-w-2xl">
-          <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-indigo-200">
+          <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-accent-ink">
             <FileLock2 className="h-4 w-4" /> Secure publishing
           </p>
           <h3 className="mt-3 text-2xl font-extrabold tracking-tight sm:text-3xl">PDF Manager</h3>
-          <p className="mt-2 text-sm leading-6 text-indigo-100/90">
+          <p className="mt-2 text-sm leading-6 text-accent-ink/90">
             Upload a protected edition and deliver only permitted preview pages.
             Reader access is verified on the server for every file request.
           </p>
         </div>
-        <div className="grid min-w-[160px] gap-2 rounded-xl border border-white/15 bg-white/10 p-4 text-sm">
-          <span className="text-indigo-100">Edition status</span>
+        <div className="grid min-w-[160px] gap-2 rounded-xl border border-white/15 bg-card/10 p-4 text-sm">
+          <span className="text-accent-ink">Edition status</span>
           <strong className="flex items-center gap-2">
             {book.fullPdfStorageKey ? <CheckCircle2 className="h-4 w-4 text-emerald-300" /> : <FileText className="h-4 w-4" />}
             {book.fullPdfStorageKey ? "Protected PDF ready" : "No private PDF"}
           </strong>
-          <span className="text-xs text-indigo-200">
+          <span className="text-xs text-accent-ink">
             {book.fullPdfStorageKey ? "Preview generated" : "Upload an edition below"}
           </span>
         </div>
@@ -326,10 +326,10 @@ export function PdfSettings({
         onCommit={onAccessCommit}
       />
 
-      <section className="grid gap-6 rounded-2xl border border-slate-200 bg-card p-5 shadow-sm lg:grid-cols-[minmax(0,1fr)_280px] sm:p-6">
+      <section className="grid gap-6 rounded-2xl border border-border bg-card p-5 shadow-sm lg:grid-cols-[minmax(0,1fr)_280px] sm:p-6">
         <div className="space-y-5">
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-indigo-600">Edition details</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-accent-ink">Edition details</p>
             <h4 className="mt-1 text-lg font-bold">Printable reference</h4>
             <p className="mt-1 text-sm text-muted-foreground">Changes to these details are saved with the Save changes action.</p>
           </div>
@@ -343,10 +343,10 @@ export function PdfSettings({
         />
       </label>
 
-      <label className="flex min-h-11 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/70 px-3 text-sm font-medium dark:border-slate-800 dark:bg-slate-900/60">
+      <label className="flex min-h-11 items-center gap-3 rounded-xl border border-border bg-background/70 px-3 text-sm font-medium dark:border-border dark:bg-surface-2/60">
         <input
           type="checkbox"
-          className="h-4 w-4 rounded border-slate-300 accent-indigo-600"
+          className="h-4 w-4 rounded border-border accent-indigo-600"
           checked={!!book.isCheatSheet}
           onChange={(event) => onChange({ isCheatSheet: event.target.checked })}
         />
@@ -373,7 +373,7 @@ export function PdfSettings({
         role="button"
         tabIndex={book.revision && !busy && !accessBusy ? 0 : -1}
         aria-disabled={!book.revision || busy || accessBusy}
-        className={`rounded-3xl border-2 border-dashed p-10 text-center shadow-inner transition-all ${dragging ? "scale-[1.01] border-indigo-500 bg-indigo-50 shadow-indigo-500/10 dark:bg-indigo-950/30" : "border-slate-300 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-900/50"} ${!book.revision || busy || accessBusy ? "cursor-not-allowed opacity-55" : "cursor-pointer hover:-translate-y-0.5 hover:border-indigo-400 hover:bg-indigo-50/60 hover:shadow-lg dark:hover:bg-indigo-950/20"}`}
+        className={`rounded-3xl border-2 border-dashed p-10 text-center shadow-inner transition-all ${dragging ? "scale-[1.01] border-accent-ink bg-accent-soft shadow-transparent/10 dark:bg-accent-soft/30" : "border-border bg-background/50 dark:border-border dark:bg-surface-2/50"} ${!book.revision || busy || accessBusy ? "cursor-not-allowed opacity-55" : "cursor-pointer hover:-translate-y-0.5 hover:border-accent-ink hover:bg-accent-soft/60 hover:shadow-lg dark:hover:bg-accent-soft/20"}`}
         onDragOver={(event) => {
           event.preventDefault();
           if (book.revision && !busy && !accessBusy) setDragging(true);
@@ -392,7 +392,7 @@ export function PdfSettings({
           }
         }}
       >
-        <CloudUpload className="mx-auto mb-3 h-10 w-10 text-indigo-600" />
+        <CloudUpload className="mx-auto mb-3 h-10 w-10 text-accent-ink" />
         <p className="font-semibold">
           {busy ? <span className="inline-flex items-center gap-2"><LoaderCircle className="h-4 w-4 animate-spin" />Uploading and generating preview…</span> : "Drop a PDF here or click to browse"}
         </p>
@@ -420,7 +420,7 @@ export function PdfSettings({
           </p>
           <button
             type="button"
-            className="mt-3 min-h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+            className="mt-3 min-h-10 rounded-xl border border-border bg-card px-3 text-sm font-bold text-foreground shadow-sm hover:-translate-y-0.5 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 dark:border-border dark:bg-background dark:text-foreground"
             onClick={() =>
               onChange({
                 pdfUrl: "",
@@ -448,8 +448,8 @@ export function PdfSettings({
         </a>
       )}
         </div>
-        <aside className="flex flex-col gap-3 rounded-xl border border-indigo-100 bg-indigo-50/60 p-5 text-sm dark:border-indigo-900 dark:bg-indigo-950/20">
-          <p className="text-xs font-bold uppercase tracking-widest text-indigo-700 dark:text-indigo-300">How publishing works</p>
+        <aside className="flex flex-col gap-3 rounded-xl border border-border bg-accent-soft/60 p-5 text-sm dark:border-border dark:bg-accent-soft/20">
+          <p className="text-xs font-bold uppercase tracking-widest text-accent-ink dark:text-accent-ink">How publishing works</p>
           <div className="space-y-4">
             <p><strong className="block">1. Save an ebook</strong><span className="text-muted-foreground">Create the ebook record before uploading a PDF.</span></p>
             <p><strong className="block">2. Set access</strong><span className="text-muted-foreground">Free/Pro and download controls save immediately for existing ebooks.</span></p>

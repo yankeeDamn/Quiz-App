@@ -171,7 +171,7 @@ export default function FlashcardsPage({ params }: PageProps) {
   return (
     <>
       <Header />
-      <main className="flex-1 bg-gray-50 dark:bg-background">
+      <main className="flex-1 bg-background dark:bg-background">
         <div className="container mx-auto px-4 py-8 max-w-3xl">
           {/* Back */}
           <Button variant="ghost" asChild className="mb-6">
@@ -266,11 +266,11 @@ export default function FlashcardsPage({ params }: PageProps) {
                                     </div>
                                   ))}
                               </div>
-                              <div className="rounded-lg border border-indigo-200 bg-indigo-50 p-3 dark:border-indigo-900 dark:bg-indigo-900/20">
-                                <p className="text-sm font-semibold text-indigo-700 dark:text-indigo-300 mb-1">
+                              <div className="rounded-lg border border-border bg-accent-soft p-3 dark:border-border dark:bg-accent-soft/20">
+                                <p className="text-sm font-semibold text-accent-ink dark:text-accent-ink mb-1">
                                   Explanation
                                 </p>
-                                <p className="text-sm text-indigo-800 dark:text-indigo-200">
+                                <p className="text-sm text-accent-ink dark:text-accent-ink">
                                   {currentCard.explanation}<ReportMistake questionId={currentCard.id}/>
                                 </p>
                               </div>
@@ -379,7 +379,7 @@ export default function FlashcardsPage({ params }: PageProps) {
                       <Button
                         size="lg"
                         onClick={handleStudyUnknown}
-                        className="bg-indigo-600 hover:bg-indigo-700"
+                        className="bg-primary hover:bg-primary-hover"
                       >
                         <RotateCcw className="mr-2 h-4 w-4" />
                         Study Unknown ({unknownIds.size})

@@ -45,7 +45,7 @@ export function CglContentPipeline(){
   <label className="block text-sm">Question bank JSON — four arrays of 25 questions each
    <textarea rows={6} className="mt-2 w-full rounded border p-3 font-mono text-xs" value={source} onChange={e=>setSource(e.target.value)} placeholder={'{ "reasoning": [], "general-awareness": [], "quant": [], "english": [] }'}/>
   </label>
-  <button type="button" disabled={working||!source.trim()} onClick={()=>void inspect()} className="rounded bg-indigo-700 px-4 py-2 text-white disabled:opacity-50">Validate draft only</button>
+  <button type="button" disabled={working||!source.trim()} onClick={()=>void inspect()} className="rounded bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50">Validate draft only</button>
   {preview?.valid&&<button type="button" disabled={working} onClick={()=>void stage()} className="ml-3 rounded border border-amber-500 px-4 py-2 text-sm">Create inactive staging draft (confirmation required)</button>}
   {notice&&<p role="status" className="text-sm">{notice}</p>}
   {error&&<p role="alert" className="text-red-600">{error}</p>}

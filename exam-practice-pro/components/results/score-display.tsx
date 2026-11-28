@@ -26,7 +26,7 @@ export function ScoreDisplay({ result }: ScoreDisplayProps) {
             fill="none"
             stroke="currentColor"
             strokeWidth="8"
-            className="text-gray-200 dark:text-gray-700"
+            className="text-foreground dark:text-foreground"
           />
           {/* Progress circle */}
           <motion.circle
