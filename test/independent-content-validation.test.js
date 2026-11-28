@@ -1,0 +1,12 @@
+'use strict';
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const courses=require('../src/services/course-drafts.service');
+const certs=require('../src/services/certification-drafts.service');
+const pdfs=require('../src/services/pdf-drafts.service');
+const uid='00000000-0000-4000-8000-000000000001',other='00000000-0000-4000-8000-000000000002';
+const lesson={id:other,title:'Intro',kind:'reading',minutes:15,preview:false,content:'Text'};
+const course={title:'Test',description:'',level:'beginner',modules:[{id:uid,title:'Module',lessons:[lesson]}]};
+test('curriculum preserves stable identifiers and validates lesson type and time',()=>{assert.deepEqual(courses.validate(course),course);assert.throws(()=>courses.validate({...course,modules:[{...course.modules[0],lessons:[{...lesson,minutes:0}]}]}),/Invalid lesson/);assert.throws(()=>courses.validate({...course,modules:[{...course.modules[0],lessons:[lesson,lesson]}]}),/Duplicate/);assert.throws(()=>courses.validate({...course,modules:[{...course.modules[0],lessons:[{...lesson,kind:'link',content:'javascript:alert(1)'}]}]}),/HTTPS/);});
+test('certification weight cannot exceed 100 and duplicate links are normalized',()=>{const input={title:'Test',exam_code:'T1',description:'',domains:[{id:uid,title:'A',weight:60}],pdf_ids:[uid,uid],course_ids:[]};assert.deepEqual(certs.validate(input).pdf_ids,[uid]);assert.throws(()=>certs.validate({...input,domains:[...input.domains,{id:other,title:'B',weight:41}]}),/100/);});
+test('disabled independent content fails before DB access',async()=>{const old=process.env.INDEPENDENT_CONTENT_ENABLED;try{delete process.env.INDEPENDENT_CONTENT_ENABLED;for(const s of [pdfs,courses,certs])await assert.rejects(s.list(),e=>e.statusCode===404);}finally{if(old===undefined)delete process.env.INDEPENDENT_CONTENT_ENABLED;else process.env.INDEPENDENT_CONTENT_ENABLED=old;}});
