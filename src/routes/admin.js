@@ -421,4 +421,12 @@ router.put('/tests/:id', wrap(async (req, res) => {
   return (await content.updateTest(req.params.id, r.value, active)) ? ok(res, {}) : bad(res, 'Test not found', 404);
 }));
 
+const pdfDrafts=require('../services/pdf-drafts.service');
+router.get('/content-pdfs',requireHumanReviewer,wrap(async(_req,res)=>ok(res,{items:await pdfDrafts.list()})));
+router.post('/content-pdfs',requireHumanReviewer,wrap(async(req,res)=>ok(res,await pdfDrafts.create(req.body))));
+router.put('/content-pdfs/:id',requireHumanReviewer,wrap(async(req,res)=>ok(res,await pdfDrafts.update(req.params.id,req.body))));
+router.post('/content-pdfs/:id/file',requireHumanReviewer,wrap(async(req,res)=>ok(res,await pdfDrafts.upload(req.params.id,Number(req.query.revision),req.body))));
+router.get('/content-pdfs/:id/preview',requireHumanReviewer,wrap(async(req,res)=>{
+ const bytes=await pdfDrafts.preview(req.params.id);res.type('application/pdf');res.set('Content-Disposition','inline; filename="preview.pdf"');res.set('X-Content-Type-Options','nosniff');res.send(bytes);
+}));
 module.exports = router;
