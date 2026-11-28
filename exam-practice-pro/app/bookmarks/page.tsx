@@ -1,6 +1,8 @@
 'use client';
+import {useClientReady} from '@/hooks/use-client-ready';
+import {useUserStorage} from '@/components/layout/user-storage-provider';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -27,33 +29,20 @@ interface BookmarkWithQuestion extends BookmarkType {
   quizTitle?: string;
 }
 
-export default function BookmarksPage() {
-  const [bookmarks, setBookmarks] = useState<BookmarkWithQuestion[]>([]);
+function readBookmarks(): BookmarkWithQuestion[] {
+  return loadBookmarks().map(bm => {
+    const quiz = getAnyQuizById(bm.quizId);
+    return {...bm, question: quiz?.questions.find(q => q.id === bm.questionId), quizTitle: quiz?.title};
+  });
+}
+
+export default function BookmarksPage() { const ready=useClientReady(),storage=useUserStorage(); return ready&&storage.ready ? <BookmarksContent key={storage.prefix}/> : null; }
+function BookmarksContent() {
+  const [bookmarks, setBookmarks] = useState<BookmarkWithQuestion[]>(readBookmarks);
   const [search, setSearch] = useState('');
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    refreshBookmarks();
-  }, []);
-
-  const refreshBookmarks = () => {
-    const saved = loadBookmarks();
-    const enriched: BookmarkWithQuestion[] = saved.map((bm) => {
-      const quiz = getAnyQuizById(bm.quizId);
-      const question = quiz?.questions.find((q) => q.id === bm.questionId);
-      return {
-        ...bm,
-        question,
-        quizTitle: quiz?.title,
-      };
-    });
-    setBookmarks(enriched);
-  };
-
   const handleRemoveBookmark = (questionId: string, quizId: string) => {
     removeBookmark(questionId, quizId);
-    refreshBookmarks();
+    setBookmarks(readBookmarks());
   };
 
   const filtered = useMemo(() => {
@@ -68,7 +57,7 @@ export default function BookmarksPage() {
     );
   }, [bookmarks, search]);
 
-  if (!mounted) return null;
+
 
   return (
     <>

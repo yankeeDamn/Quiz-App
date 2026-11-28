@@ -35,22 +35,19 @@ export function MockReview({testId,onClose}:{testId:string;onClose:()=>void}) {
  const [message,setMessage]=useState('');
  const [email,setEmail]=useState('');
  const [eligibilityChecked,setEligibilityChecked]=useState(false);
- const load=useCallback(async()=>{
-  const r=await admin<Report>(`/tests/${encodeURIComponent(testId)}/reviews`);
+ const load=useCallback(()=>admin<Report>(`/tests/${encodeURIComponent(testId)}/reviews`).then(r=>{
   if(!r.ok){setMessage(r.message);return;}
   setReport(r.data);
   setSelectedId(old=>r.data.entries.some(e=>e.id===old)?old:r.data.entries[0]?.id||'');
- },[testId]);
+ }),[testId]);
  useEffect(()=>{void load()},[load]);
  const entry=report?.entries.find(e=>e.id===selectedId);
- useEffect(()=>{
-  if(!entry){setEdit(null);return}
-  setEdit({
-   academicStatus:entry.academicStatus,academicNotes:entry.academicNotes,
-   hindiStatus:entry.hindiStatus,hindiQuestion:entry.hindiQuestion,
-   hindiOptions:[...entry.hindiOptions],hindiExplanation:entry.hindiExplanation,
-  });
- },[selectedId,entry?.id,entry?.academicStatus,entry?.hindiStatus]);
+ const editScope = [selectedId,entry?.id,entry?.academicStatus,entry?.hindiStatus].join(':');
+ const [previousEditScope,setPreviousEditScope]=useState('');
+ if(previousEditScope!==editScope){
+  setPreviousEditScope(editScope);
+  setEdit(entry?{academicStatus:entry.academicStatus,academicNotes:entry.academicNotes,hindiStatus:entry.hindiStatus,hindiQuestion:entry.hindiQuestion,hindiOptions:[...entry.hindiOptions],hindiExplanation:entry.hindiExplanation}:null);
+ }
  const save=async()=>{
   if(!entry||!edit)return;
   setSaving(true);setMessage('');
@@ -174,7 +171,7 @@ export function MockReview({testId,onClose}:{testId:string;onClose:()=>void}) {
     <input className={input} type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="candidate@example.com"/>
    </label>
    <label className="flex items-start gap-2 text-sm"><input type="checkbox" checked={eligibilityChecked} onChange={e=>setEligibilityChecked(e.target.checked)}/>
-     I have verified this account's eligibility outside ExamPro under the applicable SSC rules.
+     I have verified this account&apos;s eligibility outside ExamPro under the applicable SSC rules.
    </label>
    <div className="flex flex-wrap gap-2">
     <button type="button" className="rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground disabled:opacity-50" disabled={!eligibilityChecked||saving} onClick={()=>void setAccommodation(true)}>Approve 20-min sections</button>

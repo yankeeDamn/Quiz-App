@@ -57,18 +57,14 @@ export default function QuizSetupPage({ params }: PageProps) {
     questionCount: quiz?.questionCount || 10,
     timeLimit: quiz?.duration || 30,
   });
-  const [hasExistingSession, setHasExistingSession] = useState(false);
+  const hasExistingSession = !!quiz && session?.quizId === quiz.id && !session.endTime;
   useEffect(() => {
     let mounted = true;
     fetchPracticeLibrary().then(data => { if (mounted) setPracticeLibrary(data); }).catch(() => {});
     return () => { mounted = false; };
   }, []);
 
-  useEffect(() => {
-    if (quiz && session?.quizId === quiz.id && !session.endTime) {
-      setHasExistingSession(true);
-    }
-  }, [quiz, session]);
+
 
   const handleStartQuiz = () => {
     if (!quiz) return;

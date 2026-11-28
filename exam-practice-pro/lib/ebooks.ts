@@ -246,8 +246,8 @@ export function saveDraft(identity: string, draft: EbookTrack) {
 }
 export function loadDraft(identity: string, ebookKey?: string): EbookTrack | null {
   try {
-    let key = ebookKey || localStorage.getItem(latestDraftKey(identity)) || "new";
-    let raw = JSON.parse(localStorage.getItem(draftKey(identity, key)) || "null");
+    const key = ebookKey || localStorage.getItem(latestDraftKey(identity)) || "new";
+    const raw = JSON.parse(localStorage.getItem(draftKey(identity, key)) || "null");
     if (raw?.book && Array.isArray(raw.book.chapters)) {
       return { ...raw.book, localDraftSavedAt: raw.savedAt };
     }

@@ -1,6 +1,8 @@
 'use client';
+import {useClientReady} from '@/hooks/use-client-ready';
+import {useUserStorage} from '@/components/layout/user-storage-provider';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Bookmark, BookmarkCheck, StickyNote, Flag, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -43,28 +45,22 @@ interface QuestionActionsProps {
   compact?: boolean;
 }
 
-export function QuestionActions({
+export function QuestionActions(props: QuestionActionsProps) { const ready=useClientReady(),storage=useUserStorage(); return ready&&storage.ready ? <QuestionActionsContent key={storage.prefix+":"+props.quizId+":"+props.questionId} {...props}/> : null; }
+function QuestionActionsContent({
   questionId,
   quizId,
   className,
   compact = false,
 }: QuestionActionsProps) {
-  const [bookmarked, setBookmarked] = useState(false);
-  const [noteContent, setNoteContent] = useState('');
-  const [hasNote, setHasNote] = useState(false);
+  const [bookmarked, setBookmarked] = useState(()=>isBookmarked(questionId,quizId));
+  const [noteContent, setNoteContent] = useState(()=>getNote(questionId,quizId)?.content||'');
+  const [hasNote, setHasNote] = useState(()=>!!getNote(questionId,quizId));
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [reportType, setReportType] = useState<string>('');
   const [reportDescription, setReportDescription] = useState('');
 
-  useEffect(() => {
-    setBookmarked(isBookmarked(questionId, quizId));
-    const existingNote = getNote(questionId, quizId);
-    if (existingNote) {
-      setNoteContent(existingNote.content);
-      setHasNote(true);
-    }
-  }, [questionId, quizId]);
+
 
   const toggleBookmark = () => {
     if (bookmarked) {

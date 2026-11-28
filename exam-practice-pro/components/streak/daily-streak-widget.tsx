@@ -1,8 +1,9 @@
 'use client';
+import {useClientReady} from '@/hooks/use-client-ready';
 
 import { useEffect, useMemo, useState } from 'react';
 import { Flame, Clock3, Share2, ShieldCheck, Trophy, X } from 'lucide-react';
-import { calculateCompletion, emptyStreakState, getDailyQuestions, getLocalDateKey, loadStreakState, saveStreakState, type DailyLanguage, type DailyStreakState } from '@/lib/daily-streak';
+import { calculateCompletion, getDailyQuestions, getLocalDateKey, loadStreakState, saveStreakState, type DailyLanguage, type DailyStreakState } from '@/lib/daily-streak';
 
 const COPY = {
   en: { title: 'Daily 5-Question Rapid Challenge', subtitle: 'Polity · Quant · Science · Reasoning · Computer & AI', play: "Play today's 5 questions", done: 'Completed today', next: 'Next question', finish: 'Finish challenge', close: 'Close', streak: 'day streak', best: 'Best', start: 'Start your daily learning habit', share: 'Challenge friends on WhatsApp', explanation: 'Explanation', score: 'Your score', timer: '90-second challenge', already: 'You have completed today’s challenge. Come back tomorrow to keep your streak going.' },
@@ -10,9 +11,10 @@ const COPY = {
   bn: { title: 'দৈনিক ৫-প্রশ্নের চ্যালেঞ্জ', subtitle: 'সংবিধান · গণিত · বিজ্ঞান · যুক্তি · কম্পিউটার ও AI', play: 'আজকের ৫টি প্রশ্ন খেলুন', done: 'আজ সম্পূর্ণ', next: 'পরের প্রশ্ন', finish: 'চ্যালেঞ্জ শেষ করুন', close: 'বন্ধ করুন', streak: 'দিনের স্ট্রিক', best: 'সেরা', start: 'প্রতিদিন শেখার অভ্যাস শুরু করুন', share: 'WhatsApp-এ বন্ধুদের চ্যালেঞ্জ করুন', explanation: 'ব্যাখ্যা', score: 'আপনার স্কোর', timer: '৯০ সেকেন্ডের চ্যালেঞ্জ', already: 'আজকের চ্যালেঞ্জ সম্পূর্ণ। স্ট্রিক বজায় রাখতে আগামীকাল ফিরে আসুন।' },
 } as const;
 
-export function DailyStreakWidget() {
+export function DailyStreakWidget() { const ready=useClientReady(); return ready ? <DailyStreakContent/> : null; }
+function DailyStreakContent() {
   const [language, setLanguage] = useState<DailyLanguage>('en');
-  const [state, setState] = useState<DailyStreakState>(emptyStreakState);
+  const [state, setState] = useState<DailyStreakState>(loadStreakState);
   const [open, setOpen] = useState(false);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
@@ -24,7 +26,6 @@ export function DailyStreakWidget() {
   const copy = COPY[language];
   const question = questions[questionIndex];
 
-  useEffect(() => setState(loadStreakState()), []);
   useEffect(() => {
     if (!open || finished || startedAt === null) return;
     const timer = window.setInterval(() => setSeconds(Math.min(90, Math.floor((Date.now() - startedAt) / 1000))), 250);

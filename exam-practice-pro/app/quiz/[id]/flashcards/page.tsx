@@ -1,4 +1,5 @@
 'use client';
+import {useClientReady} from '@/hooks/use-client-ready';
 
 import { ReportMistake } from '@/components/shared/content-review';
 import { useState, useEffect, useMemo, useCallback, use } from 'react';
@@ -31,12 +32,12 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-export default function FlashcardsPage({ params }: PageProps) {
-  const { id } = use(params);
+export default function FlashcardsPage({ params }: PageProps) { const {id}=use(params); const ready=useClientReady(); return ready ? <FlashcardsContent key={id} id={id}/> : <FullPageLoader message="Loading flashcards…"/>; }
+function FlashcardsContent({id}:{id:string}) {
   const router = useRouter();
   const quiz = getAnyQuizById(id);
 
-  const [cards, setCards] = useState<Question[]>([]);
+  const [cards, setCards] = useState<Question[]>(()=>quiz?shuffleArray([...quiz.questions]):[]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [knownIds, setKnownIds] = useState<Set<string>>(new Set());
@@ -44,11 +45,7 @@ export default function FlashcardsPage({ params }: PageProps) {
   const [isComplete, setIsComplete] = useState(false);
   const [direction, setDirection] = useState(0);
 
-  useEffect(() => {
-    if (quiz) {
-      setCards(shuffleArray([...quiz.questions]));
-    }
-  }, [quiz]);
+
 
   const currentCard = cards[currentIndex];
   const totalCards = cards.length;

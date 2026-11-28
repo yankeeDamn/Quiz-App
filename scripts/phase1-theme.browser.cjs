@@ -38,11 +38,11 @@ const headers = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Head
   }
   const browser = await chromium.launch(launch);
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, colorScheme: 'light', reducedMotion: 'reduce' });
-  let authenticated = true, allowed = true;
+  let authenticated = true, allowed = true, identity = 'preview@example.test';
   const mutations = [];
   await context.route('**/*', async route => {
     const request = route.request(), url = new URL(request.url());
-    if (url.pathname === '/api/auth/session') return route.fulfill({ json: authenticated ? { user: { name: 'Preview admin', email: 'preview@example.test' }, expires: '2099-01-01T00:00:00Z' } : null });
+    if (url.pathname === '/api/auth/session') return route.fulfill({ json: authenticated ? { user: { name: 'Preview admin', email: identity }, expires: '2099-01-01T00:00:00Z' } : null });
     if (url.pathname === '/api/auth/backend-token') return route.fulfill({ json: { token: 'synthetic-ui-test' } });
     if (url.pathname.startsWith('/api/v1/')) {
       if (request.method() === 'OPTIONS') return route.fulfill({ status: 204, headers });
@@ -134,6 +134,39 @@ const headers = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Head
       await page.goto(origin + '/');
       await page.locator('main').waitFor();
       await audit('student-home-' + theme);
+    }
+    if (process.env.THEME_TEST_BASELINE === '1') {
+      const prefix = email => { let hash=0; for(const c of email){hash=((hash<<5)-hash)+c.charCodeAt(0);hash|=0;} return 'u_'+Math.abs(hash).toString(36)+'_'; };
+      await page.evaluate(({prefix})=>{
+        localStorage.setItem(prefix+'exam-practice-bookmarks',JSON.stringify([{questionId:'math-1',quizId:'math-fundamentals',createdAt:Date.now()}]));
+      },{prefix:prefix(identity)});
+      await page.goto(origin+'/bookmarks');
+      await page.getByRole('heading',{name:'Bookmarked Questions'}).waitFor();
+      await page.getByText('1 question saved for review').waitFor();
+      identity='second@example.test';
+      await page.reload();
+      await page.getByText('0 questions saved for review').waitFor();
+      identity='preview@example.test';
+      await page.goto(origin+'/dashboard');
+      await page.getByRole('heading',{name:'Dashboard',exact:true}).waitFor();
+      await page.goto(origin+'/quiz/math-fundamentals/setup');
+      await page.getByRole('button',{name:'Begin Test',exact:true}).click();
+      await page.getByRole('timer').waitFor();
+      await page.getByRole('button',{name:'Pause',exact:true}).click();
+      const paused=await page.getByRole('timer').innerText();
+      await page.waitForTimeout(1500);
+      assert.equal(await page.getByRole('timer').innerText(),paused,'paused timer stays fixed');
+      await page.getByRole('button',{name:'Resume',exact:true}).click();
+      await page.waitForFunction(old=>document.querySelector('[role=timer]')?.textContent?.trim()!==old,paused);
+      await page.getByRole('button',{name:'Next',exact:true}).click();
+      await page.getByText(/Question 2 of/,{exact:false}).first().waitFor();
+      await page.goto(origin+'/quiz/math-fundamentals/flashcards');
+      await page.getByRole('button',{name:'Show Answer',exact:true}).click();
+      await page.getByRole('button',{name:'Got It',exact:true}).click();
+      await page.getByText(/Card 2 of/).waitFor();
+      await page.goto(origin+'/advertise');
+      await page.getByRole('heading',{name:'Book a placement'}).waitFor();
+      console.log('Browser-state, account separation, quiz timer, flashcard and draft-form regression checks passed.');
     }
     allowed = false;
     await page.goto(origin + '/admin/design-system');

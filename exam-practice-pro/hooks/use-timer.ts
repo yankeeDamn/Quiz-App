@@ -33,10 +33,11 @@ export function useTimer({
     onTimeUpRef.current = onTimeUp;
   }, [onTimeUp]);
 
-  // Sync external pause state
-  useEffect(() => {
+  const [previousPause, setPreviousPause] = useState(isPaused);
+  if (previousPause !== isPaused) {
+    setPreviousPause(isPaused);
     setPaused(isPaused);
-  }, [isPaused]);
+  }
 
   // Timer countdown
   useEffect(() => {

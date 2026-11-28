@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useSyncExternalStore } from 'react';
 import { useSession } from 'next-auth/react';
 
 interface UserStorageContextType {
@@ -35,38 +35,22 @@ declare global {
   }
 }
 
+function subscribePrefix(listener:()=>void){
+  window.addEventListener('exampro-storage-scope',listener);
+  return()=>window.removeEventListener('exampro-storage-scope',listener);
+}
 export function UserStorageProvider({ children }: { children: React.ReactNode }) {
-  const { data: session, status } = useSession();
-  const [prefix, setPrefix] = useState('');
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    if (status === 'loading') return;
-
-    let newPrefix = '';
-    if (session?.user?.id) {
-      // Use a hash of the user ID for shorter localStorage keys
-      newPrefix = `u_${hashCode(session.user.id)}_`;
-    } else if (session?.user?.email) {
-      newPrefix = `u_${hashCode(session.user.email)}_`;
-    }
-    // If no session, prefix stays empty (anonymous/backward-compatible)
-
-    setPrefix(newPrefix);
-    // Set on window for synchronous access in storage.ts
-    if (typeof window !== 'undefined') {
-      window.__examPracticeStoragePrefix = newPrefix;
-    }
-    setReady(true);
-  }, [session, status]);
-
-  return (
-    <UserStorageContext.Provider
-      value={{ prefix, ready, userId: session?.user?.id || null }}
-    >
-      {children}
-    </UserStorageContext.Provider>
-  );
+  const {data:session,status}=useSession();
+  const identity=session?.user?.id||session?.user?.email;
+  const prefix=identity?`u_${hashCode(identity)}_`:'';
+  const storedPrefix=useSyncExternalStore(subscribePrefix,getStoragePrefix,()=>null);
+  useEffect(()=>{
+    if(status==='loading')return;
+    window.__examPracticeStoragePrefix=prefix;
+    window.dispatchEvent(new Event('exampro-storage-scope'));
+  },[status,prefix]);
+  const ready=status!=='loading'&&storedPrefix===prefix;
+  return <UserStorageContext.Provider value={{prefix,ready,userId:session?.user?.id||null}}>{children}</UserStorageContext.Provider>;
 }
 
 function hashCode(str: string): string {
