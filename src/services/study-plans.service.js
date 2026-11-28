@@ -650,6 +650,29 @@ function createService(db = database, books = require("./ebooks.service")) {
       return task;
     });
   }
+  async function generateDraft(user,pid,input) {
+    admin(user);
+    if(input?.acknowledged!==true || !Array.isArray(input.resourceIds) || !input.resourceIds.length || input.resourceIds.length>365) throw v.fail("Select resources and confirm draft generation.");
+    const ids=[...new Set(input.resourceIds.map(v.id))];
+    return tx(async c=>{
+      const p=await mutable(pid,c);
+      if(p.revision!==input.revision)throw v.fail("Draft changed; reload before generating.",409);
+      const existing=await rows("SELECT id FROM study_tasks WHERE plan_id=$1 LIMIT 1",[pid],c);
+      if(existing.length)throw v.fail("Generate only into an empty draft.",409);
+      const resources=await rows("SELECT id,title,topic_id,access_policy FROM study_resources WHERE exam_id=$1 AND id=ANY($2::uuid[]) AND status='published'",[p.exam_id,ids],c);
+      const ordered=ids.map(id=>resources.find(r=>r.id===id));
+      if(ordered.some(r=>!r || (p.access_policy==='free'&&r.access_policy!=='free')))throw v.fail("Choose published resources compatible with this exam and access policy.");
+      const generated=require("./study-plan-generator").generate({duration:p.duration,dailyMinutes:p.daily_minutes,resources:ordered});
+      for(const raw of generated){
+        const d=v.task(raw);
+        if(d.topic_id)await one("SELECT id FROM study_topics WHERE id=$1 AND syllabus_id=$2",[d.topic_id,p.syllabus_id],c);
+        await c.query("INSERT INTO study_days(plan_id,day,objectives) VALUES($1,$2,'') ON CONFLICT(plan_id,day) DO NOTHING",[pid,d.day]);
+        await insert("study_tasks",{...d,plan_id:pid},c);
+      }
+      await c.query("UPDATE study_plans SET revision=revision+1 WHERE id=$1",[pid]);
+      return {added:generated.length};
+    });
+  }
   async function detail(user, pid) {
     admin(user);
     const p = await one("SELECT * FROM study_plans WHERE id=$1", [v.id(pid)]);
@@ -942,6 +965,7 @@ function createService(db = database, books = require("./ebooks.service")) {
     savePlan,
     saveTask,
     detail,
+    generateDraft,
     readiness,
     reviewPrerequisites,
     publish,
