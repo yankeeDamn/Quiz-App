@@ -225,6 +225,9 @@ function createRouters(s = service, identity = authenticateNextAuth) {
       ok(res, await s.day("", Number(req.params.day), req.user, req.params.id)),
     ),
   );
+  adminRouter.get("/plans/:id/publication-history",wrap(async(req,res)=>ok(res,await s.publicationHistory(req.user,req.params.id))));
+  adminRouter.post("/plans/:id/schedule",wrap(async(req,res)=>ok(res,await s.schedulePublication(req.user,req.params.id,req.body))));
+  adminRouter.delete("/plans/:id/schedule",wrap(async(req,res)=>ok(res,await s.cancelPublication(req.user,req.params.id))));
   for (const action of ["publish", "archive", "clone"])
     adminRouter.post(
       `/plans/:id/${action}`,
