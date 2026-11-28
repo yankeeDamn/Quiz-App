@@ -1,4 +1,4 @@
-import packs from '@/../content/separate-exam-practice-starter.json';
+import packs from '@/content/separate-exam-practice-starter.json';
 import type {MockTest,MockSummary,MockQuestion} from '@/lib/mocks';
 import type {StarterPackContent,StarterPackQuestion} from '@/lib/starter-packs';
 

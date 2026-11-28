@@ -1,4 +1,4 @@
-import data from "../../content/ebooks-starter.json";
+import data from "../content/ebooks-starter.json";
 import type { EbookTrack } from "./ebooks";
 
 // Bundled editions are intentionally normalized here as explicit Free content.
