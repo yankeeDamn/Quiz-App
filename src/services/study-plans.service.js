@@ -822,7 +822,7 @@ function createService(db = database, books = require("./ebooks.service")) {
       if (input.scheduled === true) {
         publishing.requireEnabled();
         const job=await one("SELECT * FROM publishing_jobs WHERE content_type='study_plan' AND content_id=$1 FOR UPDATE",[pid],c);
-        if (job.expected_revision!==p.revision || new Date(job.publish_at).getTime()>Date.now()) throw v.fail("Schedule is not due or the draft has changed.",409);
+        if (job.requested_by!==user.id || job.expected_revision!==p.revision || new Date(job.publish_at).getTime()>Date.now()) throw v.fail("Schedule is not due or the draft has changed.",409);
       }
       await c.query("SELECT id FROM study_syllabuses WHERE id=$1 FOR UPDATE", [p.syllabus_id]);
       const report = await checkReadiness(p,c);
@@ -836,7 +836,7 @@ function createService(db = database, books = require("./ebooks.service")) {
         const days=await rows("SELECT * FROM study_days WHERE plan_id=$1 ORDER BY day",[pid],c);
         await publishing.published(c,result,user,{plan:result,tasks,days});
       }
-      logger.info({actor,planId:pid},"Study plan published");
+      logger.info({planId:pid},"Study plan published");
       return result;
     });
   }
